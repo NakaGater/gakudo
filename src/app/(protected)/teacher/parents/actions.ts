@@ -4,8 +4,21 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
-export async function getParents() {
+async function requireTeacher() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'teacher') throw new Error('Forbidden')
+  return { supabase, user }
+}
+
+export async function getParents() {
+  const { supabase } = await requireTeacher()
   const { data: parents, error } = await supabase
     .from('profiles')
     .select('*')
@@ -44,7 +57,7 @@ export async function getParents() {
 }
 
 export async function getStudents() {
-  const supabase = await createClient()
+  const { supabase } = await requireTeacher()
   const { data, error } = await supabase
     .from('students')
     .select('*')
@@ -54,6 +67,7 @@ export async function getStudents() {
 }
 
 export async function createParent(formData: FormData) {
+  await requireTeacher()
   const admin = createAdminClient()
 
   const email = formData.get('email') as string

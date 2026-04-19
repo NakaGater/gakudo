@@ -17,6 +17,14 @@ export async function getMyChildrenAttendance(): Promise<ChildAttendance[]> {
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
+  // Verify parent role
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'parent') throw new Error('Forbidden')
+
   const today = new Date().toISOString().slice(0, 10)
 
   // Get parent's children via parent_students

@@ -3,6 +3,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+async function requireTeacher() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'teacher') throw new Error('Forbidden')
+  return { supabase, user }
+}
+
 export async function getPublicNotices() {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -14,9 +27,7 @@ export async function getPublicNotices() {
 }
 
 export async function createPublicNotice(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+  const { supabase, user } = await requireTeacher()
 
   const title = formData.get('title') as string
   const body = formData.get('body') as string
@@ -30,7 +41,7 @@ export async function createPublicNotice(formData: FormData) {
 }
 
 export async function updatePublicNotice(id: string, formData: FormData) {
-  const supabase = await createClient()
+  const { supabase } = await requireTeacher()
   const title = formData.get('title') as string
   const body = formData.get('body') as string
 
