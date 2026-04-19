@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# がくどう — 学童保育Webアプリ
 
-## Getting Started
+学童保育施設向けのWebアプリケーション。施設のHP、保護者への写真・連絡事項の共有、QRコードによる生徒の入退場記録を一つのプラットフォームに統合します。
 
-First, run the development server:
+## 機能
+
+- **公開HP** — 施設紹介・説明会案内・お知らせ
+- **入退場記録** — QRコードカードをWebカメラでスキャンして入退場を記録
+- **連絡事項** — 先生が登録、保護者がスマホで確認
+- **写真共有** — 先生がアップロード、保護者が閲覧（認証必須）
+- **ロールベースアクセス制御** — 先生（管理者）/ 保護者（閲覧者）/ 一般訪問者（HP閲覧のみ）
+
+## Tech Stack
+
+- **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Hosting**: Vercel
+- **テスト**: Vitest + Testing Library
+
+## セットアップ
+
+### 前提条件
+
+- Node.js 18+
+- npm
+- Docker (Supabase ローカル開発用)
+- Supabase CLI (`npm install -g supabase`)
+
+### 環境変数
+
+`.env.example` をコピーして `.env.local` を作成:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+必要な環境変数:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| 変数 | 説明 |
+|------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase プロジェクトURL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 匿名キー |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase サービスロールキー（サーバーサイドのみ） |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### ローカル開発
 
-## Learn More
+```bash
+# 依存パッケージのインストール
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# Supabase ローカル起動（Docker必要）
+supabase start
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# マイグレーション適用
+supabase db reset
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 開発サーバー起動
+npm run dev
+```
 
-## Deploy on Vercel
+http://localhost:3000 でアクセス
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### テスト
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm test          # テスト実行
+npm run test:watch  # ウォッチモード
+```
+
+### ビルド
+
+```bash
+npm run build     # プロダクションビルド
+npm run typecheck # 型チェック
+```
+
+## プロジェクト構成
+
+```
+src/
+  app/
+    (public)/        # 公開HP（未ログイン）
+    (auth)/          # ログイン・パスワードリセット
+    (protected)/
+      teacher/       # 先生用管理画面
+      parent/        # 保護者用画面
+  components/        # 共通コンポーネント
+  lib/
+    supabase/        # Supabaseクライアント・型定義
+supabase/
+  migrations/        # DBマイグレーション
+  seed.sql           # シードデータ
+docs/                # 設計ドキュメント
+```
+
+## ドキュメント
+
+- [PRD](docs/prd.md) — 製品要件定義書
+- [Architecture](docs/architecture.md) — アーキテクチャ設計
+- [User Stories](docs/user-stories.md) — ユーザーストーリー
+- [Design System](docs/design-system.md) — デザインシステム
+- [Security Report](docs/security-report.md) — セキュリティレポート
