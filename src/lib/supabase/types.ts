@@ -23,6 +23,7 @@ export type Database = {
           role?: 'teacher' | 'parent'
           created_at?: string
         }
+        Relationships: []
       }
       students: {
         Row: {
@@ -46,6 +47,7 @@ export type Database = {
           qr_token?: string
           created_at?: string
         }
+        Relationships: []
       }
       parent_students: {
         Row: {
@@ -60,6 +62,7 @@ export type Database = {
           parent_id?: string
           student_id?: string
         }
+        Relationships: []
       }
       attendance_records: {
         Row: {
@@ -83,6 +86,7 @@ export type Database = {
           check_in_at?: string
           check_out_at?: string | null
         }
+        Relationships: []
       }
       announcements: {
         Row: {
@@ -109,6 +113,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -132,6 +137,7 @@ export type Database = {
           uploaded_by?: string
           created_at?: string
         }
+        Relationships: []
       }
       public_notices: {
         Row: {
@@ -155,6 +161,7 @@ export type Database = {
           published_at?: string
           author_id?: string
         }
+        Relationships: []
       }
     }
     Views: Record<string, never>

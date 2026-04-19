@@ -27,3 +27,14 @@
 {"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T23","title":"写真閲覧 — 保護者用","dependsOn":["T17","T25"],"verify":["npm run build","npx tsc --noEmit"]}
 {"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T22","title":"Supabase Storage バケット + シード完成","dependsOn":["T4"],"verify":["supabase db reset"]}
 {"ts":"2026-04-19T14:52:43.721Z","type":"claimed","id":"T1","agent":"implementer"}
+{"ts":"2026-04-19T15:00:43.978Z","type":"completed","id":"T1","status":"DONE","sha":"063b63a"}
+{"ts":"2026-04-19T15:00:51.423Z","type":"claimed","id":"T2","agent":"implementer"}
+{"ts":"2026-04-19T15:00:51.465Z","type":"claimed","id":"T3","agent":"implementer"}
+{"ts":"2026-04-19T15:02:17.167Z","type":"completed","id":"T2","status":"DONE","sha":"09a366f"}
+{"ts":"2026-04-19T15:02:17.209Z","type":"completed","id":"T3","status":"DONE","sha":"09a366f"}
+{"ts":"2026-04-19T15:02:23.371Z","type":"claimed","id":"T4","agent":"implementer"}
+{"ts":"2026-04-19T15:04:18.308Z","type":"completed","id":"T4","status":"DONE","sha":"591c152"}
+{"ts":"2026-04-19T15:04:26.923Z","type":"claimed","id":"T5","agent":"implementer"}
+{"ts":"2026-04-19T15:04:26.967Z","type":"claimed","id":"T18","agent":"implementer"}
+{"ts":"2026-04-19T15:04:27.009Z","type":"claimed","id":"T22","agent":"implementer"}
+{"ts":"2026-04-19T15:04:27.051Z","type":"claimed","id":"T26","agent":"implementer"}
