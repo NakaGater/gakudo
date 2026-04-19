@@ -1,4 +1,14 @@
-export default function PublicHomePage() {
+import { createClient } from '@/lib/supabase/server'
+
+export const revalidate = 3600
+
+export default async function PublicHomePage() {
+  const supabase = await createClient()
+  const { data: notices } = await supabase
+    .from('public_notices')
+    .select('*')
+    .order('published_at', { ascending: false })
+
   return (
     <div className="font-sans">
       {/* Hero Section */}
@@ -124,29 +134,23 @@ export default function PublicHomePage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             お知らせ
           </h2>
-          <div className="space-y-3">
-            <div className="rounded-lg border border-gray-200 p-4">
-              <p className="text-xs text-gray-400 mb-1">2026-04-01</p>
-              <p className="text-gray-700">
-                2026年度の入会申し込みを開始しました。
-              </p>
+          {notices && notices.length > 0 ? (
+            <div className="space-y-3">
+              {notices.map((notice: { id: string; title: string; body: string; published_at: string }) => (
+                <div key={notice.id} className="rounded-lg border border-gray-200 p-4">
+                  <p className="text-xs text-gray-400 mb-1">
+                    {new Date(notice.published_at).toLocaleDateString('ja-JP')}
+                  </p>
+                  <p className="font-semibold text-gray-900 mb-1">{notice.title}</p>
+                  <p className="text-gray-700 text-sm">{notice.body}</p>
+                </div>
+              ))}
             </div>
-            <div className="rounded-lg border border-gray-200 p-4">
-              <p className="text-xs text-gray-400 mb-1">2026-03-15</p>
-              <p className="text-gray-700">
-                春休み期間中の開所時間についてお知らせします。
-              </p>
-            </div>
-            <div className="rounded-lg border border-gray-200 p-4">
-              <p className="text-xs text-gray-400 mb-1">2026-03-01</p>
-              <p className="text-gray-700">
-                ホームページをリニューアルしました。
-              </p>
-            </div>
-          </div>
-          <p className="mt-4 text-center text-sm text-gray-400">
-            ※ お知らせは今後動的に読み込まれます
-          </p>
+          ) : (
+            <p className="text-center text-sm text-gray-500">
+              現在お知らせはありません
+            </p>
+          )}
         </div>
       </section>
     </div>
