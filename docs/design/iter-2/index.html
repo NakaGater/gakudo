@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ひまわり学童クラブ</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Top Bar ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 3.5rem;
+      padding: 0 var(--space-4);
+      background-color: var(--color-bg-elev);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    @media (min-width: 768px) {
+      .topbar {
+        padding: 0 var(--space-8);
+      }
+    }
+
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-fg);
+    }
+
+    .topbar-logo-icon {
+      width: 28px;
+      height: 28px;
+      background-color: var(--color-accent);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-size: var(--text-sm);
+      font-weight: 700;
+    }
+
+    .topbar-login {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-size: var(--text-sm);
+      font-weight: 500;
+    }
+
+    /* ── Main Content ── */
+    .public-main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4);
+    }
+
+    @media (min-width: 768px) {
+      .public-main {
+        padding: var(--space-10) var(--space-8);
+      }
+    }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: var(--space-10);
+    }
+
+    .section-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      line-height: var(--lh-xl);
+      color: var(--color-fg);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 2px solid var(--color-accent);
+    }
+
+    @media (min-width: 768px) {
+      .section-title {
+        font-size: var(--text-2xl);
+        line-height: var(--lh-2xl);
+      }
+    }
+
+    /* ── Facility Intro ── */
+    .intro-text {
+      font-size: var(--text-base);
+      line-height: var(--lh-base);
+      color: var(--color-fg);
+      margin-bottom: var(--space-4);
+    }
+
+    .info-grid {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .info-row {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .info-label {
+      flex-shrink: 0;
+      width: 6rem;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-fg-muted);
+    }
+
+    .info-value {
+      font-size: var(--text-sm);
+      color: var(--color-fg);
+    }
+
+    /* ── Schedule List ── */
+    .schedule-list {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .schedule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+      padding: var(--space-4);
+    }
+
+    .schedule-date {
+      flex-shrink: 0;
+      text-align: center;
+      min-width: 3.5rem;
+    }
+
+    .schedule-date-month {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      color: var(--color-fg-muted);
+      text-transform: uppercase;
+    }
+
+    .schedule-date-day {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: var(--lh-xl);
+    }
+
+    .schedule-body {
+      flex: 1;
+    }
+
+    .schedule-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-fg);
+      margin-bottom: var(--space-1);
+    }
+
+    .schedule-meta {
+      font-size: var(--text-sm);
+      color: var(--color-fg-muted);
+    }
+
+    .schedule-badge {
+      display: inline-block;
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      background-color: var(--color-accent-soft);
+      color: var(--color-accent);
+      border-radius: var(--radius-full);
+      margin-top: var(--space-2);
+    }
+
+    /* ── Notices ── */
+    .notice-list {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .notice-item {
+      padding: var(--space-4);
+    }
+
+    .notice-date {
+      font-size: var(--text-xs);
+      color: var(--color-fg-muted);
+      margin-bottom: var(--space-1);
+    }
+
+    .notice-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-fg);
+      margin-bottom: var(--space-2);
+    }
+
+    .notice-excerpt {
+      font-size: var(--text-sm);
+      color: var(--color-fg-muted);
+      line-height: var(--lh-sm);
+    }
+
+    /* ── Footer ── */
+    .public-footer {
+      border-top: 1px solid var(--color-border);
+      padding: var(--space-8) var(--space-4);
+      text-align: center;
+      font-size: var(--text-sm);
+      color: var(--color-fg-muted);
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <header class="topbar" role="banner">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon" aria-hidden="true">学</div>
+      ひまわり学童クラブ
+    </div>
+    <a href="auth.html" class="topbar-login">
+      <!-- Lucide: LogIn -->
+      <span class="icon icon-16" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></span>
+      ログイン
+    </a>
+  </header>
+
+  <!-- Main -->
+  <main class="public-main">
+    <!-- Facility Introduction -->
+    <section class="section" aria-labelledby="about-heading">
+      <h1 id="about-heading" class="section-title">施設のご案内</h1>
+      <p class="intro-text">
+        ひまわり学童クラブは、練馬区立光が丘小学校区域の放課後児童クラブです。
+        小学1年生から6年生までのお子さまをお預かりし、安全で楽しい放課後の居場所を提供しています。
+        指導員6名体制で、宿題のサポートや季節の行事、外遊びなどを行っています。
+      </p>
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">所在地</span>
+          <span class="info-value">東京都練馬区光が丘3-1-5 光が丘コミュニティセンター2F</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">開所時間</span>
+          <span class="info-value">放課後〜19:00（土曜日・長期休暇 8:00〜19:00）</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">対象</span>
+          <span class="info-value">光が丘小学校に通う小学1年〜6年生</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">定員</span>
+          <span class="info-value">40名</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">月額利用料</span>
+          <span class="info-value">8,000円（おやつ代含む）</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">お問い合わせ</span>
+          <span class="info-value">03-1234-5678（平日 9:00〜17:00）</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Orientation Schedule -->
+    <section class="section" aria-labelledby="schedule-heading">
+      <h2 id="schedule-heading" class="section-title">入会説明会</h2>
+      <div class="schedule-list">
+        <article class="card schedule-item">
+          <div class="schedule-date">
+            <div class="schedule-date-month">5月</div>
+            <div class="schedule-date-day">10</div>
+          </div>
+          <div class="schedule-body">
+            <h3 class="schedule-title">第1回 入会説明会</h3>
+            <p class="schedule-meta">10:00〜11:30 ｜ 光が丘コミュニティセンター 2F 集会室</p>
+            <span class="schedule-badge">受付中</span>
+          </div>
+        </article>
+
+        <article class="card schedule-item">
+          <div class="schedule-date">
+            <div class="schedule-date-month">6月</div>
+            <div class="schedule-date-day">14</div>
+          </div>
+          <div class="schedule-body">
+            <h3 class="schedule-title">第2回 入会説明会</h3>
+            <p class="schedule-meta">14:00〜15:30 ｜ 光が丘コミュニティセンター 2F 集会室</p>
+            <span class="schedule-badge">受付中</span>
+          </div>
+        </article>
+
+        <article class="card schedule-item">
+          <div class="schedule-date">
+            <div class="schedule-date-month">7月</div>
+            <div class="schedule-date-day">5</div>
+          </div>
+          <div class="schedule-body">
+            <h3 class="schedule-title">第3回 入会説明会</h3>
+            <p class="schedule-meta">10:00〜11:30 ｜ 光が丘コミュニティセンター 2F 集会室</p>
+            <span class="schedule-badge">受付前</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Public Notices -->
+    <section class="section" aria-labelledby="notices-heading">
+      <h2 id="notices-heading" class="section-title">お知らせ</h2>
+      <div class="notice-list">
+        <article class="card notice-item">
+          <time class="notice-date" datetime="2026-04-15">2026年4月15日</time>
+          <h3 class="notice-title">ゴールデンウィーク期間の開所日について</h3>
+          <p class="notice-excerpt">
+            5月3日（日）〜5月6日（水）は祝日のためお休みとなります。5月7日（木）より通常通り開所いたします。ご不明点がございましたらお気軽にお問い合わせください。
+          </p>
+        </article>
+
+        <article class="card notice-item">
+          <time class="notice-date" datetime="2026-04-10">2026年4月10日</time>
+          <h3 class="notice-title">2026年度の入会申込を受け付けています</h3>
+          <p class="notice-excerpt">
+            来年度の入会を希望される方は、説明会にご参加の上、申込書をご提出ください。定員に達し次第、受付を終了いたします。
+          </p>
+        </article>
+
+        <article class="card notice-item">
+          <time class="notice-date" datetime="2026-04-01">2026年4月1日</time>
+          <h3 class="notice-title">新年度のご挨拶</h3>
+          <p class="notice-excerpt">
+            新年度がスタートしました。今年度もお子さまが安心して過ごせるよう、指導員一同努めてまいります。何かご不安な点がございましたらいつでもご連絡ください。
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="public-footer">
+    <p>&copy; 2026 ひまわり学童クラブ ｜ 東京都練馬区光が丘3-1-5</p>
+  </footer>
+</body>
+</html>

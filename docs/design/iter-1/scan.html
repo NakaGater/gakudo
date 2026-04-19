@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>入退場スキャン — ひまわり学童クラブ</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .scan-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #1A1A1A;
+      color: #FFFFFF;
+    }
+
+    /* ── Top Bar ── */
+    .scan-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      flex-shrink: 0;
+    }
+
+    .scan-back {
+      color: #FFFFFF;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      opacity: 0.8;
+      transition: opacity var(--transition-fast);
+    }
+
+    .scan-back:hover {
+      opacity: 1;
+      color: #FFFFFF;
+    }
+
+    .scan-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+    }
+
+    .scan-spacer {
+      width: 4rem;
+    }
+
+    /* ── Camera Area ── */
+    .scan-camera-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+    }
+
+    .scan-camera {
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 4 / 3;
+      background-color: #2A2A2A;
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scan-camera-placeholder {
+      text-align: center;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .scan-camera-icon {
+      font-size: 3rem;
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+
+    .scan-camera-text {
+      font-size: var(--text-sm);
+    }
+
+    /* ── Viewfinder Frame ── */
+    .scan-viewfinder {
+      position: absolute;
+      inset: var(--space-8);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: var(--radius-md);
+      pointer-events: none;
+    }
+
+    .scan-viewfinder::before,
+    .scan-viewfinder::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-color: #FFFFFF;
+      border-style: solid;
+    }
+
+    .scan-viewfinder::before {
+      top: -1px;
+      left: -1px;
+      border-width: 3px 0 0 3px;
+      border-radius: 4px 0 0 0;
+    }
+
+    .scan-viewfinder::after {
+      top: -1px;
+      right: -1px;
+      border-width: 3px 3px 0 0;
+      border-radius: 0 4px 0 0;
+    }
+
+    /* Bottom corners */
+    .scan-viewfinder-bottom {
+      position: absolute;
+      inset: var(--space-8);
+      pointer-events: none;
+    }
+
+    .scan-viewfinder-bottom::before,
+    .scan-viewfinder-bottom::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-color: #FFFFFF;
+      border-style: solid;
+    }
+
+    .scan-viewfinder-bottom::before {
+      bottom: -1px;
+      left: -1px;
+      border-width: 0 0 3px 3px;
+      border-radius: 0 0 0 4px;
+    }
+
+    .scan-viewfinder-bottom::after {
+      bottom: -1px;
+      right: -1px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 4px 0;
+    }
+
+    /* ── Status Hint ── */
+    .scan-hint {
+      text-align: center;
+      padding: var(--space-4);
+      flex-shrink: 0;
+    }
+
+    .scan-hint-text {
+      font-size: var(--text-sm);
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ──────────────────────────────────
+       Result Overlay States (examples)
+       ────────────────────────────────── */
+    .scan-result-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      text-align: center;
+      padding: var(--space-6);
+    }
+
+    .scan-result-icon {
+      font-size: 4rem;
+      margin-bottom: var(--space-4);
+    }
+
+    .scan-result-name {
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      line-height: var(--lh-3xl);
+      margin-bottom: var(--space-2);
+    }
+
+    .scan-result-detail {
+      font-size: var(--text-lg);
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .scan-result-time {
+      font-size: var(--text-xl);
+      font-weight: 500;
+      margin-top: var(--space-4);
+      opacity: 0.8;
+    }
+
+    /* Check-in (green) */
+    .scan-result-checkin {
+      background-color: var(--color-checkin);
+      color: #FFFFFF;
+    }
+
+    /* Check-out (blue) */
+    .scan-result-checkout {
+      background-color: var(--color-checkout);
+      color: #FFFFFF;
+    }
+
+    /* Error (red) */
+    .scan-result-error {
+      background-color: var(--color-danger);
+      color: #FFFFFF;
+    }
+
+    /* ── Demo Selector (for mockup only) ── */
+    .demo-selector {
+      position: fixed;
+      bottom: var(--space-4);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: var(--space-2);
+      z-index: 200;
+      background-color: rgba(0,0,0,0.6);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-full);
+    }
+
+    .demo-btn {
+      padding: var(--space-1) var(--space-3);
+      border: 1px solid rgba(255,255,255,0.3);
+      background: transparent;
+      color: #FFFFFF;
+      font-size: var(--text-xs);
+      font-family: var(--font-sans);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+
+    .demo-btn:hover {
+      background-color: rgba(255,255,255,0.15);
+    }
+
+    .demo-btn-checkin {
+      border-color: var(--color-checkin);
+    }
+
+    .demo-btn-checkout {
+      border-color: var(--color-checkout);
+    }
+
+    .demo-btn-error {
+      border-color: var(--color-danger);
+    }
+
+    .demo-btn-reset {
+      border-color: rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- Scanner Page -->
+  <div class="scan-page" id="scanPage">
+    <header class="scan-header">
+      <a href="teacher.html" class="scan-back">← 戻る</a>
+      <h1 class="scan-title">入退場スキャン</h1>
+      <div class="scan-spacer"></div>
+    </header>
+
+    <div class="scan-camera-area">
+      <div class="scan-camera" role="img" aria-label="カメラプレビュー領域">
+        <div class="scan-camera-placeholder">
+          <span class="scan-camera-icon" aria-hidden="true">📷</span>
+          <span class="scan-camera-text">カメラプレビュー</span>
+        </div>
+        <div class="scan-viewfinder" aria-hidden="true"></div>
+        <div class="scan-viewfinder-bottom" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="scan-hint">
+      <p class="scan-hint-text">QRコードをカメラにかざしてください</p>
+    </div>
+  </div>
+
+  <!-- Check-in Overlay (hidden by default) -->
+  <div class="scan-result-overlay scan-result-checkin" id="overlayCheckin" hidden aria-live="assertive">
+    <span class="scan-result-icon" aria-hidden="true">✓</span>
+    <div class="scan-result-name">田中太郎</div>
+    <div class="scan-result-detail">入場しました</div>
+    <div class="scan-result-time">14:32</div>
+  </div>
+
+  <!-- Check-out Overlay (hidden by default) -->
+  <div class="scan-result-overlay scan-result-checkout" id="overlayCheckout" hidden aria-live="assertive">
+    <span class="scan-result-icon" aria-hidden="true">✓</span>
+    <div class="scan-result-name">佐藤花子</div>
+    <div class="scan-result-detail">退場しました</div>
+    <div class="scan-result-time">17:45</div>
+  </div>
+
+  <!-- Error Overlay (hidden by default) -->
+  <div class="scan-result-overlay scan-result-error" id="overlayError" hidden aria-live="assertive">
+    <span class="scan-result-icon" aria-hidden="true">✕</span>
+    <div class="scan-result-name">エラー</div>
+    <div class="scan-result-detail">QRコードを認識できませんでした</div>
+    <div class="scan-result-time">もう一度お試しください</div>
+  </div>
+
+  <!-- Demo controls (for design review only) -->
+  <div class="demo-selector" aria-label="デモ用ボタン（デザインレビュー用）">
+    <button class="demo-btn demo-btn-checkin" data-show="overlayCheckin">入場</button>
+    <button class="demo-btn demo-btn-checkout" data-show="overlayCheckout">退場</button>
+    <button class="demo-btn demo-btn-error" data-show="overlayError">エラー</button>
+    <button class="demo-btn demo-btn-reset" data-show="reset">リセット</button>
+  </div>
+
+  <script>
+    // Demo overlay toggle
+    document.querySelectorAll('.demo-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var target = this.getAttribute('data-show');
+        // Hide all overlays
+        document.getElementById('overlayCheckin').hidden = true;
+        document.getElementById('overlayCheckout').hidden = true;
+        document.getElementById('overlayError').hidden = true;
+
+        if (target !== 'reset') {
+          document.getElementById(target).hidden = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

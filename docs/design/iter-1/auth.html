@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ログイン — ひまわり学童クラブ</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-8);
+    }
+
+    .auth-logo-icon {
+      width: 36px;
+      height: 36px;
+      background-color: var(--color-accent);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-size: var(--text-base);
+      font-weight: 700;
+    }
+
+    .auth-logo-text {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-fg);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-fg);
+      margin-bottom: var(--space-6);
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-submit {
+      margin-top: var(--space-2);
+      width: 100%;
+    }
+
+    .auth-footer {
+      margin-top: var(--space-4);
+      text-align: center;
+    }
+
+    .auth-footer a {
+      font-size: var(--text-sm);
+      color: var(--color-fg-muted);
+    }
+
+    .auth-footer a:hover {
+      color: var(--color-accent);
+    }
+
+    .auth-back {
+      margin-top: var(--space-6);
+      text-align: center;
+    }
+
+    .auth-back a {
+      font-size: var(--text-sm);
+      color: var(--color-fg-muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="auth-page">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" aria-hidden="true">学</div>
+      <span class="auth-logo-text">ひまわり学童クラブ</span>
+    </div>
+
+    <div class="card auth-card">
+      <h1 class="auth-title">ログイン</h1>
+
+      <form class="auth-form" action="#" method="post">
+        <div class="form-group">
+          <label for="email" class="input-label">メールアドレス</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="input-field"
+            placeholder="example@email.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="input-label">パスワード</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="input-field"
+            placeholder="パスワードを入力"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-md auth-submit">
+          ログイン
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <a href="#">パスワードをお忘れですか？</a>
+      </div>
+    </div>
+
+    <div class="auth-back">
+      <a href="index.html">← トップページに戻る</a>
+    </div>
+  </main>
+</body>
+</html>
