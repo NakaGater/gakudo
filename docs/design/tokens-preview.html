@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Tokens Preview — がくどう</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg: #FAFAF8;
+      --color-bg-elev: #FFFFFF;
+      --color-fg: #1A1A1A;
+      --color-fg-muted: #6B7280;
+      --color-accent: #2D9D78;
+      --color-accent-hv: #247A5E;
+      --color-accent-soft: #E8F5F0;
+      --color-success: #16A34A;
+      --color-warning: #D97706;
+      --color-danger: #DC2626;
+      --color-border: #E5E5E3;
+      --color-border-focus: #2D9D78;
+      --color-checkin: #2D9D78;
+      --color-checkout: #3B82F6;
+      --radius-sm: 0.25rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', system-ui, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-fg);
+      padding: 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 2rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 2rem 0 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
+
+    /* ── Color Palette ── */
+    .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .swatch {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-elev);
+      box-shadow: var(--shadow-sm);
+    }
+    .swatch-color { height: 64px; }
+    .swatch-label { padding: 8px 12px; font-size: 0.75rem; }
+    .swatch-label strong { display: block; font-size: 0.875rem; margin-bottom: 2px; }
+
+    /* ── Typography ── */
+    .type-scale { display: flex; flex-direction: column; gap: 12px; }
+    .type-row { display: flex; align-items: baseline; gap: 1rem; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+    .type-label { flex: 0 0 80px; font-size: 0.75rem; color: var(--color-fg-muted); }
+
+    /* ── Buttons ── */
+    .button-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0 1rem; border-radius: var(--radius-md);
+      font-family: inherit; font-weight: 500; cursor: pointer;
+      transition: all 150ms ease-out; border: none; font-size: 1rem;
+    }
+    .btn-md { height: 2.5rem; }
+    .btn-sm { height: 2rem; font-size: 0.875rem; }
+    .btn-lg { height: 3rem; font-size: 1.125rem; }
+    .btn-primary { background: var(--color-accent); color: white; }
+    .btn-primary:hover { background: var(--color-accent-hv); }
+    .btn-secondary { background: transparent; color: var(--color-accent); border: 1px solid var(--color-accent); }
+    .btn-secondary:hover { background: var(--color-accent-soft); }
+    .btn-ghost { background: transparent; color: var(--color-fg-muted); }
+    .btn-ghost:hover { background: var(--color-accent-soft); color: var(--color-fg); }
+    .btn-danger { background: var(--color-danger); color: white; }
+    .btn-danger:hover { opacity: 0.9; }
+
+    /* ── Inputs ── */
+    .input-group { margin: 8px 0; }
+    .input-label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 4px; }
+    .input {
+      width: 100%; max-width: 320px; height: 2.5rem;
+      padding: 0 0.75rem; border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem;
+      background: var(--color-bg-elev); color: var(--color-fg);
+      transition: border-color 150ms ease-out;
+    }
+    .input:focus { outline: none; border-color: var(--color-border-focus); border-width: 2px; }
+    .input-error { border-color: var(--color-danger); }
+    .input-help { font-size: 0.75rem; color: var(--color-danger); margin-top: 4px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--color-bg-elev);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 200ms ease-out;
+    }
+    .card:hover { box-shadow: var(--shadow-md); }
+    .card-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .card-body { color: var(--color-fg-muted); font-size: 0.875rem; }
+    .card-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 8px 0; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 8px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 0.875rem; font-weight: 600; color: var(--color-fg-muted); padding: 8px 12px; background: var(--color-bg); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--color-border); font-size: 0.875rem; }
+    tr:hover td { background: var(--color-accent-soft); }
+
+    /* ── Attendance special ── */
+    .attendance-demo { display: flex; gap: 16px; margin: 8px 0; }
+    .attendance-overlay {
+      width: 200px; height: 120px; border-radius: var(--radius-lg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: white; font-weight: 700;
+    }
+    .attendance-overlay .name { font-size: 1.5rem; }
+    .attendance-overlay .action { font-size: 0.875rem; margin-top: 4px; }
+
+    /* ── Toast ── */
+    .toast {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border-radius: var(--radius-md);
+      background: var(--color-bg-elev); border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-md); font-size: 0.875rem;
+      margin: 8px 0;
+    }
+    .toast-success { border-left: 3px solid var(--color-success); }
+    .toast-error { border-left: 3px solid var(--color-danger); }
+
+    /* ── Nav demos ── */
+    .nav-demo { margin: 8px 0; }
+    .sidebar-demo {
+      width: 256px; background: var(--color-bg-elev); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: 16px 0; box-shadow: var(--shadow-sm);
+    }
+    .sidebar-logo { padding: 0 16px 16px; font-size: 1.25rem; font-weight: 700; color: var(--color-accent); border-bottom: 1px solid var(--color-border); }
+    .sidebar-item {
+      padding: 10px 16px; font-size: 0.875rem; color: var(--color-fg-muted);
+      cursor: pointer; transition: all 150ms;
+    }
+    .sidebar-item:hover { background: var(--color-accent-soft); color: var(--color-fg); }
+    .sidebar-item.active { background: var(--color-accent-soft); color: var(--color-accent); font-weight: 500; }
+
+    .bottom-nav {
+      display: flex; justify-content: space-around; align-items: center;
+      background: var(--color-bg-elev); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: 8px 0; max-width: 375px;
+      box-shadow: var(--shadow-sm);
+    }
+    .bottom-nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 0.625rem; color: var(--color-fg-muted); cursor: pointer;
+    }
+    .bottom-nav-item.active { color: var(--color-accent); }
+    .bottom-nav-icon { width: 20px; height: 20px; background: currentColor; border-radius: 4px; opacity: 0.3; }
+  </style>
+</head>
+<body>
+
+<h1>がくどう Design Tokens Preview</h1>
+
+<!-- ── Colors ── -->
+<h2>Color Palette</h2>
+<div class="palette">
+  <div class="swatch"><div class="swatch-color" style="background:#FAFAF8; border-bottom:1px solid #E5E5E3;"></div><div class="swatch-label"><strong>bg</strong>#FAFAF8</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#FFFFFF; border-bottom:1px solid #E5E5E3;"></div><div class="swatch-label"><strong>bg-elev</strong>#FFFFFF</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#1A1A1A;"></div><div class="swatch-label"><strong>fg</strong>#1A1A1A</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#6B7280;"></div><div class="swatch-label"><strong>fg-muted</strong>#6B7280</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#2D9D78;"></div><div class="swatch-label"><strong>accent</strong>#2D9D78</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#247A5E;"></div><div class="swatch-label"><strong>accent-hv</strong>#247A5E</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#E8F5F0; border-bottom:1px solid #E5E5E3;"></div><div class="swatch-label"><strong>accent-soft</strong>#E8F5F0</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#16A34A;"></div><div class="swatch-label"><strong>success</strong>#16A34A</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#D97706;"></div><div class="swatch-label"><strong>warning</strong>#D97706</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#DC2626;"></div><div class="swatch-label"><strong>danger</strong>#DC2626</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#3B82F6;"></div><div class="swatch-label"><strong>checkout</strong>#3B82F6</div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#E5E5E3; border-bottom:1px solid #ccc;"></div><div class="swatch-label"><strong>border</strong>#E5E5E3</div></div>
+</div>
+
+<!-- ── Typography ── -->
+<h2>Typography Scale</h2>
+<div class="type-scale">
+  <div class="type-row"><span class="type-label">text-xs</span><span style="font-size:0.75rem;">テキストサンプル Sample Text</span></div>
+  <div class="type-row"><span class="type-label">text-sm</span><span style="font-size:0.875rem;">テキストサンプル Sample Text</span></div>
+  <div class="type-row"><span class="type-label">text-base</span><span style="font-size:1rem;">テキストサンプル Sample Text</span></div>
+  <div class="type-row"><span class="type-label">text-lg</span><span style="font-size:1.25rem;">テキストサンプル Sample Text</span></div>
+  <div class="type-row"><span class="type-label">text-xl</span><span style="font-size:1.5rem; font-weight:700;">見出しサンプル Heading</span></div>
+  <div class="type-row"><span class="type-label">text-2xl</span><span style="font-size:1.875rem; font-weight:700;">見出しサンプル Heading</span></div>
+  <div class="type-row"><span class="type-label">text-3xl</span><span style="font-size:2.25rem; font-weight:700;">見出しサンプル</span></div>
+</div>
+
+<!-- ── Buttons ── -->
+<h2>Buttons</h2>
+<h3>Variants</h3>
+<div class="button-row">
+  <button class="btn btn-md btn-primary">保存する</button>
+  <button class="btn btn-md btn-secondary">キャンセル</button>
+  <button class="btn btn-md btn-ghost">編集</button>
+  <button class="btn btn-md btn-danger">削除</button>
+</div>
+<h3>Sizes</h3>
+<div class="button-row">
+  <button class="btn btn-sm btn-primary">Small</button>
+  <button class="btn btn-md btn-primary">Medium</button>
+  <button class="btn btn-lg btn-primary">Large</button>
+</div>
+
+<!-- ── Inputs ── -->
+<h2>Inputs</h2>
+<div class="input-group">
+  <label class="input-label">メールアドレス</label>
+  <input class="input" type="email" placeholder="example@email.com">
+</div>
+<div class="input-group">
+  <label class="input-label">生徒名（エラー例）</label>
+  <input class="input input-error" type="text" value="">
+  <div class="input-help">生徒名を入力してください</div>
+</div>
+
+<!-- ── Cards ── -->
+<h2>Cards</h2>
+<div class="card-row">
+  <div class="card">
+    <div class="card-title">連絡事項タイトル</div>
+    <div class="card-body">明日は遠足のため、お弁当と水筒を持たせてください。集合時間は8:30です。</div>
+  </div>
+  <div class="card">
+    <div class="card-title">入退場記録</div>
+    <div class="card-body">
+      <div>田中太郎 — 入場 14:30 / 退場 18:00</div>
+      <div>田中花子 — 入場 14:35 / 在室中</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Table ── -->
+<h2>Table</h2>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>生徒名</th><th>クラス</th><th>入場</th><th>退場</th><th>操作</th></tr></thead>
+    <tbody>
+      <tr><td>田中太郎</td><td>1年</td><td>14:30</td><td>18:00</td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+      <tr><td>佐藤花子</td><td>2年</td><td>14:35</td><td style="color:var(--color-accent);">在室中</td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+      <tr><td>鈴木一郎</td><td>3年</td><td>—</td><td>—</td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── Attendance overlays ── -->
+<h2>Attendance Scan Results</h2>
+<div class="attendance-demo">
+  <div class="attendance-overlay" style="background:var(--color-checkin);">
+    <div class="name">田中太郎</div>
+    <div class="action">入場しました</div>
+  </div>
+  <div class="attendance-overlay" style="background:var(--color-checkout);">
+    <div class="name">佐藤花子</div>
+    <div class="action">退場しました</div>
+  </div>
+  <div class="attendance-overlay" style="background:var(--color-danger);">
+    <div class="name">エラー</div>
+    <div class="action">未登録のQRコードです</div>
+  </div>
+</div>
+
+<!-- ── Toasts ── -->
+<h2>Toasts</h2>
+<div class="toast toast-success">✓ 生徒を登録しました</div>
+<br>
+<div class="toast toast-error">✕ 保存に失敗しました</div>
+
+<!-- ── Navigation ── -->
+<h2>Navigation</h2>
+<h3>Teacher Sidebar</h3>
+<div class="nav-demo">
+  <div class="sidebar-demo">
+    <div class="sidebar-logo">がくどう</div>
+    <div class="sidebar-item active">生徒管理</div>
+    <div class="sidebar-item">入退場記録</div>
+    <div class="sidebar-item">入退場スキャン</div>
+    <div class="sidebar-item">連絡事項</div>
+    <div class="sidebar-item">写真</div>
+    <div class="sidebar-item">公開お知らせ</div>
+    <div class="sidebar-item" style="margin-top:16px; border-top:1px solid var(--color-border); padding-top:16px;">ログアウト</div>
+  </div>
+</div>
+
+<h3>Parent Bottom Nav (mobile)</h3>
+<div class="nav-demo">
+  <div class="bottom-nav">
+    <div class="bottom-nav-item active"><div class="bottom-nav-icon"></div>ホーム</div>
+    <div class="bottom-nav-item"><div class="bottom-nav-icon"></div>入退場</div>
+    <div class="bottom-nav-item"><div class="bottom-nav-icon"></div>連絡</div>
+    <div class="bottom-nav-item"><div class="bottom-nav-icon"></div>写真</div>
+  </div>
+</div>
+
+</body>
+</html>
