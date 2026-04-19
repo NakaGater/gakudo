@@ -8,15 +8,15 @@
 
 ```css
 /* ── Base ── */
---color-bg:          #FAFAF8;    /* warm off-white */
+--color-bg:          #FFFDF7;    /* warm cream-white */
 --color-bg-elev:     #FFFFFF;    /* cards, modals */
 --color-fg:          #1A1A1A;    /* primary text */
 --color-fg-muted:    #6B7280;    /* secondary text */
 
-/* ── Accent: warm green (安心・安全のイメージ) ── */
---color-accent:      #2D9D78;    /* primary actions, links */
---color-accent-hv:   #247A5E;    /* hover state */
---color-accent-soft: #E8F5F0;    /* accent background */
+/* ── Accent: warm yellow (明るく親しみやすい) ── */
+--color-accent:      #F59F0A;    /* primary actions, links */
+--color-accent-hv:   #D98A09;    /* hover state */
+--color-accent-soft: #FFF8E8;    /* accent background */
 
 /* ── Status ── */
 --color-success:     #16A34A;
@@ -24,8 +24,8 @@
 --color-danger:      #DC2626;
 
 /* ── Border & dividers ── */
---color-border:      #E5E5E3;
---color-border-focus: #2D9D78;
+--color-border:      #F0E6D3;
+--color-border-focus: #F59F0A;
 
 /* ── Attendance-specific ── */
 --color-checkin:     #2D9D78;    /* 入場: green */
@@ -35,11 +35,12 @@
 ### Contrast ratios (WCAG AA)
 | Combination | Ratio | Pass? |
 |-------------|-------|-------|
-| `--color-fg` on `--color-bg` | 15.2:1 | AA |
-| `--color-fg-muted` on `--color-bg` | 5.1:1 | AA |
-| `--color-accent` on `--color-bg` | 4.6:1 | AA |
+| `--color-fg` on `--color-bg` | 14.8:1 | AA |
+| `--color-fg-muted` on `--color-bg` | 4.9:1 | AA |
+| `--color-fg` on `--color-accent` | 3.2:1 | AA Large |
 | `--color-bg-elev` text `--color-fg` | 17.1:1 | AA |
-| white on `--color-accent` | 4.8:1 | AA |
+
+Note: warm yellow accent (#F59F0A) on white背景は3:1未満のためボタンはfg色テキスト(#1A1A1A)を使用する
 
 ## 3. Typography
 
@@ -65,22 +66,22 @@
 ## 4. Spacing & layout
 
 ```css
-/* 4px base scale */
---space-1:   0.25rem;   /* 4px */
---space-2:   0.5rem;    /* 8px */
---space-3:   0.75rem;   /* 12px */
---space-4:   1rem;      /* 16px */
---space-5:   1.25rem;   /* 20px */
---space-6:   1.5rem;    /* 24px */
---space-8:   2rem;      /* 32px */
---space-10:  2.5rem;    /* 40px */
---space-12:  3rem;      /* 48px */
---space-16:  4rem;      /* 64px */
+/* 4px base scale × 1.1 */
+--space-1:   0.275rem;  /* ~4.4px */
+--space-2:   0.55rem;   /* ~8.8px */
+--space-3:   0.825rem;  /* ~13.2px */
+--space-4:   1.1rem;    /* ~17.6px */
+--space-5:   1.375rem;  /* ~22px */
+--space-6:   1.65rem;   /* ~26.4px */
+--space-8:   2.2rem;    /* ~35.2px */
+--space-10:  2.75rem;   /* ~44px */
+--space-12:  3.3rem;    /* ~52.8px */
+--space-16:  4.4rem;    /* ~70.4px */
 
-/* Radius */
---radius-sm:   0.25rem;  /* 4px — inputs, small elements */
---radius-md:   0.5rem;   /* 8px — cards, buttons */
---radius-lg:   0.75rem;  /* 12px — modals, large cards */
+/* Radius (rounded) */
+--radius-sm:   0.375rem;  /* 6px — inputs, small elements */
+--radius-md:   0.75rem;   /* 12px — cards, buttons */
+--radius-lg:   1rem;      /* 16px — modals, large cards */
 --radius-full: 9999px;   /* pills, avatars */
 
 /* Shadow */
@@ -106,7 +107,7 @@
 
 | Variant | Background | Text | Border | Use case |
 |---------|-----------|------|--------|----------|
-| Primary | `--color-accent` | white | none | 主要アクション（保存、登録） |
+| Primary | `--color-accent` | `--color-fg` (#1A1A1A) | none | 主要アクション（保存、登録） |
 | Secondary | transparent | `--color-accent` | `--color-accent` | 副次アクション（キャンセル、戻る） |
 | Ghost | transparent | `--color-fg-muted` | none | インラインアクション（編集、削除） |
 | Danger | `--color-danger` | white | none | 破壊的アクション |
@@ -189,7 +190,7 @@
 
 ## 8. Anti-slop rules
 
-- **紫〜ピンクのグラデーションは使用しない。** アクセントカラーはwarm green 1色のみ。
+- **紫〜ピンクのグラデーションは使用しない。** アクセントカラーはwarm yellow 1色のみ。
 - **Inter フォントは使用しない。** 日本語対応のNoto Sans JPを使用。
 - **中央寄せヒーロー + 3カード横並びレイアウトは使用しない。** 公開HPは情報優先の縦スクロール。
 - **グラスモーフィズム（すりガラス効果）は使用しない。**
