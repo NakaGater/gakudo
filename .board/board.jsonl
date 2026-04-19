@@ -1,0 +1,29 @@
+{"ts":"2026-04-19T14:52:38.041Z","type":"task-added","id":"T1","title":"Next.js プロジェクト初期化","dependsOn":[],"verify":["npm run build","npm run typecheck"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T2","title":"Supabase プロジェクト初期化","dependsOn":["T1"],"verify":["supabase start","supabase status"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T3","title":"Supabase クライアント設定","dependsOn":["T1"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T4","title":"DBスキーマ + RLSポリシー","dependsOn":["T2","T3"],"verify":["supabase db reset","supabase db lint"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T5","title":"認証ミドルウェア","dependsOn":["T4"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T6","title":"ログインページ","dependsOn":["T5"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T7","title":"パスワードリセット","dependsOn":["T6"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T8","title":"先生用レイアウト + ダッシュボード","dependsOn":["T6"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T9","title":"生徒 CRUD — Server Actions","dependsOn":["T4","T8"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T10","title":"生徒管理 — UI","dependsOn":["T9"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T11","title":"QRコードカード生成（PDF出力）","dependsOn":["T10"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T16","title":"保護者アカウント作成","dependsOn":["T4","T8"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.042Z","type":"task-added","id":"T17","title":"保護者用レイアウト + ダッシュボード","dependsOn":["T6","T16"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T12","title":"入退場スキャン — Server Action","dependsOn":["T4","T8"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T13","title":"入退場スキャン — UI（QRリーダー）","dependsOn":["T11","T12"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T14","title":"入退場履歴 — 先生用","dependsOn":["T13"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T15","title":"入退場履歴 — 保護者用","dependsOn":["T14","T16","T17"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T18","title":"公開HP — 静的ページ","dependsOn":["T4"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T26","title":"公開お知らせ管理 — Server Actions","dependsOn":["T4"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T27","title":"公開お知らせ管理 — UI","dependsOn":["T26"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T28","title":"公開HP — お知らせ表示統合","dependsOn":["T27"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T20","title":"連絡事項 — Server Actions","dependsOn":["T4","T8"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T21","title":"連絡事項管理 — 先生用 UI","dependsOn":["T20"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T19","title":"連絡事項閲覧 — 保護者用","dependsOn":["T17","T21"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T24","title":"写真アップロード — Server Actions + Storage","dependsOn":["T4","T8"],"verify":["npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T25","title":"写真管理 — 先生用 UI","dependsOn":["T24"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T23","title":"写真閲覧 — 保護者用","dependsOn":["T17","T25"],"verify":["npm run build","npx tsc --noEmit"]}
+{"ts":"2026-04-19T14:52:38.043Z","type":"task-added","id":"T22","title":"Supabase Storage バケット + シード完成","dependsOn":["T4"],"verify":["supabase db reset"]}
+{"ts":"2026-04-19T14:52:43.721Z","type":"claimed","id":"T1","agent":"implementer"}
