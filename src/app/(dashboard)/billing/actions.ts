@@ -169,3 +169,65 @@ export async function calculateAllBills(
     totalAmount,
   };
 }
+
+/**
+ * 請求を確定する (admin/teacher のみ)
+ */
+export async function confirmBill(
+  billId: string,
+): Promise<{ success: boolean; message: string }> {
+  const user = await getUser();
+  if (user.role !== "admin" && user.role !== "teacher") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("monthly_bills") as any)
+    .update({
+      status: "confirmed",
+      confirmed_at: new Date().toISOString(),
+      confirmed_by: user.id,
+    })
+    .eq("id", billId)
+    .eq("status", "draft");
+
+  if (error) {
+    return { success: false, message: `確定に失敗しました: ${error.message}` };
+  }
+
+  revalidatePath("/billing");
+  return { success: true, message: "請求を確定しました" };
+}
+
+/**
+ * 単一の子供の月次請求を計算する (admin/teacher のみ)
+ */
+export async function calculateSingleBill(
+  childId: string,
+  yearMonth: string,
+): Promise<{ success: boolean; message: string }> {
+  const user = await getUser();
+  if (user.role !== "admin" && user.role !== "teacher") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
+    return { success: false, message: "yearMonth は YYYY-MM 形式で指定してください" };
+  }
+
+  const { calculateMonthlyBill } = await import("@/lib/billing/calculate");
+
+  try {
+    await calculateMonthlyBill(childId, yearMonth);
+  } catch (err) {
+    return {
+      success: false,
+      message: err instanceof Error ? err.message : "計算エラー",
+    };
+  }
+
+  revalidatePath("/billing");
+  return { success: true, message: "計算が完了しました" };
+}
