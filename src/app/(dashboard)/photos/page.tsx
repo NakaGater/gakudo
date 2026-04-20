@@ -19,9 +19,10 @@ export default async function PhotosPage() {
 
   const photoList: Photo[] = photos ?? [];
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
   function getPublicUrl(storagePath: string) {
-    return supabase.storage.from("photos").getPublicUrl(storagePath).data
-      .publicUrl;
+    return `${supabaseUrl}/storage/v1/object/public/photos/${storagePath}`;
   }
 
   return (

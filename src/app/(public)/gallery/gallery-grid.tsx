@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 export type GalleryPhoto = {
@@ -84,12 +83,12 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
                   onClick={() => setLightboxIndex(flatIndex)}
                   aria-label={photo.caption ?? "写真を拡大表示"}
                 >
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={photo.url}
                     alt={photo.caption ?? ""}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
                   />
                   {photo.caption && (
                     <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -117,13 +116,11 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative h-[70vh] w-[90vw] max-w-5xl">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={flatPhotos[lightboxIndex].url}
                 alt={flatPhotos[lightboxIndex].caption ?? ""}
-                fill
-                sizes="90vw"
-                className="object-contain"
-                priority
+                className="absolute inset-0 w-full h-full object-contain"
               />
             </div>
 
