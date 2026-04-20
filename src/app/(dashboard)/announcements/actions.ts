@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { sendAnnouncementNotification } from "@/lib/notifications/send";
 
 export type ActionState = {
   success: boolean;
@@ -54,6 +55,15 @@ export async function createAnnouncement(
   if (error) {
     return { success: false, message: `投稿に失敗しました: ${error.message}` };
   }
+
+  // Best-effort notification dispatch (non-blocking)
+  sendAnnouncementNotification(
+    "new",
+    (title as string).trim(),
+    (body as string).trim(),
+  ).catch((err) => {
+    console.error("[announcements] Notification dispatch failed:", err);
+  });
 
   revalidatePath("/announcements");
   redirect("/announcements");

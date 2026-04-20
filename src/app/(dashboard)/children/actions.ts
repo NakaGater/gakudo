@@ -98,6 +98,29 @@ export async function updateChild(
   return { success: true, message: "更新しました" };
 }
 
+export async function regenerateQR(childId: string): Promise<ActionState> {
+  const user = await getUser();
+  if (user.role !== "admin") {
+    return { success: false, message: "管理者権限が必要です" };
+  }
+
+  const newQR = `GK-${nanoid()}`;
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("children") as any)
+    .update({ qr_code: newQR, qr_active: true })
+    .eq("id", childId);
+
+  if (error) {
+    return { success: false, message: `再発行に失敗しました: ${error.message}` };
+  }
+
+  revalidatePath(`/children/${childId}`);
+  revalidatePath(`/children/${childId}/qr`);
+  return { success: true, message: "QRコードを再発行しました" };
+}
+
 export async function deleteChild(id: string): Promise<ActionState> {
   const user = await getUser();
   if (user.role !== "admin") {
