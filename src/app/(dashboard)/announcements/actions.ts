@@ -58,3 +58,28 @@ export async function createAnnouncement(
   revalidatePath("/announcements");
   redirect("/announcements");
 }
+
+export async function markAsRead(announcementId: string): Promise<void> {
+  const user = await getUser();
+  if (user.role !== "parent") return;
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase.from("announcement_reads") as any).upsert(
+    { announcement_id: announcementId, user_id: user.id },
+    { onConflict: "announcement_id,user_id", ignoreDuplicates: true },
+  );
+
+  revalidatePath("/announcements");
+  revalidatePath(`/announcements/${announcementId}`);
+}
+
+export async function getReadCount(announcementId: string): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("announcement_reads")
+    .select("*", { count: "exact", head: true })
+    .eq("announcement_id", announcementId);
+
+  return count ?? 0;
+}
