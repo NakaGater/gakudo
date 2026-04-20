@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入退場管理 — gakudo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Sidebar (desktop) -->
+  <nav class="sidebar" aria-label="サイドバーナビゲーション">
+    <div class="sidebar-logo">
+      <span class="site-logo-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 8c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4"/></svg>
+      </span>
+      gakudo
+    </div>
+    <div class="sidebar-nav">
+      <a href="app.html" class="sidebar-item">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        ホーム
+      </a>
+      <a href="attendance.html" class="sidebar-item active">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        入退場
+      </a>
+      <a href="announcements.html" class="sidebar-item">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        連絡
+      </a>
+      <a href="#" class="sidebar-item">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        写真
+      </a>
+      <a href="#" class="sidebar-item">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+        請求
+      </a>
+      <a href="#" class="sidebar-item">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        児童管理
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" aria-hidden="true">山</div>
+      <div>
+        <div class="text-sm font-medium">山田 花子</div>
+        <div class="text-xs text-muted">先生</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="app-main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">QRコード読取</h1>
+        <p class="page-desc">児童のQRコードをカメラにかざしてください</p>
+      </div>
+      <a href="#manual" class="btn btn-secondary">手動で記録する</a>
+    </div>
+
+    <!-- Scanner -->
+    <div class="scanner-area" role="region" aria-label="QRコードスキャナー">
+      <div class="scanner-overlay"></div>
+      <div class="scanner-hint">QRコードをここに合わせてください</div>
+      <div class="scanner-status">📷 カメラ準備中…</div>
+    </div>
+
+    <div class="text-center mt-3">
+      <span class="text-sm text-muted">カメラが起動しない場合は、ブラウザのカメラ許可を確認してください</span>
+    </div>
+
+    <!-- Latest results -->
+    <div class="mt-8">
+      <h2 class="text-lg font-bold mb-4">直近の記録</h2>
+
+      <div class="results-grid">
+        <div class="attendance-result-overlay attendance-result-enter">
+          <div>
+            <div class="result-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="result-name">佐藤 あおい</div>
+            <div class="result-action result-action-enter">入室しました</div>
+            <div class="result-time">15:32 — QR読取</div>
+          </div>
+        </div>
+        <div class="attendance-result-overlay attendance-result-exit">
+          <div>
+            <div class="result-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <div class="result-name">鈴木 はると</div>
+            <div class="result-action result-action-exit">退室しました</div>
+            <div class="result-time">17:45 — QR読取</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual fallback section -->
+    <div id="manual" class="mt-8">
+      <h2 class="text-lg font-bold mb-4">手動入力</h2>
+      <p class="text-sm text-muted mb-4">QRコードが読み取れない場合は、児童名をタップして記録できます。</p>
+
+      <div class="card">
+        <table class="children-table">
+          <thead>
+            <tr>
+              <th>児童名</th>
+              <th>学年</th>
+              <th>状態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="child-name">田中 太郎</span></td>
+              <td><span class="child-grade">3年生</span></td>
+              <td><span class="badge badge-enter">入室中</span></td>
+              <td><button class="btn btn-exit btn-sm">退室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">佐藤 あおい</span></td>
+              <td><span class="child-grade">2年生</span></td>
+              <td><span class="badge badge-enter">入室中</span></td>
+              <td><button class="btn btn-exit btn-sm">退室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">伊藤 さくら</span></td>
+              <td><span class="child-grade">1年生</span></td>
+              <td><span class="badge badge-warning">未入室</span></td>
+              <td><button class="btn btn-enter btn-sm">入室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">高橋 ゆうき</span></td>
+              <td><span class="child-grade">4年生</span></td>
+              <td><span class="badge badge-exit">退室済</span></td>
+              <td><button class="btn btn-enter btn-sm">入室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">渡辺 りく</span></td>
+              <td><span class="child-grade">2年生</span></td>
+              <td><span class="badge badge-warning">未入室</span></td>
+              <td><button class="btn btn-enter btn-sm">入室</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile tabs -->
+  <nav class="mobile-tabs" aria-label="モバイルナビゲーション">
+    <div class="mobile-tabs-inner">
+      <a href="app.html" class="mobile-tab">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        ホーム
+      </a>
+      <a href="attendance.html" class="mobile-tab active">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        入退場
+      </a>
+      <a href="announcements.html" class="mobile-tab">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        連絡
+      </a>
+      <a href="#" class="mobile-tab">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        写真
+      </a>
+      <a href="#" class="mobile-tab">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+        請求
+      </a>
+    </div>
+  </nav>
+</div>
+
+</body>
+</html>

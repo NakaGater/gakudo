@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ひまわり学童クラブ — 子どもたちの笑顔があふれる放課後</title>
+<meta name="description" content="ひまわり学童クラブは、保護者が運営する学童保育施設です。安心・安全な放課後の居場所を提供します。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="container site-header-inner">
+    <a href="index.html" class="site-logo">
+      <span class="site-logo-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 8c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4"/><path d="M12 2v6"/><path d="M12 16v6"/><path d="M2 12h6"/><path d="M16 12h6"/><path d="M4.93 4.93l4.24 4.24"/><path d="M14.83 14.83l4.24 4.24"/><path d="M19.07 4.93l-4.24 4.24"/><path d="M9.17 14.83l-4.24 4.24"/></svg>
+      </span>
+      ひまわり学童クラブ
+    </a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="#about">施設について</a>
+      <a href="#features">特徴</a>
+      <a href="#news">お知らせ</a>
+      <a href="#access">アクセス</a>
+      <a href="auth.html" class="btn btn-primary btn-sm">保護者ログイン</a>
+    </nav>
+    <button class="hamburger-btn" aria-label="メニューを開く" aria-expanded="false" aria-controls="mobile-menu">
+      <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile menu overlay -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <div class="mobile-menu-panel">
+    <div class="mobile-menu-header">
+      <span class="site-logo" style="font-size:1rem;">
+        <span class="site-logo-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 8c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4"/></svg>
+        </span>
+        ひまわり学童クラブ
+      </span>
+      <button class="mobile-menu-close" aria-label="メニューを閉じる">
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-menu-nav" aria-label="モバイルメニュー">
+      <a href="#about">施設について</a>
+      <a href="#features">特徴</a>
+      <a href="#news">お知らせ</a>
+      <a href="#access">アクセス</a>
+      <a href="auth.html" class="btn btn-primary btn-block">保護者ログイン</a>
+    </nav>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <p class="hero-tagline">父母運営型 学童保育</p>
+        <h1 class="hero-title">子どもたちが<br>安心して過ごせる<br>放課後の居場所</h1>
+        <p class="hero-desc">
+          ひまわり学童クラブは、保護者の手で運営する学童保育施設です。
+          約30名の児童が、宿題・遊び・おやつの時間を通じて、
+          のびのびと放課後を過ごしています。
+        </p>
+        <div class="hero-buttons">
+          <a href="#about" class="btn btn-primary">施設について詳しく</a>
+          <a href="#access" class="btn btn-secondary">見学のお申し込み</a>
+        </div>
+      </div>
+      <div class="hero-image" aria-label="施設で遊ぶ子どもたちのイラスト">
+        <svg viewBox="0 0 480 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" style="width:100%;height:100%;">
+          <!-- Sky -->
+          <rect width="480" height="360" rx="12" fill="#CCFBF1"/>
+          <!-- Sun -->
+          <circle cx="400" cy="70" r="36" fill="#FEF3C7" stroke="#B45309" stroke-width="1.5"/>
+          <line x1="400" y1="24" x2="400" y2="12" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="400" y1="116" x2="400" y2="128" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="354" y1="70" x2="342" y2="70" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="446" y1="70" x2="458" y2="70" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="374" y1="44" x2="366" y2="36" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="426" y1="96" x2="434" y2="104" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="426" y1="44" x2="434" y2="36" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="374" y1="96" x2="366" y2="104" stroke="#B45309" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Ground -->
+          <rect x="0" y="260" width="480" height="100" fill="#D1FAE5"/>
+          <!-- Tree left -->
+          <rect x="60" y="200" width="12" height="60" rx="3" fill="#78716C"/>
+          <circle cx="66" cy="180" r="32" fill="#0F766E" opacity="0.7"/>
+          <circle cx="50" cy="195" r="22" fill="#0F766E" opacity="0.6"/>
+          <circle cx="82" cy="192" r="24" fill="#0F766E" opacity="0.65"/>
+          <!-- Tree right -->
+          <rect x="400" y="210" width="10" height="50" rx="3" fill="#78716C"/>
+          <circle cx="405" cy="190" r="28" fill="#0F766E" opacity="0.6"/>
+          <circle cx="390" cy="202" r="20" fill="#0F766E" opacity="0.55"/>
+          <circle cx="418" cy="198" r="22" fill="#0F766E" opacity="0.6"/>
+          <!-- Building body -->
+          <rect x="150" y="140" width="180" height="120" rx="4" fill="#FFFFFF" stroke="#0F766E" stroke-width="2"/>
+          <!-- Roof -->
+          <polygon points="140,142 240,80 340,142" fill="#0F766E" opacity="0.9"/>
+          <polygon points="140,142 240,80 340,142" fill="none" stroke="#0D5D56" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Door -->
+          <rect x="222" y="210" width="36" height="50" rx="3" fill="#0F766E" opacity="0.3" stroke="#0F766E" stroke-width="1.5"/>
+          <circle cx="251" cy="238" r="3" fill="#0F766E"/>
+          <!-- Windows -->
+          <rect x="170" y="165" width="30" height="28" rx="3" fill="#CCFBF1" stroke="#0F766E" stroke-width="1.5"/>
+          <line x1="185" y1="165" x2="185" y2="193" stroke="#0F766E" stroke-width="1"/>
+          <line x1="170" y1="179" x2="200" y2="179" stroke="#0F766E" stroke-width="1"/>
+          <rect x="280" y="165" width="30" height="28" rx="3" fill="#CCFBF1" stroke="#0F766E" stroke-width="1.5"/>
+          <line x1="295" y1="165" x2="295" y2="193" stroke="#0F766E" stroke-width="1"/>
+          <line x1="280" y1="179" x2="310" y2="179" stroke="#0F766E" stroke-width="1"/>
+          <!-- Sign -->
+          <rect x="196" y="150" width="88" height="18" rx="3" fill="#CCFBF1" stroke="#0F766E" stroke-width="1"/>
+          <text x="240" y="163" text-anchor="middle" font-size="9" font-family="Noto Sans JP, sans-serif" fill="#0F766E" font-weight="500">ひまわり学童</text>
+          <!-- Small flowers -->
+          <circle cx="130" cy="268" r="5" fill="#FEF3C7"/>
+          <circle cx="130" cy="268" r="2" fill="#B45309"/>
+          <circle cx="350" cy="272" r="5" fill="#FEF3C7"/>
+          <circle cx="350" cy="272" r="2" fill="#B45309"/>
+          <circle cx="440" cy="265" r="4" fill="#FEF3C7"/>
+          <circle cx="440" cy="265" r="1.5" fill="#B45309"/>
+          <!-- Path -->
+          <path d="M240 260 Q240 290 240 360" stroke="#E7E5E4" stroke-width="20" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about" class="section section-alt">
+  <div class="container">
+    <h2 class="section-title">施設について</h2>
+    <p class="section-desc">
+      地域の小学1年生から6年生までの児童を対象に、放課後の安全な居場所を提供しています。
+    </p>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">QRコードで入退場管理</div>
+          <div class="feature-desc">専用のQRコードで入室・退室をワンタッチ記録。保護者のスマホにリアルタイムで通知が届きます。</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">連絡事項をアプリで配信</div>
+          <div class="feature-desc">行事予定やお知らせをアプリから配信。紙のプリントをなくし、既読確認も可能です。</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">活動写真の共有</div>
+          <div class="feature-desc">施設での活動写真を保護者限定で安全に共有。行事の様子をいつでも振り返れます。</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">延長保育料金の自動計算</div>
+          <div class="feature-desc">延長保育の料金を退室時間から自動計算。月次の請求書をオンラインで確認できます。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- News -->
+<section id="news" class="section">
+  <div class="container">
+    <h2 class="section-title">お知らせ</h2>
+    <p class="section-desc">ひまわり学童クラブからのお知らせです。</p>
+    <div class="news-list">
+      <div class="news-item">
+        <time class="news-date" datetime="2026-04-18">2026.04.18</time>
+        <a href="#" class="news-title-link">ゴールデンウィーク期間の開所時間について</a>
+      </div>
+      <div class="news-item">
+        <time class="news-date" datetime="2026-04-10">2026.04.10</time>
+        <a href="#" class="news-title-link">5月の行事予定を掲載しました</a>
+      </div>
+      <div class="news-item">
+        <time class="news-date" datetime="2026-04-03">2026.04.03</time>
+        <a href="#" class="news-title-link">新年度の運営方針について（保護者の皆様へ）</a>
+      </div>
+      <div class="news-item">
+        <time class="news-date" datetime="2026-03-25">2026.03.25</time>
+        <a href="#" class="news-title-link">入所説明会のご案内（2026年度 新規入所希望の方へ）</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Access -->
+<section id="access" class="section section-alt">
+  <div class="container">
+    <h2 class="section-title">アクセス</h2>
+    <div class="access-grid">
+      <div class="access-map" aria-label="施設周辺の地図">
+        [ Google Maps 埋め込みエリア ]
+      </div>
+      <dl class="access-info">
+        <dt>施設名</dt>
+        <dd>ひまわり学童クラブ</dd>
+        <dt>所在地</dt>
+        <dd>〒123-4567 東京都世田谷区桜丘3-12-8 ひまわりビル1F</dd>
+        <dt>電話番号</dt>
+        <dd>03-1234-5678</dd>
+        <dt>開所時間</dt>
+        <dd>
+          平日：放課後〜19:00<br>
+          土曜・長期休業：8:00〜19:00
+        </dd>
+        <dt>対象</dt>
+        <dd>小学1年生〜6年生（定員30名）</dd>
+        <dt>見学・お問い合わせ</dt>
+        <dd>お電話にてお気軽にご連絡ください。</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-heading">ひまわり学童クラブ</div>
+        <p class="footer-text">
+          保護者の手で運営する、地域に根ざした学童保育施設です。<br>
+          子どもたちの「ただいま」が聞こえる、あたたかい居場所を<br>
+          これからも守り続けます。
+        </p>
+      </div>
+      <div>
+        <div class="footer-heading">リンク</div>
+        <p class="footer-text">
+          <a href="#about">施設について</a><br>
+          <a href="#news">お知らせ</a><br>
+          <a href="#access">アクセス</a><br>
+          <a href="auth.html">保護者ログイン</a>
+        </p>
+      </div>
+      <div>
+        <div class="footer-heading">お問い合わせ</div>
+        <p class="footer-text">
+          〒123-4567<br>
+          東京都世田谷区桜丘3-12-8<br>
+          TEL: 03-1234-5678<br>
+          受付: 平日 9:00〜18:00
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 ひまわり学童クラブ. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var btn = document.querySelector('.hamburger-btn');
+  var menu = document.getElementById('mobile-menu');
+  var close = menu.querySelector('.mobile-menu-close');
+  var links = menu.querySelectorAll('.mobile-menu-nav a');
+
+  function openMenu() {
+    menu.style.display = 'block';
+    requestAnimationFrame(function() {
+      menu.classList.add('open');
+    });
+    menu.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    close.focus();
+  }
+
+  function closeMenu() {
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    setTimeout(function() {
+      if (!menu.classList.contains('open')) menu.style.display = 'none';
+    }, 250);
+    btn.focus();
+  }
+
+  btn.addEventListener('click', openMenu);
+  close.addEventListener('click', closeMenu);
+  menu.addEventListener('click', function(e) {
+    if (e.target === menu) closeMenu();
+  });
+  for (var i = 0; i < links.length; i++) {
+    links[i].addEventListener('click', closeMenu);
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && menu.classList.contains('open')) closeMenu();
+  });
+})();
+</script>
+
+</body>
+</html>
