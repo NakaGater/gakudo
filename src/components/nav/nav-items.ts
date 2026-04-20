@@ -18,14 +18,14 @@ export type NavItem = {
 };
 
 export const navItems: NavItem[] = [
-  { label: "ホーム", icon: Home, href: "/dashboard", roles: ["parent", "teacher", "admin"] },
-  { label: "入退場", icon: ScanLine, href: "/dashboard/attendance", roles: ["parent", "teacher", "admin"] },
-  { label: "連絡", icon: Bell, href: "/dashboard/announcements", roles: ["parent", "teacher", "admin"] },
-  { label: "写真", icon: Camera, href: "/dashboard/photos", roles: ["parent", "teacher", "admin"] },
-  { label: "請求", icon: Receipt, href: "/dashboard/billing", roles: ["parent", "teacher", "admin"] },
-  { label: "児童管理", icon: Users, href: "/dashboard/children", roles: ["teacher", "admin"] },
-  { label: "ユーザー", icon: UserPlus, href: "/dashboard/admin/users", roles: ["admin"] },
-  { label: "HP管理", icon: Globe, href: "/dashboard/admin/site/pages", roles: ["admin"] },
+  { label: "ホーム", icon: Home, href: "/attendance/dashboard", roles: ["parent", "teacher", "admin"] },
+  { label: "入退場", icon: ScanLine, href: "/attendance", roles: ["parent", "teacher", "admin"] },
+  { label: "連絡", icon: Bell, href: "/announcements", roles: ["parent", "teacher", "admin"] },
+  { label: "写真", icon: Camera, href: "/photos", roles: ["parent", "teacher", "admin"] },
+  { label: "請求", icon: Receipt, href: "/billing", roles: ["parent", "teacher", "admin"] },
+  { label: "児童管理", icon: Users, href: "/children", roles: ["teacher", "admin"] },
+  { label: "ユーザー", icon: UserPlus, href: "/admin/users", roles: ["admin"] },
+  { label: "HP管理", icon: Globe, href: "/admin/site/pages", roles: ["admin"] },
 ];
 
 export function getNavItems(role: string): NavItem[] {

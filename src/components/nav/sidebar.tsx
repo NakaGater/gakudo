@@ -16,8 +16,14 @@ export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const items = getNavItems(user.role);
 
-  const isActive = (href: string) =>
-    href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (pathname === href) return true;
+    if (href === "/attendance/dashboard") return false;
+    if (href === "/attendance") {
+      return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard";
+    }
+    return pathname.startsWith(href + "/");
+  };
 
   async function handleLogout() {
     const supabase = createClient();

@@ -17,7 +17,14 @@ export function MobileTabs({ user }: MobileTabsProps) {
   const items = getNavItems(user.role).slice(0, MAX_TABS);
 
   const isActive = (href: string) =>
-    href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+    (() => {
+      if (pathname === href) return true;
+      if (href === "/attendance/dashboard") return false;
+      if (href === "/attendance") {
+        return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard";
+      }
+      return pathname.startsWith(href + "/");
+    })();
 
   return (
     <nav className="fixed bottom-0 inset-x-0 md:hidden bg-bg-elev border-t border-border z-40">

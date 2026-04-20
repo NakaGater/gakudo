@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { getNavItems } from "./nav-items";
 
 // Mock next/navigation
-const mockPathname = vi.fn<() => string>().mockReturnValue("/dashboard");
+const mockPathname = vi.fn<() => string>().mockReturnValue("/attendance/dashboard");
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname(),
   useRouter: () => ({ push: vi.fn() }),
@@ -18,7 +18,7 @@ vi.mock("@/lib/supabase/client", () => ({
 
 afterEach(() => {
   cleanup();
-  mockPathname.mockReturnValue("/dashboard");
+  mockPathname.mockReturnValue("/attendance/dashboard");
 });
 
 // ----- getNavItems unit tests -----
@@ -64,7 +64,7 @@ describe("Sidebar", () => {
     );
     const links = screen.getAllByRole("link");
     // 5 nav items
-    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/dashboard"))).toHaveLength(5);
+    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(5);
   });
 
   it("renders teacher nav items (6 links)", () => {
@@ -98,7 +98,7 @@ describe("Sidebar", () => {
   });
 
   it("applies active styling to current path", () => {
-    mockPathname.mockReturnValue("/dashboard");
+    mockPathname.mockReturnValue("/attendance/dashboard");
     render(
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
@@ -108,7 +108,7 @@ describe("Sidebar", () => {
   });
 
   it("does not apply active styling to non-current paths", () => {
-    mockPathname.mockReturnValue("/dashboard");
+    mockPathname.mockReturnValue("/attendance/dashboard");
     render(
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
@@ -143,7 +143,7 @@ describe("MobileTabs", () => {
   });
 
   it("applies active styling to current tab", () => {
-    mockPathname.mockReturnValue("/dashboard");
+    mockPathname.mockReturnValue("/attendance/dashboard");
     render(
       <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
