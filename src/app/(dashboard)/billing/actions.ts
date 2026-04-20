@@ -117,3 +117,55 @@ export async function createBillingRule(
   revalidatePath("/billing/rules");
   return { success: true, message: "料金ルールを作成しました" };
 }
+
+/**
+ * 全児童の月次請求を一括計算する (admin/teacher のみ)
+ */
+export async function calculateAllBills(
+  yearMonth: string,
+): Promise<{ success: boolean; message: string; processed?: number; totalAmount?: number }> {
+  const user = await getUser();
+  if (user.role !== "admin" && user.role !== "teacher") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
+    return { success: false, message: "yearMonth は YYYY-MM 形式で指定してください" };
+  }
+
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: children, error: childrenError } = await (supabase.from("children") as any)
+    .select("id");
+
+  if (childrenError || !children) {
+    return { success: false, message: "児童データの取得に失敗しました" };
+  }
+
+  const { calculateMonthlyBill } = await import("@/lib/billing/calculate");
+
+  let processed = 0;
+  let totalAmount = 0;
+
+  for (const child of children as { id: string }[]) {
+    try {
+      const result = await calculateMonthlyBill(child.id, yearMonth);
+      totalAmount += result.totalAmount;
+      processed++;
+    } catch (err) {
+      return {
+        success: false,
+        message: err instanceof Error ? err.message : "計算エラー",
+      };
+    }
+  }
+
+  revalidatePath("/billing");
+  return {
+    success: true,
+    message: `${processed}名の月次請求計算が完了しました（合計金額: ¥${totalAmount.toLocaleString()}）`,
+    processed,
+    totalAmount,
+  };
+}
