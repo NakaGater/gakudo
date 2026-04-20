@@ -34,6 +34,128 @@ function todayRangeJST(): { start: string; end: string } {
   return { start, end: endDate.toISOString() };
 }
 
+export type ChildAttendanceStatus = {
+  childId: string;
+  name: string;
+  grade: number;
+  status: "none" | "entered" | "exited";
+  lastRecordedAt: string | null;
+};
+
+export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[]> {
+  const user = await getUser();
+  if (!isStaff(user.role)) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { start, end } = todayRangeJST();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: children } = await (supabase.from("children") as any)
+    .select("id, name, grade")
+    .order("grade", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (!children || children.length === 0) return [];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: attendances } = await (supabase.from("attendances") as any)
+    .select("child_id, type, recorded_at")
+    .gte("recorded_at", start)
+    .lt("recorded_at", end)
+    .order("recorded_at", { ascending: false });
+
+  // Build a map of child_id → latest attendance record
+  const latestMap = new Map<string, { type: string; recorded_at: string }>();
+  for (const a of attendances ?? []) {
+    if (!latestMap.has(a.child_id)) {
+      latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
+    }
+  }
+
+  return (children as { id: string; name: string; grade: number }[]).map((c) => {
+    const latest = latestMap.get(c.id);
+    let status: "none" | "entered" | "exited" = "none";
+    if (latest) {
+      status = latest.type === "enter" ? "entered" : "exited";
+    }
+    return {
+      childId: c.id,
+      name: c.name,
+      grade: c.grade,
+      status,
+      lastRecordedAt: latest?.recorded_at ?? null,
+    };
+  });
+}
+
+export async function recordManualAttendance(
+  childId: string,
+): Promise<AttendanceResult> {
+  const user = await getUser();
+  if (!isStaff(user.role)) {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const supabase = await createClient();
+
+  // 1. Verify child exists
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: child } = await (supabase.from("children") as any)
+    .select("id, name")
+    .eq("id", childId)
+    .single();
+
+  if (!child) {
+    return { success: false, message: "児童が見つかりません" };
+  }
+
+  // 2. Get latest attendance for this child today (JST)
+  const { start, end } = todayRangeJST();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: latest } = await (supabase.from("attendances") as any)
+    .select("id, type, recorded_at")
+    .eq("child_id", child.id)
+    .gte("recorded_at", start)
+    .lt("recorded_at", end)
+    .order("recorded_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  // 3. Determine enter/exit
+  const actionType: "enter" | "exit" =
+    !latest || latest.type === "exit" ? "enter" : "exit";
+
+  // 4. Insert attendance record
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: record, error: insertError } = await (supabase.from("attendances") as any)
+    .insert({
+      child_id: child.id,
+      type: actionType,
+      method: "manual",
+      recorded_by: user.id,
+    })
+    .select("id, type, recorded_at")
+    .single();
+
+  if (insertError) {
+    return { success: false, message: `記録に失敗しました: ${insertError.message}` };
+  }
+
+  revalidatePath("/attendance");
+  revalidatePath("/attendance/manual");
+
+  return {
+    success: true,
+    message: actionType === "enter" ? "入室しました" : "退室しました",
+    childName: child.name,
+    type: record.type,
+    recordedAt: record.recorded_at,
+  };
+}
+
 export async function recordAttendance(
   qrCode: string,
 ): Promise<AttendanceResult> {
