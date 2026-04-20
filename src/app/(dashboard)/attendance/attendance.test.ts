@@ -43,10 +43,8 @@ function setupChain() {
   mockEq.mockReset();
   mockSelect.mockReset();
   mockInsert.mockReset();
+  mockFrom.mockReset();
 
-  // Default chain: .select().eq().eq().single() for child lookup
-  // and .select().eq().gte().lt().order().limit().single() for attendance lookup
-  // and .insert().select().single() for insert
   const chain = {
     select: mockSelect,
     eq: mockEq,
@@ -58,6 +56,7 @@ function setupChain() {
     insert: mockInsert,
   };
 
+  mockFrom.mockReturnValue(chain);
   mockSelect.mockReturnValue(chain);
   mockEq.mockReturnValue(chain);
   mockGte.mockReturnValue(chain);
