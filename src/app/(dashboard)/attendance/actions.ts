@@ -90,6 +90,81 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
   });
 }
 
+export type DashboardChildStatus = {
+  childId: string;
+  name: string;
+  grade: number;
+  status: "none" | "entered" | "exited";
+  enterTime: string | null;
+  exitTime: string | null;
+};
+
+export async function getDashboardAttendanceStatus(): Promise<
+  DashboardChildStatus[]
+> {
+  const user = await getUser();
+  if (!isStaff(user.role)) return [];
+
+  const supabase = await createClient();
+  const { start, end } = todayRangeJST();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: children } = await (supabase.from("children") as any)
+    .select("id, name, grade")
+    .order("grade", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (!children || children.length === 0) return [];
+
+  // Fetch today's records sorted ascending so we can find first enter & latest record
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: attendances } = await (supabase.from("attendances") as any)
+    .select("child_id, type, recorded_at")
+    .gte("recorded_at", start)
+    .lt("recorded_at", end)
+    .order("recorded_at", { ascending: true });
+
+  const enterMap = new Map<string, string>();
+  const latestMap = new Map<string, { type: string; recorded_at: string }>();
+
+  for (const a of (attendances ?? []) as {
+    child_id: string;
+    type: string;
+    recorded_at: string;
+  }[]) {
+    if (a.type === "enter" && !enterMap.has(a.child_id)) {
+      enterMap.set(a.child_id, a.recorded_at);
+    }
+    latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
+  }
+
+  return (children as { id: string; name: string; grade: number }[]).map(
+    (c) => {
+      const latest = latestMap.get(c.id);
+      let status: "none" | "entered" | "exited" = "none";
+      let exitTime: string | null = null;
+
+      if (latest) {
+        if (latest.type === "enter") {
+          status = "entered";
+        } else {
+          status = "exited";
+          exitTime = latest.recorded_at;
+        }
+      }
+
+      return {
+        childId: c.id,
+        name: c.name,
+        grade: c.grade,
+        status,
+        enterTime: enterMap.get(c.id) ?? null,
+        exitTime,
+      };
+    },
+  );
+}
+
 export async function recordManualAttendance(
   childId: string,
 ): Promise<AttendanceResult> {
