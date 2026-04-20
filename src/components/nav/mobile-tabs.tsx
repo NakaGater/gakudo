@@ -1,0 +1,45 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { getNavItems } from "./nav-items";
+import type { AuthUser } from "@/lib/auth/get-user";
+
+const MAX_TABS = 5;
+
+type MobileTabsProps = {
+  user: AuthUser;
+};
+
+export function MobileTabs({ user }: MobileTabsProps) {
+  const pathname = usePathname();
+  const items = getNavItems(user.role).slice(0, MAX_TABS);
+
+  const isActive = (href: string) =>
+    href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+
+  return (
+    <nav className="fixed bottom-0 inset-x-0 md:hidden bg-bg-elev border-t border-border z-40">
+      <div className="flex items-center justify-around h-14">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs transition-colors",
+                active ? "text-accent" : "text-fg-muted",
+              )}
+            >
+              <Icon size={20} strokeWidth={1.75} />
+              <span className="truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
