@@ -3,11 +3,18 @@ import { createClient } from '@/lib/supabase/server'
 export const revalidate = 3600
 
 export default async function PublicHomePage() {
-  const supabase = await createClient()
-  const { data: notices } = await supabase
-    .from('public_notices')
-    .select('*')
-    .order('published_at', { ascending: false })
+  let notices: { id: string; title: string; body: string; published_at: string }[] | null = null
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('public_notices')
+      .select('*')
+      .order('published_at', { ascending: false })
+    notices = data
+  } catch {
+    // Supabase not configured — show static content only
+    notices = null
+  }
 
   return (
     <div className="font-sans">
