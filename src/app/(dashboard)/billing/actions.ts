@@ -202,6 +202,48 @@ export async function confirmBill(
 }
 
 /**
+ * 対象月の未確定請求をすべて確定する (admin/teacher のみ)
+ */
+export async function confirmAllBills(
+  yearMonth: string,
+): Promise<{ success: boolean; message: string; confirmed?: number }> {
+  const user = await getUser();
+  if (user.role !== "admin" && user.role !== "teacher") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
+    return { success: false, message: "yearMonth は YYYY-MM 形式で指定してください" };
+  }
+
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.from("monthly_bills") as any)
+    .update({
+      status: "confirmed",
+      confirmed_at: new Date().toISOString(),
+      confirmed_by: user.id,
+    })
+    .eq("year_month", yearMonth)
+    .eq("status", "draft")
+    .select("id");
+
+  if (error) {
+    return { success: false, message: `一括確定に失敗しました: ${error.message}` };
+  }
+
+  const confirmed = (data as { id: string }[] | null)?.length ?? 0;
+
+  revalidatePath("/billing");
+  return {
+    success: true,
+    message: `${confirmed}件の請求を確定しました`,
+    confirmed,
+  };
+}
+
+/**
  * 単一の子供の月次請求を計算する (admin/teacher のみ)
  */
 export async function calculateSingleBill(
