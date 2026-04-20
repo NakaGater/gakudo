@@ -4,11 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import type { Database } from "@/lib/supabase/types";
 
 export type ActionState = {
   success: boolean;
   message: string;
 } | null;
+
+type SitePageUpdate = Database["public"]["Tables"]["site_pages"]["Update"];
 
 export async function updateSitePage(
   slug: string,
@@ -29,14 +32,15 @@ export async function updateSitePage(
   }
 
   const supabase = await createClient();
+  const updateData: SitePageUpdate = {
+    title: title.trim(),
+    content,
+    updated_by: user.id,
+  };
+  // Supabase PostgREST builder .update() resolves to `never` with TS 5.9
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
-    .from("site_pages")
-    .update({
-      title: title.trim(),
-      content,
-      updated_by: user.id,
-    })
+  const { error } = await (supabase.from("site_pages") as any)
+    .update(updateData)
     .eq("slug", slug);
 
   if (error) {
