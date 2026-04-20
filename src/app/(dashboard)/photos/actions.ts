@@ -44,7 +44,7 @@ export async function uploadPhoto(
 
     const timestamp = Date.now();
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const storagePath = `photos/${user.id}/${timestamp}-${safeName}`;
+    const storagePath = `${user.id}/${timestamp}-${safeName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("photos")
