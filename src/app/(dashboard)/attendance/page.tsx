@@ -86,12 +86,10 @@ export default function AttendancePage() {
 
       {/* QR Scanner */}
       {scannerEnabled ? (
-        <div className="mb-6">
+        <div className="mb-6 w-full max-w-lg">
           <QRScanner
             onScan={handleScan}
             onError={handleCameraError}
-            width={320}
-            height={320}
           />
         </div>
       ) : (
