@@ -117,3 +117,80 @@ export async function deleteChild(id: string): Promise<ActionState> {
   revalidatePath("/children");
   return { success: true, message: "削除しました" };
 }
+
+export type ParentSearchResult = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export async function searchParents(
+  query: string,
+): Promise<ParentSearchResult[]> {
+  const user = await getUser();
+  if (!isStaff(user.role)) return [];
+
+  if (!query.trim()) return [];
+
+  const supabase = await createClient();
+  const pattern = `%${query.trim()}%`;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.from("profiles") as any)
+    .select("id, name, email")
+    .eq("role", "parent")
+    .or(`name.ilike.${pattern},email.ilike.${pattern}`)
+    .limit(10);
+
+  if (error) return [];
+  return (data ?? []) as ParentSearchResult[];
+}
+
+export async function linkParent(
+  childId: string,
+  parentId: string,
+): Promise<ActionState> {
+  const user = await getUser();
+  if (!isStaff(user.role)) {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("child_parents") as any)
+    .upsert(
+      { child_id: childId, parent_id: parentId },
+      { onConflict: "child_id,parent_id", ignoreDuplicates: true },
+    );
+
+  if (error) {
+    return { success: false, message: `紐付けに失敗しました: ${error.message}` };
+  }
+
+  revalidatePath(`/children/${childId}`);
+  return { success: true, message: "紐付けました" };
+}
+
+export async function unlinkParent(
+  childId: string,
+  parentId: string,
+): Promise<ActionState> {
+  const user = await getUser();
+  if (!isStaff(user.role)) {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("child_parents") as any)
+    .delete()
+    .eq("child_id", childId)
+    .eq("parent_id", parentId);
+
+  if (error) {
+    return { success: false, message: `解除に失敗しました: ${error.message}` };
+  }
+
+  revalidatePath(`/children/${childId}`);
+  return { success: true, message: "解除しました" };
+}

@@ -5,6 +5,7 @@ import { getUser } from "@/lib/auth/get-user";
 import { Card, CardContent, CardHeader, Badge, Button } from "@/components/ui";
 import { ChildEditForm } from "./child-edit-form";
 import { ChildDeleteButton } from "./child-delete-button";
+import { LinkParent } from "./link-parent";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -46,8 +47,12 @@ export default async function ChildDetailPage({ params }: Props) {
     .returns<ParentInfo[]>();
 
   const parents = (parentLinks ?? [])
-    .map((p) => p.profiles)
-    .filter((p): p is { name: string; email: string } => p !== null);
+    .filter((p): p is ParentInfo & { profiles: { name: string; email: string } } => p.profiles !== null)
+    .map((p) => ({
+      parent_id: p.parent_id,
+      name: p.profiles.name,
+      email: p.profiles.email,
+    }));
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -124,23 +129,7 @@ export default async function ChildDetailPage({ params }: Props) {
           <h2 className="text-lg font-semibold text-fg">保護者</h2>
         </CardHeader>
         <CardContent>
-          {parents.length === 0 ? (
-            <p className="text-sm text-fg-muted">
-              紐付けられた保護者はいません
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {parents.map((p) => (
-                <li
-                  key={p.email}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <span className="font-medium text-fg">{p.name}</span>
-                  <span className="text-fg-muted">{p.email}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <LinkParent childId={child.id} linkedParents={parents} />
         </CardContent>
       </Card>
 
