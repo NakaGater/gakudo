@@ -2,7 +2,7 @@
 
 ## 1. Mood & identity
 
-**温かく、信頼感があり、落ち着いた学びの場。** gakudoは子どもの安全と保護者の安心を支えるツール。派手さよりも「確実に使える」安心感を重視する。色使いは自然の緑と温かみのあるニュートラルを基調とし、情報は整理されて一目でわかること。幼稚すぎず、事務的すぎない「学校の先生のような」佇まい。
+**温かく、信頼感があり、落ち着いた学びの場。** gakudoは子どもの安全と保護者の安心を支えるツール。派手さよりも「確実に使える」安心感を重視する。色使いはアンバー（琥珀色）と温かみのあるニュートラルを基調とし、情報は整理されて一目でわかること。幼稚すぎず、事務的すぎない「学校の先生のような」佇まい。
 
 **キーワード:** 温かい、信頼、整然、やさしい、実用的
 
@@ -18,9 +18,9 @@
 --color-bg-elev:     #FFFFFF;    /* カード・モーダル背景 */
 --color-fg:          #1C1917;    /* ほぼ黒（stone-900） */
 --color-fg-muted:    #78716C;    /* 説明テキスト（stone-500） */
---color-accent:      #0F766E;    /* ティールグリーン（teal-700） */
---color-accent-hv:   #0D5D56;    /* ホバー時 */
---color-accent-light:#CCFBF1;    /* アクセント背景（teal-100） */
+--color-accent:      #B45309;    /* アンバー（amber-700） */
+--color-accent-hv:   #92400E;    /* ホバー時（amber-800） */
+--color-accent-light:#FEF3C7;    /* アクセント背景（amber-100） */
 --color-success:     #15803D;    /* 入室・完了（green-700） */
 --color-warning:     #B45309;    /* 注意（amber-700） */
 --color-danger:      #B91C1C;    /* 退室・エラー（red-700） */
@@ -37,9 +37,9 @@
 |------|------|------|------|
 | `--color-fg` #1C1917 | `--color-bg` #FAFAF7 | 15.6:1 | ✅ AAA |
 | `--color-fg-muted` #78716C | `--color-bg` #FAFAF7 | 4.6:1 | ✅ AA body |
-| `--color-accent` #0F766E | `--color-bg` #FAFAF7 | 5.2:1 | ✅ AA body |
-| `--color-accent` #0F766E | `--color-bg-elev` #FFFFFF | 5.4:1 | ✅ AA body |
-| `#FFFFFF` | `--color-accent` #0F766E | 5.4:1 | ✅ AA body（白抜き文字） |
+| `--color-accent` #B45309 | `--color-bg` #FAFAF7 | 7.7:1 | ✅ AAA |
+| `--color-accent` #B45309 | `--color-bg-elev` #FFFFFF | 7.5:1 | ✅ AAA |
+| `#FFFFFF` | `--color-accent` #B45309 | 7.5:1 | ✅ AAA（白抜き文字） |
 | `--color-success` #15803D | `--color-bg` #FAFAF7 | 5.8:1 | ✅ AA body |
 | `--color-danger` #B91C1C | `--color-bg` #FAFAF7 | 5.9:1 | ✅ AA body |
 
