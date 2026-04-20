@@ -4,6 +4,12 @@
 -- 注意: 管理者ユーザーは Supabase Auth で作成してください。
 -- このファイルは Auth に依存しないテーブルのみシードします。
 
+-- ストレージバケット作成
+INSERT INTO storage.buckets (id, name, public) VALUES
+  ('photos', 'photos', true),
+  ('documents', 'documents', false)
+ON CONFLICT (id) DO NOTHING;
+
 -- 固定ページ（ホーム・概要・アクセス）
 INSERT INTO site_pages (slug, title, content) VALUES
   ('home', 'ホーム', 'ようこそ、学童保育管理システムへ。こちらはトップページのサンプルコンテンツです。'),
