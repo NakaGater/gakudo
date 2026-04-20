@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { sendAttendanceNotification } from "@/lib/notifications/send";
 
 export type AttendanceResult = {
   success: boolean;
@@ -222,6 +223,11 @@ export async function recordManualAttendance(
   revalidatePath("/attendance");
   revalidatePath("/attendance/manual");
 
+  // Non-blocking: fire and forget
+  sendAttendanceNotification(child.id, actionType, record.recorded_at).catch((err) => {
+    console.error("[attendance] notification error:", err);
+  });
+
   return {
     success: true,
     message: actionType === "enter" ? "入室しました" : "退室しました",
@@ -290,6 +296,11 @@ export async function recordAttendance(
   }
 
   revalidatePath("/attendance");
+
+  // Non-blocking: fire and forget
+  sendAttendanceNotification(child.id, actionType, record.recorded_at).catch((err) => {
+    console.error("[attendance] notification error:", err);
+  });
 
   return {
     success: true,

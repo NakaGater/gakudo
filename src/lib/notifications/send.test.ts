@@ -23,14 +23,29 @@ vi.mock("resend", () => ({
   },
 }));
 
-import { sendAnnouncementNotification } from "./send";
+import { sendAnnouncementNotification, sendAttendanceNotification } from "./send";
 
-// Helper to build chained Supabase query mocks
+// Helper to build chained Supabase query mocks (legacy: select → in)
 function mockSupabaseQuery(resolvedValue: { data: unknown; error: unknown }) {
   const terminal = vi.fn().mockResolvedValue(resolvedValue);
   // .in() is the terminal call in our queries
   const selectFn = vi.fn().mockReturnValue({ in: terminal });
   return { select: selectFn, in: terminal };
+}
+
+// Flexible chainable mock — supports any combination of .select/.eq/.in/.single
+function mockChainQuery(resolvedValue: { data: unknown; error: unknown }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chain: Record<string, any> = {};
+  chain.select = vi.fn().mockReturnValue(chain);
+  chain.eq = vi.fn().mockReturnValue(chain);
+  chain.in = vi.fn().mockReturnValue(chain);
+  chain.single = vi.fn().mockReturnValue(chain);
+  // Make chain thenable so `await supabase.from(t).select().eq()` resolves
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  chain.then = (onFulfilled: any, onRejected: any) =>
+    Promise.resolve(resolvedValue).then(onFulfilled, onRejected);
+  return chain;
 }
 
 describe("sendAnnouncementNotification", () => {
@@ -228,6 +243,121 @@ describe("sendAnnouncementNotification", () => {
     mockFrom.mockImplementation(() => prefsQuery);
 
     await sendAnnouncementNotification("ann-6", "空テスト", "空本文");
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+    expect(mockEmailSend).not.toHaveBeenCalled();
+  });
+});
+
+describe("sendAttendanceNotification", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: "test-public-key",
+      VAPID_PRIVATE_KEY: "test-private-key",
+      RESEND_API_KEY: "re_test_key",
+    };
+  });
+
+  it("sends push notification to linked parents", async () => {
+    const childQuery = mockChainQuery({ data: { name: "太郎" }, error: null });
+    const linksQuery = mockChainQuery({
+      data: [{ parent_id: "parent-1" }],
+      error: null,
+    });
+    const prefsQuery = mockChainQuery({
+      data: [{ user_id: "parent-1", method: "push" }],
+      error: null,
+    });
+    const subsQuery = mockChainQuery({
+      data: [
+        {
+          user_id: "parent-1",
+          subscription: {
+            endpoint: "https://push.example.com/p1",
+            keys: { p256dh: "pk1", auth: "pa1" },
+          },
+        },
+      ],
+      error: null,
+    });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      if (table === "child_parents") return linksQuery;
+      if (table === "notification_preferences") return prefsQuery;
+      if (table === "push_subscriptions") return subsQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    mockSendNotification.mockResolvedValue({});
+
+    // 2024-01-15T06:30:00Z = 15:30 JST
+    await sendAttendanceNotification("child-1", "enter", "2024-01-15T06:30:00.000Z");
+
+    expect(mockSendNotification).toHaveBeenCalledWith(
+      { endpoint: "https://push.example.com/p1", keys: { p256dh: "pk1", auth: "pa1" } },
+      expect.stringContaining("太郎が入室しました"),
+    );
+    const payload = mockSendNotification.mock.calls[0][1];
+    expect(payload).toContain("15:30");
+  });
+
+  it("sends email with child name and time", async () => {
+    const childQuery = mockChainQuery({ data: { name: "花子" }, error: null });
+    const linksQuery = mockChainQuery({
+      data: [{ parent_id: "parent-2" }],
+      error: null,
+    });
+    const prefsQuery = mockChainQuery({
+      data: [{ user_id: "parent-2", method: "email" }],
+      error: null,
+    });
+    const profilesQuery = mockChainQuery({
+      data: [{ id: "parent-2", email: "parent2@example.com" }],
+      error: null,
+    });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      if (table === "child_parents") return linksQuery;
+      if (table === "notification_preferences") return prefsQuery;
+      if (table === "profiles") return profilesQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    mockEmailSend.mockResolvedValue({ id: "email-att-1" });
+
+    // 2024-01-15T09:00:00Z = 18:00 JST
+    await sendAttendanceNotification("child-2", "exit", "2024-01-15T09:00:00.000Z");
+
+    expect(mockEmailSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "parent2@example.com",
+        subject: "【星ヶ丘こどもクラブ】花子の退室通知",
+      }),
+    );
+    const emailCall = mockEmailSend.mock.calls[0][0];
+    expect(emailCall.text).toContain("18:00");
+    expect(emailCall.text).toContain("花子");
+  });
+
+  it("handles no linked parents gracefully", async () => {
+    const childQuery = mockChainQuery({ data: { name: "次郎" }, error: null });
+    const linksQuery = mockChainQuery({ data: [], error: null });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      if (table === "child_parents") return linksQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    await expect(
+      sendAttendanceNotification("child-3", "enter", "2024-01-15T06:00:00.000Z"),
+    ).resolves.toBeUndefined();
 
     expect(mockSendNotification).not.toHaveBeenCalled();
     expect(mockEmailSend).not.toHaveBeenCalled();

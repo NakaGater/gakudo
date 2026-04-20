@@ -64,12 +64,12 @@ export async function sendAnnouncementNotification(
 
   // Send push notifications
   if (pushUserIds.length > 0) {
-    await sendPushNotifications(supabase, pushUserIds, title, body, announcementId);
+    await sendPushNotifications(supabase, pushUserIds, title, body, `/announcements/${announcementId}`);
   }
 
   // Send email notifications
   if (emailUserIds.length > 0) {
-    await sendEmailNotifications(supabase, emailUserIds, title, body);
+    await sendEmailNotifications(supabase, emailUserIds, `【星ヶ丘こどもクラブ】${title}`, body);
   }
 }
 
@@ -79,7 +79,7 @@ async function sendPushNotifications(
   userIds: string[],
   title: string,
   body: string,
-  announcementId: string,
+  url: string,
 ): Promise<void> {
   let vapidKeys: { publicKey: string; privateKey: string };
   try {
@@ -109,7 +109,7 @@ async function sendPushNotifications(
   const payload = JSON.stringify({
     title,
     body: truncatedBody,
-    url: `/announcements/${announcementId}`,
+    url,
   });
 
   for (const row of subs as PushSubscriptionRow[]) {
@@ -128,7 +128,7 @@ async function sendEmailNotifications(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   userIds: string[],
-  title: string,
+  subject: string,
   body: string,
 ): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -149,8 +149,6 @@ async function sendEmailNotifications(
     return;
   }
 
-  const subject = `【星ヶ丘こどもクラブ】${title}`;
-
   for (const profile of profiles as ProfileRow[]) {
     try {
       await resend.emails.send({
@@ -165,5 +163,96 @@ async function sendEmailNotifications(
         err instanceof Error ? err.message : err,
       );
     }
+  }
+}
+
+/** Format ISO timestamp as HH:mm in JST */
+function formatJSTTime(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+export async function sendAttendanceNotification(
+  childId: string,
+  type: "enter" | "exit",
+  recordedAt: string,
+): Promise<void> {
+  const supabase = createAdminClient();
+
+  // 1. Fetch child name
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: child, error: childError } = await (supabase as any)
+    .from("children")
+    .select("name")
+    .eq("id", childId)
+    .single();
+
+  if (childError || !child) {
+    if (childError) {
+      console.error("[notifications] Failed to fetch child:", childError.message);
+    }
+    return;
+  }
+
+  // 2. Fetch linked parent IDs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: links, error: linksError } = await (supabase as any)
+    .from("child_parents")
+    .select("parent_id")
+    .eq("child_id", childId);
+
+  if (linksError || !links || (links as { parent_id: string }[]).length === 0) {
+    return;
+  }
+
+  const parentIds = (links as { parent_id: string }[]).map((l) => l.parent_id);
+
+  // 3. Fetch notification preferences for parents
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: prefs, error: prefsError } = await (supabase as any)
+    .from("notification_preferences")
+    .select("user_id, method")
+    .in("user_id", parentIds);
+
+  if (prefsError || !prefs) {
+    return;
+  }
+
+  const activePrefs = (prefs as NotificationPreferenceRow[]).filter(
+    (p) => p.method === "push" || p.method === "email" || p.method === "both",
+  );
+
+  if (activePrefs.length === 0) return;
+
+  // 4. Build messages
+  const jstTime = formatJSTTime(recordedAt);
+  const actionLabel = type === "enter" ? "入室" : "退室";
+  const childName = (child as { name: string }).name;
+
+  const pushMessage = `${childName}が${actionLabel}しました (${jstTime})`;
+  const emailSubject = `【星ヶ丘こどもクラブ】${childName}の${actionLabel}通知`;
+  const emailBody = `${childName}が${jstTime}に${actionLabel}しました。`;
+
+  // 5. Send push notifications
+  const pushUserIds = activePrefs
+    .filter((p) => p.method === "push" || p.method === "both")
+    .map((p) => p.user_id);
+
+  if (pushUserIds.length > 0) {
+    await sendPushNotifications(supabase, pushUserIds, pushMessage, pushMessage, "/attendance");
+  }
+
+  // 6. Send email notifications
+  const emailUserIds = activePrefs
+    .filter((p) => p.method === "email" || p.method === "both")
+    .map((p) => p.user_id);
+
+  if (emailUserIds.length > 0) {
+    await sendEmailNotifications(supabase, emailUserIds, emailSubject, emailBody);
   }
 }
