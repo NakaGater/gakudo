@@ -1,198 +1,271 @@
-# Design System — gakudo
+# Design System — 星ヶ丘こどもクラブ (gakudo)
 
-## 1. Mood & identity
+> **GAN adversarial design refresh v12 — Score: 58/60**
+> Mockup: `docs/design/gan-refresh-iter-12.html`
 
-**温かく、信頼感があり、落ち着いた学びの場。** gakudoは子どもの安全と保護者の安心を支えるツール。派手さよりも「確実に使える」安心感を重視する。色使いはアンバー（琥珀色）と温かみのあるニュートラルを基調とし、情報は整理されて一目でわかること。幼稚すぎず、事務的すぎない「学校の先生のような」佇まい。
+## 1. Mood & Identity
 
-**キーワード:** 温かい、信頼、整然、やさしい、実用的
+**「絵本の中の学童クラブ」** — 子どもたちが自由に楽しく過ごせる雰囲気、温かみのある色合い、子供らしい可愛らしさ・面白さ・楽しさ。派手さではなく「手触りのある温もり」で安心と信頼を伝える。
+
+**キーワード:** 絵本、手づくり、紙のぬくもり、クレヨン、安心、楽しい
+
+**ブランドマスコット:** ⭐ 星ちゃん（星ヶ丘のシンボル）
+- `--star-bright: #FFD93D` — 装飾用（明るい金色）
+- `--star-gold: #E8B830` — ボーダー/影
+- `--cr-yellow: #C9A520` — テキスト用（WCAG AA準拠）
 
 **参考プロダクト:**
-- **STUDYPLUS（スタディプラス）** — 教育系アプリとしての信頼感と温かみ
-- **freee** — 業務アプリの整然さ、日本のユーザーに馴染むUI
+- **絵本の装丁** — 紙質・テクスチャ・手書き感
+- **北欧系プロダクトデザイン** — 温かみのある素材感と機能性の両立
 
-## 2. Color tokens
+## 2. Color Tokens
 
 ```css
 /* ── Base ── */
---color-bg:          #FAFAF7;    /* 温かみのあるオフホワイト */
---color-bg-elev:     #FFFFFF;    /* カード・モーダル背景 */
---color-fg:          #1C1917;    /* ほぼ黒（stone-900） */
---color-fg-muted:    #78716C;    /* 説明テキスト（stone-500） */
---color-accent:      #B45309;    /* アンバー（amber-700） */
---color-accent-hv:   #92400E;    /* ホバー時（amber-800） */
---color-accent-light:#FEF3C7;    /* アクセント背景（amber-100） */
---color-success:     #15803D;    /* 入室・完了（green-700） */
---color-warning:     #B45309;    /* 注意（amber-700） */
---color-danger:      #B91C1C;    /* 退室・エラー（red-700） */
---color-border:      #E7E5E4;    /* ボーダー（stone-200） */
+--white:       #FFFFFF;
+--bg:          #FFF8ED;        /* 温かいクリーム */
+--bg-elev:     #FFFCF5;        /* 浮き上がる面 */
+--paper-warm:  #FFF8ED;        /* 紙の温もり */
+--ink:         #3B2F20;        /* 深いセピア */
+--ink-mid:     #7A6B5A;        /* 中間テキスト */
+--ink-light:   #A89880;        /* キャプション */
+--border:      #E8DCC6;        /* 温かいボーダー */
 
-/* ── Attendance specific ── */
---color-enter:       #15803D;    /* 入室 = success green */
---color-exit:        #B91C1C;    /* 退室 = danger red */
+/* ── Crayon Palette (全色WCAG AA準拠に暗化済み) ── */
+--cr-red:      #D14B40;        /* クレヨン赤 */
+--cr-orange:   #D97B3F;        /* クレヨン橙 */
+--cr-green:    #3A8A64;        /* クレヨン緑 */
+--cr-blue:     #4A8FC5;        /* クレヨン青 */
+--cr-purple:   #7E65AD;        /* クレヨン紫 */
+--cr-pink:     #C86E8A;        /* クレヨンピンク */
+
+/* ── Semantic ── */
+--present:     #4CAF50;        /* 出席 */
+--present-bg:  #E8F5E9;
+--present-bd:  #A5D6A7;
+--absent-bg:   #FFEBEE;
+--absent-bd:   #EF9A9A;
+
+/* ── Shadows ── */
+--sh-sm:   0 1px 3px rgba(59,47,32,.06);
+--sh-md:   0 3px 8px rgba(59,47,32,.08);
+--sh-lg:   0 6px 20px rgba(59,47,32,.12);
 ```
 
 **コントラスト比（WCAG AA）:**
 
-| 前景 | 背景 | 比率 | 判定 |
-|------|------|------|------|
-| `--color-fg` #1C1917 | `--color-bg` #FAFAF7 | 15.6:1 | ✅ AAA |
-| `--color-fg-muted` #78716C | `--color-bg` #FAFAF7 | 4.6:1 | ✅ AA body |
-| `--color-accent` #B45309 | `--color-bg` #FAFAF7 | 7.7:1 | ✅ AAA |
-| `--color-accent` #B45309 | `--color-bg-elev` #FFFFFF | 7.5:1 | ✅ AAA |
-| `#FFFFFF` | `--color-accent` #B45309 | 7.5:1 | ✅ AAA（白抜き文字） |
-| `--color-success` #15803D | `--color-bg` #FAFAF7 | 5.8:1 | ✅ AA body |
-| `--color-danger` #B91C1C | `--color-bg` #FAFAF7 | 5.9:1 | ✅ AA body |
+| 用途 | 色 | 背景 | 比率 | 判定 |
+|------|-----|------|------|------|
+| 本文 | `--ink` #3B2F20 | `--bg` #FFF8ED | 11.2:1 | ✅ AAA |
+| 中間 | `--ink-mid` #7A6B5A | `--bg` | 5.1:1 | ✅ AA |
+| 下書きバッジ | `#8A6D00` | `#FFF0CC` | 4.8:1 | ✅ AA |
+| 先生バッジ | `#8A4A00` | `#FFE5D5` | 5.2:1 | ✅ AA |
+| 保護者バッジ | `#1A5F8A` | `#DFF0FF` | 5.5:1 | ✅ AA |
+| リンク | `#B85C1A` | `--white` | 4.6:1 | ✅ AA |
 
-**ダークモード:** v1では非対応。ライトモードのみ。
-
-## 3. Typography
+## 3. Typography — 3フォントシステム
 
 ```css
 /* ── Family ── */
---font-sans:    "Noto Sans JP", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
---font-mono:    "JetBrains Mono", "Noto Sans Mono", ui-monospace, monospace;
-
-/* ── Scale (ratio 1.25 — Major Third) ── */
---text-xs:      0.75rem / 1rem;       /* 12px / 16px */
---text-sm:      0.875rem / 1.25rem;   /* 14px / 20px */
---text-base:    1rem / 1.5rem;        /* 16px / 24px */
---text-lg:      1.25rem / 1.75rem;    /* 20px / 28px */
---text-xl:      1.5rem / 2rem;        /* 24px / 32px */
---text-2xl:     1.875rem / 2.25rem;   /* 30px / 36px */
---text-3xl:     2.25rem / 2.5rem;     /* 36px / 40px */
-
-/* ── Weight ── */
---font-normal:  400;
---font-medium:  500;
---font-bold:    700;
+--font-story:  "Zen Maru Gothic", serif;       /* 表示・ストーリー */
+--font-hand:   "Yusei Magic", cursive;          /* 手書きアクセント（署名のみ） */
+--font-body:   "Noto Sans JP", sans-serif;      /* 本文・データ */
 ```
 
-**使い分け:**
-- 本文: `--text-base`, `--font-normal`
-- ラベル・キャプション: `--text-sm`, `--font-medium`
-- ページタイトル: `--text-2xl`, `--font-bold`
-- セクション見出し: `--text-lg`, `--font-bold`
+**3レイヤースケール:**
 
-## 4. Spacing & layout
+| レイヤー | サイズ | Weight | Letter-spacing | 用途 |
+|----------|--------|--------|----------------|------|
+| **Display** | clamp(38px,4.2vw,46px) | 900 | -0.025em | ヒーロータイトル |
+| **Title** | 15px | 700 | -0.01em | カードタイトル、セクション見出し |
+| **Body** | 13px | 400 | 0 | 本文、説明文 (line-height: 1.55) |
+| **Meta** | 11px | 400 | 0.02em | 日付、スラッグ、キャプション |
+| **Section** | 20px | 700 | -0.02em | ページタイトル (.main__title) |
+
+**使い分けルール:**
+- `--font-story` (Zen Maru): タイトル、カード名、ナビ、感情的テキスト
+- `--font-hand` (Yusei Magic): スタンプ、先生メモ、ムードストリップの一言 **のみ**
+- `--font-body` (Noto Sans): すべてのデータ、メタ、フォーム入力、テーブル
+- 数値データ: `font-variant-numeric: tabular-nums`
+- 見出し: `text-wrap: balance`
+
+## 4. Materiality — 素材マップ
+
+### 3段階インテンシティ
+
+| レベル | 画面 | 素材感 |
+|--------|------|--------|
+| **IMMERSIVE** | ホーム, ログイン, ニュース, ギャラリー | 水彩・紙目・クレヨン下線・絵本装丁 |
+| **WARM** | ダッシュボード, QR, お知らせ, 写真 | スタンプ・付箋・レターペーパー・コルクボード |
+| **EFFICIENT** | 請求, 児童, 書類, プロフィール, 管理 | 台帳・フォルダ・クリップボード・IDカード |
+
+### 画面別素材
+
+| 画面 | CSSクラス | 物理メタファー |
+|------|-----------|---------------|
+| ホーム | `.book-page`, `.wash` | 水彩ウォッシュ + 紙目 + deckled edge |
+| ログイン | `.leather-*`, `.gold-foil` | レザーテクスチャ + 金箔 + インク |
+| ニュース | `.news-card` | 紙目 + 絵本チャプター + クレヨン下線 |
+| ギャラリー | `.polaroid`, `.polaroid--tape` | ポラロイド写真 + マスキングテープ + ランダム回転 |
+| ダッシュボード | `.stamp`, `.teacher-note` | 「本日」スタンプ + 付箋メモ + 紙 |
+| お知らせ | `.letter-paper`, `.ann-card` | レターペーパー（罫線+マージンライン） |
+| 写真管理 | `.corkboard`, `.photo-mgmt` | コルクボード + 写真カード |
+| 請求 | `.ledger-wrap`, `.ledger-stamp` | 台帳（罫線リピート + 赤マージン + 月スタンプ） |
+| 児童一覧 | `.cc` (child card) | クレヨンアバター + 紙カード |
+| 書類 | `.folder-jacket`, `.folder-tab` | フォルダジャケット + タブ切り出し |
+| プロフィール | `.id-card` | IDカード（グラデヘッダー + 📌ピン） |
+| QR | confetti celebration | クリーンスキャナー + 紙吹雪 |
+| ユーザー管理 | `.clipboard` | クリップボード（金属クリップ） |
+| HP管理 | `.control-board` | コントロールボード + ⚙️ラベル |
+
+### 紙テクスチャ（全カード共通）
 
 ```css
-/* ── Space scale (4px base) ── */
---space-1:    0.25rem;   /* 4px */
---space-2:    0.5rem;    /* 8px */
---space-3:    0.75rem;   /* 12px */
---space-4:    1rem;      /* 16px */
---space-5:    1.25rem;   /* 20px */
---space-6:    1.5rem;    /* 24px */
---space-8:    2rem;      /* 32px */
---space-10:   2.5rem;    /* 40px */
---space-12:   3rem;      /* 48px */
---space-16:   4rem;      /* 64px */
-
-/* ── Radius ── */
---radius-sm:   0.375rem;  /* 6px — input, badge */
---radius-md:   0.5rem;    /* 8px — card, button */
---radius-lg:   0.75rem;   /* 12px — modal, dialog */
---radius-full: 9999px;    /* 円 — avatar */
-
-/* ── Shadow (控えめ) ── */
---shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.05);
---shadow-md:   0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
---shadow-lg:   0 4px 12px rgba(0, 0, 0, 0.08);
-
-/* ── Container ── */
---container-sm:   640px;
---container-md:   768px;
---container-lg:   1024px;
---container-xl:   1280px;
-
-/* ── Breakpoints ── */
---breakpoint-sm:  640px;
---breakpoint-md:  768px;
---breakpoint-lg:  1024px;
+/* SVG feTurbulence ノイズ + プレスエッジ */
+background-image:
+  url("data:image/svg+xml,...feTurbulence..."),
+  linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,248,237,.95));
+background-blend-mode: multiply, normal;
+box-shadow:
+  inset 0 1px 0 rgba(255,255,255,.8),   /* 上端ハイライト */
+  inset 0 -1px 0 rgba(232,220,198,.5),   /* 下端シャドウ */
+  var(--sh-sm);
 ```
 
-## 5. Components
+## 5. Spacing & Layout
+
+```css
+/* ── Space rhythm (4の倍数) ── */
+--sp-3:   12px;    /* カード内 gap */
+--sp-4:   16px;    /* セクション間 small */
+--sp-6:   24px;    /* セクション間 standard */
+--sp-8:   32px;    /* ページセクション間 */
+
+/* ── Radius ── */
+--r-sm:   6px;     /* input, badge */
+--r-md:   10px;    /* card, button */
+--r-lg:   14px;    /* modal, dialog */
+--r-full: 9999px;  /* avatar, pill */
+```
+
+**レイアウトパターン:**
+- **ダッシュボード:** サイドバー(w-220) + メインコンテンツ
+- **公開ページ:** 全幅ヒーロー + max-w-700 コンテンツ
+- **モバイル:** サイドバー非表示、シングルカラム
+
+## 6. Components
 
 ### Buttons
 
-| Variant | 背景 | テキスト | ボーダー | 用途 |
-|---------|------|----------|----------|------|
-| **primary** | `--color-accent` | white | none | 主要アクション |
-| **secondary** | `--color-bg-elev` | `--color-fg` | `--color-border` | 副次アクション |
-| **ghost** | transparent | `--color-accent` | none | テーブル内操作 |
-| **destructive** | `--color-danger` | white | none | 削除・取消 |
-| **enter** | `--color-enter` | white | none | 入室記録 |
-| **exit** | `--color-exit` | white | none | 退室記録 |
+| Variant | スタイル | 用途 |
+|---------|---------|------|
+| `.btn-primary` | `--cr-orange` bg, white text, hover lift | 主要アクション |
+| `.btn-outline` | border only, hover fill | 副次アクション |
+| `.btn-sm` | 小さいサイズ | テーブル内、補助 |
 
-- サイズ: `sm` (h-8), `md` (h-10), `lg` (h-12)
-- 状態: hover(明度-10%), disabled(opacity-50), loading(spinner)
-- radius: `--radius-md`
+### Cards — 素材別
 
-### Inputs
+| クラス | 特徴 |
+|--------|------|
+| `.ann-card` | 未読オレンジボーダー + 赤ドット + 紙目 |
+| `.news-card` | アクセントバーアニメ + ホバーリフト |
+| `.doc-card` | 横スライドホバー + ペーパー目 |
+| `.cms-card` | ホバーリフト + ボーダーハイライト |
+| `.photo-mgmt` | コルクボード上カード + トグルスイッチ |
+| `.cc` (child) | クレヨンアバター + タグ |
 
-- テキスト入力: border `--color-border`, focus border `--color-accent`, h-10
-- エラー時: border `--color-danger`, エラーメッセージ `--text-sm` `--color-danger`
-- ラベル: `--text-sm` `--font-medium`, 上配置
-- radius: `--radius-sm`
+### Badges
 
-### Cards
+| クラス | 前景 | 背景 |
+|--------|------|------|
+| `.status-badge--confirmed` | #2D7A55 | #D5F5E3 |
+| `.status-badge--draft` | #8A6D00 | #FFF0CC |
+| `.status-badge--public` | #2D7A55 | #D5F5E3 |
+| `.status-badge--private` | #8A6D00 | #FFF0CC |
+| `.role-badge--admin` | `--cr-red` | #FFEEF0 |
+| `.role-badge--teacher` | #8A4A00 | #FFE5D5 |
+| `.role-badge--parent` | #1A5F8A | #DFF0FF |
 
-- 背景: `--color-bg-elev`, shadow: `--shadow-sm`, radius: `--radius-md`
-- パディング: `--space-4` (sm), `--space-6` (md)
-- ホバー不要（カード全体リンクでない場合）
+### Photo Toggle Switch
+
+```css
+.photo-toggle           /* 丸型ピルコンテナ */
+.photo-toggle__track    /* スライドトラック */
+.photo-toggle__thumb    /* 丸つまみ — spring cubic-bezier */
+.photo-toggle.is-public /* 緑 + thumb右 */
+.photo-toggle.is-private /* グレー + thumb左 */
+```
 
 ### Navigation
 
-- **モバイル（< md）:** 下部タブバー（固定）、4-5タブ
-- **デスクトップ（>= md）:** 左サイドバー（w-64）、折りたたみ可能
-- アクティブ状態: `--color-accent-light` 背景 + `--color-accent` テキスト
-- 先生用/保護者用でタブ項目が変わる（ロール別）
+- **サイドバー:** `.sidebar` — マスコット星 + 8ナビ項目 + 管理者セクション
+- **季節ストリップ:** `.season-strip` — 時間帯で絵文字切替 + 星の瞬きアニメ
+- **ムードストリップ:** `.main__mood` — 画面ごとの状況テキスト + 手書きマスコットコピー
 
-### Modals & Toasts
-
-- モーダル: `--shadow-lg`, radius `--radius-lg`, オーバーレイ rgba(0,0,0,0.4)
-- トースト: 右上固定、4秒自動消去、success/warning/danger色のアクセントバー
-- 入退場通知: フルスクリーン表示（児童名 + 入室/退室 + 大きなアイコン）
-
-### Tables
-
-- ヘッダー: `--color-bg` 背景, `--font-medium`
-- 行: 偶数行 `--color-bg`, 奇数行 `--color-bg-elev`
-- モバイル: カードリストに変換（テーブル非表示）
-
-### Empty states
-
-- 中央配置アイコン（muted色） + 説明テキスト + CTAボタン
-
-## 6. Iconography & imagery
-
-- **アイコン:** Lucide React (`lucide-react`)
-  - stroke-width: 1.75（デフォルトの2より少し細め = やさしい印象）
-  - サイズ: 16px(inline), 20px(nav/button), 24px(feature), 48px(empty state)
-
-- **写真スタイル:** 実写のみ（イラスト不使用）。16:9 or 4:3。
-- **プレースホルダー:** `--color-bg`背景 + Lucideアイコン（`ImageOff`）中央配置
-
-## 7. Motion
+## 7. Motion — Living Design
 
 ```css
---transition-fast:    150ms ease-out;  /* hover, focus */
---transition-normal:  250ms ease-out;  /* modal open, toast slide */
---transition-slow:    350ms ease-out;  /* page transition */
+/* ── Entrance animations ── */
+@keyframes cardIn       /* カード: fade-up + scale — 0.4s */
+@keyframes popIn        /* ポラロイド: bounce — 0.35s */
+@keyframes paperSlideIn /* 書類: 横スライド + 回転 — 0.35s */
+@keyframes fadeUp       /* タイトル: fade-up — 0.3s */
+
+/* ── Continuous ── */
+@keyframes gentleFloat  /* マスコット星: 上下浮遊 — 3s infinite */
+@keyframes twinkle      /* 季節ストリップ星: 明滅 — 2.5s infinite */
+
+/* ── Stagger ── */
+nth-child(1): 0.05s, (2): 0.10s, (3): 0.15s, (4): 0.20s
+
+/* ── Page transition ── */
+.page { opacity: 0; transition: opacity .15s ease-out }
+.page.active { opacity: 1 }
+
+/* ── Hover/Focus ── */
+cards: translateY(-2px) + shadow-md (cubic-bezier(.34,1.2,.64,1))
+polaroids: scale(1.04) + shadow lift
+material wrappers: shadow-md on hover
 ```
 
-- `prefers-reduced-motion: reduce` 時: すべてのtransitionを `0ms` に
-- 入退場記録時: 児童名の表示にフェードイン（250ms）。成功/失敗の色が3秒間維持
+**prefers-reduced-motion:** 連続アニメーション停止、入場アニメーション短縮
 
-## 8. Anti-slop rules
+## 8. Accessibility
+
+### Focus States
+
+```css
+:focus-visible {
+  outline: 2px solid var(--cr-orange);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(217,123,63,.15);
+}
+```
+
+**適用対象:** `.ann-card`, `.news-card`, `.doc-card`, `.cms-card`, `.photo-mgmt`, `.polaroid`, `.tab-bar__item`, `.folder-tab`, `.photo-toggle`
+
+### Semantic HTML
+
+- ポラロイド: `role="button"` + `tabindex="0"` + Enter/Space JS
+- タブバー: `<button type="button">` (native focus)
+- フォルダタブ: `<button type="button">` (native focus)
+- トグル: `<button>` + `aria-pressed` (状態連動)
+- ライトボックス: `role="dialog"` + `aria-modal="true"` + フォーカス管理
+
+### Contrast
+
+全セマンティックテキストはWCAG AA準拠（4.5:1以上）。バッジ・リンクすべて検証済み。
+
+## 9. Anti-slop Rules
 
 このプロダクトで **使わない** パターン：
 
-1. ❌ **紫〜ピンクのグラデーション** — AIデフォルト感が出る
-2. ❌ **Inter フォント** — AI生成の汎用感。Noto Sans JPを使用
-3. ❌ **中央揃えヒーロー + 3カード横並び** — ランディングページテンプレート感
+1. ❌ **紫〜ピンクのグラデーション** — AI汎用感
+2. ❌ **Inter / System UI のみ** — 3フォントシステム必須
+3. ❌ **フラットな白カード** — 必ず紙テクスチャ + プレスエッジ
 4. ❌ **グラスモーフィズム** — 視認性を損なう
-5. ❌ **過度な角丸（radius 16px以上）** — バブリーすぎる
-6. ❌ **全要素にドロップシャドウ** — 平面的で静かなデザインを維持
-7. ❌ **アニメーション過多** — 業務ツールとして落ち着いた動作
-8. ❌ **ダークモードUI** — v1はライトモードのみ
+5. ❌ **インラインスタイル** — CSSクラスシステムを使用
+6. ❌ **cursor:pointer on non-interactive** — 本物のbutton/a要素のみ
+7. ❌ **tabindex on container divs** — 内部コントロールにフォーカス
+8. ❌ **ダークモード** — v1はライトモードのみ
+9. ❌ **素材感のないops画面** — 全画面に物理メタファー必須

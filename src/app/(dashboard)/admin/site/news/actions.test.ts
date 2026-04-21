@@ -40,11 +40,49 @@ vi.mock("@/lib/supabase/server", () => ({
   ),
 }));
 
-import { createNews } from "./actions";
+import { createNews, deleteNews } from "./actions";
+
+describe("deleteNews", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("redirects non-admin users", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    await expect(deleteNews("news-1")).rejects.toThrow("NEXT_REDIRECT");
+    expect(mockRedirect).toHaveBeenCalledWith("/");
+  });
+
+  it("deletes news successfully", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const mockEq = vi.fn().mockResolvedValue({ error: null });
+    const mockDelete = vi.fn(() => ({ eq: mockEq }));
+    mockFrom.mockReturnValue({ delete: mockDelete });
+
+    const result = await deleteNews("news-1");
+    expect(result).toEqual({ success: true, message: "削除しました" });
+    expect(mockFrom).toHaveBeenCalledWith("site_news");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/news");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/site/news");
+  });
+
+  it("returns error on DB failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const mockEq = vi.fn().mockResolvedValue({ error: { message: "FK violation" } });
+    const mockDelete = vi.fn(() => ({ eq: mockEq }));
+    mockFrom.mockReturnValue({ delete: mockDelete });
+
+    const result = await deleteNews("news-1");
+    expect(result?.success).toBe(false);
+    expect(result?.message).toContain("FK violation");
+  });
+});
 
 describe("createNews", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Restore the chainable mock for createNews
+    mockFrom.mockImplementation(() => ({ insert: mockInsert }));
   });
 
   it("redirects non-admin users", async () => {

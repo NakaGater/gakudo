@@ -247,6 +247,155 @@ describe("sendAnnouncementNotification", () => {
     expect(mockSendNotification).not.toHaveBeenCalled();
     expect(mockEmailSend).not.toHaveBeenCalled();
   });
+
+  it("returns early on prefs error", async () => {
+    const prefsQuery = mockSupabaseQuery({
+      data: null,
+      error: { message: "DB connection failed" },
+    });
+
+    mockFrom.mockImplementation(() => prefsQuery);
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await sendAnnouncementNotification("ann-7", "エラー", "本文");
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+    expect(mockEmailSend).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Failed to fetch preferences"),
+      "DB connection failed",
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("skips push when VAPID keys are not configured", async () => {
+    delete process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    delete process.env.VAPID_PRIVATE_KEY;
+
+    const prefsQuery = mockSupabaseQuery({
+      data: [{ user_id: "user-v1", method: "push" }],
+      error: null,
+    });
+
+    mockFrom.mockImplementation(() => prefsQuery);
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await sendAnnouncementNotification("ann-v1", "VAPID欠落", "本文");
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("VAPID keys not configured"),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("skips email when RESEND_API_KEY is not configured", async () => {
+    delete process.env.RESEND_API_KEY;
+
+    const prefsQuery = mockSupabaseQuery({
+      data: [{ user_id: "user-e1", method: "email" }],
+      error: null,
+    });
+
+    mockFrom.mockImplementation(() => prefsQuery);
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await sendAnnouncementNotification("ann-e1", "Resend欠落", "本文");
+
+    expect(mockEmailSend).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("RESEND_API_KEY not configured"),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("handles push subscriptions fetch error", async () => {
+    const prefsQuery = mockSupabaseQuery({
+      data: [{ user_id: "user-s1", method: "push" }],
+      error: null,
+    });
+    const subsQuery = mockSupabaseQuery({
+      data: null,
+      error: { message: "subs fetch error" },
+    });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "notification_preferences") return prefsQuery;
+      if (table === "push_subscriptions") return subsQuery;
+      return mockSupabaseQuery({ data: [], error: null });
+    });
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await sendAnnouncementNotification("ann-s1", "SubsError", "本文");
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Failed to fetch push subscriptions"),
+      "subs fetch error",
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("handles profiles fetch error for email", async () => {
+    const prefsQuery = mockSupabaseQuery({
+      data: [{ user_id: "user-p1", method: "email" }],
+      error: null,
+    });
+    const profilesQuery = mockSupabaseQuery({
+      data: null,
+      error: { message: "profiles fetch error" },
+    });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "notification_preferences") return prefsQuery;
+      if (table === "profiles") return profilesQuery;
+      return mockSupabaseQuery({ data: [], error: null });
+    });
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await sendAnnouncementNotification("ann-p1", "ProfileError", "本文");
+
+    expect(mockEmailSend).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Failed to fetch profiles"),
+      "profiles fetch error",
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("truncates long body for push notification", async () => {
+    const longBody = "あ".repeat(200);
+    const prefsQuery = mockSupabaseQuery({
+      data: [{ user_id: "user-t1", method: "push" }],
+      error: null,
+    });
+    const subsQuery = mockSupabaseQuery({
+      data: [{
+        user_id: "user-t1",
+        subscription: {
+          endpoint: "https://push.example.com/t1",
+          keys: { p256dh: "pk", auth: "ak" },
+        },
+      }],
+      error: null,
+    });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "notification_preferences") return prefsQuery;
+      if (table === "push_subscriptions") return subsQuery;
+      return mockSupabaseQuery({ data: [], error: null });
+    });
+
+    mockSendNotification.mockResolvedValue({});
+
+    await sendAnnouncementNotification("ann-t1", "長文テスト", longBody);
+
+    const payload = JSON.parse(mockSendNotification.mock.calls[0][1]);
+    expect(payload.body.length).toBeLessThanOrEqual(101 + 1); // 100 chars + "…"
+    expect(payload.body).toContain("…");
+  });
 });
 
 describe("sendAttendanceNotification", () => {
@@ -358,6 +507,84 @@ describe("sendAttendanceNotification", () => {
     await expect(
       sendAttendanceNotification("child-3", "enter", "2024-01-15T06:00:00.000Z"),
     ).resolves.toBeUndefined();
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+    expect(mockEmailSend).not.toHaveBeenCalled();
+  });
+
+  it("handles child fetch error gracefully", async () => {
+    const childQuery = mockChainQuery({ data: null, error: { message: "child DB error" } });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await expect(
+      sendAttendanceNotification("child-err", "enter", "2024-01-15T06:00:00.000Z"),
+    ).resolves.toBeUndefined();
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Failed to fetch child"),
+      "child DB error",
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("handles links error gracefully", async () => {
+    const childQuery = mockChainQuery({ data: { name: "太郎" }, error: null });
+    const linksQuery = mockChainQuery({ data: null, error: { message: "links error" } });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      if (table === "child_parents") return linksQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    await expect(
+      sendAttendanceNotification("child-le", "exit", "2024-01-15T09:00:00.000Z"),
+    ).resolves.toBeUndefined();
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+  });
+
+  it("handles prefs error in attendance notification", async () => {
+    const childQuery = mockChainQuery({ data: { name: "太郎" }, error: null });
+    const linksQuery = mockChainQuery({ data: [{ parent_id: "p1" }], error: null });
+    const prefsQuery = mockChainQuery({ data: null, error: { message: "prefs error" } });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      if (table === "child_parents") return linksQuery;
+      if (table === "notification_preferences") return prefsQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    await expect(
+      sendAttendanceNotification("child-pe", "enter", "2024-01-15T06:00:00.000Z"),
+    ).resolves.toBeUndefined();
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+  });
+
+  it("skips when all prefs are off", async () => {
+    const childQuery = mockChainQuery({ data: { name: "太郎" }, error: null });
+    const linksQuery = mockChainQuery({ data: [{ parent_id: "p1" }], error: null });
+    const prefsQuery = mockChainQuery({
+      data: [{ user_id: "p1", method: "off" }],
+      error: null,
+    });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "children") return childQuery;
+      if (table === "child_parents") return linksQuery;
+      if (table === "notification_preferences") return prefsQuery;
+      return mockChainQuery({ data: [], error: null });
+    });
+
+    await sendAttendanceNotification("child-off", "enter", "2024-01-15T06:00:00.000Z");
 
     expect(mockSendNotification).not.toHaveBeenCalled();
     expect(mockEmailSend).not.toHaveBeenCalled();

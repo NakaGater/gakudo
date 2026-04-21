@@ -9,12 +9,15 @@ import {
 } from "./attendance-history-client";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mockRouterPush }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
+const mockRouterPush = vi.fn();
+
 afterEach(() => {
   cleanup();
+  mockRouterPush.mockClear();
 });
 
 const defaultChildren: ChildOption[] = [
@@ -106,6 +109,89 @@ describe("AttendanceHistoryClient", () => {
     expect(
       screen.getByRole("heading", { name: "入退室履歴" }),
     ).toBeInTheDocument();
+  });
+
+  it("shows staff column header when isStaff=true", () => {
+    renderHistory({
+      isStaff: true,
+      days: [
+        {
+          date: "2024-06-10",
+          pairs: [
+            {
+              enterTime: "2024-06-10T05:00:00Z",
+              exitTime: "2024-06-10T08:30:00Z",
+            },
+          ],
+        },
+      ],
+    });
+    // Staff mode shows 児童 column in table header
+    const { container } = render(
+      <AttendanceHistoryClient
+        days={[]}
+        children={defaultChildren}
+        startDate="2024-06-10"
+        endDate="2024-06-16"
+        selectedChildId=""
+        isStaff={true}
+      />,
+    );
+    const headers = container.querySelectorAll("th");
+    const headerTexts = Array.from(headers).map((h) => h.textContent);
+    expect(headerTexts).toContain("児童");
+    cleanup();
+  });
+
+  it("navigates on date filter change", async () => {
+    const { getByLabelText } = renderHistory();
+    const startInput = getByLabelText("開始日");
+    const { fireEvent } = await import("@testing-library/react");
+    fireEvent.change(startInput, { target: { value: "2024-06-12" } });
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      expect.stringContaining("start=2024-06-12"),
+    );
+  });
+
+  it("navigates on child filter change", async () => {
+    const { getByLabelText } = renderHistory();
+    const select = getByLabelText("児童");
+    const { fireEvent } = await import("@testing-library/react");
+    fireEvent.change(select, { target: { value: "c1" } });
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      expect.stringContaining("child=c1"),
+    );
+  });
+
+  it("deletes param when filter cleared", async () => {
+    const { getByLabelText } = renderHistory();
+    const select = getByLabelText("児童");
+    const { fireEvent } = await import("@testing-library/react");
+    fireEvent.change(select, { target: { value: "" } });
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      expect.not.stringContaining("child="),
+    );
+  });
+
+  it("shows 該当する履歴がありません when days is empty", () => {
+    renderHistory({ days: [] });
+    expect(screen.getByText("該当する履歴がありません")).toBeInTheDocument();
+  });
+
+  it("shows multiple pairs for same day", () => {
+    const days: DayRecord[] = [
+      {
+        date: "2024-06-10",
+        pairs: [
+          { enterTime: "2024-06-10T00:00:00Z", exitTime: "2024-06-10T03:00:00Z" },
+          { enterTime: "2024-06-10T05:00:00Z", exitTime: "2024-06-10T08:00:00Z" },
+        ],
+      },
+    ];
+    renderHistory({ days });
+    // Both pairs should render durations
+    const durations = screen.getAllByText("3時間0分");
+    expect(durations.length).toBeGreaterThanOrEqual(2);
   });
 });
 

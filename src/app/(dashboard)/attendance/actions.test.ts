@@ -36,7 +36,10 @@ const createChain = (table: string): Record<string, unknown> => {
   const handler = (): Record<string, unknown> =>
     new Proxy({} as Record<string, unknown>, {
       get: (_target, prop) => {
-        if (prop === "then") return undefined;
+        if (prop === "then") {
+          // Make proxy thenable so `await chain` dequeues
+          return (resolve: (v: unknown) => void) => resolve(dequeue(table));
+        }
         if (prop === "single") {
           return () => Promise.resolve(dequeue(table));
         }
@@ -225,12 +228,55 @@ describe("getTodayAttendanceStatus", () => {
 
   it("returns empty when no children exist", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    // children query returns via the chain's non-single terminal
-    // We need the proxy to handle the non-single case
-    // Since our proxy returns { data: null } for everything,
-    // the function checks !children || children.length === 0 → []
+    enqueue("children", { data: [], error: null });
     const result = await getTodayAttendanceStatus();
     expect(result).toEqual([]);
+  });
+
+  it("returns children with none status when no attendance records", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: [], error: null });
+
+    const result = await getTodayAttendanceStatus();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      childId: "c1",
+      name: "太郎",
+      grade: 1,
+      status: "none",
+      lastRecordedAt: null,
+    });
+  });
+
+  it("returns entered status when latest record is enter", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    enqueue("children", { data: [
+      { id: "c1", name: "太郎", grade: 1 },
+      { id: "c2", name: "花子", grade: 2 },
+    ], error: null });
+    enqueue("attendances", { data: [
+      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+      { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+    ], error: null });
+
+    const result = await getTodayAttendanceStatus();
+    expect(result).toHaveLength(2);
+    expect(result[0].status).toBe("entered");
+    expect(result[0].lastRecordedAt).toBe("2025-01-01T08:00:00Z");
+    expect(result[1].status).toBe("exited");
+    expect(result[1].lastRecordedAt).toBe("2025-01-01T17:00:00Z");
+  });
+
+  it("handles null attendances data gracefully", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: null, error: null });
+
+    const result = await getTodayAttendanceStatus();
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe("none");
   });
 });
 
@@ -248,7 +294,63 @@ describe("getDashboardAttendanceStatus", () => {
 
   it("returns empty when no children", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    enqueue("children", { data: [], error: null });
     const result = await getDashboardAttendanceStatus();
     expect(result).toEqual([]);
+  });
+
+  it("returns children with enter/exit times", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    enqueue("children", { data: [
+      { id: "c1", name: "太郎", grade: 1 },
+      { id: "c2", name: "花子", grade: 2 },
+    ], error: null });
+    // Records sorted ascending
+    enqueue("attendances", { data: [
+      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+      { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+      { child_id: "c1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+    ], error: null });
+
+    const result = await getDashboardAttendanceStatus();
+    expect(result).toHaveLength(2);
+    // c1: exited (latest is exit)
+    expect(result[0]).toMatchObject({
+      childId: "c1",
+      status: "exited",
+      enterTime: "2025-01-01T08:00:00Z",
+      exitTime: "2025-01-01T17:00:00Z",
+    });
+    // c2: entered (latest is enter)
+    expect(result[1]).toMatchObject({
+      childId: "c2",
+      status: "entered",
+      enterTime: "2025-01-01T08:30:00Z",
+      exitTime: null,
+    });
+  });
+
+  it("returns none status for children with no records", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: [], error: null });
+
+    const result = await getDashboardAttendanceStatus();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      status: "none",
+      enterTime: null,
+      exitTime: null,
+    });
+  });
+
+  it("handles null attendances gracefully", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: null, error: null });
+
+    const result = await getDashboardAttendanceStatus();
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe("none");
   });
 });

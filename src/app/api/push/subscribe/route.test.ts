@@ -105,6 +105,67 @@ describe('POST /api/push/subscribe', () => {
     })
   })
 
+  it('returns 400 for invalid JSON body', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-123' } },
+      error: null,
+    })
+
+    const req = new Request('http://localhost/api/push/subscribe', {
+      method: 'POST',
+      body: '{{not valid json',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 500 on select error', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-123' } },
+      error: null,
+    })
+
+    const mockEq2 = vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 })
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'push_subscriptions') {
+        return { select: mockSelect }
+      }
+      return {}
+    })
+
+    const res = await POST(makeRequest(validSubscription))
+    expect(res.status).toBe(500)
+    const json = await res.json()
+    expect(json.error).toContain('確認')
+  })
+
+  it('returns 500 on insert error', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-123' } },
+      error: null,
+    })
+
+    const mockEq2 = vi.fn().mockResolvedValue({ data: [], error: null })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 })
+    const mockInsert = vi.fn().mockResolvedValue({ error: { message: 'insert failed' } })
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'push_subscriptions') {
+        return { select: mockSelect, insert: mockInsert }
+      }
+      return {}
+    })
+
+    const res = await POST(makeRequest(validSubscription))
+    expect(res.status).toBe(500)
+    const json = await res.json()
+    expect(json.error).toContain('登録')
+  })
+
   it('returns 200 when subscription already exists', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-123' } },
@@ -143,6 +204,53 @@ describe('DELETE /api/push/subscribe', () => {
 
     const res = await DELETE(makeRequest(validSubscription, 'DELETE'))
     expect(res.status).toBe(401)
+  })
+
+  it('returns 400 for invalid JSON body', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-123' } },
+      error: null,
+    })
+
+    const req = new Request('http://localhost/api/push/subscribe', {
+      method: 'DELETE',
+      body: '{{bad',
+    })
+    const res = await DELETE(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 400 for invalid subscription', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-123' } },
+      error: null,
+    })
+
+    const res = await DELETE(makeRequest({ endpoint: '' }, 'DELETE'))
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 500 on delete error', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-123' } },
+      error: null,
+    })
+
+    const mockEq2 = vi.fn().mockResolvedValue({ error: { message: 'delete failed' } })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockDelete = vi.fn().mockReturnValue({ eq: mockEq1 })
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'push_subscriptions') {
+        return { delete: mockDelete }
+      }
+      return {}
+    })
+
+    const res = await DELETE(makeRequest(validSubscription, 'DELETE'))
+    expect(res.status).toBe(500)
+    const json = await res.json()
+    expect(json.error).toContain('削除')
   })
 
   it('returns 200 on successful deletion', async () => {
