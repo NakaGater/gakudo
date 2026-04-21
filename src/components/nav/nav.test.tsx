@@ -61,7 +61,8 @@ describe("Sidebar", () => {
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const links = screen.getAllByRole("link");
-    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(3);
+    // 3 nav items + 1 logo link = 4 links starting with "/"
+    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(4);
   });
 
   it("renders teacher nav items (6 links)", () => {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Sun } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "ホーム" },
@@ -16,12 +16,12 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/80">
+    <header className="sticky top-0 z-40 border-b-2 border-dashed border-page-edge bg-page/95 backdrop-blur supports-[backdrop-filter]:bg-page/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg text-fg">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white">
-            <Sun size={18} strokeWidth={1.75} />
+        {/* Logo with star mascot */}
+        <Link href="/" className="flex items-center gap-2.5 font-story font-bold text-lg text-ink">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-star border-2 border-star-gold shadow-[2px_2px_0_var(--star-gold)] text-lg">
+            ⭐
           </span>
           星ヶ丘こどもクラブ
         </Link>
@@ -32,14 +32,14 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-accent-light hover:text-accent"
+              className="rounded-lg px-3 py-2 text-sm font-bold font-story text-ink-mid transition-colors hover:bg-page-deep hover:text-cr-orange"
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/login"
-            className="ml-2 inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hv"
+            className="ml-2 inline-flex items-center rounded-lg bg-accent border-2 border-[#92400E] shadow-[0_3px_0_#92400E] px-4 py-2 text-sm font-bold font-story text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_0_#92400E] active:translate-y-0.5 active:shadow-[0_1px_0_#92400E]"
           >
             ログイン
           </Link>
@@ -48,7 +48,7 @@ export function Header() {
         {/* Mobile hamburger */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-fg-muted transition-colors hover:bg-accent-light hover:text-accent md:hidden"
+          className="inline-flex items-center justify-center rounded-lg p-2 text-ink-mid transition-colors hover:bg-page-deep hover:text-cr-orange md:hidden"
           aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
@@ -59,13 +59,13 @@ export function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-border bg-bg md:hidden">
+        <div className="border-t-2 border-dashed border-page-edge bg-page md:hidden">
           <nav className="mx-auto max-w-6xl space-y-1 px-4 py-3 sm:px-6" aria-label="モバイルメニュー">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="block rounded-md px-3 py-2 text-base font-medium text-fg-muted transition-colors hover:bg-accent-light hover:text-accent"
+                className="block rounded-lg px-3 py-2 text-base font-bold font-story text-ink-mid transition-colors hover:bg-page-deep hover:text-cr-orange"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
@@ -73,7 +73,7 @@ export function Header() {
             ))}
             <Link
               href="/login"
-              className="mt-2 block rounded-md bg-accent px-3 py-2 text-center text-base font-medium text-white transition-colors hover:bg-accent-hv"
+              className="mt-2 block rounded-lg bg-accent border-2 border-[#92400E] px-3 py-2 text-center text-base font-bold font-story text-white transition-colors hover:bg-accent-hv"
               onClick={() => setMenuOpen(false)}
             >
               ログイン

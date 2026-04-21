@@ -11,10 +11,12 @@ export default async function DashboardLayout({
   const user = await getUser();
 
   return (
-    <div data-user-role={user.role} className="min-h-screen">
+    <div data-user-role={user.role} className="min-h-screen bg-page-deep">
       <Sidebar user={user} />
       <main className="md:pl-64 pb-16 md:pb-0 min-h-screen">
-        {children}
+        <div className="mx-auto max-w-5xl p-4 md:p-6">
+          {children}
+        </div>
       </main>
       <MobileTabs user={user} />
     </div>

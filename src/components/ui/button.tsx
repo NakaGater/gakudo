@@ -2,12 +2,17 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const variantStyles = {
-  primary: "bg-accent text-white hover:bg-accent-hv",
-  secondary: "bg-bg-elev text-fg border border-border hover:bg-bg",
+  primary:
+    "bg-accent text-white border-2 border-[#92400E] shadow-[0_3px_0_#92400E] hover:shadow-[0_4px_0_#92400E] active:shadow-[0_1px_0_#92400E]",
+  secondary:
+    "bg-bg-elev text-fg border-2 border-border shadow-[0_2px_0_var(--page-edge)] hover:border-cr-orange hover:text-cr-orange",
   ghost: "bg-transparent text-accent hover:bg-accent-light",
-  destructive: "bg-danger text-white hover:opacity-90",
-  enter: "bg-enter text-white hover:opacity-90",
-  exit: "bg-exit text-white hover:opacity-90",
+  destructive:
+    "bg-danger text-white border-2 border-[#A83C32] shadow-[0_3px_0_#A83C32] hover:shadow-[0_4px_0_#A83C32] active:shadow-[0_1px_0_#A83C32]",
+  enter:
+    "bg-enter text-white border-2 border-[#1F5E3D] shadow-[0_3px_0_#1F5E3D] hover:shadow-[0_4px_0_#1F5E3D] active:shadow-[0_1px_0_#1F5E3D]",
+  exit:
+    "bg-exit text-white border-2 border-[#A83C32] shadow-[0_3px_0_#A83C32] hover:shadow-[0_4px_0_#A83C32] active:shadow-[0_1px_0_#A83C32]",
 } as const;
 
 const sizeStyles = {
@@ -68,8 +73,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center rounded-md font-medium transition-colors",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center rounded-lg font-story font-bold transition-all",
+          "hover:-translate-y-0.5 active:translate-y-0.5",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
           variantStyles[variant],
           sizeStyles[size],
           className,

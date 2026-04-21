@@ -53,6 +53,14 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; strokeWidth?
   QrCode, Megaphone, Camera, Receipt,
 };
 
+/* Crayon color per feature index */
+const CRAYON_COLORS = [
+  { bg: "bg-cr-green/10", text: "text-cr-green", border: "border-cr-green/30" },
+  { bg: "bg-cr-blue/10", text: "text-cr-blue", border: "border-cr-blue/30" },
+  { bg: "bg-cr-purple/10", text: "text-cr-purple", border: "border-cr-purple/30" },
+  { bg: "bg-cr-pink/10", text: "text-cr-pink", border: "border-cr-pink/30" },
+];
+
 export default async function HomePage() {
   let heroTitle = DEFAULT_HERO_TITLE;
   let heroText = DEFAULT_HERO_TEXT;
@@ -86,31 +94,36 @@ export default async function HomePage() {
   }
   return (
     <>
-      {/* Hero */}
-      <section className="bg-gradient-to-b from-accent-light/60 to-bg py-16 sm:py-24">
+      {/* Hero — storybook gradient */}
+      <section className="bg-gradient-to-b from-page-deep via-page to-page py-16 sm:py-24 relative overflow-hidden">
+        {/* Ambient stars */}
+        <span className="star-ambient absolute top-8 right-12 text-4xl pointer-events-none select-none" aria-hidden="true">✦</span>
+        <span className="star-ambient absolute top-24 left-8 text-2xl pointer-events-none select-none" style={{ animationDelay: "2s" }} aria-hidden="true">✦</span>
+        <span className="star-ambient absolute bottom-16 right-32 text-xl pointer-events-none select-none" style={{ animationDelay: "4s" }} aria-hidden="true">✦</span>
+
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid items-center gap-10 lg:grid-cols-2">
-            <div>
-              <p className="mb-3 text-sm font-semibold tracking-wide text-accent">
-                父母運営型 学童保育
+            <div className="animate-slide-in">
+              <p className="mb-3 text-sm font-hand text-cr-orange tracking-wide">
+                ✎ 父母運営型 学童保育
               </p>
-              <h1 className="text-3xl font-bold leading-tight text-fg sm:text-4xl lg:text-5xl whitespace-pre-wrap">
+              <h1 className="text-3xl font-story font-black leading-tight text-ink sm:text-4xl lg:text-5xl whitespace-pre-wrap">
                 {heroTitle}
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-fg-muted sm:text-lg whitespace-pre-wrap">
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-ink-mid sm:text-lg whitespace-pre-wrap">
                 {heroText}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/about"
-                  className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hv"
+                  className="inline-flex items-center gap-2 rounded-lg bg-accent border-2 border-[#92400E] shadow-[0_3px_0_#92400E] px-5 py-2.5 text-sm font-bold font-story text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_0_#92400E] active:translate-y-0.5 active:shadow-[0_1px_0_#92400E]"
                 >
                   施設について詳しく
                   <ArrowRight size={16} />
                 </Link>
                 <Link
                   href="/access"
-                  className="inline-flex items-center gap-2 rounded-md border border-border bg-bg-elev px-5 py-2.5 text-sm font-medium text-fg transition-colors hover:bg-accent-light"
+                  className="inline-flex items-center gap-2 rounded-lg border-2 border-page-edge bg-bg-elev shadow-[0_2px_0_var(--page-edge)] px-5 py-2.5 text-sm font-bold font-story text-ink transition-all hover:border-cr-orange hover:text-cr-orange hover:-translate-y-0.5"
                 >
                   <MapPin size={16} />
                   見学のお申し込み
@@ -118,11 +131,12 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Hero image placeholder */}
-            <div className="flex items-center justify-center rounded-2xl bg-accent-light/50 p-12 lg:aspect-[4/3]">
-              <div className="text-center text-accent/60">
-                <Camera size={48} strokeWidth={1.5} className="mx-auto mb-3" />
-                <p className="text-sm font-medium">
+            {/* Hero illustration — craft card with gradient landscape */}
+            <div className="animate-pop-in flex items-center justify-center rounded-2xl bg-gradient-to-b from-[#FFF9E6] via-[#FDEBD0] to-[#D5F5E3] p-12 lg:aspect-[4/3] border-2 border-page-edge shadow-[4px_4px_0_var(--page-edge)] relative overflow-hidden paper-grain">
+              <div className="text-center text-ink-mid relative z-10">
+                <div className="mx-auto mb-4 text-5xl animate-float">⭐</div>
+                <Camera size={36} strokeWidth={1.5} className="mx-auto mb-3 text-cr-green" />
+                <p className="text-sm font-bold font-story">
                   子どもたちの笑顔があふれる
                   <br />
                   放課後の風景
@@ -133,32 +147,33 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-bg py-16 sm:py-24">
+      {/* Features — crayon-colored cards */}
+      <section className="bg-page py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-center text-2xl font-bold text-fg sm:text-3xl">
+          <h2 className="text-center text-2xl font-story font-black text-ink sm:text-3xl">
             {featuresHeading}
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-fg-muted">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-ink-mid">
             {featuresSubtitle}
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            {featureItems.map((feature) => {
+            {featureItems.map((feature, i) => {
               const IconComponent = ICON_MAP[feature.icon];
+              const crayon = CRAYON_COLORS[i % CRAYON_COLORS.length];
               return (
                 <div
                   key={feature.title}
-                  className="rounded-lg border border-border bg-bg-elev p-6 shadow-sm transition-shadow hover:shadow-md"
+                  className={`animate-card-in stagger-${i + 1} rounded-xl border-2 ${crayon.border} bg-bg-elev p-6 shadow-sm hover-lift paper-grain`}
                 >
-                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent-light text-accent">
+                  <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${crayon.bg} ${crayon.text}`}>
                     {IconComponent ? (
                       <IconComponent size={22} strokeWidth={1.75} />
                     ) : (
                       <span className="text-lg">{feature.icon}</span>
                     )}
                   </div>
-                  <h3 className="text-base font-bold text-fg">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-fg-muted">
+                  <h3 className="text-base font-bold font-story text-ink">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-mid">
                     {feature.description}
                   </p>
                 </div>
@@ -168,13 +183,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-accent-light/40 py-16 sm:py-20">
+      {/* CTA — warm accent */}
+      <section className="bg-gradient-to-b from-page to-page-deep py-16 sm:py-20 relative">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <h2 className="text-2xl font-bold text-fg sm:text-3xl">
+          <div className="mx-auto mb-4 text-3xl">🏠</div>
+          <h2 className="text-2xl font-story font-black text-ink sm:text-3xl">
             見学・お問い合わせ
           </h2>
-          <p className="mt-3 text-fg-muted">
+          <p className="mt-3 text-ink-mid">
             入所をご検討の方は、お気軽にお電話またはお問い合わせください。
             <br />
             施設の見学も随時受け付けております。
@@ -182,12 +198,12 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/access"
-              className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hv"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent border-2 border-[#92400E] shadow-[0_3px_0_#92400E] px-6 py-3 text-sm font-bold font-story text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_0_#92400E] active:translate-y-0.5 active:shadow-[0_1px_0_#92400E]"
             >
               <MapPin size={16} />
               アクセス・お問い合わせ
             </Link>
-            <span className="text-sm text-fg-muted">
+            <span className="text-sm text-ink-light font-hand">
               TEL: 03-1234-5678（平日 9:00〜18:00）
             </span>
           </div>

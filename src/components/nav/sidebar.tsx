@@ -32,12 +32,15 @@ export function Sidebar({ user }: SidebarProps) {
   }
 
   return (
-    <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-bg-elev border-r border-border">
-      {/* Facility name */}
-      <div className="flex items-center h-16 px-6 border-b border-border">
-        <span className="text-lg font-bold text-fg truncate">
-          星ヶ丘こどもクラブ
-        </span>
+    <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-page border-r-2 border-dashed border-page-edge">
+      {/* Facility name with star mascot */}
+      <div className="flex items-center h-16 px-5 border-b-2 border-dashed border-page-edge">
+        <Link href="/attendance/dashboard" className="flex items-center gap-2.5 font-story font-bold text-base text-ink no-underline">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-star border-2 border-star-gold shadow-[2px_2px_0_var(--star-gold)] text-lg">
+            ⭐
+          </span>
+          <span>星ヶ丘こどもクラブ</span>
+        </Link>
       </div>
 
       {/* Nav items */}
@@ -50,10 +53,10 @@ export function Sidebar({ user }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold font-story transition-all",
                 active
-                  ? "bg-accent-light text-accent"
-                  : "text-fg-muted hover:bg-bg hover:text-fg",
+                  ? "bg-accent-light text-accent shadow-sm border border-page-edge"
+                  : "text-ink-mid hover:bg-page-deep hover:text-ink",
               )}
             >
               <Icon size={20} strokeWidth={1.75} />
@@ -64,15 +67,15 @@ export function Sidebar({ user }: SidebarProps) {
       </nav>
 
       {/* User info + logout */}
-      <div className="border-t border-border px-4 py-3">
+      <div className="border-t-2 border-dashed border-page-edge px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-fg truncate">{user.name}</p>
-            <p className="text-xs text-fg-muted truncate">{user.role}</p>
+            <p className="text-sm font-bold font-story text-ink truncate">{user.name}</p>
+            <p className="text-xs text-ink-light truncate">{user.role}</p>
           </div>
           <button
             onClick={handleLogout}
-            className="p-2 rounded-md text-fg-muted hover:text-danger hover:bg-bg transition-colors"
+            className="p-2 rounded-lg text-ink-light hover:text-cr-red hover:bg-absent-bg transition-colors"
             aria-label="ログアウト"
           >
             <LogOut size={18} strokeWidth={1.75} />

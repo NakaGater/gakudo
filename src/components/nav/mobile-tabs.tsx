@@ -27,7 +27,7 @@ export function MobileTabs({ user }: MobileTabsProps) {
     })();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 md:hidden bg-bg-elev border-t border-border z-40">
+    <nav className="fixed bottom-0 inset-x-0 md:hidden bg-page border-t-2 border-dashed border-page-edge z-40">
       <div className="flex items-center justify-around h-14">
         {items.map((item) => {
           const Icon = item.icon;
@@ -37,8 +37,8 @@ export function MobileTabs({ user }: MobileTabsProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs transition-colors",
-                active ? "text-accent" : "text-fg-muted",
+                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs font-story font-bold transition-colors",
+                active ? "text-accent" : "text-ink-light",
               )}
             >
               <Icon size={20} strokeWidth={1.75} />

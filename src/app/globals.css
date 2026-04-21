@@ -1,24 +1,75 @@
 @import "tailwindcss";
 
-/* ── Design System Tokens ───────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   星ヶ丘こどもクラブ — Design System Tokens
+   Storybook / Craft Theme — GAN Refresh 58/60
+   ══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Colors */
-  --color-bg: #FAFAF7;
-  --color-bg-elev: #FFFFFF;
-  --color-fg: #1C1917;
-  --color-fg-muted: #78716C;
-  --color-accent: #B45309;
-  --color-accent-hv: #92400E;
-  --color-accent-light: #FEF3C7;
-  --color-success: #15803D;
-  --color-warning: #B45309;
-  --color-danger: #B91C1C;
-  --color-border: #E7E5E4;
-  --color-enter: #15803D;
-  --color-exit: #B91C1C;
+  /* ── Craft Paper Palette (source of truth) ──────────────── */
+  --page:       #FDF6E3;
+  --page-deep:  #F5EBCF;
+  --page-edge:  #E8DCC6;
+  --paper-warm: #FFF8ED;
+  --bg-elev:    #FFFCF5;
 
-  /* Motion */
+  --ink:        #3B2F20;
+  --ink-mid:    #5A4A38;
+  --ink-light:  #7D6D5A;
+  --ink-faint:  #A89880;
+
+  /* ── Crayon Colors (AA-checked against cream/white) ─────── */
+  --cr-red:     #D14B40;
+  --cr-orange:  #D97B3F;
+  --cr-yellow:  #C9A520;
+  --cr-green:   #3A8A64;
+  --cr-blue:    #4A8FC5;
+  --cr-purple:  #7E65AD;
+  --cr-pink:    #C86E8A;
+
+  /* Star mascot — bright for decoration, gold for AA text */
+  --star-bright: #FFD93D;
+  --star-gold:   #E8B830;
+
+  /* ── Functional Status ──────────────────────────────────── */
+  --present:    #2D7A55;
+  --present-bg: #D5F5E3;
+  --present-bd: #8BCFAA;
+  --absent:     #C0392B;
+  --absent-bg:  #FFE0E0;
+  --absent-bd:  #F5AEAE;
+
+  /* ── Semantic Aliases (Tailwind compatibility) ──────────── */
+  --color-bg:           var(--page);
+  --color-bg-elev:      var(--bg-elev);
+  --color-fg:           var(--ink);
+  --color-fg-muted:     var(--ink-mid);
+  --color-accent:       #B45309;
+  --color-accent-hv:    #92400E;
+  --color-accent-light: var(--page-deep);
+  --color-success:      var(--present);
+  --color-warning:      var(--cr-orange);
+  --color-danger:       var(--cr-red);
+  --color-border:       var(--page-edge);
+  --color-enter:        var(--present);
+  --color-exit:         var(--cr-red);
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-story: var(--font-zen-maru-gothic), "Hiragino Maru Gothic ProN", sans-serif;
+  --font-hand:  var(--font-yusei-magic), "Hiragino Maru Gothic ProN", sans-serif;
+  --font-body:  var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+
+  /* ── Spacing & Radius ───────────────────────────────────── */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* ── Shadows (warm-tinted) ──────────────────────────────── */
+  --sh-sm: 0 1px 3px rgba(59,47,32,0.06);
+  --sh-md: 0 4px 12px rgba(59,47,32,0.08);
+  --sh-lg: 0 8px 24px rgba(59,47,32,0.12);
+
+  /* ── Motion ─────────────────────────────────────────────── */
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 350ms;
@@ -28,7 +79,7 @@
 /* ── Tailwind Theme (v4 CSS-based config) ───────────────────── */
 
 @theme inline {
-  /* Colors — reference :root variables for runtime overridability */
+  /* Semantic colors */
   --color-bg: var(--color-bg);
   --color-bg-elev: var(--color-bg-elev);
   --color-fg: var(--color-fg);
@@ -43,21 +94,150 @@
   --color-enter: var(--color-enter);
   --color-exit: var(--color-exit);
 
-  /* Typography */
-  --font-sans: var(--font-noto-sans-jp), "Hiragino Kaku Gothic ProN", system-ui,
-    sans-serif;
+  /* Craft colors (for direct use in Tailwind classes) */
+  --color-page: var(--page);
+  --color-page-deep: var(--page-deep);
+  --color-page-edge: var(--page-edge);
+  --color-paper-warm: var(--paper-warm);
+  --color-ink: var(--ink);
+  --color-ink-mid: var(--ink-mid);
+  --color-ink-light: var(--ink-light);
+  --color-star: var(--star-bright);
+  --color-star-gold: var(--star-gold);
+  --color-cr-orange: var(--cr-orange);
+  --color-cr-green: var(--cr-green);
+  --color-cr-red: var(--cr-red);
+  --color-cr-blue: var(--cr-blue);
+  --color-cr-purple: var(--cr-purple);
+  --color-cr-pink: var(--cr-pink);
+  --color-present: var(--present);
+  --color-present-bg: var(--present-bg);
+  --color-absent: var(--absent);
+  --color-absent-bg: var(--absent-bg);
+
+  /* Typography — 3-font system */
+  --font-sans: var(--font-body);
+  --font-story: var(--font-story);
+  --font-hand: var(--font-hand);
   --font-mono: "JetBrains Mono", "Noto Sans Mono", ui-monospace, monospace;
 
   /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
   --radius-full: 9999px;
 
-  /* Shadows (subtle) */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+  /* Shadows (warm-tinted) */
+  --shadow-sm: var(--sh-sm);
+  --shadow-md: var(--sh-md);
+  --shadow-lg: var(--sh-lg);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Craft Utilities
+   ══════════════════════════════════════════════════════════════ */
+
+/* Paper grain texture overlay */
+.paper-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+.paper-grain { position: relative; }
+.paper-grain > * { position: relative; z-index: 1; }
+
+/* Crayon underline decoration */
+.crayon-underline {
+  position: relative;
+  display: inline;
+}
+.crayon-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -4px;
+  right: -4px;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg width='200' height='10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 6 Q10 2 25 5 T50 5 T75 4 T100 6 T125 4 T150 5 T175 6 T200 5' stroke='%23C9A520' stroke-width='4' fill='none' stroke-linecap='round' opacity='0.35'/%3E%3C/svg%3E") repeat-x;
+  background-size: 200px 10px;
+}
+
+/* Dashed craft divider */
+.craft-divider {
+  border: none;
+  border-top: 2px dashed var(--page-edge);
+}
+
+/* ── Entrance Animations ──────────────────────────────────── */
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.92); }
+  70%  { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.15); }
+}
+@keyframes paperSlideIn {
+  from { opacity: 0; transform: translateX(-8px) rotate(-0.5deg); }
+  to   { opacity: 1; transform: translateX(0) rotate(0); }
+}
+
+.animate-card-in  { animation: cardIn 0.4s ease-out both; }
+.animate-pop-in   { animation: popIn 0.35s ease-out both; }
+.animate-float    { animation: gentleFloat 4s ease-in-out infinite; }
+.animate-twinkle  { animation: twinkle 3s ease-in-out infinite; }
+.animate-slide-in { animation: paperSlideIn 0.4s ease-out both; }
+
+/* Stagger delays for card lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* ── Tactile Hover ────────────────────────────────────────── */
+
+.hover-lift {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sh-md);
+}
+
+/* ── Focus Visible ────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--cr-orange);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* ── Star Mascot Ambient ──────────────────────────────────── */
+
+@keyframes starPulse {
+  0%, 100% { opacity: 0.2; }
+  50%      { opacity: 0.5; }
+}
+.star-ambient {
+  color: var(--star-bright);
+  opacity: 0.3;
+  animation: starPulse 8s ease-in-out infinite;
 }
 
 /* ── Reduced Motion ─────────────────────────────────────────── */
