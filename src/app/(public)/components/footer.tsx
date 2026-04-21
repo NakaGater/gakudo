@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="relative text-white/55" style={{
       backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence baseFrequency='0.5' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.06'/%3E%3C/svg%3E"), linear-gradient(180deg, #3B2F20 0%, #2A2018 100%)`
     }}>
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-10">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-10">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr]">
           {/* Facility info */}
           <div>

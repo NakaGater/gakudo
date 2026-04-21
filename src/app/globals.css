@@ -247,7 +247,6 @@
 .book-page {
   background: var(--page);
   max-width: 1120px;
-  min-height: calc(100vh - 80px);
   position: relative;
   box-shadow:
     0 2px 4px rgba(59,47,32,0.08),
