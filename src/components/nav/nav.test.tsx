@@ -23,12 +23,10 @@ afterEach(() => {
 
 // ----- getNavItems unit tests -----
 describe("getNavItems", () => {
-  it("returns 5 items for parent role", () => {
+  it("returns 3 items for parent role", () => {
     const items = getNavItems("parent");
-    expect(items).toHaveLength(5);
+    expect(items).toHaveLength(3);
     expect(items.map((i) => i.label)).toEqual([
-      "ホーム",
-      "入退場",
       "連絡",
       "写真",
       "請求",
@@ -58,13 +56,12 @@ describe("Sidebar", () => {
     Sidebar = mod.Sidebar;
   });
 
-  it("renders parent nav items (5 links)", () => {
+  it("renders parent nav items (3 links)", () => {
     render(
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const links = screen.getAllByRole("link");
-    // 5 nav items
-    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(5);
+    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(3);
   });
 
   it("renders teacher nav items (6 links)", () => {
@@ -98,22 +95,22 @@ describe("Sidebar", () => {
   });
 
   it("applies active styling to current path", () => {
-    mockPathname.mockReturnValue("/attendance/dashboard");
+    mockPathname.mockReturnValue("/announcements");
     render(
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
-    const homeLink = screen.getByRole("link", { name: /ホーム/ });
-    expect(homeLink.className).toContain("bg-accent-light");
-    expect(homeLink.className).toContain("text-accent");
+    const announcementsLink = screen.getByRole("link", { name: /連絡/ });
+    expect(announcementsLink.className).toContain("bg-accent-light");
+    expect(announcementsLink.className).toContain("text-accent");
   });
 
   it("does not apply active styling to non-current paths", () => {
-    mockPathname.mockReturnValue("/attendance/dashboard");
+    mockPathname.mockReturnValue("/announcements");
     render(
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
-    const attendanceLink = screen.getByRole("link", { name: /入退場/ });
-    expect(attendanceLink.className).not.toContain("bg-accent-light");
+    const photosLink = screen.getByRole("link", { name: /写真/ });
+    expect(photosLink.className).not.toContain("bg-accent-light");
   });
 });
 
@@ -126,12 +123,12 @@ describe("MobileTabs", () => {
     MobileTabs = mod.MobileTabs;
   });
 
-  it("renders max 5 tab items for parent", () => {
+  it("renders max 3 tab items for parent", () => {
     render(
       <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(5);
+    expect(links).toHaveLength(3);
   });
 
   it("renders max 5 tab items for admin (subset)", () => {
@@ -143,11 +140,11 @@ describe("MobileTabs", () => {
   });
 
   it("applies active styling to current tab", () => {
-    mockPathname.mockReturnValue("/attendance/dashboard");
+    mockPathname.mockReturnValue("/announcements");
     render(
       <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
-    const homeLink = screen.getByRole("link", { name: /ホーム/ });
-    expect(homeLink.className).toContain("text-accent");
+    const announcementsLink = screen.getByRole("link", { name: /連絡/ });
+    expect(announcementsLink.className).toContain("text-accent");
   });
 });
