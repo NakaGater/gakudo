@@ -2,7 +2,8 @@
 
 import { useActionState, useRef, useState, useCallback, type DragEvent } from "react";
 import { Button, Input } from "@/components/ui";
-import { uploadDocument, type ActionState } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
+import { uploadDocument } from "./actions";
 
 const CATEGORIES = ["お便り", "スケジュール", "書類", "その他"] as const;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

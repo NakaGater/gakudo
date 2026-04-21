@@ -6,17 +6,9 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import type { ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
+import type { BillingRule } from "./types";
 
-export type { ActionState as BillingRuleActionState };
-
-export type BillingRule = {
-  id: string;
-  regular_end_time: string;
-  rate_per_unit: number;
-  unit_minutes: number;
-  effective_from: string;
-  created_at: string;
-};
+type FieldErrors = Record<string, string>;
 
 export async function getActiveBillingRule(): Promise<BillingRule | null> {
   const user = await getUser();
@@ -49,9 +41,9 @@ export async function getBillingRules(): Promise<BillingRule[]> {
 }
 
 export async function createBillingRule(
-  _prev: BillingRuleActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<BillingRuleActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };

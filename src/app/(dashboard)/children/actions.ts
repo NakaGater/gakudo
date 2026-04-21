@@ -5,12 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { customAlphabet } from "nanoid";
-import type { ActionState as BaseActionState } from "@/lib/actions/types";
 import { QR_CODE, ERROR_MESSAGES } from "@/config/constants";
+import type { ActionState } from "./types";
 
 const nanoid = customAlphabet(QR_CODE.ALPHABET, QR_CODE.LENGTH);
-
-export type ActionState = NonNullable<BaseActionState> & { childId?: string } | null;
 
 type ValidationOk = { ok: true; name: string; grade: number };
 type ValidationErr = { ok: false; error: NonNullable<ActionState> };

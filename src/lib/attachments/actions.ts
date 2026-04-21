@@ -35,7 +35,7 @@ export async function uploadAttachment(
   if (file.size > MAX_FILE_SIZE) {
     return { success: false, message: "ファイルサイズは10MB以下にしてください" };
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
+  if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
     return { success: false, message: "PDF または画像ファイルを選択してください" };
   }
 

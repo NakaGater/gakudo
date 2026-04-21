@@ -34,6 +34,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       children: {
         Row: {
@@ -63,6 +64,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       child_parents: {
         Row: {
@@ -77,6 +79,22 @@ export type Database = {
           child_id?: string
           parent_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "child_parents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_parents_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       attendances: {
         Row: {
@@ -103,6 +121,7 @@ export type Database = {
           recorded_at?: string
           recorded_by?: string | null
         }
+        Relationships: []
       }
       announcements: {
         Row: {
@@ -126,6 +145,7 @@ export type Database = {
           posted_by?: string
           created_at?: string
         }
+        Relationships: []
       }
       announcement_reads: {
         Row: {
@@ -143,6 +163,7 @@ export type Database = {
           user_id?: string
           read_at?: string
         }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -175,6 +196,7 @@ export type Database = {
           uploaded_by?: string
           created_at?: string
         }
+        Relationships: []
       }
       documents: {
         Row: {
@@ -201,6 +223,7 @@ export type Database = {
           uploaded_by?: string
           created_at?: string
         }
+        Relationships: []
       }
       billing_rules: {
         Row: {
@@ -230,6 +253,7 @@ export type Database = {
           created_by?: string
           created_at?: string
         }
+        Relationships: []
       }
       monthly_bills: {
         Row: {
@@ -265,6 +289,15 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_bills_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       site_pages: {
         Row: {
@@ -294,6 +327,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
         }
+        Relationships: []
       }
       site_news: {
         Row: {
@@ -317,6 +351,7 @@ export type Database = {
           published_at?: string
           created_by?: string | null
         }
+        Relationships: []
       }
       attachments: {
         Row: {
@@ -352,6 +387,7 @@ export type Database = {
           uploaded_by?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       notification_preferences: {
         Row: {
@@ -366,6 +402,7 @@ export type Database = {
           user_id?: string
           method?: 'push' | 'email' | 'both' | 'off'
         }
+        Relationships: []
       }
       push_subscriptions: {
         Row: {
@@ -386,6 +423,7 @@ export type Database = {
           subscription?: Json
           created_at?: string
         }
+        Relationships: []
       }
     }
     Views: {

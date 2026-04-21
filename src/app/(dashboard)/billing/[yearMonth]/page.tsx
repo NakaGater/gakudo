@@ -6,7 +6,7 @@ import { isStaff } from "@/lib/auth/roles";
 import { Card, CardContent, CardHeader, Badge } from "@/components/ui";
 import { ConfirmButton } from "./confirm-button";
 import { CalculateSingleButton } from "./calculate-single-button";
-import type { BillingRule } from "../actions";
+import type { BillingRule } from "../types";
 
 type AttendanceRow = {
   type: "enter" | "exit";

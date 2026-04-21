@@ -4,7 +4,8 @@ import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
 import { FileUploader } from "@/components/attachments/file-uploader";
-import { createAnnouncement, type ActionState } from "../actions";
+import type { ActionState } from "@/lib/actions/types";
+import { createAnnouncement } from "../actions";
 
 type FileInfo = { file: File };
 

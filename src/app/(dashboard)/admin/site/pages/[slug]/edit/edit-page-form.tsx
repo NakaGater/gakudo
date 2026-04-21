@@ -2,7 +2,8 @@
 
 import { useActionState, useState, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import { updateSitePage, type ActionState } from "../../../actions";
+import type { ActionState } from "@/lib/actions/types";
+import { updateSitePage } from "../../../actions";
 import { cn } from "@/lib/utils";
 
 type ScheduleItem = { time: string; label: string; emoji: string };

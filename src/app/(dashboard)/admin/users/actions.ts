@@ -5,8 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";
 import type { ActionState } from "@/lib/actions/types";
 
-export type { ActionState };
-
 const VALID_ROLES = ["parent", "teacher", "admin"] as const;
 type Role = (typeof VALID_ROLES)[number];
 
@@ -52,7 +50,7 @@ export async function inviteUser(
     id: inviteData.user.id,
     email: email.trim(),
     name: name.trim(),
-    role,
+    role: role as Role,
   });
 
   if (profileError) {
@@ -97,7 +95,7 @@ export async function updateUser(
   const adminClient = createAdminClient();
 
   const { error: profileError } = await adminClient.from("profiles")
-    .update({ name: name.trim(), role })
+    .update({ name: name.trim(), role: role as Role })
     .eq("id", targetId);
 
   if (profileError) {

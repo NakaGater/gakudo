@@ -2,7 +2,8 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Button, Input } from "@/components/ui";
-import { inviteUser, type ActionState } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
+import { inviteUser } from "./actions";
 
 const ROLE_OPTIONS = [
   { value: "parent", label: "保護者" },

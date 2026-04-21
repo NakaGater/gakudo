@@ -3,7 +3,8 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
-import { createChild, type ActionState } from "../actions";
+import type { ActionState } from "../types";
+import { createChild } from "../actions";
 
 const grades = [1, 2, 3, 4, 5, 6] as const;
 

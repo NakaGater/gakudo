@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { BillingRule } from "@/app/(dashboard)/billing/actions";
+import type { BillingRule } from "@/app/(dashboard)/billing/types";
 
 export type BillCalculationResult = {
   totalExtendedMinutes: number;

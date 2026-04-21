@@ -10,8 +10,6 @@ import { uploadAttachment } from "@/lib/attachments/actions";
 import type { ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 
-export type { ActionState };
-
 export async function createAnnouncement(
   _prev: ActionState,
   formData: FormData,

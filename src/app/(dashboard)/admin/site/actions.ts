@@ -7,8 +7,6 @@ import { getUser } from "@/lib/auth/get-user";
 import type { Database, Json } from "@/lib/supabase/types";
 import type { ActionState } from "@/lib/actions/types";
 
-export type { ActionState };
-
 type SitePageUpdate = Database["public"]["Tables"]["site_pages"]["Update"];
 
 export async function updateSitePage(
@@ -46,8 +44,8 @@ export async function updateSitePage(
     metadata: metadata as unknown as Json,
     updated_by: user.id,
   };
-  // Supabase PostgREST builder .update() resolves to `never` with TS 5.9
   const { error } = await supabase.from("site_pages")
+    // @ts-ignore -- Supabase PostgREST resolves update param to `never` under TS 5.9
     .update(updateData)
     .eq("slug", slug);
 

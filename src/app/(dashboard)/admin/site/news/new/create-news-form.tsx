@@ -3,7 +3,8 @@
 import { useActionState, useRef, useState } from "react";
 import { Button, Input } from "@/components/ui";
 import { FileUploader } from "@/components/attachments/file-uploader";
-import { createNews, type ActionState } from "../actions";
+import type { ActionState } from "@/lib/actions/types";
+import { createNews } from "../actions";
 import { cn } from "@/lib/utils";
 
 type FileInfo = { file: File };

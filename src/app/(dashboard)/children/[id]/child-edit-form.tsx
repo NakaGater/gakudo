@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { Button, Input } from "@/components/ui";
-import { updateChild, type ActionState } from "../actions";
+import type { ActionState } from "../types";
+import { updateChild } from "../actions";
 
 const grades = [1, 2, 3, 4, 5, 6] as const;
 

@@ -5,7 +5,8 @@ import { type AuthUser } from "@/lib/auth/get-user";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { updateProfile, type ActionState } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
+import { updateProfile } from "./actions";
 
 const roleLabels: Record<AuthUser["role"], string> = {
   parent: "保護者",

@@ -2,11 +2,12 @@
 
 import { useActionState } from "react";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
-import { createBillingRule, type BillingRuleActionState } from "../actions";
+import type { ActionState } from "@/lib/actions/types";
+import { createBillingRule } from "../actions";
 
 export function BillingRuleForm({ onClose }: { onClose?: () => void }) {
   const [state, formAction, isPending] = useActionState<
-    BillingRuleActionState,
+    ActionState,
     FormData
   >(createBillingRule, null);
 

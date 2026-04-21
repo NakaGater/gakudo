@@ -3,7 +3,8 @@
 import { useState, useCallback, useActionState, useEffect } from "react";
 import { Button } from "@/components/ui";
 import { InviteForm } from "./invite-form";
-import { updateUser, deleteUser, type ActionState } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
+import { updateUser, deleteUser } from "./actions";
 import { Pencil, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import { Button, Input } from "@/components/ui";
 import { compressPhoto } from "@/lib/photos/compress";
-import { uploadPhoto, type ActionState } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
+import { uploadPhoto } from "./actions";
 
 export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
   const [previews, setPreviews] = useState<string[]>([]);

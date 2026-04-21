@@ -7,8 +7,6 @@ import { isStaff } from "@/lib/auth/roles";
 import type { ActionState } from "@/lib/actions/types";
 import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 
-export type { ActionState };
-
 const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
 
 const MAX_FILE_SIZE = FILE_LIMITS.MAX_SIZE_BYTES;
@@ -41,7 +39,7 @@ export async function uploadDocument(
     fieldErrors.file = "ファイルを選択してください";
   } else if (file.size > MAX_FILE_SIZE) {
     fieldErrors.file = "ファイルサイズは10MB以下にしてください";
-  } else if (!ALLOWED_TYPES.includes(file.type)) {
+  } else if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
     fieldErrors.file = "PDF または画像ファイルを選択してください";
   }
 

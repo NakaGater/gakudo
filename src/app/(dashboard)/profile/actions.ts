@@ -5,8 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import type { ActionState } from "@/lib/actions/types";
 
-export type { ActionState };
-
 export async function updateProfile(
   _prev: ActionState,
   formData: FormData,

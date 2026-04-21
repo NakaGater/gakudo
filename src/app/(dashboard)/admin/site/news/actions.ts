@@ -8,8 +8,6 @@ import type { Database } from "@/lib/supabase/types";
 import { uploadAttachment } from "@/lib/attachments/actions";
 import type { ActionState } from "@/lib/actions/types";
 
-export type { ActionState };
-
 type SiteNewsInsert = Database["public"]["Tables"]["site_news"]["Insert"];
 
 export async function createNews(

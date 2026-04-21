@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import type { Json } from '@/lib/supabase/types'
 
 interface PushSubscriptionBody {
   endpoint: string
@@ -49,11 +50,11 @@ export async function POST(request: Request) {
   }
 
   // Check for existing subscription
-  const ps = supabase.from('push_subscriptions')
-  const { data: existing, error: selectError } = await ps
+  const { data: existing, error: selectError } = await supabase
+    .from('push_subscriptions')
     .select('id')
     .eq('user_id', user.id)
-    .eq('endpoint', body.endpoint)
+    .eq('subscription->>endpoint' as 'subscription', body.endpoint)
 
   if (selectError) {
     return NextResponse.json(
@@ -66,9 +67,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: '既に登録済みです' }, { status: 200 })
   }
 
-  const { error: insertError } = await ps.insert({
+  const { error: insertError } = await supabase.from('push_subscriptions').insert({
     user_id: user.id,
-    subscription: body,
+    subscription: body as unknown as Json,
   })
 
   if (insertError) {
@@ -115,7 +116,7 @@ export async function DELETE(request: Request) {
   const { error: deleteError } = await supabase.from('push_subscriptions')
     .delete()
     .eq('user_id', user.id)
-    .eq('endpoint', body.endpoint)
+    .eq('subscription->>endpoint' as 'subscription', body.endpoint)
 
   if (deleteError) {
     return NextResponse.json(

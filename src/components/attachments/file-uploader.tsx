@@ -33,7 +33,7 @@ export function FileUploader({ files, onChange, multiple = true, disabled = fals
           setError(`${file.name}: 10MB以下にしてください`);
           continue;
         }
-        if (!ALLOWED_TYPES.includes(file.type)) {
+        if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
           setError(`${file.name}: PDF/画像のみ対応`);
           continue;
         }

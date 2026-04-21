@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth/get-user";
 import { Card, CardContent, CardHeader } from "@/components/ui";
-import { getActiveBillingRule, getBillingRules, type BillingRule } from "../actions";
+import { getActiveBillingRule, getBillingRules } from "../actions";
+import type { BillingRule } from "../types";
 import { BillingRuleForm } from "./billing-rule-form";
 
 function formatTime(time: string) {

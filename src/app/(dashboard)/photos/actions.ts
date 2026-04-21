@@ -7,8 +7,6 @@ import { isStaff } from "@/lib/auth/roles";
 import type { ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 
-export type { ActionState };
-
 export async function uploadPhoto(
   formData: FormData,
 ): Promise<ActionState> {
