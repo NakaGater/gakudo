@@ -8,11 +8,22 @@ export default function PublicLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div
+      className="min-h-screen py-5 px-4 sm:px-6"
+      style={{
+        background: `#B8A88A`,
+        backgroundImage: `
+          repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px),
+          repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.008) 50px, rgba(0,0,0,0.008) 51px)
+        `,
+      }}
+    >
       <AuthHashRedirect />
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </>
+      <div className="book-page mx-auto flex flex-col">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </div>
+    </div>
   );
 }
