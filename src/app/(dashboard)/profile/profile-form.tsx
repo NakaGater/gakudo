@@ -12,6 +12,7 @@ const roleLabels: Record<AuthUser["role"], string> = {
   parent: "保護者",
   teacher: "指導員",
   admin: "管理者",
+  entrance: "入口端末",
 };
 
 interface ProfileFormProps {

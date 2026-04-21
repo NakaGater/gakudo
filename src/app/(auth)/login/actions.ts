@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
     .single();
 
   const role = (profile as { role: string } | null)?.role;
-  if (role === "admin" || role === "teacher") {
+  if (role === "admin" || role === "teacher" || role === "entrance") {
     redirect("/attendance/dashboard");
   } else {
     redirect("/announcements");

@@ -20,6 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
   admin: "管理者",
   teacher: "先生",
   parent: "保護者",
+  entrance: "入口端末",
 };
 
 function formatDate(dateString: string) {

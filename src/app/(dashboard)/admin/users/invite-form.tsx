@@ -9,6 +9,7 @@ const ROLE_OPTIONS = [
   { value: "parent", label: "保護者" },
   { value: "teacher", label: "先生" },
   { value: "admin", label: "管理者" },
+  { value: "entrance", label: "入口端末" },
 ] as const;
 
 export function InviteForm({ onClose }: { onClose: () => void }) {

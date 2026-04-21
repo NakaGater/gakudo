@@ -5,7 +5,7 @@ export type AuthUser = {
   id: string
   email: string
   name: string
-  role: 'parent' | 'teacher' | 'admin'
+  role: 'parent' | 'teacher' | 'admin' | 'entrance'
 }
 
 export async function getUser(): Promise<AuthUser> {

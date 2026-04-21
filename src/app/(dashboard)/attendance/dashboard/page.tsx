@@ -27,7 +27,7 @@ const statusConfig = {
 
 export default async function AttendanceDashboardPage() {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") redirect("/");
+  if (user.role !== "admin" && user.role !== "teacher" && user.role !== "entrance") redirect("/");
 
   const children = await getDashboardAttendanceStatus();
 

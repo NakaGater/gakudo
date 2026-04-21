@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";
 import type { ActionState } from "@/lib/actions/types";
 
-const VALID_ROLES = ["parent", "teacher", "admin"] as const;
+const VALID_ROLES = ["parent", "teacher", "admin", "entrance"] as const;
 type Role = (typeof VALID_ROLES)[number];
 
 export async function inviteUser(

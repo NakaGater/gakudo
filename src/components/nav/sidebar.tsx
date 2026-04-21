@@ -31,7 +31,7 @@ export function Sidebar({ user }: SidebarProps) {
     window.location.href = "/";
   }
 
-  const roleLabel = user.role === "admin" ? "管理者" : user.role === "teacher" ? "先生" : "保護者";
+  const roleLabel = user.role === "admin" ? "管理者" : user.role === "teacher" ? "先生" : user.role === "entrance" ? "入口端末" : "保護者";
 
   return (
     <aside className="sidebar hidden md:flex">

@@ -14,7 +14,7 @@ export type Database = {
           id: string
           email: string
           name: string
-          role: 'parent' | 'teacher' | 'admin'
+          role: 'parent' | 'teacher' | 'admin' | 'entrance'
           created_at: string
           updated_at: string
         }
@@ -22,7 +22,7 @@ export type Database = {
           id: string
           email: string
           name: string
-          role: 'parent' | 'teacher' | 'admin'
+          role: 'parent' | 'teacher' | 'admin' | 'entrance'
           created_at?: string
           updated_at?: string
         }
@@ -30,7 +30,7 @@ export type Database = {
           id?: string
           email?: string
           name?: string
-          role?: 'parent' | 'teacher' | 'admin'
+          role?: 'parent' | 'teacher' | 'admin' | 'entrance'
           created_at?: string
           updated_at?: string
         }
