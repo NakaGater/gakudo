@@ -565,6 +565,89 @@ body{
 .home-ft{background:linear-gradient(180deg,#3B2F20 0%,#2A2018 100%);
   background-image:url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence baseFrequency='0.5' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.06'/%3E%3C/svg%3E"),
   linear-gradient(180deg,#3B2F20 0%,#2A2018 100%)}
+/* ═══ TYPOGRAPHY SCALE REFINEMENT ═══ */
+/* Title layer: 15px semibold ink */
+.ann-card__title,.doc-card__title,.cms-card__title,.photo-mgmt__title{
+  font-size:15px;font-weight:700;letter-spacing:-.01em}
+/* Body layer: 13px regular ink-mid */
+.ann-card__body{font-size:13px;line-height:1.55;color:var(--ink-mid)}
+/* Meta layer: 11px lighter, tracking wider */
+.ann-card__date,.doc-card__meta,.cms-card__date,.cms-card__slug,
+.photo-mgmt__caption{font-size:11px;color:var(--ink-light);letter-spacing:.02em}
+/* Section headers: consistent */
+.main__title{font-size:20px;letter-spacing:-.02em}
+.doc-cat{font-family:var(--font-story);font-size:15px;font-weight:700;color:var(--ink);
+  margin-bottom:10px;padding-bottom:4px;display:inline-block}
+.doc-cat--letter{border-bottom:3px solid var(--cr-orange)}
+.doc-cat--schedule{border-bottom:3px solid var(--cr-blue)}
+.doc-cat--form{border-bottom:3px solid var(--cr-green)}
+
+/* ═══ OPS SCREEN MATERIAL METAPHORS ═══ */
+
+/* Billing = Ledger texture: ruled lines, stamped header */
+.ledger-wrap{position:relative;background:
+  repeating-linear-gradient(transparent,transparent 31px,rgba(180,160,130,.12) 31px,rgba(180,160,130,.12) 32px),
+  linear-gradient(135deg,var(--paper-warm),#FFF8ED);
+  border-radius:var(--r-md);padding:20px;margin-top:16px;border:1.5px solid var(--border)}
+.ledger-wrap::before{content:'';position:absolute;left:48px;top:0;bottom:0;width:1.5px;
+  background:rgba(209,75,64,.15)}
+.ledger-stamp{position:absolute;top:12px;right:16px;font-family:var(--font-hand);
+  font-size:11px;color:var(--cr-red);opacity:.5;transform:rotate(-8deg);
+  border:1.5px solid var(--cr-red);padding:2px 8px;border-radius:4px}
+
+/* Documents = Folder jacket with tab cutouts */
+.folder-jacket{background:linear-gradient(180deg,#F5E6D0 0%,var(--paper-warm) 3px,var(--white) 3px);
+  border:1.5px solid var(--border);border-radius:0 0 var(--r-md) var(--r-md);
+  padding:20px;margin-top:0;position:relative;box-shadow:var(--sh-sm)}
+.folder-tab{display:inline-block;background:#F5E6D0;border:1.5px solid var(--border);
+  border-bottom:none;border-radius:var(--r-sm) var(--r-sm) 0 0;padding:6px 16px;
+  font-family:var(--font-story);font-size:13px;font-weight:700;color:var(--ink);
+  margin-right:4px;position:relative;top:1.5px;cursor:pointer;transition:.2s;
+  outline:none;-webkit-appearance:none;appearance:none}
+.folder-tab:hover{background:#EDD9C0}
+.folder-tab--active{background:var(--white);border-bottom-color:var(--white);z-index:1}
+
+/* Profile = Pinned ID card with photo corner clips */
+.id-card{background:var(--white);border:2px solid var(--border);border-radius:var(--r-md);
+  padding:24px;position:relative;box-shadow:var(--sh-md);overflow:hidden}
+.id-card::before{content:'';position:absolute;top:0;left:0;right:0;height:60px;
+  background:linear-gradient(135deg,var(--cr-orange),var(--star-bright));opacity:.15}
+.id-card::after{content:'📌';position:absolute;top:-2px;right:16px;font-size:20px;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.15))}
+.id-card .avatar-lg{border:3px solid var(--white);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+
+/* Admin Users = Clipboard with metal clip */
+.clipboard{background:var(--white);border:2px solid #D4C4A8;border-radius:var(--r-md);
+  padding:20px;padding-top:28px;position:relative;box-shadow:var(--sh-md)}
+.clipboard::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:60px;height:16px;background:linear-gradient(180deg,#B8A88A,#8A7A5A);
+  border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.clipboard::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:40px;height:8px;background:linear-gradient(180deg,#A8986A,#786840);border-radius:2px}
+
+/* Admin Site CMS = Control board with toggle rail */
+.control-board{background:linear-gradient(135deg,var(--paper-warm),#FFF8ED);
+  border:1.5px solid var(--border);border-radius:var(--r-md);padding:20px;
+  position:relative;box-shadow:var(--sh-sm)}
+.control-board::before{content:'⚙️ 管理パネル';position:absolute;top:-10px;left:16px;
+  font-family:var(--font-hand);font-size:11px;color:var(--ink-mid);
+  background:var(--bg-elev);padding:0 8px}
+
+/* Photos = Corkboard background */
+.corkboard{background:
+  repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(160,120,60,.03) 20px,rgba(160,120,60,.03) 21px),
+  linear-gradient(135deg,#F5E8D4,#EDE0CC);
+  border:2px solid #D4BC94;border-radius:var(--r-md);padding:20px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.06),var(--sh-sm)}
+
+/* Announcements = Letter paper with margin line */
+.letter-paper{position:relative;background:
+  linear-gradient(90deg,transparent 39px,rgba(209,75,64,.1) 39px,rgba(209,75,64,.1) 40px,transparent 40px),
+  repeating-linear-gradient(transparent,transparent 27px,rgba(100,140,200,.08) 27px,rgba(100,140,200,.08) 28px),
+  var(--white);
+  border:1.5px solid var(--border);border-radius:var(--r-md);padding:20px 20px 20px 52px;
+  box-shadow:var(--sh-sm)}
+
 /* ═══ FOCUS-VISIBLE for accessibility ═══ */
 .ann-card:focus-visible,.news-card:focus-visible,.doc-card:focus-visible,
 .cms-card:focus-visible,.photo-mgmt:focus-visible,.polaroid:focus-visible,
@@ -588,7 +671,7 @@ body{
 
 /* Announcement cards — letter paper feel */
 .ann-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);
-  padding:16px;position:relative;cursor:pointer;box-shadow:var(--sh-sm);
+  padding:16px;position:relative;box-shadow:var(--sh-sm);
   transition:transform .2s cubic-bezier(.34,1.2,.64,1),box-shadow .2s,border-color .15s}
 .ann-card:hover{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:var(--cr-orange)}
 .ann-card:active{transform:translateY(0);transition-duration:.08s}
@@ -596,9 +679,9 @@ body{
   background:linear-gradient(90deg,rgba(255,248,237,1) 0%,var(--white) 20%)}
 .ann-card--unread::after{content:'●';position:absolute;top:14px;right:14px;
   color:var(--cr-red);font-size:10px;line-height:1}
-.ann-card__date{font-size:12px;color:var(--ink-light);font-family:var(--font-body)}
-.ann-card__title{font-family:var(--font-story);font-size:16px;font-weight:700;color:var(--ink);margin-top:4px}
-.ann-card__body{font-size:13px;color:var(--ink-mid);margin-top:6px;line-height:1.6}
+.ann-card__date{font-size:11px;color:var(--ink-light);font-family:var(--font-body);letter-spacing:.02em}
+.ann-card__title{font-family:var(--font-story);font-size:15px;font-weight:700;color:var(--ink);margin-top:4px;letter-spacing:-.01em}
+.ann-card__body{font-size:13px;color:var(--ink-mid);margin-top:6px;line-height:1.55}
 .ann-card--read{opacity:.8}
 .ann-card--read:hover{opacity:1}
 
@@ -638,9 +721,9 @@ body{
   transition:transform .2s cubic-bezier(.34,1.2,.64,1),box-shadow .2s,border-color .15s}
 .doc-card:hover{transform:translateX(3px);box-shadow:var(--sh-md);border-color:var(--cr-orange)}
 .doc-card:active{transform:translateX(1px);transition-duration:.08s}
-.doc-card__title{font-weight:600;font-size:14px;color:var(--ink)}
-.doc-card__meta{font-size:12px;color:var(--ink-light);margin-top:2px}
-.doc-cat{font-family:var(--font-story);font-size:16px;font-weight:700;color:var(--ink);
+.doc-card__title{font-weight:700;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+.doc-card__meta{font-size:11px;color:var(--ink-light);margin-top:2px;letter-spacing:.02em}
+.doc-cat{font-family:var(--font-story);font-size:15px;font-weight:700;color:var(--ink);
   margin-bottom:10px;padding-bottom:4px;display:inline-block;position:relative}
 .doc-cat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
   border-radius:2px;opacity:.7}
@@ -674,24 +757,24 @@ body{
 /* Role badges */
 .role-badge{font-size:10px;padding:2px 8px;border-radius:var(--r-full);font-weight:600;display:inline-block}
 .role-badge--admin{background:#FFEEF0;color:var(--cr-red)}
-.role-badge--teacher{background:#FFE5D5;color:var(--cr-orange)}
-.role-badge--parent{background:#E5F7FF;color:var(--cr-blue)}
+.role-badge--teacher{background:#FFE5D5;color:#8A4A00}
+.role-badge--parent{background:#DFF0FF;color:#1A5F8A}
 
 /* Status badges */
 .status-badge{font-size:10px;padding:2px 8px;border-radius:var(--r-full);font-weight:600;display:inline-block}
 .status-badge--confirmed{background:#D5F5E3;color:#2D7A55}
-.status-badge--draft{background:#FFF5CC;color:var(--cr-yellow)}
+.status-badge--draft{background:#FFF0CC;color:#8A6D00}
 .status-badge--public{background:#D5F5E3;color:#2D7A55}
-.status-badge--private{background:#FFF5CC;color:var(--cr-yellow)}
+.status-badge--private{background:#FFF0CC;color:#8A6D00}
 
 /* CMS cards */
 .cms-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);
   padding:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh-sm);
   transition:transform .2s,box-shadow .2s,border-color .15s}
 .cms-card:hover{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:var(--cr-orange)}
-.cms-card__title{font-weight:600;font-size:14px;color:var(--ink)}
-.cms-card__slug{font-size:12px;color:var(--ink-light);margin-top:2px;font-family:var(--font-body)}
-.cms-card__date{font-size:11px;color:var(--ink-light);margin-top:2px}
+.cms-card__title{font-weight:700;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+.cms-card__slug{font-size:11px;color:var(--ink-light);margin-top:2px;font-family:var(--font-body);letter-spacing:.02em}
+.cms-card__date{font-size:11px;color:var(--ink-light);margin-top:2px;letter-spacing:.02em}
 .cms-card__edit{font-size:13px;color:var(--cr-orange);text-decoration:none;font-weight:600;
   transition:color .15s}
 .cms-card__edit:hover{color:var(--cr-red)}
@@ -704,17 +787,21 @@ body{
 .photo-mgmt__img{width:100%;aspect-ratio:4/3;display:flex;align-items:center;
   justify-content:center;font-size:40px;position:relative}
 .photo-mgmt__info{padding:10px}
-.photo-mgmt__title{font-size:13px;font-weight:600;color:var(--ink);font-family:var(--font-story)}
-.photo-mgmt__caption{font-size:11px;color:var(--ink-light);margin-top:2px}
+.photo-mgmt__title{font-size:15px;font-weight:700;color:var(--ink);font-family:var(--font-story);letter-spacing:-.01em}
+.photo-mgmt__caption{font-size:11px;color:var(--ink-light);margin-top:2px;letter-spacing:.02em}
 .photo-mgmt__actions{display:flex;align-items:center;margin-top:6px}
 .photo-mgmt__toggle{margin-left:auto;font-size:11px;cursor:pointer;
-  transition:color .15s}
+  transition:color .15s;background:none;border:none;padding:0;
+  font-family:var(--font-body);outline:none;-webkit-appearance:none;appearance:none}
 .photo-mgmt__toggle:hover{color:var(--cr-orange)}
+.photo-mgmt__toggle:focus-visible{outline:2px solid var(--cr-orange);outline-offset:2px;border-radius:var(--r-sm)}
 
 /* Tab bar for admin */
 .tab-bar{display:flex;gap:0;border-bottom:2px solid var(--border);margin-top:12px}
 .tab-bar__item{padding:8px 16px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;
-  margin-bottom:-2px;transition:color .15s,border-color .15s;color:var(--ink-light);font-weight:500}
+  margin-bottom:-2px;transition:color .15s,border-color .15s;color:var(--ink-light);font-weight:500;
+  background:none;border-top:none;border-left:none;border-right:none;
+  font-family:var(--font-body);outline:none;-webkit-appearance:none;appearance:none}
 .tab-bar__item:hover{color:var(--ink)}
 .tab-bar__item--active{color:var(--cr-orange);border-bottom-color:var(--cr-orange);font-weight:600}
 
@@ -833,6 +920,113 @@ body{
   .gal-lb__nav--prev{left:4px}.gal-lb__nav--next{right:4px}
   .gal-lb__close{top:-36px;right:4px}
 }
+
+/* ═══ BREAKTHROUGH: LIVING DESIGN ═══ */
+
+/* ── Paper grain texture on ALL white cards ── */
+.att-card,.cc,.doc-card,.photo-mgmt,.cms-card,.ann-card,.news-card,.profile-card,.id-card{
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='4' seed='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='.03'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,rgba(255,255,255,.97),rgba(255,248,237,.95));
+  background-blend-mode:multiply,normal}
+.att-card,.cc,.doc-card,.photo-mgmt,.cms-card,.ann-card,.news-card,.profile-card,.id-card{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),inset 0 -1px 0 rgba(232,220,198,.5),var(--sh-sm)}
+
+/* ── Typographic optical finesse ── */
+.hero__t,.features__t,.cta-area__t,.bc__name,.main__title{
+  text-wrap:balance;line-height:1.18;letter-spacing:-.025em}
+.hero__t{font-size:clamp(38px,4.2vw,46px)}
+.summary-strip__date,.att-time,.billing-table .amt,
+.billing-total{font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ── Entrance animations — cards breathe in ── */
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(12px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{
+  0%{opacity:0;transform:scale(.8)}
+  60%{transform:scale(1.03)}
+  100%{opacity:1;transform:scale(1)}}
+@keyframes gentleFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}}
+@keyframes twinkle{
+  0%,100%{opacity:.4;transform:scale(.8)}
+  50%{opacity:1;transform:scale(1.1)}}
+@keyframes paperSlideIn{
+  from{opacity:0;transform:translateX(-16px) rotate(-1deg)}
+  to{opacity:1;transform:translateX(0) rotate(0)}}
+
+/* Apply entrance to cards */
+.page.active .att-card,.page.active .cc,
+.page.active .ann-card,.page.active .news-card,
+.page.active .doc-card,.page.active .photo-mgmt,
+.page.active .cms-card{
+  animation:cardIn .4s cubic-bezier(.22,1,.36,1) both}
+.page.active .att-card:nth-child(1),.page.active .cc:nth-child(1),
+.page.active .ann-card:nth-child(1),.page.active .news-card:nth-child(1){animation-delay:.05s}
+.page.active .att-card:nth-child(2),.page.active .cc:nth-child(2),
+.page.active .ann-card:nth-child(2),.page.active .news-card:nth-child(2){animation-delay:.1s}
+.page.active .att-card:nth-child(3),.page.active .cc:nth-child(3),
+.page.active .ann-card:nth-child(3){animation-delay:.15s}
+.page.active .att-card:nth-child(4),.page.active .ann-card:nth-child(4){animation-delay:.2s}
+
+/* Polaroids pop in with stagger */
+.page.active .polaroid{animation:popIn .35s cubic-bezier(.22,1,.36,1) both}
+.page.active .polaroid:nth-child(1){animation-delay:.05s}
+.page.active .polaroid:nth-child(2){animation-delay:.12s}
+.page.active .polaroid:nth-child(3){animation-delay:.19s}
+.page.active .polaroid:nth-child(4){animation-delay:.26s}
+
+/* Document cards slide in like papers */
+.page.active .doc-card{animation:paperSlideIn .35s cubic-bezier(.22,1,.36,1) both}
+.page.active .doc-card:nth-child(1){animation-delay:.05s}
+.page.active .doc-card:nth-child(2){animation-delay:.12s}
+
+/* Main titles fade up */
+.page.active .main__title,.page.active .main__mood{
+  animation:fadeUp .3s ease-out both}
+
+/* Sidebar mascot star gently floats */
+.sb__mark{animation:gentleFloat 3s ease-in-out infinite;display:inline-block}
+
+/* Season strip twinkling stars */
+.season-strip::after{content:'✦ ✦ ✦';position:absolute;top:3px;right:16px;
+  font-size:8px;color:var(--star-bright);letter-spacing:12px;
+  animation:twinkle 2.5s ease-in-out infinite alternate}
+
+/* ── Photo toggle switch — stateful micro-interaction ── */
+.photo-toggle{display:inline-flex;align-items:center;gap:8px;margin-left:auto;
+  padding:3px 10px 3px 5px;border:1.5px solid var(--border);border-radius:999px;
+  background:var(--white);font-size:11px;font-family:var(--font-body);
+  cursor:pointer;transition:all .2s cubic-bezier(.34,1.3,.64,1);
+  -webkit-appearance:none;appearance:none;outline:none}
+.photo-toggle:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.photo-toggle:active{transform:scale(.97)}
+.photo-toggle:focus-visible{outline:2px solid var(--cr-orange);outline-offset:2px}
+.photo-toggle__track{width:28px;height:16px;border-radius:999px;background:#D4C4A8;
+  position:relative;flex-shrink:0;transition:background .2s}
+.photo-toggle__thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;
+  border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,.2);
+  transition:transform .2s cubic-bezier(.34,1.4,.64,1)}
+.photo-toggle.is-public{color:#2D7A55;border-color:var(--present-bd)}
+.photo-toggle.is-public .photo-toggle__track{background:var(--present)}
+.photo-toggle.is-public .photo-toggle__thumb{transform:translateX(12px)}
+.photo-toggle.is-private{color:#8A6D00;border-color:#E8D4A0}
+
+/* ── Hover "lift" micro-polish for material cards ── */
+.ledger-wrap:hover,.folder-jacket:hover,.corkboard:hover,
+.letter-paper:hover,.clipboard:hover,.control-board:hover{
+  box-shadow:0 4px 16px rgba(0,0,0,.06);transition:box-shadow .3s}
+
+/* ── Page transition ── */
+.page{opacity:0;transition:opacity .15s ease-out}
+.page.active{opacity:1}
+
+
 </style>
 </head>
 <body>
@@ -1207,19 +1401,19 @@ body{
       <div class="gallery-event" style="margin-top:32px">
         <div class="gallery-event__hdr"><span class="ge-emoji">🎨</span>お絵かき大会</div>
         <div class="gallery-grid">
-          <div class="polaroid polaroid--tape" onclick="openLb(0)">
+          <div role="button" class="polaroid polaroid--tape" tabindex="0" onclick="openLb(0)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#FFE5D5,#FFEEF0)">🌈</div>
             <span class="polaroid__caption">虹を描いたよ</span>
           </div>
-          <div class="polaroid" onclick="openLb(1)">
+          <div role="button" class="polaroid" tabindex="0" onclick="openLb(1)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#FFF5CC,#FFE5D5)">🌻</div>
             <span class="polaroid__caption">ひまわりの絵</span>
           </div>
-          <div class="polaroid polaroid--tape-pink" onclick="openLb(2)">
+          <div role="button" class="polaroid polaroid--tape-pink" tabindex="0" onclick="openLb(2)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#FFEEF0,#F0E5FF)">🦋</div>
             <span class="polaroid__caption">ちょうちょさん</span>
           </div>
-          <div class="polaroid" onclick="openLb(3)">
+          <div role="button" class="polaroid" tabindex="0" onclick="openLb(3)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#D5F5E3,#E5F7FF)">🐠</div>
             <span class="polaroid__caption">海の中の世界</span>
           </div>
@@ -1229,15 +1423,15 @@ body{
       <div class="gallery-event" style="margin-top:24px">
         <div class="gallery-event__hdr"><span class="ge-emoji">⚽</span>スポーツ大会</div>
         <div class="gallery-grid">
-          <div class="polaroid polaroid--tape-green" onclick="openLb(4)">
+          <div role="button" class="polaroid polaroid--tape-green" tabindex="0" onclick="openLb(4)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#D5F5E3,#FFF5CC)">⚽</div>
             <span class="polaroid__caption">サッカー対決！</span>
           </div>
-          <div class="polaroid" onclick="openLb(5)">
+          <div role="button" class="polaroid" tabindex="0" onclick="openLb(5)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#E5F7FF,#D5F5E3)">🏃</div>
             <span class="polaroid__caption">リレー走</span>
           </div>
-          <div class="polaroid polaroid--tape" onclick="openLb(6)">
+          <div role="button" class="polaroid polaroid--tape" tabindex="0" onclick="openLb(6)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#FFF5CC,#FFEEF0)">🏅</div>
             <span class="polaroid__caption">表彰式</span>
           </div>
@@ -1247,11 +1441,11 @@ body{
       <div class="gallery-event" style="margin-top:24px">
         <div class="gallery-event__hdr"><span class="ge-emoji">🍉</span>夏のイベント</div>
         <div class="gallery-grid">
-          <div class="polaroid" onclick="openLb(7)">
+          <div role="button" class="polaroid" tabindex="0" onclick="openLb(7)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#FFEEF0,#FFF5CC)">🍉</div>
             <span class="polaroid__caption">スイカ割り</span>
           </div>
-          <div class="polaroid polaroid--tape-pink" onclick="openLb(8)">
+          <div role="button" class="polaroid polaroid--tape-pink" tabindex="0" onclick="openLb(8)">
             <div class="polaroid__placeholder" style="background:linear-gradient(135deg,#E5F7FF,#F0E5FF)">🏊</div>
             <span class="polaroid__caption">プール遊び</span>
           </div>
@@ -1260,7 +1454,7 @@ body{
     </section>
   </div>
   <!-- Gallery Lightbox -->
-  <div class="gal-lb" id="gal-lb" onclick="closeLb()">
+  <div class="gal-lb" id="gal-lb" role="dialog" aria-modal="true" aria-label="写真ギャラリー" onclick="closeLb()">
     <div class="gal-lb__inner" onclick="event.stopPropagation()">
       <button class="gal-lb__close" onclick="closeLb()">✕</button>
       <button class="gal-lb__nav gal-lb__nav--prev" onclick="lbNav(-1)">‹</button>
@@ -1295,7 +1489,8 @@ body{
         <div class="main__mood">📢 未読のお知らせが2件あります</div>
         <div class="main__content">
           <div class="main__hdr"><h1 class="main__title">📢 お知らせ</h1><button class="btn btn-primary btn-sm">＋ 新規作成</button></div>
-          <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+          <div class="letter-paper" style="margin-top:16px">
+          <div style="display:flex;flex-direction:column;gap:12px">
             <div class="ann-card ann-card--unread">
               <div class="ann-card__date">2025年7月3日 ・ 田中先生</div>
               <h3 class="ann-card__title">🏊 プール開きのお知らせ</h3>
@@ -1317,6 +1512,7 @@ body{
               <p class="ann-card__body">本日の避難訓練は無事に完了しました。全員が3分以内に避難場所に集合できました…</p>
             </div>
           </div>
+          </div><!-- /letter-paper -->
           <nav style="margin-top:20px;display:flex;align-items:center;justify-content:center;gap:12px">
             <button class="btn btn-outline btn-sm" disabled>前のページ</button>
             <span style="font-size:13px;color:var(--ink-light)">1 / 3</span>
@@ -1348,10 +1544,11 @@ body{
         <div class="sb__ft"><div class="sb__av">田</div><div><div class="sb__uname">田中 花子</div><div class="sb__urole">先生</div></div></div>
       </aside>
       <div class="main">
-        <div class="main__mood">📷 公開中の写真: 4枚 ・ 非公開: 2枚</div>
+        <div class="main__mood">📷 公開中の写真: 4枚 ・ 非公開: 2枚 <span style="font-family:var(--font-hand);font-size:11px;color:var(--cr-orange);margin-left:8px">♪ 素敵な思い出がいっぱい！</span></div>
         <div class="main__content">
           <div class="main__hdr"><h1 class="main__title">📷 写真管理</h1></div>
-          <details style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);padding:16px;margin-top:12px">
+          <div class="corkboard" style="margin-top:12px">
+          <details style="background:rgba(255,255,255,.7);border:1.5px solid var(--border);border-radius:var(--r-md);padding:16px">
             <summary style="cursor:pointer;font-family:var(--font-story);font-weight:600;color:var(--ink)">📤 アップロード</summary>
             <div style="margin-top:16px">
               <div class="gallery-upload">
@@ -1372,29 +1569,30 @@ body{
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:20px">
             <div class="photo-mgmt">
               <div class="photo-mgmt__img" style="background:linear-gradient(135deg,#FFE5D5,#FFEEF0)">🎨</div>
-              <div class="photo-mgmt__info"><p class="photo-mgmt__title">お絵かき大会</p><p class="photo-mgmt__caption">みんなで虹を描いたよ</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><span class="photo-mgmt__toggle" style="color:var(--ink-light)">非公開にする</span></div></div>
+              <div class="photo-mgmt__info"><p class="photo-mgmt__title">お絵かき大会</p><p class="photo-mgmt__caption">みんなで虹を描いたよ</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><button type="button" class="photo-toggle is-public" onclick="this.classList.toggle('is-public');this.classList.toggle('is-private');var p=this.classList.contains('is-public');this.setAttribute('aria-pressed',p);this.innerHTML='<span class=photo-toggle__track><span class=photo-toggle__thumb></span></span>'+(p?'公開中':'非公開')" aria-pressed="true"><span class="photo-toggle__track"><span class="photo-toggle__thumb"></span></span>公開中</button></div></div>
             </div>
             <div class="photo-mgmt">
               <div class="photo-mgmt__img" style="background:linear-gradient(135deg,#D5F5E3,#E5F7FF)">⚽</div>
-              <div class="photo-mgmt__info"><p class="photo-mgmt__title">サッカー練習</p><p class="photo-mgmt__caption">みんな上手になったね</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><span class="photo-mgmt__toggle" style="color:var(--ink-light)">非公開にする</span></div></div>
+              <div class="photo-mgmt__info"><p class="photo-mgmt__title">サッカー練習</p><p class="photo-mgmt__caption">みんな上手になったね</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><button type="button" class="photo-toggle is-public" onclick="this.classList.toggle('is-public');this.classList.toggle('is-private');var p=this.classList.contains('is-public');this.setAttribute('aria-pressed',p);this.innerHTML='<span class=photo-toggle__track><span class=photo-toggle__thumb></span></span>'+(p?'公開中':'非公開')" aria-pressed="true"><span class="photo-toggle__track"><span class="photo-toggle__thumb"></span></span>公開中</button></div></div>
             </div>
             <div class="photo-mgmt">
               <div class="photo-mgmt__img" style="background:linear-gradient(135deg,#FFF5CC,#FFE5D5)">🎵</div>
-              <div class="photo-mgmt__info"><p class="photo-mgmt__title">音楽の時間</p><p class="photo-mgmt__caption">リコーダー練習中</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--private">非公開</span><span class="photo-mgmt__toggle" style="color:var(--cr-blue)">公開する</span></div></div>
+              <div class="photo-mgmt__info"><p class="photo-mgmt__title">音楽の時間</p><p class="photo-mgmt__caption">リコーダー練習中</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--private">非公開</span><button type="button" class="photo-toggle is-private" onclick="this.classList.toggle('is-public');this.classList.toggle('is-private');var p=this.classList.contains('is-public');this.setAttribute('aria-pressed',p);this.innerHTML='<span class=photo-toggle__track><span class=photo-toggle__thumb></span></span>'+(p?'公開中':'非公開')" aria-pressed="false"><span class="photo-toggle__track"><span class="photo-toggle__thumb"></span></span>非公開</button></div></div>
             </div>
             <div class="photo-mgmt">
               <div class="photo-mgmt__img" style="background:linear-gradient(135deg,#E5F7FF,#F0E5FF)">🏊</div>
-              <div class="photo-mgmt__info"><p class="photo-mgmt__title">プール遊び</p><p class="photo-mgmt__caption">水しぶきキラキラ！</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><span class="photo-mgmt__toggle" style="color:var(--ink-light)">非公開にする</span></div></div>
+              <div class="photo-mgmt__info"><p class="photo-mgmt__title">プール遊び</p><p class="photo-mgmt__caption">水しぶきキラキラ！</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><button type="button" class="photo-toggle is-public" onclick="this.classList.toggle('is-public');this.classList.toggle('is-private');var p=this.classList.contains('is-public');this.setAttribute('aria-pressed',p);this.innerHTML='<span class=photo-toggle__track><span class=photo-toggle__thumb></span></span>'+(p?'公開中':'非公開')" aria-pressed="true"><span class="photo-toggle__track"><span class="photo-toggle__thumb"></span></span>公開中</button></div></div>
             </div>
             <div class="photo-mgmt">
               <div class="photo-mgmt__img" style="background:linear-gradient(135deg,#FFEEF0,#FFF5CC)">🍉</div>
-              <div class="photo-mgmt__info"><p class="photo-mgmt__title">スイカ割り</p><p class="photo-mgmt__caption">えいっ！割れたかな？</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><span class="photo-mgmt__toggle" style="color:var(--ink-light)">非公開にする</span></div></div>
+              <div class="photo-mgmt__info"><p class="photo-mgmt__title">スイカ割り</p><p class="photo-mgmt__caption">えいっ！割れたかな？</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--public">公開</span><button type="button" class="photo-toggle is-public" onclick="this.classList.toggle('is-public');this.classList.toggle('is-private');var p=this.classList.contains('is-public');this.setAttribute('aria-pressed',p);this.innerHTML='<span class=photo-toggle__track><span class=photo-toggle__thumb></span></span>'+(p?'公開中':'非公開')" aria-pressed="true"><span class="photo-toggle__track"><span class="photo-toggle__thumb"></span></span>公開中</button></div></div>
             </div>
             <div class="photo-mgmt">
               <div class="photo-mgmt__img" style="background:linear-gradient(135deg,#F0E5FF,#E5F7FF)">📚</div>
-              <div class="photo-mgmt__info"><p class="photo-mgmt__title">読書タイム</p><p class="photo-mgmt__caption">みんな集中してるね</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--private">非公開</span><span class="photo-mgmt__toggle" style="color:var(--cr-blue)">公開する</span></div></div>
+              <div class="photo-mgmt__info"><p class="photo-mgmt__title">読書タイム</p><p class="photo-mgmt__caption">みんな集中してるね</p><div class="photo-mgmt__actions"><span class="status-badge status-badge--private">非公開</span><button type="button" class="photo-toggle is-private" onclick="this.classList.toggle('is-public');this.classList.toggle('is-private');var p=this.classList.contains('is-public');this.setAttribute('aria-pressed',p);this.innerHTML='<span class=photo-toggle__track><span class=photo-toggle__thumb></span></span>'+(p?'公開中':'非公開')" aria-pressed="false"><span class="photo-toggle__track"><span class="photo-toggle__thumb"></span></span>非公開</button></div></div>
             </div>
           </div>
+          </div><!-- /corkboard -->
         </div>
       </div>
     </div>
@@ -1421,7 +1619,7 @@ body{
         <div class="sb__ft"><div class="sb__av">田</div><div><div class="sb__uname">田中 花子</div><div class="sb__urole">先生</div></div></div>
       </aside>
       <div class="main">
-        <div class="main__mood">💰 6月の請求データを表示中</div>
+        <div class="main__mood">💰 6月の請求データを表示中 <span style="font-family:var(--font-hand);font-size:11px;color:var(--cr-orange);margin-left:8px">〜 確認よろしくお願いします ♪ 田中</span></div>
         <div class="main__content">
           <div class="main__hdr"><h1 class="main__title">💰 月次請求一覧</h1><a href="#" class="cms-card__edit">料金ルール →</a></div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">
@@ -1436,7 +1634,7 @@ body{
             </select>
             <button class="btn btn-outline btn-sm" style="margin-left:auto">📊 一括計算</button>
           </div>
-          <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);margin-top:16px;overflow:hidden">
+          <div class="ledger-wrap" style="margin-top:16px"><span class="ledger-stamp">7月分</span>
             <table class="billing-table">
               <thead>
                 <tr>
@@ -1486,6 +1684,7 @@ body{
               </tbody>
             </table>
           </div>
+          </div><!-- /ledger-wrap -->
           <div class="billing-total">合計: ¥17,250</div><div style="clear:both"></div>
         </div>
       </div>
@@ -1518,11 +1717,14 @@ body{
           <div class="main__hdr"><h1 class="main__title">📄 資料一覧</h1>
             <details style="display:inline"><summary class="btn btn-primary btn-sm" style="cursor:pointer;list-style:none">📤 アップロード</summary></details>
           </div>
-          <div style="background:var(--paper-warm);border-radius:var(--r-md);padding:12px 16px;margin-top:12px;font-size:13px;color:var(--ink-mid);display:flex;align-items:center;gap:8px;border:1px solid var(--border)">
-            <span style="font-size:18px">📂</span>
-            <span><strong style="color:var(--ink)">5件</strong>の資料が登録されています ・ 3カテゴリ</span>
+          <div style="margin-top:16px;display:flex;align-items:end">
+            <button type="button" class="folder-tab folder-tab--active">📂 すべて (5)</button>
+            <button type="button" class="folder-tab">📮 お便り</button>
+            <button type="button" class="folder-tab">📅 スケジュール</button>
+            <button type="button" class="folder-tab">📝 書類</button>
           </div>
-          <div style="margin-top:20px">
+          <div class="folder-jacket">
+          <div>
             <h2 class="doc-cat doc-cat--letter">📮 お便り</h2>
             <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
               <div class="doc-card"><div><p class="doc-card__title">7月のクラブ便り</p><p class="doc-card__meta">田中先生 ・ 2025年7月1日</p></div><span class="status-badge" style="background:var(--paper-warm);color:var(--ink-mid)">お便り</span></div>
@@ -1572,7 +1774,7 @@ body{
         <div class="main__content">
           <div class="main__hdr"><h1 class="main__title">👤 プロフィール</h1></div>
           <div style="max-width:480px;margin-top:20px">
-            <div class="profile-card">
+            <div class="id-card">
               <div style="text-align:center;margin-bottom:20px;position:relative;z-index:1">
                 <div class="avatar-lg">田</div>
                 <div style="font-family:var(--font-story);font-size:18px;font-weight:700;color:var(--ink);margin-top:8px">田中 花子</div>
@@ -1615,7 +1817,7 @@ body{
         <div class="sb__ft"><div class="sb__av">田</div><div><div class="sb__uname">田中 花子</div><div class="sb__urole">管理者</div></div></div>
       </aside>
       <div class="main">
-        <div class="main__mood">👥 登録ユーザー: 5名</div>
+        <div class="main__mood">👥 登録ユーザー: 5名 <span style="font-family:var(--font-hand);font-size:11px;color:var(--cr-orange);margin-left:8px">⭐ みんなの情報を大切に管理してるよ！</span></div>
         <div class="main__content">
           <div class="main__hdr"><h1 class="main__title">👥 ユーザー管理</h1></div>
           <div style="display:flex;gap:12px;margin-top:12px">
@@ -1624,7 +1826,8 @@ body{
             <div style="background:#FFE5D5;border-radius:var(--r-md);padding:10px 16px;font-size:13px;font-family:var(--font-story);color:#8A4A00"><span style="font-weight:700">1</span> 先生</div>
             <div style="background:#DFF0FF;border-radius:var(--r-md);padding:10px 16px;font-size:13px;font-family:var(--font-story);color:#1A5F8A"><span style="font-weight:700">3</span> 保護者</div>
           </div>
-          <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);margin-top:16px;overflow:hidden">
+          <div class="clipboard" style="margin-top:16px">
+          <div style="overflow:hidden">
             <table class="admin-table">
               <thead>
                 <tr>
@@ -1668,6 +1871,7 @@ body{
               </tbody>
             </table>
           </div>
+          </div><!-- /clipboard -->
         </div>
       </div>
     </div>
@@ -1700,11 +1904,12 @@ body{
         <div class="main__mood">🌐 公開ページを管理できます</div>
         <div class="main__content">
           <div class="main__hdr"><h1 class="main__title">🌐 HP管理</h1></div>
-          <div class="tab-bar">
-            <span class="tab-bar__item tab-bar__item--active">ページ管理</span>
-            <span class="tab-bar__item">お知らせ管理</span>
+          <div class="control-board" style="margin-top:16px">
+          <div class="tab-bar" style="margin-bottom:16px">
+            <button class="tab-bar__item tab-bar__item--active" type="button">ページ管理</button>
+            <button class="tab-bar__item" type="button">お知らせ管理</button>
           </div>
-          <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
+          <div style="display:flex;flex-direction:column;gap:12px">
             <div class="cms-card">
               <div><p class="cms-card__title">ホーム</p><p class="cms-card__slug">/home</p><p class="cms-card__date">最終更新: 2025年6月15日</p></div>
               <a href="#" class="cms-card__edit">編集</a>
@@ -1718,6 +1923,7 @@ body{
               <a href="#" class="cms-card__edit">編集</a>
             </div>
           </div>
+          </div><!-- /control-board -->
         </div>
       </div>
     </div>
@@ -1911,11 +2117,14 @@ var _lbData=[
   {emoji:'🏊',bg:'linear-gradient(135deg,#E5F7FF,#F0E5FF)',cap:'プール遊び'}
 ];
 var _lbIdx=0;
-function openLb(i){_lbIdx=i;updLb();document.getElementById('gal-lb').classList.add('show');document.body.style.overflow='hidden'}
-function closeLb(){document.getElementById('gal-lb').classList.remove('show');document.body.style.overflow=''}
+var _lbTrigger=null;
+function openLb(i){_lbTrigger=document.activeElement;_lbIdx=i;updLb();document.getElementById('gal-lb').classList.add('show');document.body.style.overflow='hidden';document.querySelector('.gal-lb__close').focus()}
+function closeLb(){document.getElementById('gal-lb').classList.remove('show');document.body.style.overflow='';if(_lbTrigger)_lbTrigger.focus()}
 function lbNav(d){_lbIdx=(_lbIdx+d+_lbData.length)%_lbData.length;updLb()}
 function updLb(){var d=_lbData[_lbIdx];var el=document.getElementById('gal-lb-img');el.textContent=d.emoji;el.style.background=d.bg;document.getElementById('gal-lb-cap').textContent=d.cap;document.getElementById('gal-lb-cnt').textContent=(_lbIdx+1)+' / '+_lbData.length}
 document.addEventListener('keydown',function(e){if(!document.getElementById('gal-lb').classList.contains('show'))return;if(e.key==='Escape')closeLb();if(e.key==='ArrowLeft')lbNav(-1);if(e.key==='ArrowRight')lbNav(1)});
+document.querySelectorAll('.polaroid[tabindex]').forEach(function(el){el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}})});
+document.querySelectorAll('.polaroid[tabindex]').forEach(function(el){el.setAttribute('role','button')});
 </script>
 </body>
 </html>
