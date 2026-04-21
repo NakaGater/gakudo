@@ -9,15 +9,19 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("site_pages")
-    .select("title")
-    .eq("slug", slug)
-    .single() as { data: { title: string } | null };
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("site_pages")
+      .select("title")
+      .eq("slug", slug)
+      .single() as { data: { title: string } | null };
 
-  if (!data) return { title: "ページが見つかりません" };
-  return { title: `${data.title} — 星ヶ丘こどもクラブ` };
+    if (!data) return { title: "ページが見つかりません" };
+    return { title: `${data.title} — 星ヶ丘こどもクラブ` };
+  } catch {
+    return { title: "ページが見つかりません" };
+  }
 }
 
 export default async function SitePage({ params }: PageProps) {
@@ -26,12 +30,18 @@ export default async function SitePage({ params }: PageProps) {
   // news と gallery は専用ページがあるためスキップ
   if (slug === "news" || slug === "gallery") notFound();
 
-  const supabase = await createClient();
-  const { data: page } = await supabase
-    .from("site_pages")
-    .select("title, content, updated_at")
-    .eq("slug", slug)
-    .single() as { data: { title: string; content: string; updated_at: string } | null };
+  let page: { title: string; content: string; updated_at: string } | null = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("site_pages")
+      .select("title, content, updated_at")
+      .eq("slug", slug)
+      .single() as { data: { title: string; content: string; updated_at: string } | null };
+    page = data;
+  } catch {
+    notFound();
+  }
 
   if (!page) notFound();
 

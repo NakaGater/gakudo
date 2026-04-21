@@ -47,14 +47,21 @@ const DEFAULT_HERO_TEXT =
   "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const { data: homePage } = await supabase
-    .from("site_pages")
-    .select("content")
-    .eq("slug", "home")
-    .single() as { data: { content: string } | null };
+  let heroText = DEFAULT_HERO_TEXT;
+  try {
+    const supabase = await createClient();
+    const { data: homePage } = await supabase
+      .from("site_pages")
+      .select("content")
+      .eq("slug", "home")
+      .single() as { data: { content: string } | null };
 
-  const heroText = homePage?.content || DEFAULT_HERO_TEXT;
+    if (homePage?.content) {
+      heroText = homePage.content;
+    }
+  } catch {
+    // DB接続エラー時はデフォルトテキストを使用
+  }
   return (
     <>
       {/* Hero */}
