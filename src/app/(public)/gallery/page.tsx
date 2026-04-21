@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { GalleryGrid, type GalleryPhoto } from "./gallery-grid";
 
@@ -42,25 +41,24 @@ export default async function GalleryPage() {
   }));
 
   return (
-    <section className="bg-bg py-12 sm:py-16">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <h1 className="text-center text-2xl font-bold text-fg sm:text-3xl">
-          フォトギャラリー
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-fg-muted">
-          子どもたちの活動風景やイベントの様子をご覧いただけます。
-        </p>
+    <section style={{ maxWidth: "960px", margin: "0 auto", padding: "32px 24px", width: "100%" }}>
+      <h1 className="font-story font-black text-ink text-center" style={{ fontSize: "28px" }}>
+        🖼️ <span className="crayon-underline">フォトギャラリー</span>
+      </h1>
+      <p className="text-center text-sm text-ink-mid mt-2">
+        子どもたちの活動風景やイベントの様子をご覧いただけます。
+      </p>
 
-        <div className="mt-10">
-          {photos.length > 0 ? (
-            <GalleryGrid photos={photos} />
-          ) : (
-            <div className="flex flex-col items-center gap-3 py-20 text-fg-muted">
-              <Camera size={48} strokeWidth={1.5} className="text-accent/40" />
-              <p className="text-base">公開中の写真はまだありません</p>
-            </div>
-          )}
-        </div>
+      <div className="mt-8">
+        {photos.length > 0 ? (
+          <GalleryGrid photos={photos} />
+        ) : (
+          <div className="gallery-empty">
+            <div className="gallery-empty__icon">📷</div>
+            <div className="gallery-empty__text">まだ写真がないよ…</div>
+            <div className="gallery-empty__sub">たのしい写真をまっててね ⭐</div>
+          </div>
+        )}
       </div>
     </section>
   );

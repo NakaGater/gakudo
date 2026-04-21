@@ -61,23 +61,23 @@ export default async function NewsDetailPage({ params }: Props) {
   }
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
+    <article className="mx-auto max-w-3xl px-4 py-8">
       <Link
         href="/news"
-        className="inline-flex items-center gap-1 text-sm text-accent hover:text-accent-hv transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-cr-orange hover:underline transition-colors font-story"
       >
         <ArrowLeft size={16} />
         お知らせ一覧へ戻る
       </Link>
 
-      <h1 className="mt-6 text-2xl font-bold text-fg sm:text-3xl">
-        {news.title}
+      <h1 className="mt-6 font-story font-black text-ink ink-bleed" style={{ fontSize: "24px" }}>
+        <span className="crayon-underline">{news.title}</span>
       </h1>
-      <p className="mt-2 text-sm text-fg-muted">
+      <p className="mt-2 text-xs text-ink-light font-hand">
         {dateFormat.format(new Date(news.published_at))}
       </p>
 
-      <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed text-fg">
+      <div className="mt-8 whitespace-pre-wrap text-sm leading-relaxed text-ink-mid">
         {news.body}
       </div>
 

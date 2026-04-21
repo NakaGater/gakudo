@@ -55,9 +55,11 @@ export default async function SitePage({ params }: PageProps) {
 
   // 汎用ページ
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold text-fg mb-6">{page.title}</h1>
-      <div className="prose prose-stone max-w-none text-fg-muted leading-relaxed whitespace-pre-wrap">
+    <div className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="font-story font-black text-ink ink-bleed mb-4" style={{ fontSize: "28px" }}>
+        <span className="crayon-underline">{page.title}</span>
+      </h1>
+      <div className="text-sm text-ink-mid leading-relaxed whitespace-pre-wrap">
         {page.content}
       </div>
     </div>
@@ -86,29 +88,30 @@ function AboutPage({ title, content, metadata }: { title: string; content: strin
 
   return (
     <>
-      {/* ヒーロー */}
-      <section className="bg-gradient-to-b from-amber-50 to-bg py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
-          <h1 className="text-3xl font-bold text-fg sm:text-4xl">{title}</h1>
-          <p className="mt-4 text-lg text-fg-muted max-w-2xl mx-auto leading-relaxed">
+      <section style={{ padding: "32px 24px 0" }}>
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい３しょう</div>
+          <h1 className="font-story font-black text-ink ink-bleed" style={{ fontSize: "28px" }}>
+            <span className="crayon-underline">{title}</span>
+          </h1>
+          <p className="mt-3 text-sm text-ink-mid leading-relaxed max-w-2xl mx-auto">
             {subtitle}
           </p>
         </div>
       </section>
 
-      {/* 理念 */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="grid gap-10 md:grid-cols-2 items-center">
+      <section style={{ padding: "24px 24px" }}>
+        <div className="mx-auto max-w-4xl">
+          <div className="grid gap-8 md:grid-cols-2 items-center">
             <div>
-              <h2 className="text-2xl font-bold text-fg mb-4">{visionHeading}</h2>
-              <div className="text-fg-muted leading-relaxed whitespace-pre-wrap">
+              <h2 className="font-story font-bold text-ink text-lg mb-3">{visionHeading}</h2>
+              <div className="text-sm text-ink-mid leading-relaxed whitespace-pre-wrap">
                 {content}
               </div>
             </div>
-            <div className="rounded-2xl bg-amber-50 p-10 text-center">
-              <p className="text-6xl mb-4">{visionEmoji}</p>
-              <p className="text-sm font-medium text-amber-700">
+            <div className="rounded-xl bg-page-deep border-2 border-page-edge p-8 text-center shadow-[4px_4px_0_var(--page-edge)]">
+              <p className="text-5xl mb-3">{visionEmoji}</p>
+              <p className="text-sm font-bold font-story text-cr-orange">
                 {visionTagline}
               </p>
             </div>
@@ -116,36 +119,45 @@ function AboutPage({ title, content, metadata }: { title: string; content: strin
         </div>
       </section>
 
-      {/* 1日の流れ */}
       {schedule.length > 0 && (
-        <section className="bg-amber-50/50 py-16 sm:py-20">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6">
-            <h2 className="text-2xl font-bold text-fg text-center mb-10">1日の流れ</h2>
+        <section style={{ padding: "24px 24px", background: "linear-gradient(180deg, transparent, rgba(255,217,61,.03), transparent)" }}>
+          <div className="mx-auto max-w-4xl">
+            <h2 className="font-story font-black text-ink text-center mb-6" style={{ fontSize: "20px" }}>
+              <span className="crayon-underline">1日の流れ</span>
+            </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {schedule.map((item) => (
-                <div key={item.time} className="rounded-lg border border-border bg-bg p-5 text-center shadow-sm">
-                  <p className="text-3xl mb-2">{item.emoji}</p>
-                  <p className="text-sm font-bold text-accent">{item.time}</p>
-                  <p className="text-sm text-fg-muted mt-1">{item.label}</p>
-                </div>
-              ))}
+              {schedule.map((item, i) => {
+                const rotations = ["-1deg", "0.8deg", "-0.5deg", "1.2deg"];
+                const colors = ["#FFF8C5", "#D5F5E3", "#D6EEF8", "#FFE0E8"];
+                return (
+                  <div key={item.time} className="sticky-note p-5 text-center" style={{
+                    background: colors[i % 4],
+                    transform: `rotate(${rotations[i % 4]})`,
+                  }}>
+                    <p className="text-3xl mb-2">{item.emoji}</p>
+                    <p className="text-sm font-bold font-story text-cr-orange">{item.time}</p>
+                    <p className="text-xs text-ink-mid mt-1">{item.label}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
       )}
 
-      {/* 概要 */}
       {facilityInfo.length > 0 && (
-        <section className="py-16 sm:py-20">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6">
-            <h2 className="text-2xl font-bold text-fg text-center mb-8">施設概要</h2>
-            <div className="overflow-hidden rounded-lg border border-border">
+        <section style={{ padding: "24px 24px 32px" }}>
+          <div className="mx-auto max-w-4xl">
+            <h2 className="font-story font-black text-ink text-center mb-6" style={{ fontSize: "20px" }}>
+              <span className="crayon-underline">施設概要</span>
+            </h2>
+            <div className="overflow-hidden rounded-xl border-2 border-page-edge shadow-[2px_2px_0_var(--page-edge)]">
               <table className="w-full text-sm">
                 <tbody>
                   {facilityInfo.map((item) => (
-                    <tr key={item.label} className="border-b border-border last:border-b-0">
-                      <th className="bg-amber-50 px-4 py-3 text-left font-medium text-fg w-1/3">{item.label}</th>
-                      <td className="px-4 py-3 text-fg-muted">{item.value}</td>
+                    <tr key={item.label} className="border-b border-page-edge last:border-b-0">
+                      <th className="bg-page-deep px-4 py-3 text-left font-bold font-story text-ink w-1/3">{item.label}</th>
+                      <td className="px-4 py-3 text-ink-mid">{item.value}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -168,58 +180,52 @@ function AccessPage({ title, content, metadata }: { title: string; content: stri
 
   return (
     <>
-      {/* ヒーロー */}
-      <section className="bg-gradient-to-b from-amber-50 to-bg py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
-          <h1 className="text-3xl font-bold text-fg sm:text-4xl">{title}</h1>
-          <p className="mt-4 text-lg text-fg-muted">
+      <section style={{ padding: "32px 24px 0" }}>
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい４しょう</div>
+          <h1 className="font-story font-black text-ink ink-bleed" style={{ fontSize: "28px" }}>
+            <span className="crayon-underline">{title}</span>
+          </h1>
+          <p className="mt-3 text-sm text-ink-mid">
             {subtitle}
           </p>
         </div>
       </section>
 
-      {/* 地図 + 情報 */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+      <section style={{ padding: "24px 24px" }}>
+        <div className="mx-auto max-w-4xl">
           <div className="grid gap-8 md:grid-cols-2">
-            {/* 地図プレースホルダー */}
-            <div className="rounded-2xl bg-stone-100 flex items-center justify-center aspect-square md:aspect-auto">
+            <div className="rounded-xl bg-page-deep border-2 border-page-edge flex items-center justify-center aspect-square md:aspect-auto shadow-[4px_4px_0_var(--page-edge)]">
               <div className="text-center p-8">
-                <MapPin size={48} className="mx-auto mb-3 text-accent" strokeWidth={1.5} />
-                <p className="text-sm text-fg-muted">
+                <MapPin size={48} className="mx-auto mb-3 text-cr-orange" strokeWidth={1.5} />
+                <p className="text-xs text-ink-mid font-story">
                   Google Maps 埋め込みエリア
                   <br />
                   （本番環境で設定）
                 </p>
               </div>
             </div>
-
-            {/* アクセス情報 */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="flex gap-3">
-                <MapPin size={20} className="mt-1 text-accent shrink-0" />
+                <MapPin size={20} className="mt-1 text-cr-orange shrink-0" />
                 <div>
-                  <h3 className="font-bold text-fg mb-1">所在地</h3>
-                  <p className="text-fg-muted text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+                  <h3 className="font-bold font-story text-ink mb-1">所在地</h3>
+                  <p className="text-ink-mid text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
                 </div>
               </div>
-
               <div className="flex gap-3">
-                <Phone size={20} className="mt-1 text-accent shrink-0" />
+                <Phone size={20} className="mt-1 text-cr-orange shrink-0" />
                 <div>
-                  <h3 className="font-bold text-fg mb-1">お電話</h3>
-                  <p className="text-fg-muted text-sm">TEL: {phone}</p>
-                  <p className="text-fg-muted text-xs mt-1">{phoneHours}</p>
+                  <h3 className="font-bold font-story text-ink mb-1">お電話</h3>
+                  <p className="text-ink-mid text-sm">TEL: {phone}</p>
+                  <p className="text-ink-light text-xs mt-1">{phoneHours}</p>
                 </div>
               </div>
-
               <div className="flex gap-3">
-                <Clock size={20} className="mt-1 text-accent shrink-0" />
+                <Clock size={20} className="mt-1 text-cr-orange shrink-0" />
                 <div>
-                  <h3 className="font-bold text-fg mb-1">開所時間</h3>
-                  <p className="text-fg-muted text-sm whitespace-pre-wrap">
-                    {openingHours}
-                  </p>
+                  <h3 className="font-bold font-story text-ink mb-1">開所時間</h3>
+                  <p className="text-ink-mid text-sm whitespace-pre-wrap">{openingHours}</p>
                 </div>
               </div>
             </div>
@@ -227,21 +233,26 @@ function AccessPage({ title, content, metadata }: { title: string; content: stri
         </div>
       </section>
 
-      {/* 見学申し込み */}
-      <section className="bg-amber-50/50 py-16 sm:py-20">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-bold text-fg mb-4">{visitHeading}</h2>
-          <p className="text-fg-muted mb-6 whitespace-pre-wrap">
-            {visitText}
-          </p>
-          <a
-            href={`tel:${phone.replace(/-/g, "")}`}
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hv"
-          >
-            <Phone size={16} />
-            {phone} に電話する
-          </a>
-        </div>
+      <section style={{
+        padding: "28px 36px",
+        margin: "0 24px 32px",
+        background: "var(--page-deep)",
+        border: "2px dashed var(--cr-yellow)",
+        borderRadius: "12px",
+        textAlign: "center",
+      }}>
+        <div className="text-2xl mb-2">📞</div>
+        <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>{visitHeading}</h2>
+        <p className="text-sm text-ink-mid mt-2 mb-4 whitespace-pre-wrap leading-relaxed">
+          {visitText}
+        </p>
+        <a
+          href={`tel:${phone.replace(/-/g, "")}`}
+          className="inline-flex items-center gap-2 rounded-[10px] border-2 border-[#B5663A] bg-cr-orange px-[22px] py-[10px] text-sm font-bold font-story text-white shadow-[0_3px_0_#B5663A] transition-all hover:-translate-y-px hover:shadow-[0_4px_0_#B5663A] active:translate-y-px active:shadow-[0_1px_0_#B5663A]"
+        >
+          <Phone size={16} />
+          {phone} に電話する
+        </a>
       </section>
     </>
   );
