@@ -75,7 +75,7 @@ export async function uploadDocument(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: dbError } = await (supabase.from("documents") as any).insert({
+  const { error: dbError } = await supabase.from("documents").insert({
     title: (title as string).trim(),
     category: category as string,
     file_path: filePath,
@@ -102,11 +102,11 @@ export async function deleteDocument(
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: doc, error: fetchError } = await (supabase
+  const { data: doc, error: fetchError } = await supabase
     .from("documents")
     .select("id, file_path, uploaded_by")
     .eq("id", id)
-    .single() as any);
+    .single();
 
   if (fetchError || !doc) {
     return { success: false, message: "資料が見つかりません" };

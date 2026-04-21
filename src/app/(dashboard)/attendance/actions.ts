@@ -34,7 +34,7 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
   const { start, end } = todayRangeJST();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: children } = await (supabase.from("children") as any)
+  const { data: children } = await supabase.from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
@@ -42,7 +42,7 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
   if (!children || children.length === 0) return [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: attendances } = await (supabase.from("attendances") as any)
+  const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
     .lt("recorded_at", end)
@@ -91,7 +91,7 @@ export async function getDashboardAttendanceStatus(): Promise<
   const { start, end } = todayRangeJST();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: children } = await (supabase.from("children") as any)
+  const { data: children } = await supabase.from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
@@ -100,7 +100,7 @@ export async function getDashboardAttendanceStatus(): Promise<
 
   // Fetch today's records sorted ascending so we can find first enter & latest record
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: attendances } = await (supabase.from("attendances") as any)
+  const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
     .lt("recorded_at", end)
@@ -159,7 +159,7 @@ export async function recordManualAttendance(
 
   // 1. Verify child exists
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: child } = await (supabase.from("children") as any)
+  const { data: child } = await supabase.from("children")
     .select("id, name")
     .eq("id", childId)
     .single();
@@ -172,7 +172,7 @@ export async function recordManualAttendance(
   const { start, end } = todayRangeJST();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: latest } = await (supabase.from("attendances") as any)
+  const { data: latest } = await supabase.from("attendances")
     .select("id, type, recorded_at")
     .eq("child_id", child.id)
     .gte("recorded_at", start)
@@ -187,7 +187,7 @@ export async function recordManualAttendance(
 
   // 4. Insert attendance record
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: record, error: insertError } = await (supabase.from("attendances") as any)
+  const { data: record, error: insertError } = await supabase.from("attendances")
     .insert({
       child_id: child.id,
       type: actionType,
@@ -230,7 +230,7 @@ export async function recordAttendance(
 
   // 1. Look up child by qr_code
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: child } = await (supabase.from("children") as any)
+  const { data: child } = await supabase.from("children")
     .select("id, name, qr_active")
     .eq("qr_code", qrCode)
     .single();
@@ -247,7 +247,7 @@ export async function recordAttendance(
   const { start, end } = todayRangeJST();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: latest } = await (supabase.from("attendances") as any)
+  const { data: latest } = await supabase.from("attendances")
     .select("id, type, recorded_at")
     .eq("child_id", child.id)
     .gte("recorded_at", start)
@@ -262,7 +262,7 @@ export async function recordAttendance(
 
   // 4. Insert attendance record
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: record, error: insertError } = await (supabase.from("attendances") as any)
+  const { data: record, error: insertError } = await supabase.from("attendances")
     .insert({
       child_id: child.id,
       type: actionType,

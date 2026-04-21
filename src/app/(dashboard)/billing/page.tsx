@@ -49,7 +49,7 @@ export default async function BillingListPage({ searchParams }: Props) {
 
   if (staff) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase.from("children") as any)
+    const { data } = await supabase.from("children")
       .select("id, name")
       .order("name");
     for (const c of (data ?? []) as { id: string; name: string }[]) {
@@ -58,7 +58,7 @@ export default async function BillingListPage({ searchParams }: Props) {
     }
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase.from("child_parents") as any)
+    const { data } = await supabase.from("child_parents")
       .select("child_id, children(id, name)")
       .eq("parent_id", user.id);
     for (const row of (data ?? []) as {
@@ -74,7 +74,7 @@ export default async function BillingListPage({ searchParams }: Props) {
   let bills: BillRow[] = [];
   if (childIds.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (supabase.from("monthly_bills") as any)
+    let query = supabase.from("monthly_bills")
       .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
       .eq("year_month", yearMonth)
       .order("child_id");

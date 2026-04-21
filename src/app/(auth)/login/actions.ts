@@ -16,8 +16,8 @@ export async function login(formData: FormData) {
   }
 
   // ロールに応じてリダイレクト先を変更
-  const { data: profile } = await (supabase
-    .from("profiles") as any)
+  const { data: profile } = await supabase
+    .from("profiles")
     .select("role")
     .eq("id", data.user.id)
     .single();

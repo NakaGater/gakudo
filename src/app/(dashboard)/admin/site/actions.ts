@@ -48,7 +48,7 @@ export async function updateSitePage(
   };
   // Supabase PostgREST builder .update() resolves to `never` with TS 5.9
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("site_pages") as any)
+  const { error } = await supabase.from("site_pages")
     .update(updateData)
     .eq("slug", slug);
 

@@ -103,7 +103,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
     // For parents, default to first child
     if (!staff) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase.from("child_parents") as any)
+      const { data } = await supabase.from("child_parents")
         .select("child_id, children(id, name)")
         .eq("parent_id", user.id)
         .limit(1);
@@ -122,7 +122,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
     // Verify access: parents can only see their children
     if (!staff) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase.from("child_parents") as any)
+      const { data } = await supabase.from("child_parents")
         .select("child_id, children(id, name)")
         .eq("parent_id", user.id)
         .eq("child_id", targetChildId)
@@ -135,7 +135,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   // Get child name for staff
   if (staff && !childName) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase.from("children") as any)
+    const { data } = await supabase.from("children")
       .select("name")
       .eq("id", targetChildId)
       .single();
@@ -144,7 +144,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
 
   // Fetch monthly bill
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: bill } = await (supabase.from("monthly_bills") as any)
+  const { data: bill } = await supabase.from("monthly_bills")
     .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
     .eq("child_id", targetChildId)
     .eq("year_month", yearMonth)
@@ -164,7 +164,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: ruleData } = await (supabase.from("billing_rules") as any)
+  const { data: ruleData } = await supabase.from("billing_rules")
     .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
     .lte("effective_from", lastDayOfMonth)
     .order("effective_from", { ascending: false })
@@ -182,7 +182,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   const monthEndUTC = `${nextMonth}-01T00:00:00+09:00`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: attendances } = await (supabase.from("attendances") as any)
+  const { data: attendances } = await supabase.from("attendances")
     .select("type, recorded_at")
     .eq("child_id", targetChildId)
     .eq("type", "exit")

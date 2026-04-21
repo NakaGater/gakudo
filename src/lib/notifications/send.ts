@@ -41,8 +41,7 @@ export async function sendAnnouncementNotification(
   const supabase = createAdminClient();
 
   // Fetch parents who have notifications enabled
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: prefs, error: prefsError } = await (supabase as any)
+  const { data: prefs, error: prefsError } = await supabase
     .from("notification_preferences")
     .select("user_id, method")
     .in("method", ["push", "email", "both"]);
@@ -185,8 +184,7 @@ export async function sendAttendanceNotification(
   const supabase = createAdminClient();
 
   // 1. Fetch child name
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: child, error: childError } = await (supabase as any)
+  const { data: child, error: childError } = await supabase
     .from("children")
     .select("name")
     .eq("id", childId)
@@ -200,8 +198,7 @@ export async function sendAttendanceNotification(
   }
 
   // 2. Fetch linked parent IDs
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: links, error: linksError } = await (supabase as any)
+  const { data: links, error: linksError } = await supabase
     .from("child_parents")
     .select("parent_id")
     .eq("child_id", childId);
@@ -213,8 +210,7 @@ export async function sendAttendanceNotification(
   const parentIds = (links as { parent_id: string }[]).map((l) => l.parent_id);
 
   // 3. Fetch notification preferences for parents
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: prefs, error: prefsError } = await (supabase as any)
+  const { data: prefs, error: prefsError } = await supabase
     .from("notification_preferences")
     .select("user_id, method")
     .in("user_id", parentIds);

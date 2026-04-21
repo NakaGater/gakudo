@@ -54,7 +54,7 @@ export async function uploadPhoto(
       continue;
     }
 
-    const { error: insertError } = await (supabase.from("photos") as any).insert({
+    const { error: insertError } = await supabase.from("photos").insert({
       storage_path: storagePath,
       caption,
       event_name: eventName,
@@ -91,7 +91,7 @@ export async function setPhotoVisibility(
   }
 
   const supabase = await createClient();
-  const { error } = await (supabase.from("photos") as any)
+  const { error } = await supabase.from("photos")
     .update({ visibility })
     .eq("id", id);
 
@@ -112,7 +112,7 @@ export async function deletePhoto(id: string): Promise<ActionState> {
   const supabase = await createClient();
 
   // Fetch storage_path first
-  const { data: photo, error: fetchError } = await (supabase.from("photos") as any)
+  const { data: photo, error: fetchError } = await supabase.from("photos")
     .select("storage_path, uploaded_by")
     .eq("id", id)
     .single();
@@ -139,7 +139,7 @@ export async function deletePhoto(id: string): Promise<ActionState> {
   }
 
   // Delete from DB
-  const { error: dbError } = await (supabase.from("photos") as any)
+  const { error: dbError } = await supabase.from("photos")
     .delete()
     .eq("id", id);
 

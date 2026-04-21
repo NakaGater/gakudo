@@ -42,7 +42,7 @@ export async function createAnnouncement(
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from("announcements") as any)
+  const { data, error } = await supabase.from("announcements")
     .insert({
       title: (title as string).trim(),
       body: (body as string).trim(),
@@ -86,7 +86,7 @@ export async function markAsRead(announcementId: string): Promise<void> {
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase.from("announcement_reads") as any).upsert(
+  await supabase.from("announcement_reads").upsert(
     { announcement_id: announcementId, user_id: user.id },
     { onConflict: "announcement_id,user_id", ignoreDuplicates: true },
   );

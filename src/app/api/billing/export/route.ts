@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
   // 権限チェック (admin/teacher のみ)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase.from("profiles") as any)
+  const { data: profile } = await supabase.from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
@@ -37,8 +37,7 @@ export async function GET(request: Request) {
   }
 
   // monthly_bills を children と結合して取得
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: bills, error: billsError } = await (supabase.from("monthly_bills") as any)
+  const { data: bills, error: billsError } = await supabase.from("monthly_bills")
     .select("total_extended_minutes, total_amount, status, year_month, children(name)")
     .eq("year_month", yearMonth);
 
@@ -49,13 +48,12 @@ export async function GET(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = ((bills ?? []) as any[]).map((b) => ({
-    child_name: b.children?.name ?? "",
-    year_month: b.year_month,
-    total_extended_minutes: b.total_extended_minutes,
-    total_amount: b.total_amount,
-    status: b.status,
+  const rows = (bills ?? []).map((b: Record<string, unknown>) => ({
+    child_name: (b.children as { name: string } | null)?.name ?? "",
+    year_month: b.year_month as string,
+    total_extended_minutes: b.total_extended_minutes as number,
+    total_amount: b.total_amount as number,
+    status: b.status as string,
   }));
 
   const csv = generateBillingCSV(rows);

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase.from('profiles') as any)
+  const { data: profile } = await supabase.from('profiles')
     .select('role')
     .eq('id', user.id)
     .single()
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: profileError } = await (adminClient.from('profiles') as any).upsert({
+  const { error: profileError } = await adminClient.from('profiles').upsert({
     id: inviteData.user.id,
     email: email.trim(),
     name: name.trim(),

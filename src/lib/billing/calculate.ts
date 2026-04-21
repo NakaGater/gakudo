@@ -20,7 +20,7 @@ export async function calculateMonthlyBill(
   const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rule } = await (supabase.from("billing_rules") as any)
+  const { data: rule } = await supabase.from("billing_rules")
     .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
     .lte("effective_from", lastDayOfMonth)
     .order("effective_from", { ascending: false })
@@ -39,7 +39,7 @@ export async function calculateMonthlyBill(
   const monthEndUTC = `${nextMonth}-01T00:00:00+09:00`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: attendances } = await (supabase.from("attendances") as any)
+  const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .eq("child_id", childId)
     .gte("recorded_at", monthStartUTC)
@@ -78,7 +78,7 @@ export async function calculateMonthlyBill(
 
   // monthly_bills へ upsert (child_id + year_month のユニーク制約で更新)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase.from("monthly_bills") as any).upsert(
+  await supabase.from("monthly_bills").upsert(
     {
       child_id: childId,
       year_month: yearMonth,

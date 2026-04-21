@@ -54,7 +54,7 @@ export async function uploadAttachment(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error: dbError } = await (supabase.from("attachments") as any)
+  const { data, error: dbError } = await supabase.from("attachments")
     .insert({
       entity_type: entityType,
       entity_id: entityId,
@@ -86,12 +86,11 @@ export async function deleteAttachment(
 
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: att, error: fetchError } = await (supabase
+  const { data: att, error: fetchError } = await supabase
     .from("attachments")
     .select("id, file_path")
     .eq("id", attachmentId)
-    .single() as any);
+    .single();
 
   if (fetchError || !att) {
     return { success: false, message: "添付ファイルが見つかりません" };

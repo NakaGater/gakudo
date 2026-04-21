@@ -24,7 +24,7 @@ export async function updateProfile(
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("profiles") as any)
+  const { error } = await supabase.from("profiles")
     .update({ name: name.trim() })
     .eq("id", user.id);
 

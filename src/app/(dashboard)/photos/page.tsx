@@ -13,7 +13,7 @@ export default async function PhotosPage() {
   const isStaff = user.role === "admin" || user.role === "teacher";
   const isAdmin = user.role === "admin";
 
-  const { data: photos } = await (supabase.from("photos") as any)
+  const { data: photos } = await supabase.from("photos")
     .select("*")
     .order("created_at", { ascending: false });
 

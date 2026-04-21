@@ -36,7 +36,7 @@ export async function createNews(
     created_by: user.id,
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from("site_news") as any)
+  const { data, error } = await supabase.from("site_news")
     .insert(insertData)
     .select("id")
     .single();
@@ -67,7 +67,7 @@ export async function deleteNews(id: string): Promise<ActionState> {
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("site_news") as any)
+  const { error } = await supabase.from("site_news")
     .delete()
     .eq("id", id);
 

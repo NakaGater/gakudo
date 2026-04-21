@@ -126,14 +126,14 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
   let childrenOptions: ChildOption[] = [];
   if (staff) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase.from("children") as any)
+    const { data } = await supabase.from("children")
       .select("id, name")
       .order("name");
     childrenOptions = (data ?? []) as ChildOption[];
   } else {
     // Parent: get children via child_parents
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase.from("child_parents") as any)
+    const { data } = await supabase.from("child_parents")
       .select("child_id, children(id, name)")
       .eq("parent_id", user.id);
 
@@ -164,7 +164,7 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
 
   // Fetch attendance records
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase.from("attendances") as any)
+  let query = supabase.from("attendances")
     .select("id, child_id, type, recorded_at")
     .gte("recorded_at", rangeStart)
     .lt("recorded_at", rangeEnd)

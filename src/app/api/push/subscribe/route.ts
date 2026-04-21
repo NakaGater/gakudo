@@ -49,8 +49,7 @@ export async function POST(request: Request) {
   }
 
   // Check for existing subscription
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ps = supabase.from('push_subscriptions') as any
+  const ps = supabase.from('push_subscriptions')
   const { data: existing, error: selectError } = await ps
     .select('id')
     .eq('user_id', user.id)
@@ -114,7 +113,7 @@ export async function DELETE(request: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: deleteError } = await (supabase.from('push_subscriptions') as any)
+  const { error: deleteError } = await supabase.from('push_subscriptions')
     .delete()
     .eq('user_id', user.id)
     .eq('endpoint', body.endpoint)

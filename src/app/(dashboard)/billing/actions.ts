@@ -26,7 +26,7 @@ export async function getActiveBillingRule(): Promise<BillingRule | null> {
   const today = new Date().toISOString().slice(0, 10);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase.from("billing_rules") as any)
+  const { data } = await supabase.from("billing_rules")
     .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
     .lte("effective_from", today)
     .order("effective_from", { ascending: false })
@@ -43,7 +43,7 @@ export async function getBillingRules(): Promise<BillingRule[]> {
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase.from("billing_rules") as any)
+  const { data } = await supabase.from("billing_rules")
     .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
     .order("effective_from", { ascending: false });
 
@@ -94,7 +94,7 @@ export async function createBillingRule(
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("billing_rules") as any).insert({
+  const { error } = await supabase.from("billing_rules").insert({
     regular_end_time: (regularEndTime as string).trim(),
     rate_per_unit: Number(ratePerUnit),
     unit_minutes: Number(unitMinutes),
@@ -128,7 +128,7 @@ export async function calculateAllBills(
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: children, error: childrenError } = await (supabase.from("children") as any)
+  const { data: children, error: childrenError } = await supabase.from("children")
     .select("id");
 
   if (childrenError || !children) {
@@ -176,7 +176,7 @@ export async function confirmBill(
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("monthly_bills") as any)
+  const { error } = await supabase.from("monthly_bills")
     .update({
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
@@ -211,7 +211,7 @@ export async function confirmAllBills(
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.from("monthly_bills") as any)
+  const { data, error } = await supabase.from("monthly_bills")
     .update({
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
