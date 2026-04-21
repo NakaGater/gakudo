@@ -30,14 +30,14 @@ export default async function SitePage({ params }: PageProps) {
   // news と gallery は専用ページがあるためスキップ
   if (slug === "news" || slug === "gallery") notFound();
 
-  let page: { title: string; content: string; updated_at: string } | null = null;
+  let page: { title: string; content: string; updated_at: string; metadata: Record<string, unknown> } | null = null;
   try {
     const supabase = await createClient();
     const { data } = await supabase
       .from("site_pages")
-      .select("title, content, updated_at")
+      .select("title, content, updated_at, metadata")
       .eq("slug", slug)
-      .single() as { data: { title: string; content: string; updated_at: string } | null };
+      .single() as { data: { title: string; content: string; updated_at: string; metadata: Record<string, unknown> } | null };
     page = data;
   } catch {
     notFound();
@@ -46,11 +46,11 @@ export default async function SitePage({ params }: PageProps) {
   if (!page) notFound();
 
   if (slug === "access") {
-    return <AccessPage title={page.title} content={page.content} />;
+    return <AccessPage title={page.title} content={page.content} metadata={page.metadata} />;
   }
 
   if (slug === "about") {
-    return <AboutPage title={page.title} content={page.content} />;
+    return <AboutPage title={page.title} content={page.content} metadata={page.metadata} />;
   }
 
   // 汎用ページ
@@ -64,7 +64,23 @@ export default async function SitePage({ params }: PageProps) {
   );
 }
 
-function AboutPage({ title, content }: { title: string; content: string }) {
+function AboutPage({ title, content, metadata }: { title: string; content: string; metadata: Record<string, unknown> }) {
+  const subtitle = (metadata?.subtitle as string) || "子どもたちが「ただいま！」と駆け込んでくる、あたたかい居場所です。";
+  const schedule = (metadata?.schedule as Array<{ time: string; label: string; emoji: string }>) || [
+    { time: "14:00", label: "入室・宿題タイム", emoji: "📝" },
+    { time: "15:30", label: "おやつ", emoji: "🍪" },
+    { time: "16:00", label: "自由遊び・活動", emoji: "⚽" },
+    { time: "18:00", label: "お迎え・退室", emoji: "👋" },
+  ];
+  const facilityInfo = (metadata?.facility_info as Array<{ label: string; value: string }>) || [
+    { label: "施設名", value: "星ヶ丘こどもクラブ" },
+    { label: "運営形態", value: "父母運営型 学童保育" },
+    { label: "対象", value: "小学1〜6年生" },
+    { label: "定員", value: "約30名" },
+    { label: "開所時間", value: "平日 放課後〜19:00 / 土曜・長期休暇 8:00〜19:00" },
+    { label: "休所日", value: "日曜・祝日・年末年始" },
+  ];
+
   return (
     <>
       {/* ヒーロー */}
@@ -72,7 +88,7 @@ function AboutPage({ title, content }: { title: string; content: string }) {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <h1 className="text-3xl font-bold text-fg sm:text-4xl">{title}</h1>
           <p className="mt-4 text-lg text-fg-muted max-w-2xl mx-auto leading-relaxed">
-            子どもたちが「ただいま！」と駆け込んでくる、あたたかい居場所です。
+            {subtitle}
           </p>
         </div>
       </section>
@@ -98,56 +114,55 @@ function AboutPage({ title, content }: { title: string; content: string }) {
       </section>
 
       {/* 1日の流れ */}
-      <section className="bg-amber-50/50 py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-fg text-center mb-10">1日の流れ</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { time: "14:00", label: "入室・宿題タイム", emoji: "📝" },
-              { time: "15:30", label: "おやつ", emoji: "🍪" },
-              { time: "16:00", label: "自由遊び・活動", emoji: "⚽" },
-              { time: "18:00", label: "お迎え・退室", emoji: "👋" },
-            ].map((item) => (
-              <div key={item.time} className="rounded-lg border border-border bg-bg p-5 text-center shadow-sm">
-                <p className="text-3xl mb-2">{item.emoji}</p>
-                <p className="text-sm font-bold text-accent">{item.time}</p>
-                <p className="text-sm text-fg-muted mt-1">{item.label}</p>
-              </div>
-            ))}
+      {schedule.length > 0 && (
+        <section className="bg-amber-50/50 py-16 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+            <h2 className="text-2xl font-bold text-fg text-center mb-10">1日の流れ</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {schedule.map((item) => (
+                <div key={item.time} className="rounded-lg border border-border bg-bg p-5 text-center shadow-sm">
+                  <p className="text-3xl mb-2">{item.emoji}</p>
+                  <p className="text-sm font-bold text-accent">{item.time}</p>
+                  <p className="text-sm text-fg-muted mt-1">{item.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 概要 */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-fg text-center mb-8">施設概要</h2>
-          <div className="overflow-hidden rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <tbody>
-                {[
-                  ["施設名", "星ヶ丘こどもクラブ"],
-                  ["運営形態", "父母運営型 学童保育"],
-                  ["対象", "小学1〜6年生"],
-                  ["定員", "約30名"],
-                  ["開所時間", "平日 放課後〜19:00 / 土曜・長期休暇 8:00〜19:00"],
-                  ["休所日", "日曜・祝日・年末年始"],
-                ].map(([label, value]) => (
-                  <tr key={label} className="border-b border-border last:border-b-0">
-                    <th className="bg-amber-50 px-4 py-3 text-left font-medium text-fg w-1/3">{label}</th>
-                    <td className="px-4 py-3 text-fg-muted">{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {facilityInfo.length > 0 && (
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+            <h2 className="text-2xl font-bold text-fg text-center mb-8">施設概要</h2>
+            <div className="overflow-hidden rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <tbody>
+                  {facilityInfo.map((item) => (
+                    <tr key={item.label} className="border-b border-border last:border-b-0">
+                      <th className="bg-amber-50 px-4 py-3 text-left font-medium text-fg w-1/3">{item.label}</th>
+                      <td className="px-4 py-3 text-fg-muted">{item.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }
 
-function AccessPage({ title, content }: { title: string; content: string }) {
+function AccessPage({ title, content, metadata }: { title: string; content: string; metadata: Record<string, unknown> }) {
+  const subtitle = (metadata?.subtitle as string) || "お気軽にお越しください。見学も随時受け付けております。";
+  const phone = (metadata?.phone as string) || "03-1234-5678";
+  const phoneHours = (metadata?.phone_hours as string) || "受付: 平日 9:00〜18:00";
+  const openingHours = (metadata?.opening_hours as string) || "平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00";
+  const visitHeading = (metadata?.visit_heading as string) || "見学のお申し込み";
+  const visitText = (metadata?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。";
+
   return (
     <>
       {/* ヒーロー */}
@@ -155,7 +170,7 @@ function AccessPage({ title, content }: { title: string; content: string }) {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <h1 className="text-3xl font-bold text-fg sm:text-4xl">{title}</h1>
           <p className="mt-4 text-lg text-fg-muted">
-            お気軽にお越しください。見学も随時受け付けております。
+            {subtitle}
           </p>
         </div>
       </section>
@@ -190,8 +205,8 @@ function AccessPage({ title, content }: { title: string; content: string }) {
                 <Phone size={20} className="mt-1 text-accent shrink-0" />
                 <div>
                   <h3 className="font-bold text-fg mb-1">お電話</h3>
-                  <p className="text-fg-muted text-sm">TEL: 03-1234-5678</p>
-                  <p className="text-fg-muted text-xs mt-1">受付: 平日 9:00〜18:00</p>
+                  <p className="text-fg-muted text-sm">TEL: {phone}</p>
+                  <p className="text-fg-muted text-xs mt-1">{phoneHours}</p>
                 </div>
               </div>
 
@@ -199,10 +214,8 @@ function AccessPage({ title, content }: { title: string; content: string }) {
                 <Clock size={20} className="mt-1 text-accent shrink-0" />
                 <div>
                   <h3 className="font-bold text-fg mb-1">開所時間</h3>
-                  <p className="text-fg-muted text-sm">
-                    平日: 放課後〜19:00
-                    <br />
-                    土曜・長期休暇: 8:00〜19:00
+                  <p className="text-fg-muted text-sm whitespace-pre-wrap">
+                    {openingHours}
                   </p>
                 </div>
               </div>
@@ -214,18 +227,16 @@ function AccessPage({ title, content }: { title: string; content: string }) {
       {/* 見学申し込み */}
       <section className="bg-amber-50/50 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-bold text-fg mb-4">見学のお申し込み</h2>
-          <p className="text-fg-muted mb-6">
-            入所をご検討中の方は、お気軽にお電話ください。
-            <br />
-            施設の見学は随時受け付けております。
+          <h2 className="text-2xl font-bold text-fg mb-4">{visitHeading}</h2>
+          <p className="text-fg-muted mb-6 whitespace-pre-wrap">
+            {visitText}
           </p>
           <a
-            href="tel:03-1234-5678"
+            href={`tel:${phone.replace(/-/g, "")}`}
             className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hv"
           >
             <Phone size={16} />
-            03-1234-5678 に電話する
+            {phone} に電話する
           </a>
         </div>
       </section>

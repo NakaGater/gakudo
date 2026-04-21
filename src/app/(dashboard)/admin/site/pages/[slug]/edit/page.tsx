@@ -18,9 +18,9 @@ export default async function EditSitePage({
   const supabase = await createClient();
   const { data: page, error } = await supabase
     .from("site_pages")
-    .select("slug, title, content")
+    .select("slug, title, content, metadata")
     .eq("slug", slug)
-    .single<{ slug: string; title: string; content: string }>();
+    .single<{ slug: string; title: string; content: string; metadata: Record<string, unknown> }>();
 
   if (error || !page) notFound();
 
@@ -37,7 +37,7 @@ export default async function EditSitePage({
         ページ編集: {page.title}
       </h1>
 
-      <EditPageForm slug={page.slug} title={page.title} content={page.content} />
+      <EditPageForm slug={page.slug} title={page.title} content={page.content} metadata={page.metadata} />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import type { Database } from "@/lib/supabase/types";
+import type { Database, Json } from "@/lib/supabase/types";
 
 export type ActionState = {
   success: boolean;
@@ -23,6 +23,7 @@ export async function updateSitePage(
 
   const title = formData.get("title");
   const content = formData.get("content");
+  const metadataRaw = formData.get("metadata");
 
   if (typeof title !== "string" || !title.trim()) {
     return { success: false, message: "タイトルを入力してください" };
@@ -31,10 +32,20 @@ export async function updateSitePage(
     return { success: false, message: "コンテンツを入力してください" };
   }
 
+  let metadata: Record<string, unknown> = {};
+  if (typeof metadataRaw === "string" && metadataRaw.trim()) {
+    try {
+      metadata = JSON.parse(metadataRaw);
+    } catch {
+      return { success: false, message: "メタデータのJSON形式が不正です" };
+    }
+  }
+
   const supabase = await createClient();
   const updateData: SitePageUpdate = {
     title: title.trim(),
     content,
+    metadata: metadata as unknown as Json,
     updated_by: user.id,
   };
   // Supabase PostgREST builder .update() resolves to `never` with TS 5.9
