@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useActionState } from "react";
+import { useState, useCallback, useActionState, useEffect } from "react";
 import { Button } from "@/components/ui";
 import { Badge } from "@/components/ui";
 import type { BadgeVariant } from "@/components/ui";
@@ -40,6 +40,12 @@ function formatDate(dateString: string) {
 function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentUserId: string; onClose: () => void }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(updateUser, null);
   const isSelf = user.id === currentUserId;
+
+  useEffect(() => {
+    if (state?.success) {
+      onClose();
+    }
+  }, [state, onClose]);
 
   return (
     <tr className="border-b border-border bg-accent-light/30">
@@ -85,6 +91,12 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
 
 function DeleteConfirm({ user, onClose }: { user: Profile; onClose: () => void }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(deleteUser, null);
+
+  useEffect(() => {
+    if (state?.success) {
+      onClose();
+    }
+  }, [state, onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
