@@ -122,13 +122,13 @@ export default async function BillingListPage({ searchParams }: Props) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto flex flex-col gap-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">📒 月次請求一覧</h1>
+      <div className="main__hdr flex-wrap gap-3">
+        <h1 className="main__title">📒 月次請求一覧</h1>
         {staff && (
           <div className="flex items-center gap-3">
             <Link
               href="/billing/rules"
-              className="text-sm text-accent hover:text-accent-hv"
+              className="text-sm text-cr-orange hover:underline"
             >
               料金ルール →
             </Link>
@@ -150,7 +150,7 @@ export default async function BillingListPage({ searchParams }: Props) {
       {bills.length === 0 ? (
         <Card>
           <CardContent>
-            <p className="text-fg-muted text-center py-4">
+            <p className="text-ink-mid text-center py-4">
               {yearMonth.replace("-", "年")}月の請求データはありません
             </p>
           </CardContent>
@@ -216,8 +216,8 @@ export default async function BillingListPage({ searchParams }: Props) {
                 <Card>
                   <CardContent className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-fg">{bill.child_name}</p>
-                      <p className="text-sm text-fg-muted">
+                      <p className="font-medium">{bill.child_name}</p>
+                      <p className="text-sm text-ink-mid">
                         {formatMinutes(bill.total_extended_minutes)} ・{" "}
                         {formatAmount(bill.total_amount)}
                       </p>

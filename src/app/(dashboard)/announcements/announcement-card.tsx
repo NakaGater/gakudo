@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 export interface AnnouncementCardProps {
   id: string;
@@ -32,21 +30,17 @@ export function AnnouncementCard({
 }: AnnouncementCardProps) {
   return (
     <Link href={`/announcements/${id}`} className="block">
-      <Card className={`transition-shadow hover:shadow-md ${!isRead ? "border-l-4 border-l-cr-orange" : ""}`}>
-        <CardContent className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-fg truncate font-story">{title}</h2>
-            {!isRead && <Badge variant="warning">🔔 未読</Badge>}
-          </div>
-          <p className="text-sm text-fg/70">{truncate(body, 80)}</p>
-          <div className="flex items-center justify-between text-xs text-fg/50">
-            <span>{author}</span>
-            <time dateTime={date}>
-              {dateFormatter.format(new Date(date))}
-            </time>
-          </div>
-        </CardContent>
-      </Card>
+      <div className={`ann-card ${!isRead ? "ann-card--unread" : "ann-card--read"}`}>
+        <div className="flex items-center justify-between gap-2">
+          <time className="ann-card__date" dateTime={date}>
+            {dateFormatter.format(new Date(date))}
+          </time>
+          {!isRead && <span className="tag tag-warn">🔔 未読</span>}
+        </div>
+        <h2 className="ann-card__title truncate">{title}</h2>
+        <p className="ann-card__body">{truncate(body, 80)}</p>
+        <span className="ann-card__date">{author}</span>
+      </div>
     </Link>
   );
 }

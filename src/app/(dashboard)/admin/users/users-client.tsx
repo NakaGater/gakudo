@@ -2,8 +2,6 @@
 
 import { useState, useCallback, useActionState, useEffect } from "react";
 import { Button } from "@/components/ui";
-import { Badge } from "@/components/ui";
-import type { BadgeVariant } from "@/components/ui";
 import { InviteForm } from "./invite-form";
 import { updateUser, deleteUser, type ActionState } from "./actions";
 import { Pencil, Trash2, X } from "lucide-react";
@@ -21,12 +19,6 @@ const ROLE_LABELS: Record<string, string> = {
   admin: "管理者",
   teacher: "先生",
   parent: "保護者",
-};
-
-const ROLE_BADGE_VARIANT: Record<string, BadgeVariant> = {
-  admin: "danger",
-  teacher: "warning",
-  parent: "default",
 };
 
 function formatDate(dateString: string) {
@@ -53,7 +45,7 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
         <form action={formAction} className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="id" value={user.id} />
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-fg-muted">名前</label>
+            <label className="text-xs text-ink-mid">名前</label>
             <input
               name="name"
               defaultValue={user.name}
@@ -62,7 +54,7 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-fg-muted">役割</label>
+            <label className="text-xs text-ink-mid">役割</label>
             <select
               name="role"
               defaultValue={user.role}
@@ -130,7 +122,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-fg">ユーザー管理</h1>
+        <h1 className="main__title">ユーザー管理</h1>
         {!showInvite && (
           <Button onClick={() => setShowInvite(true)}>ユーザー招待</Button>
         )}
@@ -148,15 +140,15 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
         <DeleteConfirm user={deletingUser} onClose={() => setDeletingUser(null)} />
       )}
 
-      <div className="rounded-md bg-bg-elev shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-md overflow-hidden">
+        <table className="admin-table">
           <thead>
             <tr className="border-b border-border text-left">
-              <th className="px-4 py-3 font-medium text-fg-muted">名前</th>
-              <th className="px-4 py-3 font-medium text-fg-muted">メールアドレス</th>
-              <th className="px-4 py-3 font-medium text-fg-muted">役割</th>
-              <th className="px-4 py-3 font-medium text-fg-muted">登録日</th>
-              <th className="px-4 py-3 font-medium text-fg-muted w-24">操作</th>
+              <th className="px-4 py-3 font-medium text-ink-mid">名前</th>
+              <th className="px-4 py-3 font-medium text-ink-mid">メールアドレス</th>
+              <th className="px-4 py-3 font-medium text-ink-mid">役割</th>
+              <th className="px-4 py-3 font-medium text-ink-mid">登録日</th>
+              <th className="px-4 py-3 font-medium text-ink-mid w-24">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -170,14 +162,14 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
                 />
               ) : (
                 <tr key={u.id} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3 text-fg">{u.name}</td>
-                  <td className="px-4 py-3 text-fg-muted">{u.email}</td>
+                  <td className="px-4 py-3">{u.name}</td>
+                  <td className="px-4 py-3 text-ink-mid">{u.email}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={ROLE_BADGE_VARIANT[u.role] ?? "default"}>
+                    <span className={`role-badge role-badge--${u.role}`}>
                       {ROLE_LABELS[u.role] ?? u.role}
-                    </Badge>
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-fg-muted">{formatDate(u.created_at)}</td>
+                  <td className="px-4 py-3 text-ink-mid">{formatDate(u.created_at)}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
                       <button
@@ -203,7 +195,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
             )}
             {users.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-fg-muted">
+                <td colSpan={5} className="px-4 py-8 text-center text-ink-mid">
                   ユーザーがいません
                 </td>
               </tr>

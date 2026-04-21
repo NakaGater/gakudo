@@ -1,6 +1,6 @@
 import { getUser } from "@/lib/auth/get-user";
 import { createClient } from "@/lib/supabase/server";
-import { Badge, Button } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { setPhotoVisibility, deletePhoto } from "./actions";
 import { UploadForm } from "./upload-form";
 import type { Database } from "@/lib/supabase/types";
@@ -28,7 +28,7 @@ export default async function PhotosPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-fg font-story ink-bleed">📷 写真一覧</h1>
+        <h1 className="main__title">📷 写真一覧</h1>
       </div>
 
       {isStaff && (
@@ -43,7 +43,7 @@ export default async function PhotosPage() {
       )}
 
       {photoList.length === 0 ? (
-        <p className="text-fg-muted text-center py-12">写真がありません</p>
+        <p className="text-ink-mid text-center py-12">写真がありません</p>
       ) : (
         <div className="corkboard">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -64,21 +64,17 @@ export default async function PhotosPage() {
               </div>
               <div className="p-2 pt-3 space-y-1">
                 {photo.event_name && (
-                  <p className="text-sm font-medium text-fg">
+                  <p className="photo-mgmt__title">
                     {photo.event_name}
                   </p>
                 )}
                 {photo.caption && (
-                  <p className="text-xs text-fg-muted">{photo.caption}</p>
+                  <p className="photo-mgmt__caption">{photo.caption}</p>
                 )}
-                <div className="flex items-center justify-between pt-1">
-                  <Badge
-                    variant={
-                      photo.visibility === "public" ? "success" : "default"
-                    }
-                  >
+                <div className="photo-mgmt__actions">
+                  <span className={`status-badge ${photo.visibility === "public" ? "status-badge--public" : "status-badge--private"}`}>
                     {photo.visibility === "public" ? "公開" : "非公開"}
-                  </Badge>
+                  </span>
 
                   {isAdmin && (
                     <div className="flex gap-1">

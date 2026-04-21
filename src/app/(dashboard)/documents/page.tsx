@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import { Card, CardContent, Badge } from "@/components/ui";
+import { Badge } from "@/components/ui";
 import { UploadSection } from "./upload-section";
 
 type DocumentRow = {
@@ -47,8 +47,8 @@ export default async function DocumentsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">📁 資料一覧</h1>
+      <div className="main__hdr">
+        <h1 className="main__title">📁 資料一覧</h1>
         {isStaff && <UploadSection />}
       </div>
 
@@ -70,22 +70,20 @@ export default async function DocumentsPage() {
                 <div className="folder-jacket flex flex-col gap-3">
                   {docs.map((doc) => (
                     <Link key={doc.id} href={`/documents/${doc.id}`}>
-                      <Card className="transition-colors hover:bg-bg-elev/80">
-                        <CardContent className="flex items-center justify-between gap-4">
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate font-medium text-fg">
-                              {doc.title}
-                            </p>
-                            <p className="mt-1 text-sm text-fg/60">
-                              {doc.uploader?.name ?? "不明"} ・{" "}
-                              {new Date(doc.created_at).toLocaleDateString(
-                                "ja-JP",
-                              )}
-                            </p>
-                          </div>
-                          <Badge>{doc.category}</Badge>
-                        </CardContent>
-                      </Card>
+                      <div className="doc-card">
+                        <div className="min-w-0 flex-1">
+                          <p className="doc-card__title truncate">
+                            {doc.title}
+                          </p>
+                          <p className="doc-card__meta">
+                            {doc.uploader?.name ?? "不明"} ・{" "}
+                            {new Date(doc.created_at).toLocaleDateString(
+                              "ja-JP",
+                            )}
+                          </p>
+                        </div>
+                        <Badge>{doc.category}</Badge>
+                      </div>
                     </Link>
                   ))}
                 </div>

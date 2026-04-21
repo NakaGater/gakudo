@@ -58,8 +58,8 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">📬 お知らせ</h1>
+      <div className="main__hdr">
+        <h1 className="main__title">📬 お知らせ</h1>
         {isStaff && (
           <Link href="/announcements/new">
             <Button size="sm">新規作成</Button>
