@@ -16,53 +16,70 @@ export const metadata: Metadata = {
     "星ヶ丘こどもクラブは、保護者が運営する学童保育施設です。安心・安全な放課後の居場所を提供します。",
 };
 
-const features = [
+const DEFAULT_HERO_TITLE = "子どもたちの\n笑顔あふれる放課後を";
+const DEFAULT_HERO_TEXT =
+  "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
+
+type FeatureItem = { icon: string; title: string; description: string };
+
+const DEFAULT_FEATURES: FeatureItem[] = [
   {
-    icon: QrCode,
+    icon: "QrCode",
     title: "安全管理（QR入退場）",
     description:
       "専用QRコードで入室・退室をワンタッチ記録。保護者のスマホにリアルタイムで通知が届きます。",
   },
   {
-    icon: Megaphone,
+    icon: "Megaphone",
     title: "連絡配信",
     description:
       "行事予定やお知らせをアプリから配信。紙のプリントをなくし、既読確認も可能です。",
   },
   {
-    icon: Camera,
+    icon: "Camera",
     title: "写真共有",
     description:
       "施設での活動写真を保護者限定で安全に共有。行事の様子をいつでも振り返れます。",
   },
   {
-    icon: Receipt,
+    icon: "Receipt",
     title: "請求管理",
     description:
       "延長保育の料金を退室時間から自動計算。月次の請求書をオンラインで確認できます。",
   },
-] as const;
+];
 
-const DEFAULT_HERO_TITLE = "子どもたちの\n笑顔あふれる放課後を";
-const DEFAULT_HERO_TEXT =
-  "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  QrCode, Megaphone, Camera, Receipt,
+};
 
 export default async function HomePage() {
   let heroTitle = DEFAULT_HERO_TITLE;
   let heroText = DEFAULT_HERO_TEXT;
+  let featuresHeading = "施設の特徴";
+  let featuresSubtitle = "デジタルの力で、保護者の安心と運営の効率化を両立します。";
+  let featureItems: FeatureItem[] = DEFAULT_FEATURES;
   try {
     const supabase = await createClient();
     const { data: homePage } = await supabase
       .from("site_pages")
-      .select("title, content")
+      .select("title, content, metadata")
       .eq("slug", "home")
-      .single() as { data: { title: string; content: string } | null };
+      .single() as { data: { title: string; content: string; metadata: Record<string, unknown> } | null };
 
     if (homePage?.title) {
       heroTitle = homePage.title;
     }
     if (homePage?.content) {
       heroText = homePage.content;
+    }
+    if (homePage?.metadata) {
+      const m = homePage.metadata;
+      if (m.features_heading) featuresHeading = m.features_heading as string;
+      if (m.features_subtitle) featuresSubtitle = m.features_subtitle as string;
+      if (Array.isArray(m.features) && m.features.length > 0) {
+        featureItems = m.features as FeatureItem[];
+      }
     }
   } catch {
     // DB接続エラー時はデフォルトテキストを使用
@@ -120,26 +137,33 @@ export default async function HomePage() {
       <section className="bg-bg py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-fg sm:text-3xl">
-            施設の特徴
+            {featuresHeading}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-fg-muted">
-            デジタルの力で、保護者の安心と運営の効率化を両立します。
+            {featuresSubtitle}
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-lg border border-border bg-bg-elev p-6 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent-light text-accent">
-                  <feature.icon size={22} strokeWidth={1.75} />
+            {featureItems.map((feature) => {
+              const IconComponent = ICON_MAP[feature.icon];
+              return (
+                <div
+                  key={feature.title}
+                  className="rounded-lg border border-border bg-bg-elev p-6 shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent-light text-accent">
+                    {IconComponent ? (
+                      <IconComponent size={22} strokeWidth={1.75} />
+                    ) : (
+                      <span className="text-lg">{feature.icon}</span>
+                    )}
+                  </div>
+                  <h3 className="text-base font-bold text-fg">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-fg-muted">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-base font-bold text-fg">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -90,6 +90,11 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
         />
       </div>
 
+      {/* Home ページ固有フィールド */}
+      {slug === "home" && (
+        <HomeMetaFields meta={meta} updateMeta={updateMeta} />
+      )}
+
       {/* About ページ固有フィールド */}
       {slug === "about" && (
         <AboutMetaFields meta={meta} updateMeta={updateMeta} />
@@ -106,6 +111,109 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
         </Button>
       </div>
     </form>
+  );
+}
+
+/* ================================================================
+   Home ページ: 施設の特徴
+   ================================================================ */
+function HomeMetaFields({
+  meta,
+  updateMeta,
+}: {
+  meta: Record<string, unknown>;
+  updateMeta: (key: string, value: unknown) => void;
+}) {
+  type FeatureItem = { icon: string; title: string; description: string };
+  const features = (meta.features as FeatureItem[]) ?? [];
+
+  const updateFeatureItem = (idx: number, field: keyof FeatureItem, value: string) => {
+    const updated = [...features];
+    updated[idx] = { ...updated[idx], [field]: value };
+    updateMeta("features", updated);
+  };
+
+  const addFeatureItem = () => {
+    updateMeta("features", [...features, { icon: "⭐", title: "", description: "" }]);
+  };
+
+  const removeFeatureItem = (idx: number) => {
+    updateMeta("features", features.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <>
+      <fieldset className="border border-border rounded-md p-4">
+        <legend className="text-sm font-bold text-fg px-2">特徴セクション</legend>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-fg-muted">セクション見出し</label>
+            <input
+              type="text"
+              value={(meta.features_heading as string) ?? "施設の特徴"}
+              onChange={(e) => updateMeta("features_heading", e.target.value)}
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-fg-muted">セクション説明</label>
+            <input
+              type="text"
+              value={(meta.features_subtitle as string) ?? ""}
+              onChange={(e) => updateMeta("features_subtitle", e.target.value)}
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="border border-border rounded-md p-4">
+        <legend className="text-sm font-bold text-fg px-2">特徴カード</legend>
+        <div className="flex flex-col gap-4">
+          {features.map((item, idx) => (
+            <div key={idx} className="flex flex-col gap-2 p-3 border border-border/50 rounded-md bg-bg">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="アイコン（絵文字）"
+                  value={item.icon}
+                  onChange={(e) => updateFeatureItem(idx, "icon", e.target.value)}
+                  className="w-20 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm text-center"
+                />
+                <input
+                  type="text"
+                  placeholder="タイトル"
+                  value={item.title}
+                  onChange={(e) => updateFeatureItem(idx, "title", e.target.value)}
+                  className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeFeatureItem(idx)}
+                  className="text-danger hover:text-danger/80 text-sm px-2"
+                >
+                  ✕
+                </button>
+              </div>
+              <textarea
+                placeholder="説明文"
+                value={item.description}
+                onChange={(e) => updateFeatureItem(idx, "description", e.target.value)}
+                rows={2}
+                className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm resize-y"
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addFeatureItem}
+            className="self-start text-sm text-accent hover:text-accent-hv"
+          >
+            ＋ 追加
+          </button>
+        </div>
+      </fieldset>
+    </>
   );
 }
 
@@ -152,6 +260,42 @@ function AboutMetaFields({
 
   return (
     <>
+      {/* 理念セクション */}
+      <fieldset className="border border-border rounded-md p-4">
+        <legend className="text-sm font-bold text-fg px-2">理念セクション</legend>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-fg-muted">セクション見出し</label>
+            <input
+              type="text"
+              value={(meta.vision_heading as string) ?? "私たちの想い"}
+              onChange={(e) => updateMeta("vision_heading", e.target.value)}
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-fg-muted">絵文字</label>
+              <input
+                type="text"
+                value={(meta.vision_emoji as string) ?? "🏠"}
+                onChange={(e) => updateMeta("vision_emoji", e.target.value)}
+                className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm text-center"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-fg-muted">キャッチコピー</label>
+              <input
+                type="text"
+                value={(meta.vision_tagline as string) ?? "家庭のようなあたたかさ"}
+                onChange={(e) => updateMeta("vision_tagline", e.target.value)}
+                className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
       {/* 1日の流れ */}
       <fieldset className="border border-border rounded-md p-4">
         <legend className="text-sm font-bold text-fg px-2">1日の流れ</legend>

@@ -66,6 +66,9 @@ export default async function SitePage({ params }: PageProps) {
 
 function AboutPage({ title, content, metadata }: { title: string; content: string; metadata: Record<string, unknown> }) {
   const subtitle = (metadata?.subtitle as string) || "子どもたちが「ただいま！」と駆け込んでくる、あたたかい居場所です。";
+  const visionHeading = (metadata?.vision_heading as string) || "私たちの想い";
+  const visionEmoji = (metadata?.vision_emoji as string) || "🏠";
+  const visionTagline = (metadata?.vision_tagline as string) || "家庭のようなあたたかさ";
   const schedule = (metadata?.schedule as Array<{ time: string; label: string; emoji: string }>) || [
     { time: "14:00", label: "入室・宿題タイム", emoji: "📝" },
     { time: "15:30", label: "おやつ", emoji: "🍪" },
@@ -98,15 +101,15 @@ function AboutPage({ title, content, metadata }: { title: string; content: strin
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="grid gap-10 md:grid-cols-2 items-center">
             <div>
-              <h2 className="text-2xl font-bold text-fg mb-4">私たちの想い</h2>
+              <h2 className="text-2xl font-bold text-fg mb-4">{visionHeading}</h2>
               <div className="text-fg-muted leading-relaxed whitespace-pre-wrap">
                 {content}
               </div>
             </div>
             <div className="rounded-2xl bg-amber-50 p-10 text-center">
-              <p className="text-6xl mb-4">🏠</p>
+              <p className="text-6xl mb-4">{visionEmoji}</p>
               <p className="text-sm font-medium text-amber-700">
-                家庭のようなあたたかさ
+                {visionTagline}
               </p>
             </div>
           </div>

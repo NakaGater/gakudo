@@ -6,6 +6,9 @@ ALTER TABLE site_pages
 -- 既存の about ページにデフォルトメタデータを設定
 UPDATE site_pages SET metadata = '{
   "subtitle": "子どもたちが「ただいま！」と駆け込んでくる、あたたかい居場所です。",
+  "vision_heading": "私たちの想い",
+  "vision_emoji": "🏠",
+  "vision_tagline": "家庭のようなあたたかさ",
   "schedule": [
     { "time": "14:00", "label": "入室・宿題タイム", "emoji": "📝" },
     { "time": "15:30", "label": "おやつ", "emoji": "🍪" },
