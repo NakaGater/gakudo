@@ -47,7 +47,6 @@ export async function createChild(
   const qrCode = `GK-${nanoid()}`;
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await supabase.from("children")
     .insert({
       name: validated.name,
@@ -79,7 +78,6 @@ export async function updateChild(
   if (!validated.ok) return validated.error;
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from("children")
     .update({ name: validated.name, grade: validated.grade })
     .eq("id", id);
@@ -102,7 +100,6 @@ export async function regenerateQR(childId: string): Promise<ActionState> {
   const newQR = `GK-${nanoid()}`;
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from("children")
     .update({ qr_code: newQR, qr_active: true })
     .eq("id", childId);
@@ -123,7 +120,6 @@ export async function deleteChild(id: string): Promise<ActionState> {
   }
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from("children")
     .delete()
     .eq("id", id);
@@ -153,7 +149,6 @@ export async function searchParents(
   const supabase = await createClient();
   const pattern = `%${query.trim()}%`;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await supabase.from("profiles")
     .select("id, name, email")
     .eq("role", "parent")
@@ -174,7 +169,6 @@ export async function linkParent(
   }
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from("child_parents")
     .upsert(
       { child_id: childId, parent_id: parentId },
@@ -199,7 +193,6 @@ export async function unlinkParent(
   }
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from("child_parents")
     .delete()
     .eq("child_id", childId)

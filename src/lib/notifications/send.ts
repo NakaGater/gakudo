@@ -73,7 +73,6 @@ export async function sendAnnouncementNotification(
 }
 
 async function sendPushNotifications(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   userIds: string[],
   title: string,
@@ -124,7 +123,6 @@ async function sendPushNotifications(
 }
 
 async function sendEmailNotifications(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   userIds: string[],
   subject: string,

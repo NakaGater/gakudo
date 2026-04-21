@@ -8,7 +8,6 @@ export default async function AdminUsersPage() {
   if (user.role !== "admin") redirect("/");
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profiles, error } = await supabase.from("profiles")
     .select("id, email, name, role, created_at")
     .order("created_at", { ascending: false });

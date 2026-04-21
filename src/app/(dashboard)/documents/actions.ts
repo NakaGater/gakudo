@@ -74,7 +74,6 @@ export async function uploadDocument(
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: dbError } = await supabase.from("documents").insert({
     title: (title as string).trim(),
     category: category as string,
@@ -101,7 +100,6 @@ export async function deleteDocument(
   const user = await getUser();
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: doc, error: fetchError } = await supabase
     .from("documents")
     .select("id, file_path, uploaded_by")

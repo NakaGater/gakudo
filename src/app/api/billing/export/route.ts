@@ -15,7 +15,6 @@ export async function GET(request: Request) {
   }
 
   // 権限チェック (admin/teacher のみ)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await supabase.from("profiles")
     .select("role")
     .eq("id", user.id)

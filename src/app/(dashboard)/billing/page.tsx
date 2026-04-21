@@ -48,7 +48,6 @@ export default async function BillingListPage({ searchParams }: Props) {
   const childNames = new Map<string, string>();
 
   if (staff) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await supabase.from("children")
       .select("id, name")
       .order("name");
@@ -57,7 +56,6 @@ export default async function BillingListPage({ searchParams }: Props) {
       childNames.set(c.id, c.name);
     }
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await supabase.from("child_parents")
       .select("child_id, children(id, name)")
       .eq("parent_id", user.id);
@@ -73,7 +71,6 @@ export default async function BillingListPage({ searchParams }: Props) {
   // Fetch monthly bills for the selected month
   let bills: BillRow[] = [];
   if (childIds.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = supabase.from("monthly_bills")
       .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
       .eq("year_month", yearMonth)

@@ -48,7 +48,6 @@ export async function inviteUser(
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: profileError } = await adminClient.from("profiles").upsert({
     id: inviteData.user.id,
     email: email.trim(),
@@ -97,7 +96,6 @@ export async function updateUser(
 
   const adminClient = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: profileError } = await adminClient.from("profiles")
     .update({ name: name.trim(), role })
     .eq("id", targetId);
@@ -145,7 +143,6 @@ export async function deleteUser(
 
   const adminClient = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: profileError } = await adminClient.from("profiles")
     .delete()
     .eq("id", targetId);

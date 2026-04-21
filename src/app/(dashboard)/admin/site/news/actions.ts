@@ -35,7 +35,6 @@ export async function createNews(
     body: body.trim(),
     created_by: user.id,
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await supabase.from("site_news")
     .insert(insertData)
     .select("id")
@@ -66,7 +65,6 @@ export async function deleteNews(id: string): Promise<ActionState> {
   if (user.role !== "admin") redirect("/");
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from("site_news")
     .delete()
     .eq("id", id);

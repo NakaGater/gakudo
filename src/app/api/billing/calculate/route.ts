@@ -15,7 +15,6 @@ export async function POST(request: Request) {
   }
 
   // 権限チェック (admin/teacher のみ)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await supabase.from("profiles")
     .select("role")
     .eq("id", user.id)
@@ -49,7 +48,6 @@ export async function POST(request: Request) {
   }
 
   // 全児童を取得
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: children, error: childrenError } = await supabase.from("children")
     .select("id");
 

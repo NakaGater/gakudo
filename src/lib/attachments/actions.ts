@@ -53,7 +53,6 @@ export async function uploadAttachment(
     return { success: false, message: `アップロード失敗: ${uploadError.message}` };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error: dbError } = await supabase.from("attachments")
     .insert({
       entity_type: entityType,

@@ -20,7 +20,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await supabase.from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -75,7 +74,6 @@ export async function POST(request: Request) {
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: profileError } = await adminClient.from('profiles').upsert({
     id: inviteData.user.id,
     email: email.trim(),

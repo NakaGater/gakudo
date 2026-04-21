@@ -33,7 +33,6 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
   const supabase = await createClient();
   const { start, end } = todayRangeJST();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: children } = await supabase.from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
@@ -41,7 +40,6 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
 
   if (!children || children.length === 0) return [];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
@@ -90,7 +88,6 @@ export async function getDashboardAttendanceStatus(): Promise<
   const supabase = await createClient();
   const { start, end } = todayRangeJST();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: children } = await supabase.from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
@@ -99,7 +96,6 @@ export async function getDashboardAttendanceStatus(): Promise<
   if (!children || children.length === 0) return [];
 
   // Fetch today's records sorted ascending so we can find first enter & latest record
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
@@ -158,7 +154,6 @@ export async function recordManualAttendance(
   const supabase = await createClient();
 
   // 1. Verify child exists
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: child } = await supabase.from("children")
     .select("id, name")
     .eq("id", childId)
@@ -171,7 +166,6 @@ export async function recordManualAttendance(
   // 2. Get latest attendance for this child today (JST)
   const { start, end } = todayRangeJST();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: latest } = await supabase.from("attendances")
     .select("id, type, recorded_at")
     .eq("child_id", child.id)
@@ -186,7 +180,6 @@ export async function recordManualAttendance(
     !latest || latest.type === "exit" ? "enter" : "exit";
 
   // 4. Insert attendance record
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: record, error: insertError } = await supabase.from("attendances")
     .insert({
       child_id: child.id,
@@ -229,7 +222,6 @@ export async function recordAttendance(
   const supabase = await createClient();
 
   // 1. Look up child by qr_code
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: child } = await supabase.from("children")
     .select("id, name, qr_active")
     .eq("qr_code", qrCode)
@@ -246,7 +238,6 @@ export async function recordAttendance(
   // 2. Get latest attendance for this child today (JST)
   const { start, end } = todayRangeJST();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: latest } = await supabase.from("attendances")
     .select("id, type, recorded_at")
     .eq("child_id", child.id)
@@ -261,7 +252,6 @@ export async function recordAttendance(
     !latest || latest.type === "exit" ? "enter" : "exit";
 
   // 4. Insert attendance record
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: record, error: insertError } = await supabase.from("attendances")
     .insert({
       child_id: child.id,
