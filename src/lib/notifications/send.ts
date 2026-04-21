@@ -73,7 +73,7 @@ export async function sendAnnouncementNotification(
 }
 
 async function sendPushNotifications(
-  supabase: any,
+  supabase: ReturnType<typeof createAdminClient>,
   userIds: string[],
   title: string,
   body: string,
@@ -82,7 +82,7 @@ async function sendPushNotifications(
   let vapidKeys: { publicKey: string; privateKey: string };
   try {
     vapidKeys = getVapidKeys();
-  } catch (e) {
+  } catch (_e) {
     console.error("[notifications] VAPID keys not configured, skipping push");
     return;
   }
@@ -123,7 +123,7 @@ async function sendPushNotifications(
 }
 
 async function sendEmailNotifications(
-  supabase: any,
+  supabase: ReturnType<typeof createAdminClient>,
   userIds: string[],
   subject: string,
   body: string,

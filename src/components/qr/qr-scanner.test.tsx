@@ -1,4 +1,4 @@
-import { render, screen, cleanup, act, waitFor } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import { describe, it, expect, afterEach, vi } from "vitest";
 
 const mockStart = vi.fn().mockResolvedValue(undefined);

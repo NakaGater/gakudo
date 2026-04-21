@@ -44,7 +44,7 @@ export default async function BillingListPage({ searchParams }: Props) {
   const yearMonth = params.month || currentYearMonthJST();
 
   // Build child ID list and name map
-  let childIds: string[] = [];
+  const childIds: string[] = [];
   const childNames = new Map<string, string>();
 
   if (staff) {

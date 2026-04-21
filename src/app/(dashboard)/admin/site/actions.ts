@@ -45,7 +45,6 @@ export async function updateSitePage(
     updated_by: user.id,
   };
   const { error } = await supabase.from("site_pages")
-    // @ts-ignore -- Supabase PostgREST resolves update param to `never` under TS 5.9
     .update(updateData)
     .eq("slug", slug);
 

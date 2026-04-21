@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import { isStaff } from "@/lib/auth/roles";
 import type { ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 import type { BillingRule } from "./types";
