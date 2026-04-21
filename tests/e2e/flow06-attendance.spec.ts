@@ -31,7 +31,7 @@ test.describe("Flow 6: Attendance (US-6)", () => {
   test("attendance dashboard page renders", async ({ page }) => {
     await page.goto("/attendance/dashboard");
     await expect(
-      page.getByRole("heading", { name: "本日の入退室状況" }),
+      page.getByRole("heading", { name: /きょうの\s*ようす/ }),
     ).toBeVisible({ timeout: 10000 });
   });
 

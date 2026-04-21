@@ -8,7 +8,7 @@ test.describe("Flow 9: Mobile viewport", () => {
     // Login at mobile width
     await page.goto("/login");
     await expect(
-      page.getByRole("heading", { name: "ログイン" }),
+      page.getByRole("heading", { name: "星ヶ丘こどもクラブ" }),
     ).toBeVisible();
 
     await loginViaForm(page, "admin@example.com", "password123");

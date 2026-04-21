@@ -31,7 +31,7 @@ test.describe("Flow 4: Dashboard navigation (admin)", () => {
       { path: "/attendance", marker: "入退室管理" },
       { path: "/announcements", marker: "お知らせ" },
       { path: "/billing", marker: "月次請求一覧" },
-      { path: "/photos", marker: "写真一覧" },
+      { path: "/photos", marker: "写真管理" },
       { path: "/documents", marker: "資料一覧" },
       { path: "/profile", marker: "プロフィール" },
     ];

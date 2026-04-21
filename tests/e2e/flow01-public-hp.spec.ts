@@ -5,8 +5,9 @@ test.describe("Flow 1: Public HP renders (unauthenticated)", () => {
   test("homepage renders facility content", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto("/");
+    // Hero section exists with facility name
     await expect(
-      page.getByRole("heading", { name: "ホーム" }),
+      page.getByText("星ヶ丘こどもクラブ").first(),
     ).toBeVisible();
     // Features section heading from seed data
     await expect(

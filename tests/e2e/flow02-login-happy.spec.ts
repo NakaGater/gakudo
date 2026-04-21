@@ -7,7 +7,7 @@ test.describe("Flow 2: Login happy path (US-2)", () => {
 
     await page.goto("/login");
     await expect(
-      page.getByRole("heading", { name: "ログイン" }),
+      page.getByRole("heading", { name: "星ヶ丘こどもクラブ" }),
     ).toBeVisible();
 
     await page.locator('input[name="email"]').fill("admin@example.com");
