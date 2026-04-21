@@ -18,8 +18,22 @@ export default async function AdminNewsListPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="text-2xl font-bold text-fg mb-6">HP管理</h1>
+
+      <div className="flex gap-4 border-b border-border mb-6">
+        <Link
+          href="/admin/site/pages"
+          className="pb-2 border-b-2 border-transparent text-fg-muted hover:text-fg text-sm transition-colors"
+        >
+          ページ管理
+        </Link>
+        <span className="pb-2 border-b-2 border-accent text-accent font-medium text-sm">
+          お知らせ管理
+        </span>
+      </div>
+
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-fg">お知らせ管理</h1>
+        <h2 className="text-lg font-semibold text-fg">お知らせ一覧</h2>
         <Link href="/admin/site/news/new">
           <Button>新規作成</Button>
         </Link>
