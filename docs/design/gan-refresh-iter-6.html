@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星ヶ丘こどもクラブ — Iteration 6: 星の丘えほん</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ITERATION 6: "星の丘えほん — The Living Storybook"
+   
+   PARADIGM SHIFT: The app IS a picture book, not an app with decorations.
+   
+   ✦ Storybook page frame with deckle edges
+   ✦ 星ちゃん mascot throughout
+   ✦ Hand-drawn SVG borders on everything
+   ✦ Weather-board kindergarten dashboard
+   ✦ Paper craft cards with slight rotation
+   ✦ Login as book cover opening
+   ✦ Micro-illustrations (cat, birds, flowers)
+   ✦ Crayon color palette
+   ✦ Illustrated village scene
+   ═══════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Crayon';
+  src: local('Yusei Magic');
+}
+
+:root {
+  /* Craft paper palette */
+  --page:       #FDF6E3;
+  --page-deep:  #F5EBCF;
+  --page-edge:  #E8DCC6;
+  --ink:        #3B2F20;
+  --ink-mid:    #6B5844;
+  --ink-light:  #9C8A72;
+  --ink-faint:  #C4B49C;
+
+  /* Crayon colors */
+  --crayon-red:    #E8574B;
+  --crayon-orange: #F2884B;
+  --crayon-yellow: #F0C644;
+  --crayon-green:  #4BA67A;
+  --crayon-blue:   #5BA4D9;
+  --crayon-purple: #9B7EC8;
+  --crayon-pink:   #E88BA6;
+
+  /* Functional */
+  --present:    #4BA67A;
+  --absent:     #E8574B;
+  --gone-home:  #9C8A72;
+
+  --font-story: 'Zen Maru Gothic', 'Yusei Magic', sans-serif;
+  --font-hand:  'Yusei Magic', 'Zen Maru Gothic', sans-serif;
+  --font-body:  'Noto Sans JP', sans-serif;
+
+  --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--font-body);
+  background: #B8A88A;
+  /* Wooden desk texture */
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(0,0,0,0.02) 100px, rgba(0,0,0,0.02) 101px),
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.01) 40px, rgba(0,0,0,0.01) 41px);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ══ Page Switcher ══ */
+.sw{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--ink);padding:7px 16px;display:flex;align-items:center;gap:6px;overflow-x:auto}
+.sw__l{color:rgba(255,255,255,0.35);font-size:10px;font-weight:700;letter-spacing:.1em;white-space:nowrap;margin-right:4px}
+.sw button{padding:5px 13px;border-radius:20px;border:none;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:var(--font-body)}
+.sw button.active{background:var(--crayon-orange);color:white}
+.sw button:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.55)}
+.sw button:not(.active):hover{background:rgba(255,255,255,.12);color:white}
+.page{display:none;padding-top:40px}.page.active{display:block}
+
+/* ═══════════════════════════════════════
+   ✦ STORYBOOK PAGE FRAME
+   Every screen sits on a "book page" with
+   deckle edges and paper grain
+   ═══════════════════════════════════════ */
+.book-page {
+  background: var(--page);
+  margin: 20px auto;
+  max-width: 1120px;
+  min-height: calc(100vh - 80px);
+  position: relative;
+  box-shadow: 
+    0 2px 4px rgba(59,47,32,0.08),
+    0 8px 24px rgba(59,47,32,0.12),
+    /* Paper stack shadow */
+    4px 4px 0 -1px #F0E4CE,
+    5px 5px 0 -1px #D8CBAF,
+    8px 8px 0 -1px #E4D8C0,
+    9px 9px 0 -1px #CABDA5;
+  /* Deckle edge via clip-path */
+  clip-path: polygon(
+    0% 0.3%, 2% 0%, 4% 0.2%, 6% 0%, 8% 0.3%, 10% 0.1%, 12% 0%, 14% 0.2%, 16% 0%, 18% 0.3%, 20% 0%, 22% 0.2%, 24% 0.1%, 26% 0%, 28% 0.3%, 30% 0%, 32% 0.2%, 34% 0%, 36% 0.1%, 38% 0.3%, 40% 0%, 42% 0.2%, 44% 0%, 46% 0.3%, 48% 0.1%, 50% 0%, 52% 0.2%, 54% 0%, 56% 0.3%, 58% 0%, 60% 0.2%, 62% 0.1%, 64% 0%, 66% 0.3%, 68% 0%, 70% 0.2%, 72% 0%, 74% 0.1%, 76% 0.3%, 78% 0%, 80% 0.2%, 82% 0%, 84% 0.3%, 86% 0.1%, 88% 0%, 90% 0.2%, 92% 0%, 94% 0.3%, 96% 0%, 98% 0.2%, 100% 0%,
+    100% 2%, 99.8% 4%, 100% 6%, 99.7% 8%, 100% 10%, 99.8% 12%, 100% 14%, 99.7% 16%, 100% 18%, 99.8% 20%, 100% 22%, 99.7% 24%, 100% 26%, 99.8% 28%, 100% 30%, 99.7% 32%, 100% 34%, 99.8% 36%, 100% 38%, 99.7% 40%, 100% 42%, 99.8% 44%, 100% 46%, 99.7% 48%, 100% 50%, 99.8% 52%, 100% 54%, 99.7% 56%, 100% 58%, 99.8% 60%, 100% 62%, 99.7% 64%, 100% 66%, 99.8% 68%, 100% 70%, 99.7% 72%, 100% 74%, 99.8% 76%, 100% 78%, 99.7% 80%, 100% 82%, 99.8% 84%, 100% 86%, 99.7% 88%, 100% 90%, 99.8% 92%, 100% 94%, 99.7% 96%, 100% 98%, 99.8% 100%,
+    98% 100%, 96% 99.8%, 94% 100%, 92% 99.7%, 90% 100%, 88% 99.8%, 86% 100%, 84% 99.7%, 82% 100%, 80% 99.8%, 78% 100%, 76% 99.7%, 74% 100%, 72% 99.8%, 70% 100%, 68% 99.7%, 66% 100%, 64% 99.8%, 62% 100%, 60% 99.7%, 58% 100%, 56% 99.8%, 54% 100%, 52% 99.7%, 50% 100%, 48% 99.8%, 46% 100%, 44% 99.7%, 42% 100%, 40% 99.8%, 38% 100%, 36% 99.7%, 34% 100%, 32% 99.8%, 30% 100%, 28% 99.7%, 26% 100%, 24% 99.8%, 22% 100%, 20% 99.7%, 18% 100%, 16% 99.8%, 14% 100%, 12% 99.7%, 10% 100%, 8% 99.8%, 6% 100%, 4% 99.7%, 2% 100%, 0% 99.8%,
+    0% 98%, 0.2% 96%, 0% 94%, 0.3% 92%, 0% 90%, 0.2% 88%, 0% 86%, 0.3% 84%, 0% 82%, 0.2% 80%, 0% 78%, 0.3% 76%, 0% 74%, 0.2% 72%, 0% 70%, 0.3% 68%, 0% 66%, 0.2% 64%, 0% 62%, 0.3% 60%, 0% 58%, 0.2% 56%, 0% 54%, 0.3% 52%, 0% 50%, 0.2% 48%, 0% 46%, 0.3% 44%, 0% 42%, 0.2% 40%, 0% 38%, 0.3% 36%, 0% 34%, 0.2% 32%, 0% 30%, 0.3% 28%, 0% 26%, 0.2% 24%, 0% 22%, 0.3% 20%, 0% 18%, 0.2% 16%, 0% 14%, 0.3% 12%, 0% 10%, 0.2% 8%, 0% 6%, 0.3% 4%, 0% 2%
+  );
+}
+/* Paper grain overlay */
+.book-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+.book-page > * { position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════
+   ✦ HAND-DRAWN BORDERS
+   All borders use irregular SVG paths
+   ═══════════════════════════════════════ */
+.hand-border {
+  border: none !important;
+  position: relative;
+  background: var(--page);
+}
+.hand-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  background: url("data:image/svg+xml,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='4' y='4' width='392' height='292' rx='8' fill='none' stroke='%233B2F20' stroke-width='1.5' stroke-dasharray='3,0' stroke-linecap='round' style='filter:url(%23r)'/%3E%3Cfilter id='r'%3E%3CfeTurbulence baseFrequency='0.03' numOctaves='2' seed='1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2'/%3E%3C/filter%3E%3C/svg%3E") center/100% 100% no-repeat;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.35;
+}
+
+/* ═══════════════════════════════════════
+   ✦ 星ちゃん MASCOT
+   A star character with eyes and limbs
+   ═══════════════════════════════════════ */
+.hoshi-chan {
+  display: inline-block;
+  position: relative;
+}
+.hoshi-chan svg { display: block; }
+
+/* ═══════════════════════════════════════
+   ✦ CRAFT COMPONENTS
+   ═══════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 22px; border-radius: 8px;
+  font-family: var(--font-story); font-size: 14px; font-weight: 700;
+  border: 2px solid var(--ink); cursor: pointer;
+  transition: all .15s; text-decoration: none;
+  position: relative;
+  /* Slightly imperfect shape */
+  transform: rotate(-0.3deg);
+}
+.btn:hover { transform: rotate(0deg) translateY(-2px); }
+.btn-primary {
+  background: var(--crayon-orange); color: white; border-color: #C46835;
+  box-shadow: 3px 3px 0 #C46835;
+}
+.btn-primary:hover { box-shadow: 2px 2px 0 #C46835; }
+.btn-green {
+  background: var(--crayon-green); color: white; border-color: #3A8562;
+  box-shadow: 3px 3px 0 #3A8562;
+}
+.btn-outline {
+  background: var(--page); color: var(--ink); border-color: var(--ink-faint);
+  box-shadow: 2px 2px 0 var(--page-edge);
+}
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+
+/* Paper craft card */
+.craft-card {
+  background: white;
+  border: 1.5px solid var(--page-edge);
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 2px 3px 0 rgba(59,47,32,0.06);
+  transition: all .2s;
+}
+.craft-card:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 3px 5px 8px rgba(59,47,32,0.1);
+}
+/* Paper fold line at top */
+.craft-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--page-edge), transparent);
+}
+/* Tape on top */
+.craft-card::after {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%; transform: translateX(-50%);
+  width: 40px; height: 12px;
+  background: var(--crayon-yellow);
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+/* Sticky note */
+.sticky {
+  padding: 16px 18px;
+  border-radius: 2px;
+  position: relative;
+  box-shadow: 2px 3px 6px rgba(59,47,32,0.1);
+  font-family: var(--font-hand);
+}
+.sticky--yellow { background: #FFF8C5; transform: rotate(-1deg); }
+.sticky--pink   { background: #FFE0E8; transform: rotate(0.8deg); }
+.sticky--green  { background: #D5F5E3; transform: rotate(-0.5deg); }
+.sticky--blue   { background: #D6EEF8; transform: rotate(1.2deg); }
+/* Fold corner */
+.sticky::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 20px; height: 20px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.04) 50%);
+}
+
+/* Badge / tag */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 10px;
+  font-size: 11px; font-weight: 700;
+  font-family: var(--font-story);
+  border: 1.5px solid;
+}
+.tag-present { background: #D5F5E3; color: var(--present); border-color: #A8E6C3; }
+.tag-absent  { background: #FFE0E0; color: var(--absent); border-color: #FFB5B5; }
+.tag-gone    { background: #F5EDE0; color: var(--gone-home); border-color: #E0D4C0; }
+.tag-ok      { background: #D5F5E3; color: var(--present); border-color: #A8E6C3; }
+.tag-warn    { background: #FFE0E0; color: var(--absent); border-color: #FFB5B5; }
+
+/* Hand-drawn divider */
+.hand-line {
+  display: flex; align-items: center; gap: 10px;
+  margin: 24px 0 16px;
+}
+.hand-line__label {
+  font-family: var(--font-hand);
+  font-size: 14px; font-weight: 400;
+  color: var(--ink);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.hand-line__squiggle {
+  flex: 1; height: 6px;
+  background: url("data:image/svg+xml,%3Csvg width='400' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 3 Q10 0 20 3 T40 3 T60 3 T80 3 T100 3 T120 3 T140 3 T160 3 T180 3 T200 3 T220 3 T240 3 T260 3 T280 3 T300 3 T320 3 T340 3 T360 3 T380 3 T400 3' stroke='%23C4B49C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x center;
+}
+
+/* Crayon underline */
+.crayon-underline {
+  position: relative; display: inline;
+}
+.crayon-underline::after {
+  content: ''; position: absolute;
+  bottom: -2px; left: -4px; right: -4px; height: 10px;
+  background: url("data:image/svg+xml,%3Csvg width='200' height='10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 6 Q10 2 25 5 T50 5 T75 4 T100 6 T125 4 T150 5 T175 6 T200 5' stroke='%23F0C644' stroke-width='4' fill='none' stroke-linecap='round' opacity='0.5'/%3E%3C/svg%3E") repeat-x;
+  background-size: 200px 10px;
+}
+
+/* ═══════════════════════════════════════
+   1. PUBLIC HOME — Storybook cover + interior
+   ═══════════════════════════════════════ */
+.home-header {
+  padding: 16px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 2px dashed var(--page-edge);
+}
+.home-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-story); font-weight: 900; font-size: 17px;
+  color: var(--ink); text-decoration: none;
+}
+.home-logo__mark {
+  width: 36px; height: 36px;
+  background: var(--crayon-yellow);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #C9A520;
+  box-shadow: 2px 2px 0 #C9A520;
+}
+.home-nav { display: flex; gap: 2px; align-items: center; }
+.home-nav a {
+  padding: 6px 12px; border-radius: 6px;
+  font-family: var(--font-story); font-size: 13px; font-weight: 500;
+  color: var(--ink-mid); text-decoration: none;
+  transition: all .15s;
+}
+.home-nav a:hover { color: var(--crayon-orange); background: rgba(242,136,75,0.08); }
+
+/* Hero — illustrated panorama */
+.hero {
+  padding: 48px 40px 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;
+}
+.hero__text { }
+.hero__chapter {
+  font-family: var(--font-hand); font-size: 12px; color: var(--crayon-orange);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.hero__title {
+  font-family: var(--font-story); font-size: 36px; font-weight: 900;
+  line-height: 1.4; color: var(--ink);
+}
+.hero__desc {
+  margin-top: 18px; font-size: 14px; line-height: 1.9;
+  color: var(--ink-mid); max-width: 400px;
+}
+.hero__acts { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Hero illustration — storybook scene */
+.hero__illust {
+  position: relative; height: 360px;
+  border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg, #FFF9E6 0%, #FDEBD0 25%, #D5F5E3 65%, #4BA67A 100%);
+  border: 2px solid var(--page-edge);
+  box-shadow: 4px 4px 0 var(--page-edge);
+}
+/* Watercolor wash */
+.hero__illust::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 25% 35%, rgba(240,198,68,0.15) 0%, transparent 55%),
+              radial-gradient(ellipse at 75% 70%, rgba(75,166,122,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+/* Ambient star pulse (very slow) */
+@keyframes gentlePulse { 0%,100%{opacity:.2} 50%{opacity:.6} }
+.illust-star {
+  position: absolute; font-size: 10px; color: var(--crayon-yellow); opacity: 0.3;
+  animation: gentlePulse 8s ease-in-out infinite;
+}
+
+/* Features — sticky notes */
+.features {
+  padding: 48px 40px;
+}
+.features__hd {
+  text-align: center; margin-bottom: 32px;
+}
+.features__title {
+  font-family: var(--font-story); font-size: 22px; font-weight: 900;
+}
+.features__sub {
+  font-size: 13px; color: var(--ink-light); margin-top: 6px;
+}
+.feat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+.feat-sticky {
+  padding: 20px 16px; text-align: center;
+}
+.feat-sticky__icon {
+  width: 44px; height: 44px; margin: 0 auto 10px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid;
+}
+.feat-sticky__icon svg { width: 20px; height: 20px; stroke-width: 1.75; }
+.feat-sticky__t {
+  font-family: var(--font-hand); font-size: 14px; color: var(--ink);
+  margin-bottom: 4px;
+}
+.feat-sticky__d {
+  font-size: 11px; line-height: 1.7; color: var(--ink-mid);
+}
+
+/* CTA */
+.cta-area {
+  padding: 40px;
+  margin: 0 40px 40px;
+  border-radius: 12px;
+  border: 2px dashed var(--crayon-yellow);
+  background: var(--page-deep);
+  text-align: center;
+}
+.cta-area__title { font-family: var(--font-story); font-size: 20px; font-weight: 900; }
+.cta-area__desc { font-size: 13px; color: var(--ink-mid); margin: 8px 0 20px; line-height: 1.8; }
+
+/* Micro-illustrations */
+.micro-cat {
+  position: absolute; bottom: 12px; right: 24px;
+  font-size: 22px; opacity: 0.6;
+  transform: rotate(-8deg);
+}
+.micro-bird {
+  position: absolute; font-size: 14px; opacity: 0.5;
+}
+.micro-flowers {
+  display: flex; gap: 4px; justify-content: center;
+  font-size: 14px; opacity: 0.4; margin-top: 8px;
+}
+
+/* Footer */
+.home-footer {
+  background: var(--ink);
+  color: rgba(255,255,255,.55);
+  padding: 32px 40px;
+  margin-top: auto;
+  border-radius: 0 0 4px 4px;
+}
+.home-footer__in {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 24px;
+}
+.home-footer h3 { color: white; font-family: var(--font-story); font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.home-footer p, .home-footer address { font-size: 11px; line-height: 1.8; font-style: normal; }
+.home-footer a { color: rgba(255,255,255,.5); text-decoration: none; font-size: 11px; }
+.home-footer a:hover { color: var(--crayon-yellow); }
+.footer-links { list-style: none; }
+.footer-links li + li { margin-top: 3px; }
+.footer-copy { grid-column: 1/-1; text-align: center; font-size: 10px; color: rgba(255,255,255,.2); border-top: 1px solid rgba(255,255,255,.06); padding-top: 14px; margin-top: 6px; }
+
+/* ═══════════════════════════════════════
+   2. LOGIN — Opening the book
+   ═══════════════════════════════════════ */
+.login-wrap {
+  min-height: calc(100vh - 40px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 24px;
+}
+.book-cover {
+  width: 100%; max-width: 420px;
+  background: linear-gradient(145deg, #E8574B 0%, #C44435 100%);
+  border-radius: 6px 16px 16px 6px;
+  padding: 40px 36px;
+  position: relative;
+  box-shadow: 
+    -4px 0 0 #8B2E25,
+    -6px 2px 12px rgba(59,47,32,0.25),
+    4px 4px 16px rgba(59,47,32,0.2);
+  /* Book spine effect */
+  border-left: 6px solid #8B2E25;
+}
+/* Gold foil frame */
+.book-cover::before {
+  content: ''; position: absolute;
+  inset: 14px; border: 2px solid rgba(240,198,68,0.4);
+  border-radius: 4px 10px 10px 4px;
+  pointer-events: none;
+}
+.book-cover__title {
+  text-align: center; margin-bottom: 28px;
+}
+.book-cover__star {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; background: var(--crayon-yellow);
+  border-radius: 50%; margin-bottom: 12px;
+  border: 3px solid #C9A520;
+  box-shadow: 0 4px 12px rgba(201,165,32,0.3);
+}
+.book-cover__name {
+  font-family: var(--font-story); font-size: 22px; font-weight: 900;
+  color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.book-cover__sub {
+  font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px;
+  font-family: var(--font-story);
+}
+/* Form inside "book" */
+.book-cover__form {
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 24px 20px;
+  backdrop-filter: blur(4px);
+}
+.bc-fld { margin-bottom: 14px; }
+.bc-fld__label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.8); margin-bottom: 4px;
+  font-family: var(--font-story);
+}
+.bc-fld__input {
+  width: 100%; height: 42px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 0 12px; font-size: 14px;
+  font-family: var(--font-body);
+  background: rgba(255,255,255,0.15);
+  color: white;
+  transition: all .15s;
+}
+.bc-fld__input::placeholder { color: rgba(255,255,255,0.35); }
+.bc-fld__input:focus {
+  outline: none;
+  border-color: var(--crayon-yellow);
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 0 0 3px rgba(240,198,68,0.2);
+}
+.book-cover__btn {
+  width: 100%; height: 46px; border: none; border-radius: 8px;
+  background: var(--crayon-yellow); color: var(--ink);
+  font-family: var(--font-story); font-size: 15px; font-weight: 900;
+  cursor: pointer; transition: all .15s;
+  box-shadow: 0 3px 0 #C9A520;
+  margin-top: 8px;
+}
+.book-cover__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #C9A520; }
+.book-cover__btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #C9A520; }
+.book-cover__forgot {
+  text-align: center; margin-top: 14px;
+}
+.book-cover__forgot a {
+  font-size: 12px; color: rgba(255,255,255,0.6); text-decoration: none;
+}
+.book-cover__forgot a:hover { color: var(--crayon-yellow); }
+/* Welcome message */
+.book-cover__welcome {
+  text-align: center; margin-top: 16px; padding: 10px;
+  border: 1px dashed rgba(255,255,255,0.25); border-radius: 6px;
+  font-family: var(--font-hand); font-size: 12px; color: rgba(255,255,255,0.7);
+}
+
+/* ═══════════════════════════════════════
+   3. DASHBOARD — Weather board + story
+   ═══════════════════════════════════════ */
+.dash-layout { display: flex; min-height: calc(100vh - 80px); }
+
+/* Sidebar as book index */
+.book-index {
+  width: 220px; padding: 16px 12px;
+  border-right: 2px dashed var(--page-edge);
+  display: flex; flex-direction: column;
+  background: var(--page-deep);
+}
+.book-index__hd {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px; margin-bottom: 12px;
+}
+.book-index__mark {
+  width: 28px; height: 28px; background: var(--crayon-yellow);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid #C9A520; font-size: 14px;
+}
+.book-index__name {
+  font-family: var(--font-story); font-weight: 900; font-size: 12px;
+}
+.book-index__nav { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.idx-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 6px;
+  font-family: var(--font-story); font-size: 13px; font-weight: 500;
+  color: var(--ink-mid); text-decoration: none; cursor: pointer;
+  transition: all .12s; border: 1.5px solid transparent;
+}
+.idx-item:hover { background: white; color: var(--ink); }
+.idx-item.active {
+  background: white; color: var(--crayon-orange);
+  font-weight: 700;
+  border-color: var(--crayon-orange);
+  box-shadow: 2px 2px 0 rgba(242,136,75,0.15);
+  transform: rotate(-0.5deg);
+}
+.idx-item__ic { width: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.idx-item__ic svg { width: 16px; height: 16px; stroke-width: 2; }
+.idx-item__badge {
+  margin-left: auto; background: var(--crayon-red); color: white;
+  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+}
+.book-index__ft {
+  border-top: 2px dashed var(--page-edge); padding-top: 10px; margin-top: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.idx-av {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--crayon-green); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  border: 2px solid #3A8562;
+}
+.idx-uname { font-size: 11px; font-weight: 600; }
+.idx-urole { font-size: 10px; color: var(--ink-light); }
+
+/* Main content */
+.story-content { flex: 1; padding: 24px 32px; overflow-y: auto; }
+.story-content__hdr {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.story-content__title {
+  font-family: var(--font-story); font-size: 20px; font-weight: 900;
+  display: flex; align-items: center; gap: 8px;
+}
+.story-content__date {
+  font-family: var(--font-hand); font-size: 12px; color: var(--ink-light); margin-top: 2px;
+}
+
+/* ✦ WEATHER BOARD — kindergarten morning board style */
+.weather-board {
+  background: #2E5A3E;
+  border-radius: 10px;
+  padding: 24px;
+  position: relative;
+  margin-bottom: 24px;
+  border: 4px solid #1E3D2B;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.15), 4px 4px 0 #1E3D2B;
+  color: white;
+  overflow: hidden;
+}
+/* Chalk dust texture */
+.weather-board::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='150' height='150' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.wb__header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+  font-family: var(--font-hand);
+}
+.wb__date {
+  font-size: 16px; font-weight: 400;
+  opacity: 0.9;
+}
+.wb__greeting {
+  font-size: 12px; opacity: 0.65; margin-left: auto;
+  font-family: var(--font-hand);
+}
+/* Status circles — chalk-drawn style */
+.wb__stats {
+  display: flex; gap: 16px; justify-content: center;
+  margin-bottom: 16px;
+}
+.wb__stat {
+  text-align: center; padding: 12px 20px;
+  border: 2px dashed rgba(255,255,255,0.25);
+  border-radius: 10px;
+  min-width: 100px;
+}
+.wb__stat-icon { font-size: 24px; margin-bottom: 4px; }
+.wb__stat-num {
+  font-family: var(--font-hand); font-size: 32px; font-weight: 400;
+  line-height: 1;
+}
+.wb__stat-label {
+  font-family: var(--font-hand); font-size: 11px;
+  opacity: 0.7; margin-top: 2px;
+}
+.wb__stat--present .wb__stat-num { color: #7FFFB2; }
+.wb__stat--gone .wb__stat-num { color: #FFD0A0; }
+.wb__stat--absent .wb__stat-num { color: #FF9090; }
+
+/* Village scene on the board */
+.wb__village {
+  display: flex; justify-content: center; gap: 4px;
+  flex-wrap: wrap; margin-top: 12px;
+  padding: 10px; border-top: 1px dashed rgba(255,255,255,0.15);
+}
+.wb__child {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 3px; cursor: default;
+  transition: transform 0.2s;
+}
+.wb__child:hover { transform: scale(1.3); }
+.wb__child-star { font-size: 16px; }
+.wb__child-name {
+  font-family: var(--font-hand); font-size: 8px;
+  opacity: 0.7; white-space: nowrap;
+}
+.wb__child--gone { opacity: 0.35; }
+
+/* 星ちゃん on the board */
+.wb__hoshi {
+  position: absolute; top: 10px; right: 16px;
+}
+
+/* Attendance list */
+.attend-section { margin-top: 8px; }
+.attend-card {
+  background: white; border-radius: 6px;
+  border: 1.5px solid var(--page-edge);
+  overflow: hidden;
+}
+.at-row {
+  display: flex; align-items: center; padding: 9px 14px; gap: 12px;
+  transition: background .12s;
+}
+.at-row:nth-child(even) { background: rgba(253,246,227,0.5); }
+.at-row:hover { background: #FFF5E0; }
+.at-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+  border: 2px solid;
+}
+.at-av--in  { background: #D5F5E3; color: var(--present); border-color: #A8E6C3; }
+.at-av--out { background: #FFE0E0; color: var(--absent); border-color: #FFB5B5; }
+.at-av--no  { background: #F5EDE0; color: var(--gone-home); border-color: #E0D4C0; }
+.at-name { font-weight: 600; font-size: 13px; }
+.at-grade { font-size: 11px; color: var(--ink-light); flex-shrink: 0; }
+.at-status { margin-left: auto; flex-shrink: 0; }
+.at-time { font-size: 12px; color: var(--ink-light); font-variant-numeric: tabular-nums; margin-left: 12px; min-width: 90px; text-align: right; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   4. CHILDREN — Craft card grid
+   ═══════════════════════════════════════ */
+.search-bar {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.search-input {
+  flex: 1; height: 40px;
+  border: 2px solid var(--page-edge); border-radius: 8px;
+  padding: 0 12px 0 36px; font-size: 13px;
+  font-family: var(--font-body);
+  background: white url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239C8A72' stroke-width='2' stroke-linecap='round' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 12px center;
+  transition: all .15s;
+}
+.search-input:focus { outline: none; border-color: var(--crayon-orange); box-shadow: 0 0 0 3px rgba(242,136,75,0.12); }
+
+.child-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px; margin-top: 12px;
+}
+.child-card {
+  padding: 18px; display: flex; align-items: center; gap: 12px;
+  cursor: pointer; background: white;
+  border: 1.5px solid var(--page-edge);
+  border-radius: 6px;
+  transition: all .2s;
+  position: relative;
+}
+.child-card:nth-child(odd) { transform: rotate(-0.3deg); }
+.child-card:nth-child(even) { transform: rotate(0.3deg); }
+.child-card:hover { transform: rotate(0deg) translateY(-3px); box-shadow: 3px 5px 12px rgba(59,47,32,0.1); border-color: var(--crayon-orange); }
+.child-card__av {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-story); font-size: 16px; font-weight: 900;
+  flex-shrink: 0; border: 2px solid;
+}
+.child-card__av--orange { background: #FFE5D5; color: var(--crayon-orange); border-color: var(--crayon-orange); }
+.child-card__av--green  { background: #D5F5E3; color: var(--crayon-green); border-color: var(--crayon-green); }
+.child-card__av--yellow { background: #FFF8C5; color: #B8960A; border-color: var(--crayon-yellow); }
+.child-card__av--blue   { background: #D6EEF8; color: var(--crayon-blue); border-color: var(--crayon-blue); }
+.child-card__info { flex: 1; min-width: 0; }
+.child-card__name { font-weight: 700; font-size: 14px; }
+.child-card__meta { font-size: 11px; color: var(--ink-light); margin-top: 1px; }
+.child-card__tags { display: flex; gap: 4px; margin-top: 4px; }
+
+/* ═══════════════════════════════════════
+   5. QR — Scanner with storybook frame
+   ═══════════════════════════════════════ */
+.qr-content {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 24px; max-width: 480px; margin: 0 auto;
+}
+.qr-content__title { font-family: var(--font-story); font-size: 20px; font-weight: 900; }
+.qr-content__sub { font-size: 13px; color: var(--ink-light); margin-top: 2px; margin-bottom: 24px; font-family: var(--font-hand); }
+.qr-frame {
+  width: 100%; max-width: 320px; aspect-ratio: 1;
+  background: #1a1a1a; border-radius: 12px;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  border: 4px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.qr-frame__inner { position: absolute; inset: 20px; border: 2px solid rgba(255,255,255,.2); border-radius: 6px; }
+.qr-frame__scan {
+  position: absolute; left: 20px; right: 20px; height: 2px;
+  background: var(--crayon-orange); box-shadow: 0 0 10px var(--crayon-orange);
+  animation: qrscan 2.5s ease-in-out infinite;
+}
+@keyframes qrscan { 0%{top:20px} 50%{top:calc(100% - 22px)} 100%{top:20px} }
+.qr-frame__hint { color: rgba(255,255,255,.4); font-size: 13px; text-align: center; font-family: var(--font-hand); }
+.qr-input-row {
+  width: 100%; max-width: 320px; display: flex; gap: 8px;
+}
+.qr-input-row input {
+  flex: 1; height: 42px; border: 2px solid var(--page-edge);
+  border-radius: 8px; padding: 0 12px; font-size: 14px;
+  font-family: var(--font-body); background: white;
+}
+.qr-input-row input:focus { outline: none; border-color: var(--crayon-orange); box-shadow: 0 0 0 3px rgba(242,136,75,0.12); }
+
+/* Result overlay */
+.result-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(59,47,32,0.5); backdrop-filter: blur(4px);
+}
+.result-overlay.show { display: flex; }
+.result-card {
+  background: var(--page); border-radius: 12px;
+  padding: 40px 32px; text-align: center;
+  box-shadow: 0 8px 32px rgba(59,47,32,0.2);
+  min-width: 280px; animation: popIn .3s ease-out;
+  position: relative; overflow: hidden;
+  border: 3px solid var(--page-edge);
+}
+@keyframes popIn { 0%{transform:scale(.85);opacity:0} 100%{transform:scale(1);opacity:1} }
+@keyframes ringBounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.result-card__ring {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px; border-radius: 50%;
+  margin-bottom: 16px; border: 3px solid;
+  animation: ringBounce 1.5s ease-in-out 1;
+}
+.result-card__ring--in { background: #D5F5E3; border-color: var(--present); }
+.result-card__ring--out { background: #FFE0E0; border-color: var(--absent); }
+.result-card__ring--in .rc-star { color: var(--present); }
+.result-card__ring--out .rc-star { color: var(--absent); }
+.rc-star { font-size: 28px; }
+.result-card__name { font-family: var(--font-story); font-size: 24px; font-weight: 900; }
+.result-card__status { font-size: 18px; font-weight: 700; margin-top: 4px; }
+.result-card__status--in { color: var(--present); }
+.result-card__status--out { color: var(--absent); }
+.result-card__time { font-size: 12px; color: var(--ink-light); margin-top: 4px; }
+.result-card__msg { font-family: var(--font-hand); font-size: 13px; color: var(--ink-mid); margin-top: 14px; }
+/* Confetti */
+.result-card__confetti { position: absolute; top: 50%; left: 50%; pointer-events: none; }
+.result-card__confetti span { position: absolute; font-size: 14px; opacity: 0; }
+@keyframes confetti-burst { 0%{transform:translate(0,0) rotate(0) scale(.5);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) rotate(360deg) scale(1);opacity:0} }
+
+/* ═══════════════════════════════════════
+   ✦ RESPONSIVE
+   ═══════════════════════════════════════ */
+@media(max-width:768px) {
+  .book-page { margin: 8px; }
+  .hero { grid-template-columns: 1fr; padding: 24px 20px 0; }
+  .hero__illust { height: 200px; }
+  .feat-grid { grid-template-columns: repeat(2, 1fr); }
+  .home-footer__in { grid-template-columns: 1fr; }
+  .home-nav { display: none; }
+  .book-index { display: none; }
+  .story-content { padding: 16px; }
+  .wb__stats { flex-wrap: wrap; }
+  .child-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Switcher -->
+<div class="sw">
+  <span class="sw__l">画面</span>
+  <button class="active" onclick="sp('home',this)">ホーム</button>
+  <button onclick="sp('login',this)">ログイン</button>
+  <button onclick="sp('dash',this)">出席状況</button>
+  <button onclick="sp('kids',this)">児童一覧</button>
+  <button onclick="sp('qr',this)">QR入退室</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HOME — Storybook cover spread
+     ═══════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="book-page" style="display:flex;flex-direction:column;min-height:calc(100vh - 80px)">
+
+    <header class="home-header">
+      <a href="#" class="home-logo">
+        <span class="home-logo__mark">⭐</span>
+        星ヶ丘こどもクラブ
+      </a>
+      <nav class="home-nav">
+        <a href="#">ホーム</a><a href="#">施設紹介</a><a href="#">アクセス</a><a href="#">お知らせ</a>
+        <a href="#" class="btn btn-primary btn-sm" style="margin-left:6px;transform:none">ログイン</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero__text">
+        <div class="hero__chapter">📖 だい１しょう</div>
+        <h1 class="hero__title">
+          子どもたちの<br>
+          <span class="crayon-underline">笑顔あふれる</span><br>
+          放課後を
+        </h1>
+        <p class="hero__desc">
+          星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。
+          約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。
+        </p>
+        <div class="hero__acts">
+          <a href="#" class="btn btn-primary">施設について詳しく →</a>
+          <a href="#" class="btn btn-outline">🗺️ 見学のお申し込み</a>
+        </div>
+      </div>
+
+      <!-- Storybook illustration -->
+      <div class="hero__illust">
+        <!-- Stars -->
+        <span class="illust-star" style="top:8%;left:12%;font-size:10px">⭐</span>
+        <span class="illust-star" style="top:5%;right:18%;font-size:7px;animation-delay:2s">⭐</span>
+        <span class="illust-star" style="top:14%;left:42%;font-size:6px;animation-delay:4s">⭐</span>
+        <span class="illust-star" style="top:10%;right:30%;font-size:8px;animation-delay:1s">⭐</span>
+        <!-- Hill -->
+        <svg style="position:absolute;bottom:0;width:100%;z-index:1" viewBox="0 0 400 120" preserveAspectRatio="none">
+          <path d="M0 80Q100 20 200 50T400 30V120H0Z" fill="#4BA67A" opacity=".25"/>
+          <path d="M0 90Q150 40 250 65T400 50V120H0Z" fill="#4BA67A" opacity=".18"/>
+        </svg>
+        <!-- Building -->
+        <svg style="position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:90px;z-index:2" viewBox="0 0 100 85">
+          <rect x="5" y="20" width="90" height="65" rx="3" fill="#E8574B" opacity=".2"/>
+          <rect x="15" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+          <rect x="42" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+          <rect x="69" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+          <rect x="38" y="60" width="24" height="25" rx="2" fill="#E8574B" opacity=".25"/>
+          <polygon points="50,0 0,20 100,20" fill="#E8574B" opacity=".18"/>
+          <path d="M50 4l2.5 7.5h8l-6 4.5 2 7-6.5-5-6.5 5 2-7-6-4.5h8z" fill="#F0C644" opacity=".9"/>
+        </svg>
+        <!-- 星ちゃん mascot on the roof! -->
+        <div style="position:absolute;bottom:46%;left:50%;transform:translateX(-50%);z-index:3;text-align:center">
+          <svg width="32" height="38" viewBox="0 0 32 38">
+            <!-- Star body -->
+            <path d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z" fill="#F0C644" stroke="#C9A520" stroke-width="1.5"/>
+            <!-- Eyes -->
+            <circle cx="12" cy="14" r="1.5" fill="#3B2F20"/>
+            <circle cx="20" cy="14" r="1.5" fill="#3B2F20"/>
+            <!-- Smile -->
+            <path d="M12 18 Q16 22 20 18" fill="none" stroke="#3B2F20" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- Tiny arms waving -->
+            <line x1="5" y1="16" x2="1" y2="12" stroke="#C9A520" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="27" y1="16" x2="31" y2="12" stroke="#C9A520" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Tiny feet -->
+            <line x1="10" y1="28" x2="9" y2="34" stroke="#C9A520" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="22" y1="28" x2="23" y2="34" stroke="#C9A520" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <!-- Static children silhouettes -->
+        <div style="position:absolute;bottom:10%;left:18%;z-index:2;display:flex;gap:14px">
+          <div style="width:16px;height:16px;border-radius:50%;background:#E8574B;opacity:.45"></div>
+          <div style="width:16px;height:16px;border-radius:50%;background:#5BA4D9;opacity:.45"></div>
+          <div style="width:16px;height:16px;border-radius:50%;background:#F0C644;opacity:.45"></div>
+        </div>
+        <div style="position:absolute;bottom:8%;right:22%;z-index:2;display:flex;gap:10px">
+          <div style="width:14px;height:14px;border-radius:50%;background:#9B7EC8;opacity:.4"></div>
+          <div style="width:14px;height:14px;border-radius:50%;background:#E88BA6;opacity:.4"></div>
+        </div>
+        <!-- Micro: birds -->
+        <span class="micro-bird" style="top:12%;right:12%">🐦</span>
+        <span class="micro-bird" style="top:9%;right:8%;font-size:12px;transform:scaleX(-1)">🐦</span>
+      </div>
+    </section>
+
+    <!-- Features as sticky notes -->
+    <section class="features">
+      <div class="features__hd">
+        <h2 class="features__title"><span class="crayon-underline">施設の特徴</span></h2>
+        <p class="features__sub">デジタルの力で、保護者の安心と運営の効率化を両立します</p>
+      </div>
+      <div class="feat-grid">
+        <div class="sticky sticky--yellow feat-sticky">
+          <div class="feat-sticky__icon" style="background:#FFE5D5;color:var(--crayon-orange);border-color:var(--crayon-orange)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <h3 class="feat-sticky__t">安全管理</h3>
+          <p class="feat-sticky__d">QRコードで入退室をワンタッチ記録。リアルタイム通知。</p>
+        </div>
+        <div class="sticky sticky--green feat-sticky">
+          <div class="feat-sticky__icon" style="background:#D5F5E3;color:var(--crayon-green);border-color:var(--crayon-green)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0"/></svg>
+          </div>
+          <h3 class="feat-sticky__t">連絡配信</h3>
+          <p class="feat-sticky__d">お知らせをアプリ配信。紙をなくし既読確認も。</p>
+        </div>
+        <div class="sticky sticky--blue feat-sticky">
+          <div class="feat-sticky__icon" style="background:#D6EEF8;color:var(--crayon-blue);border-color:var(--crayon-blue)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <h3 class="feat-sticky__t">写真共有</h3>
+          <p class="feat-sticky__d">活動写真を保護者限定で安全に共有。</p>
+        </div>
+        <div class="sticky sticky--pink feat-sticky">
+          <div class="feat-sticky__icon" style="background:#FFE0E8;color:var(--crayon-pink);border-color:var(--crayon-pink)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h3 class="feat-sticky__t">請求管理</h3>
+          <p class="feat-sticky__d">延長料金の自動計算。月次請求書をオンラインで。</p>
+        </div>
+      </div>
+      <div class="micro-flowers">🌸 🌼 🌷 🌻 🌸</div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-area">
+      <div style="font-size:32px;margin-bottom:8px">⭐</div>
+      <h2 class="cta-area__title">見学・お問い合わせ</h2>
+      <p class="cta-area__desc">入所をご検討の方は、お気軽にお電話またはお問い合わせください。<br>施設の見学も随時受け付けております。</p>
+      <a href="#" class="btn btn-primary">🗺️ アクセス・お問い合わせ</a>
+      <div style="font-size:12px;color:var(--ink-light);margin-top:10px">TEL: 03-1234-5678（平日 9:00〜18:00）</div>
+    </section>
+
+    <footer class="home-footer" style="position:relative">
+      <div class="home-footer__in">
+        <div><h3>星ヶ丘こどもクラブ</h3><p>保護者の手で運営する、地域に根ざした学童保育施設です。<br>子どもたちの「ただいま」が聞こえる、あたたかい居場所。</p></div>
+        <div><h3>リンク</h3><ul class="footer-links"><li><a href="#">ホーム</a></li><li><a href="#">施設紹介</a></li><li><a href="#">お知らせ</a></li><li><a href="#">アクセス</a></li><li><a href="#">保護者ログイン</a></li></ul></div>
+        <div><h3>お問い合わせ</h3><address><p>〒123-4567</p><p>東京都世田谷区桜丘3-12-8</p><p>TEL: 03-1234-5678</p><p>受付: 平日 9:00〜18:00</p></address></div>
+        <div class="footer-copy">© 2025 星ヶ丘こどもクラブ. All rights reserved.</div>
+      </div>
+      <!-- Micro: sleeping cat -->
+      <span class="micro-cat">😺</span>
+    </footer>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     LOGIN — Book cover
+     ═══════════════════════════════════════ -->
+<div id="page-login" class="page">
+  <div class="login-wrap">
+    <div class="book-cover">
+      <div class="book-cover__title">
+        <div class="book-cover__star">
+          <!-- 星ちゃん -->
+          <svg width="28" height="32" viewBox="0 0 32 38">
+            <path d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z" fill="#F0C644" stroke="#C9A520" stroke-width="1.5"/>
+            <circle cx="12" cy="14" r="1.5" fill="#3B2F20"/>
+            <circle cx="20" cy="14" r="1.5" fill="#3B2F20"/>
+            <path d="M12 18 Q16 22 20 18" fill="none" stroke="#3B2F20" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="book-cover__name">星ヶ丘こどもクラブ</div>
+        <div class="book-cover__sub">ほごしゃ・せんせいポータル</div>
+      </div>
+      <div class="book-cover__form">
+        <div class="bc-fld"><label class="bc-fld__label">メールアドレス</label><input class="bc-fld__input" type="email" placeholder="example@mail.com"></div>
+        <div class="bc-fld"><label class="bc-fld__label">パスワード</label><input class="bc-fld__input" type="password" placeholder="••••••••"></div>
+        <button class="book-cover__btn">⭐ えほんをひらく</button>
+      </div>
+      <div class="book-cover__forgot"><a href="#">パスワードをお忘れですか？</a></div>
+      <div class="book-cover__welcome">✨ おかえりなさい！星の丘のえほんへようこそ</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DASHBOARD — Weather board + attendance
+     ═══════════════════════════════════════ -->
+<div id="page-dash" class="page">
+  <div class="book-page" style="min-height:calc(100vh - 80px)">
+    <div class="dash-layout">
+      <!-- Book index (sidebar) -->
+      <aside class="book-index">
+        <div class="book-index__hd">
+          <span class="book-index__mark">⭐</span>
+          <span class="book-index__name">星ヶ丘<br>こどもクラブ</span>
+        </div>
+        <nav class="book-index__nav">
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> QR入退室</a>
+          <a class="idx-item active" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> 出席状況</a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> 児童管理</a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0"/></svg></span> お知らせ<span class="idx-item__badge">3</span></a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> 写真</a>
+        </nav>
+        <div class="book-index__ft">
+          <div class="idx-av">田</div>
+          <div><div class="idx-uname">田中 花子</div><div class="idx-urole">せんせい</div></div>
+        </div>
+      </aside>
+
+      <div class="story-content">
+        <div class="story-content__hdr">
+          <div>
+            <h1 class="story-content__title">📖 きょうの ようす</h1>
+            <p class="story-content__date" id="dash-date">2026ねん 4がつ 21にち（かようび）</p>
+          </div>
+          <button class="btn btn-outline btn-sm">🔄 こうしん</button>
+        </div>
+
+        <!-- ✦ WEATHER BOARD — Chalkboard style -->
+        <div class="weather-board">
+          <!-- 星ちゃん on the board -->
+          <div class="wb__hoshi">
+            <svg width="28" height="34" viewBox="0 0 32 38">
+              <path d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z" fill="#F0C644" stroke="#C9A520" stroke-width="1.5"/>
+              <circle cx="12" cy="14" r="1.5" fill="#3B2F20"/>
+              <circle cx="20" cy="14" r="1.5" fill="#3B2F20"/>
+              <path d="M13 18 Q16 21 19 18" fill="none" stroke="#3B2F20" stroke-width="1" stroke-linecap="round"/>
+              <line x1="5" y1="16" x2="2" y2="13" stroke="#C9A520" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="27" y1="16" x2="30" y2="13" stroke="#C9A520" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="wb__header">
+            <span style="font-size:20px" id="wb-weather-icon">☀️</span>
+            <span class="wb__date" id="wb-date">4がつ 21にち かようび</span>
+            <span class="wb__greeting" id="wb-greeting">みんな げんきかな？</span>
+          </div>
+
+          <div class="wb__stats">
+            <div class="wb__stat wb__stat--present">
+              <div class="wb__stat-icon">🏠</div>
+              <div class="wb__stat-num">18</div>
+              <div class="wb__stat-label">いるよ</div>
+            </div>
+            <div class="wb__stat wb__stat--gone">
+              <div class="wb__stat-icon">👋</div>
+              <div class="wb__stat-num">6</div>
+              <div class="wb__stat-label">かえったよ</div>
+            </div>
+            <div class="wb__stat wb__stat--absent">
+              <div class="wb__stat-icon">💤</div>
+              <div class="wb__stat-num">4</div>
+              <div class="wb__stat-label">まだだよ</div>
+            </div>
+          </div>
+
+          <!-- Children on the board -->
+          <div class="wb__village">
+            <div class="wb__child"><span class="wb__child-star" style="color:#F0C644">⭐</span><span class="wb__child-name">ゆうと</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#E88BA6">⭐</span><span class="wb__child-name">さくら</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#5BA4D9">⭐</span><span class="wb__child-name">けんた</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#E8574B">⭐</span><span class="wb__child-name">はな</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#F2884B">⭐</span><span class="wb__child-name">そうた</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#9B7EC8">⭐</span><span class="wb__child-name">りこ</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#4BA67A">⭐</span><span class="wb__child-name">たける</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#F0C644">⭐</span><span class="wb__child-name">あかり</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#5BA4D9">⭐</span><span class="wb__child-name">こはる</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#E88BA6">⭐</span><span class="wb__child-name">だいち</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#E8574B">⭐</span><span class="wb__child-name">ひなた</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#9B7EC8">⭐</span><span class="wb__child-name">ゆい</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#F2884B">⭐</span><span class="wb__child-name">れん</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#4BA67A">⭐</span><span class="wb__child-name">みお</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#F0C644">⭐</span><span class="wb__child-name">あおい</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#5BA4D9">⭐</span><span class="wb__child-name">しゅん</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#E88BA6">⭐</span><span class="wb__child-name">かなで</span></div>
+            <div class="wb__child"><span class="wb__child-star" style="color:#E8574B">⭐</span><span class="wb__child-name">ともき</span></div>
+            <span style="margin:0 6px;opacity:0.3;font-size:12px">│</span>
+            <div class="wb__child wb__child--gone"><span class="wb__child-star">👋</span><span class="wb__child-name">みゆ</span></div>
+            <div class="wb__child wb__child--gone"><span class="wb__child-star">👋</span><span class="wb__child-name">はるき</span></div>
+            <div class="wb__child wb__child--gone"><span class="wb__child-star">👋</span><span class="wb__child-name">ゆい</span></div>
+            <div class="wb__child wb__child--gone"><span class="wb__child-star">👋</span><span class="wb__child-name">れん</span></div>
+            <div class="wb__child wb__child--gone"><span class="wb__child-star">👋</span><span class="wb__child-name">みお</span></div>
+            <div class="wb__child wb__child--gone"><span class="wb__child-star">👋</span><span class="wb__child-name">しゅん</span></div>
+          </div>
+        </div>
+
+        <!-- Attendance list — hand-drawn sections -->
+        <div class="attend-section">
+          <div class="hand-line">
+            <div class="hand-line__label">🏠 いるよ（18にん）</div>
+            <div class="hand-line__squiggle"></div>
+          </div>
+          <div class="attend-card">
+            <div class="at-row"><div class="at-av at-av--in">鈴</div><span class="at-name">鈴木 さくら</span><span class="at-grade">1年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:28</span></div>
+            <div class="at-row"><div class="at-av at-av--in">小</div><span class="at-name">小林 はな</span><span class="at-grade">1年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:10</span></div>
+            <div class="at-row"><div class="at-av at-av--in">中</div><span class="at-name">中村 こはる</span><span class="at-grade">1年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:05</span></div>
+            <div class="at-row"><div class="at-av at-av--in">佐</div><span class="at-name">佐藤 ゆうと</span><span class="at-grade">2年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:32</span></div>
+            <div class="at-row"><div class="at-av at-av--in">松</div><span class="at-name">松田 そうた</span><span class="at-grade">2年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:22</span></div>
+            <div class="at-row"><div class="at-av at-av--in">高</div><span class="at-name">高橋 けんた</span><span class="at-grade">3年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:15</span></div>
+            <div class="at-row"><div class="at-av at-av--in">斎</div><span class="at-name">斎藤 りこ</span><span class="at-grade">3年</span><span class="at-status"><span class="tag tag-present">✓ 入室中</span></span><span class="at-time">14:08</span></div>
+          </div>
+
+          <div class="hand-line">
+            <div class="hand-line__label">👋 かえったよ（6にん）</div>
+            <div class="hand-line__squiggle"></div>
+          </div>
+          <div class="attend-card">
+            <div class="at-row"><div class="at-av at-av--out">田</div><span class="at-name">田中 みゆ</span><span class="at-grade">4年</span><span class="at-status"><span class="tag tag-gone">→ 退室済</span></span><span class="at-time">14:10 → 16:45</span></div>
+            <div class="at-row"><div class="at-av at-av--out">渡</div><span class="at-name">渡辺 はるき</span><span class="at-grade">2年</span><span class="at-status"><span class="tag tag-gone">→ 退室済</span></span><span class="at-time">14:05 → 17:00</span></div>
+            <div class="at-row"><div class="at-av at-av--out">加</div><span class="at-name">加藤 ゆい</span><span class="at-grade">1年</span><span class="at-status"><span class="tag tag-gone">→ 退室済</span></span><span class="at-time">14:02 → 17:15</span></div>
+            <div class="at-row"><div class="at-av at-av--out">井</div><span class="at-name">井上 れん</span><span class="at-grade">3年</span><span class="at-status"><span class="tag tag-gone">→ 退室済</span></span><span class="at-time">14:12 → 16:30</span></div>
+          </div>
+
+          <div class="hand-line">
+            <div class="hand-line__label">💤 まだだよ（4にん）</div>
+            <div class="hand-line__squiggle"></div>
+          </div>
+          <div class="attend-card">
+            <div class="at-row"><div class="at-av at-av--no">伊</div><span class="at-name">伊藤 あおい</span><span class="at-grade">1年</span><span class="at-status"><span class="tag tag-absent">— 未入室</span></span><span class="at-time">—</span></div>
+            <div class="at-row"><div class="at-av at-av--no">山</div><span class="at-name">山本 りく</span><span class="at-grade">3年</span><span class="at-status"><span class="tag tag-absent">— 未入室</span></span><span class="at-time">—</span></div>
+            <div class="at-row"><div class="at-av at-av--no">藤</div><span class="at-name">藤田 ゆな</span><span class="at-grade">2年</span><span class="at-status"><span class="tag tag-absent">— 未入室</span></span><span class="at-time">—</span></div>
+            <div class="at-row"><div class="at-av at-av--no">西</div><span class="at-name">西村 かいと</span><span class="at-grade">1年</span><span class="at-status"><span class="tag tag-absent">— 未入室</span></span><span class="at-time">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CHILDREN — Craft card collection
+     ═══════════════════════════════════════ -->
+<div id="page-kids" class="page">
+  <div class="book-page" style="min-height:calc(100vh - 80px)">
+    <div class="dash-layout">
+      <aside class="book-index">
+        <div class="book-index__hd"><span class="book-index__mark">⭐</span><span class="book-index__name">星ヶ丘<br>こどもクラブ</span></div>
+        <nav class="book-index__nav">
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> QR入退室</a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> 出席状況</a>
+          <a class="idx-item active" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> 児童管理</a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0"/></svg></span> お知らせ<span class="idx-item__badge">3</span></a>
+        </nav>
+        <div class="book-index__ft"><div class="idx-av">田</div><div><div class="idx-uname">田中 花子</div><div class="idx-urole">せんせい</div></div></div>
+      </aside>
+      <div class="story-content">
+        <div class="story-content__hdr">
+          <h1 class="story-content__title">📖 みんなの なまえ</h1>
+          <button class="btn btn-primary btn-sm">＋ しんき とうろく</button>
+        </div>
+        <div class="search-bar"><input class="search-input" type="text" placeholder="なまえ・学年で さがす..."></div>
+
+        <div class="hand-line"><div class="hand-line__label">🌸 1ねんせい（4にん）</div><div class="hand-line__squiggle"></div></div>
+        <div class="child-grid">
+          <div class="child-card"><div class="child-card__av child-card__av--orange">さ</div><div class="child-card__info"><div class="child-card__name">鈴木 さくら</div><div class="child-card__meta">1年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--green">あ</div><div class="child-card__info"><div class="child-card__name">伊藤 あおい</div><div class="child-card__meta">1年 ・ 保護者1人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--yellow">は</div><div class="child-card__info"><div class="child-card__name">小林 はな</div><div class="child-card__meta">1年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--blue">こ</div><div class="child-card__info"><div class="child-card__name">中村 こはる</div><div class="child-card__meta">1年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+        </div>
+
+        <div class="hand-line"><div class="hand-line__label">🌿 2ねんせい（3にん）</div><div class="hand-line__squiggle"></div></div>
+        <div class="child-grid">
+          <div class="child-card"><div class="child-card__av child-card__av--orange">ゆ</div><div class="child-card__info"><div class="child-card__name">佐藤 ゆうと</div><div class="child-card__meta">2年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--green">は</div><div class="child-card__info"><div class="child-card__name">渡辺 はるき</div><div class="child-card__meta">2年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-warn">✕ QR無効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--yellow">そ</div><div class="child-card__info"><div class="child-card__name">松田 そうた</div><div class="child-card__meta">2年 ・ 保護者1人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+        </div>
+
+        <div class="hand-line"><div class="hand-line__label">🍂 3ねんせい（3にん）</div><div class="hand-line__squiggle"></div></div>
+        <div class="child-grid">
+          <div class="child-card"><div class="child-card__av child-card__av--blue">け</div><div class="child-card__info"><div class="child-card__name">高橋 けんた</div><div class="child-card__meta">3年 ・ 保護者1人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--orange">り</div><div class="child-card__info"><div class="child-card__name">山本 りく</div><div class="child-card__meta">3年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--green">り</div><div class="child-card__info"><div class="child-card__name">斎藤 りこ</div><div class="child-card__meta">3年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+        </div>
+
+        <div class="hand-line"><div class="hand-line__label">⭐ 4ねんせい（2にん）</div><div class="hand-line__squiggle"></div></div>
+        <div class="child-grid">
+          <div class="child-card"><div class="child-card__av child-card__av--yellow">み</div><div class="child-card__info"><div class="child-card__name">田中 みゆ</div><div class="child-card__meta">4年 ・ 保護者1人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+          <div class="child-card"><div class="child-card__av child-card__av--blue">し</div><div class="child-card__info"><div class="child-card__name">森 しゅん</div><div class="child-card__meta">4年 ・ 保護者2人</div><div class="child-card__tags"><span class="tag tag-ok">✓ QR有効</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     QR — Storybook scanner
+     ═══════════════════════════════════════ -->
+<div id="page-qr" class="page">
+  <div class="book-page" style="min-height:calc(100vh - 80px)">
+    <div class="dash-layout">
+      <aside class="book-index">
+        <div class="book-index__hd"><span class="book-index__mark">⭐</span><span class="book-index__name">星ヶ丘<br>こどもクラブ</span></div>
+        <nav class="book-index__nav">
+          <a class="idx-item active" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> QR入退室</a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> 出席状況</a>
+          <a class="idx-item" href="#"><span class="idx-item__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> 児童管理</a>
+        </nav>
+        <div class="book-index__ft"><div class="idx-av">田</div><div><div class="idx-uname">田中 花子</div><div class="idx-urole">せんせい</div></div></div>
+      </aside>
+      <div class="story-content">
+        <div class="qr-content">
+          <h1 class="qr-content__title">📖 にゅうたいしつ かんり</h1>
+          <p class="qr-content__sub">QRコードをかざしてね ⭐</p>
+          <div class="qr-frame">
+            <div class="qr-frame__inner"></div>
+            <div class="qr-frame__scan"></div>
+            <div class="qr-frame__hint">カメラに QR コードを<br>かざしてください</div>
+          </div>
+          <div class="qr-input-row"><input type="text" placeholder="QRコードを手動入力"><button class="btn btn-primary btn-sm">送信</button></div>
+          <div style="margin-top:28px;text-align:center">
+            <p style="font-size:11px;color:var(--ink-light);margin-bottom:8px;font-family:var(--font-hand)">✨ デモ ✨</p>
+            <button class="btn btn-green btn-sm" onclick="showRes('in')">🏠 入室</button>
+            <button class="btn btn-sm" style="background:var(--crayon-red);color:white;border-color:#B8382E;box-shadow:3px 3px 0 #B8382E" onclick="showRes('out')">👋 退室</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result with confetti -->
+  <div id="res-ov" class="result-overlay" onclick="hideRes()">
+    <div class="result-card" onclick="event.stopPropagation()">
+      <div id="res-confetti" class="result-card__confetti">
+        <span style="color:#F0C644">⭐</span>
+        <span style="color:#E8574B;font-size:11px">⭐</span>
+        <span style="color:#4BA67A;font-size:13px">⭐</span>
+        <span style="color:#5BA4D9;font-size:9px">⭐</span>
+        <span style="color:#F0C644;font-size:12px">⭐</span>
+        <span style="color:#9B7EC8;font-size:10px">⭐</span>
+      </div>
+      <div id="res-ring" class="result-card__ring result-card__ring--in"><span class="rc-star">⭐</span></div>
+      <div class="result-card__name">佐藤 ゆうと</div>
+      <div id="res-st" class="result-card__status result-card__status--in">入室しました</div>
+      <div id="res-tm" class="result-card__time"></div>
+      <div id="res-msg" class="result-card__msg">おかえりなさい！きょうも たのしく すごそうね ⭐</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function sp(id,b){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sw button').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  b.classList.add('active');
+}
+
+function showRes(t){
+  const o=document.getElementById('res-ov');
+  const r=document.getElementById('res-ring');
+  const s=document.getElementById('res-st');
+  const m=document.getElementById('res-msg');
+  const cf=document.getElementById('res-confetti');
+
+  if(t==='in'){
+    r.className='result-card__ring result-card__ring--in';
+    s.textContent='入室しました';
+    s.className='result-card__status result-card__status--in';
+    m.textContent='おかえりなさい！きょうも たのしく すごそうね ⭐';
+  } else {
+    r.className='result-card__ring result-card__ring--out';
+    s.textContent='退室しました';
+    s.className='result-card__status result-card__status--out';
+    m.textContent='さようなら！きをつけて かえってね ⭐';
+  }
+  document.getElementById('res-tm').textContent=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+
+  // Confetti burst
+  const stars=cf.querySelectorAll('span');
+  stars.forEach((s,i)=>{
+    const angle=(i/stars.length)*360;
+    const dist=45+Math.random()*35;
+    const x=Math.cos(angle*Math.PI/180)*dist;
+    const y=Math.sin(angle*Math.PI/180)*dist;
+    s.style.setProperty('--tx',x+'px');
+    s.style.setProperty('--ty',y+'px');
+    s.style.animation='none';
+    s.offsetHeight;
+    s.style.animation=`confetti-burst 0.6s ease-out ${i*0.04}s forwards`;
+  });
+
+  o.classList.add('show');
+  setTimeout(()=>hideRes(),2500);
+}
+
+function hideRes(){
+  document.getElementById('res-ov').classList.remove('show');
+}
+
+// Time-aware greeting on weather board
+(function(){
+  const h=new Date().getHours();
+  const icon=document.getElementById('wb-weather-icon');
+  const greeting=document.getElementById('wb-greeting');
+  if(!icon)return;
+  if(h>=6&&h<11){icon.textContent='☀️';greeting.textContent='おはよう！きょうも がんばろう！';}
+  else if(h>=11&&h<14){icon.textContent='🌤️';greeting.textContent='もうすぐ みんな くるよ！';}
+  else if(h>=14&&h<17){icon.textContent='🎒';greeting.textContent='みんな おかえりなさい ⭐';}
+  else if(h>=17&&h<19){icon.textContent='🌅';greeting.textContent='おむかえの じかんだね！';}
+  else{icon.textContent='🌙';greeting.textContent='きょうも おつかれさま ⭐';}
+})();
+</script>
+</body>
+</html>
