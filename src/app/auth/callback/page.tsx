@@ -9,39 +9,41 @@ export default function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
+    async function handleCallback() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
 
-    // Supabaseが URLフラグメントからトークンを自動検出してセッションを確立
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        // 招待 or パスワードリセット → パスワード設定ページへ
-        router.replace("/reset-password");
-      } else if (event === "TOKEN_REFRESHED" && session) {
-        router.replace("/reset-password");
+      // エラーチェック
+      if (params.get("error")) {
+        const desc = params.get("error_description") || "認証に失敗しました";
+        setError(decodeURIComponent(desc.replace(/\+/g, " ")));
+        return;
       }
-    });
 
-    // フラグメントにエラーがある場合のハンドリング
-    const hash = window.location.hash;
-    if (hash.includes("error=")) {
-      const params = new URLSearchParams(hash.substring(1));
-      const errorDesc = params.get("error_description") || "認証に失敗しました";
-      setError(errorDesc);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+
+      if (!accessToken || !refreshToken) {
+        setError("認証情報が見つかりません。もう一度招待メールのリンクをお試しください。");
+        return;
+      }
+
+      const supabase = createClient();
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (sessionError) {
+        setError(`セッションの作成に失敗しました: ${sessionError.message}`);
+        return;
+      }
+
+      router.replace("/reset-password");
     }
 
-    // 5秒後にもセッションが確立されない場合のタイムアウト
-    const timeout = setTimeout(() => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          router.replace("/reset-password");
-        } else if (!error) {
-          setError("認証に失敗しました。もう一度招待メールのリンクをお試しください。");
-        }
-      });
-    }, 5000);
-
-    return () => clearTimeout(timeout);
-  }, [router, error]);
+    handleCallback();
+  }, [router]);
 
   if (error) {
     return (
