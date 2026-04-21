@@ -2,7 +2,6 @@
 
 import { useState, useRef, useTransition, useCallback } from "react";
 import Link from "next/link";
-import { Button, Input } from "@/components/ui";
 import { QRScanner } from "@/components/qr/qr-scanner";
 import { recordAttendance } from "./actions";
 import { AttendanceResult } from "./attendance-result";
@@ -81,59 +80,63 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 flex flex-col items-center min-h-[80vh]">
-      <h1 className="text-2xl font-bold text-fg mb-8">入退室管理</h1>
+    <div className="qr-area">
+      <h1 className="qr-area__t">📖 入退室管理</h1>
+      <p className="qr-area__sub">QRコードをかざしてね ⭐</p>
 
       {/* QR Scanner */}
       {scannerEnabled ? (
-        <div className="mb-6 w-full max-w-lg">
+        <div className="qr-frame" style={{ aspectRatio: "1", maxWidth: 320 }}>
           <QRScanner
             onScan={handleScan}
             onError={handleCameraError}
           />
         </div>
       ) : (
-        <div className="w-full max-w-sm aspect-square bg-bg-elev border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center mb-6 gap-3">
-          <p className="text-fg-muted text-center px-4">
+        <div className="qr-frame" style={{ aspectRatio: "1", maxWidth: 320 }}>
+          <div className="qr-frame__inner" />
+          <div className="qr-frame__hint">
             {cameraError
               ? "カメラにアクセスできません"
               : "スキャナーが停止中です"}
-          </p>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              setCameraError(false);
-              setScannerEnabled(true);
-            }}
-          >
-            スキャナーを起動
-          </Button>
+            <br />
+            <button
+              className="btn btn-outline btn-sm"
+              style={{ marginTop: 12 }}
+              onClick={() => {
+                setCameraError(false);
+                setScannerEnabled(true);
+              }}
+            >
+              スキャナーを起動
+            </button>
+          </div>
         </div>
       )}
 
       {/* Manual input fallback */}
-      <form onSubmit={handleSubmit} className="w-full max-w-sm flex gap-2 mb-6">
-        <div className="flex-1">
-          <Input
-            ref={inputRef}
-            name="qrCode"
-            placeholder="QRコードを手動入力"
-            autoComplete="off"
-          />
-        </div>
-        <Button type="submit" loading={isPending}>
+      <form onSubmit={handleSubmit} className="qr-input">
+        <input
+          ref={inputRef}
+          name="qrCode"
+          type="text"
+          placeholder="QRコードを手動入力"
+          autoComplete="off"
+        />
+        <button type="submit" className="btn btn-primary btn-sm" disabled={isPending}>
           送信
-        </Button>
+        </button>
       </form>
 
       {error && (
-        <p role="alert" className="text-danger text-sm mb-4">{error}</p>
+        <p role="alert" style={{ color: "var(--absent)", fontSize: 13, marginTop: 8 }}>{error}</p>
       )}
 
-      <Link href="/attendance/manual" className="text-accent hover:text-accent-hv text-sm">
-        手動入力ページへ
-      </Link>
+      <div style={{ marginTop: 20, textAlign: "center" }}>
+        <Link href="/attendance/manual" style={{ fontSize: 12, color: "var(--ink-light)", fontFamily: "var(--font-hand)" }}>
+          ✏️ 手動入力ページへ
+        </Link>
+      </div>
 
       {/* Sound feedback placeholders */}
       <audio ref={enterAudioRef} preload="none" />
