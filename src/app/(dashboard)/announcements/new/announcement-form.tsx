@@ -1,13 +1,27 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
+import { FileUploader } from "@/components/attachments/file-uploader";
 import { createAnnouncement, type ActionState } from "../actions";
 
+type FileInfo = { file: File };
+
 export function AnnouncementForm() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [pendingFiles, setPendingFiles] = useState<FileInfo[]>([]);
+
+  const wrappedAction = async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
+    // フォームデータに添付ファイルを追加
+    for (const f of pendingFiles) {
+      formData.append("files", f.file);
+    }
+    return createAnnouncement(_prev, formData);
+  };
+
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    createAnnouncement,
+    wrappedAction,
     null,
   );
 
@@ -22,7 +36,7 @@ export function AnnouncementForm() {
           </p>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="flex flex-col gap-4">
+          <form ref={formRef} action={formAction} className="flex flex-col gap-4">
             <Input
               name="title"
               label="タイトル"
@@ -50,13 +64,19 @@ export function AnnouncementForm() {
               )}
             </div>
 
+            <FileUploader
+              files={pendingFiles}
+              onChange={setPendingFiles}
+              disabled={isPending}
+            />
+
             {state && !state.success && !state.fieldErrors && (
               <p className="text-sm text-danger">{state.message}</p>
             )}
 
             <div className="flex items-center gap-3 pt-2">
               <Button type="submit" loading={isPending}>
-                投稿する
+                {isPending ? "投稿中..." : "投稿する"}
               </Button>
               <Link href="/announcements">
                 <Button type="button" variant="secondary">

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft } from "lucide-react";
+import { getAttachments, getAttachmentUrl } from "@/lib/attachments/actions";
+import { AttachmentList } from "@/components/attachments/attachment-list";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
@@ -50,6 +52,14 @@ export default async function NewsDetailPage({ params }: Props) {
 
   if (!news) notFound();
 
+  // 添付ファイル取得
+  const attachments = await getAttachments("news", id);
+  const downloadUrls: Record<string, string> = {};
+  for (const att of attachments) {
+    const url = await getAttachmentUrl(att.file_path);
+    if (url) downloadUrls[att.id] = url;
+  }
+
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
       <Link
@@ -70,6 +80,15 @@ export default async function NewsDetailPage({ params }: Props) {
       <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed text-fg">
         {news.body}
       </div>
+
+      {attachments.length > 0 && (
+        <div className="mt-8">
+          <AttachmentList
+            attachments={attachments}
+            downloadUrls={downloadUrls}
+          />
+        </div>
+      )}
     </article>
   );
 }

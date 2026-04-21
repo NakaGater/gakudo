@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getReadCount } from "../actions";
 import { MarkRead } from "./mark-read";
+import { getAttachments, getAttachmentUrl } from "@/lib/attachments/actions";
+import { AttachmentList } from "@/components/attachments/attachment-list";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -46,6 +48,14 @@ export default async function AnnouncementDetailPage({ params }: Props) {
   const announcement = data as unknown as AnnouncementRow;
   const readCount = isStaff ? await getReadCount(id) : null;
 
+  // 添付ファイル取得
+  const attachments = await getAttachments("announcement", id);
+  const downloadUrls: Record<string, string> = {};
+  for (const att of attachments) {
+    const url = await getAttachmentUrl(att.file_path);
+    if (url) downloadUrls[att.id] = url;
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* Mark as read for parents */}
@@ -77,6 +87,13 @@ export default async function AnnouncementDetailPage({ params }: Props) {
           <div className="whitespace-pre-wrap text-fg/80 leading-relaxed">
             {announcement.body}
           </div>
+
+          {attachments.length > 0 && (
+            <AttachmentList
+              attachments={attachments}
+              downloadUrls={downloadUrls}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

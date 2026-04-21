@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import type { Database } from "@/lib/supabase/types";
+import { uploadAttachment } from "@/lib/attachments/actions";
 
 export type ActionState = {
   success: boolean;
@@ -37,12 +38,25 @@ export async function createNews(
     created_by: user.id,
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("site_news") as any).insert(
-    insertData,
-  );
+  const { data, error } = await (supabase.from("site_news") as any)
+    .insert(insertData)
+    .select("id")
+    .single();
 
   if (error) {
     return { success: false, message: `作成に失敗しました: ${error.message}` };
+  }
+
+  const newsId = data.id as string;
+
+  // 添付ファイルのアップロード
+  const files = formData.getAll("files");
+  for (const file of files) {
+    if (file instanceof File && file.size > 0) {
+      const fd = new FormData();
+      fd.set("file", file);
+      await uploadAttachment("news", newsId, fd);
+    }
   }
 
   revalidatePath("/news");

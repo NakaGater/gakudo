@@ -318,6 +318,41 @@ export type Database = {
           created_by?: string | null
         }
       }
+      attachments: {
+        Row: {
+          id: string
+          entity_type: 'announcement' | 'news'
+          entity_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          mime_type: string
+          uploaded_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          entity_type: 'announcement' | 'news'
+          entity_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          mime_type: string
+          uploaded_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          entity_type?: 'announcement' | 'news'
+          entity_id?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          mime_type?: string
+          uploaded_by?: string | null
+          created_at?: string
+        }
+      }
       notification_preferences: {
         Row: {
           user_id: string

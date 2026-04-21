@@ -5,11 +5,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { sendAnnouncementNotification } from "@/lib/notifications/send";
+import { uploadAttachment } from "@/lib/attachments/actions";
 
 export type ActionState = {
   success: boolean;
   message: string;
   fieldErrors?: { title?: string; body?: string };
+  announcementId?: string;
 } | null;
 
 function isStaff(role: string): boolean {
@@ -46,14 +48,29 @@ export async function createAnnouncement(
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("announcements") as any).insert({
-    title: (title as string).trim(),
-    body: (body as string).trim(),
-    posted_by: user.id,
-  });
+  const { data, error } = await (supabase.from("announcements") as any)
+    .insert({
+      title: (title as string).trim(),
+      body: (body as string).trim(),
+      posted_by: user.id,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     return { success: false, message: `投稿に失敗しました: ${error.message}` };
+  }
+
+  const announcementId = data.id as string;
+
+  // 添付ファイルのアップロード
+  const files = formData.getAll("files");
+  for (const file of files) {
+    if (file instanceof File && file.size > 0) {
+      const fd = new FormData();
+      fd.set("file", file);
+      await uploadAttachment("announcement", announcementId, fd);
+    }
   }
 
   // Best-effort notification dispatch (non-blocking)
