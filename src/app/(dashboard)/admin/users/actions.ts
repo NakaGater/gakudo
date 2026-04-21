@@ -40,6 +40,7 @@ export async function inviteUser(
   const { data: inviteData, error: inviteError } =
     await adminClient.auth.admin.inviteUserByEmail(email.trim(), {
       data: { name: name.trim(), role },
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000"}/auth/callback?type=invite`,
     });
 
   if (inviteError) {
