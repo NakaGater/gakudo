@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 export type GalleryPhoto = {
   id: string;
@@ -67,102 +66,90 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
 
   const groups = groupByEvent(photos);
 
+  const tapeVariants = ["polaroid--tape", "", "polaroid--tape-pink", "", "polaroid--tape-green", ""];
+  const placeholderGradients = [
+    "linear-gradient(135deg,#FFE5D5,#FFEEF0)",
+    "linear-gradient(135deg,#FFF5CC,#FFE5D5)",
+    "linear-gradient(135deg,#FFEEF0,#F0E5FF)",
+    "linear-gradient(135deg,#D5F5E3,#E5F7FF)",
+    "linear-gradient(135deg,#E5F7FF,#D5F5E3)",
+    "linear-gradient(135deg,#FFF5CC,#FFEEF0)",
+  ];
+  const placeholderEmoji = ["🌈", "🌻", "🦋", "🐠", "⚽", "🏅", "🍉", "🎨", "🏃"];
+
   return (
     <>
       {groups.map((group) => (
-        <section key={group.event_name} className="mb-12">
-          <h2 className="mb-4 text-xl font-bold text-fg">{group.event_name}</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {group.photos.map((photo) => {
+        <div key={group.event_name} className="gallery-event">
+          <div className="gallery-event__hdr">
+            <span className="ge-emoji" style={{ marginRight: 6 }}>
+              {group.event_name === "その他" ? "📷" : "🎨"}
+            </span>
+            {group.event_name}
+          </div>
+          <div className="gallery-grid">
+            {group.photos.map((photo, i) => {
               const flatIndex = flatPhotos.findIndex((p) => p.id === photo.id);
+              const tape = tapeVariants[i % tapeVariants.length];
               return (
-                <button
+                <div
                   key={photo.id}
-                  type="button"
-                  className="group relative aspect-[4/3] overflow-hidden rounded-lg bg-accent-light/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  role="button"
+                  tabIndex={0}
+                  className={`polaroid${tape ? ` ${tape}` : ""}`}
                   onClick={() => setLightboxIndex(flatIndex)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setLightboxIndex(flatIndex); }}
                   aria-label={photo.caption ?? "写真を拡大表示"}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={photo.url}
                     alt={photo.caption ?? ""}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="polaroid__img"
                     loading="lazy"
                   />
                   {photo.caption && (
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">
-                      {photo.caption}
-                    </span>
+                    <span className="polaroid__caption">{photo.caption}</span>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
-        </section>
+        </div>
       ))}
 
       {/* Lightbox */}
       {lightboxIndex !== null && flatPhotos[lightboxIndex] && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          className="gal-lb"
           role="dialog"
           aria-modal="true"
-          aria-label="写真拡大表示"
+          aria-label="写真ギャラリー"
           onClick={close}
         >
-          <div
-            className="relative flex max-h-[90vh] max-w-5xl flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative h-[70vh] w-[90vw] max-w-5xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={flatPhotos[lightboxIndex].url}
-                alt={flatPhotos[lightboxIndex].caption ?? ""}
-                className="absolute inset-0 w-full h-full object-contain"
-              />
-            </div>
+          <div className="gal-lb__inner" onClick={(e) => e.stopPropagation()}>
+            <button className="gal-lb__close" onClick={close} aria-label="閉じる">✕</button>
+
+            {flatPhotos.length > 1 && (
+              <button className="gal-lb__nav gal-lb__nav--prev" onClick={prev} aria-label="前へ">‹</button>
+            )}
+            {flatPhotos.length > 1 && (
+              <button className="gal-lb__nav gal-lb__nav--next" onClick={next} aria-label="次へ">›</button>
+            )}
+
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={flatPhotos[lightboxIndex].url}
+              alt={flatPhotos[lightboxIndex].caption ?? ""}
+              className="gal-lb__img"
+            />
 
             {flatPhotos[lightboxIndex].caption && (
-              <p className="mt-3 text-center text-sm text-white/90">
-                {flatPhotos[lightboxIndex].caption}
-              </p>
+              <div className="gal-lb__caption">{flatPhotos[lightboxIndex].caption}</div>
             )}
-
-            {/* Close */}
-            <button
-              type="button"
-              className="absolute -top-2 right-0 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
-              onClick={close}
-              aria-label="閉じる"
-            >
-              <X size={24} />
-            </button>
-
-            {/* Prev */}
-            {flatPhotos.length > 1 && (
-              <button
-                type="button"
-                className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
-                onClick={prev}
-                aria-label="前へ"
-              >
-                <ChevronLeft size={28} />
-              </button>
-            )}
-
-            {/* Next */}
-            {flatPhotos.length > 1 && (
-              <button
-                type="button"
-                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
-                onClick={next}
-                aria-label="次へ"
-              >
-                <ChevronRight size={28} />
-              </button>
-            )}
+            <div className="gal-lb__counter">
+              {lightboxIndex + 1} / {flatPhotos.length}
+            </div>
           </div>
         </div>
       )}
