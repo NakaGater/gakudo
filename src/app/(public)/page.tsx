@@ -8,6 +8,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "星ヶ丘こどもクラブ — 子どもたちの笑顔あふれる放課後を",
@@ -42,7 +43,18 @@ const features = [
   },
 ] as const;
 
-export default function HomePage() {
+const DEFAULT_HERO_TEXT =
+  "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
+
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: homePage } = await supabase
+    .from("site_pages")
+    .select("content")
+    .eq("slug", "home")
+    .single() as { data: { content: string } | null };
+
+  const heroText = homePage?.content || DEFAULT_HERO_TEXT;
   return (
     <>
       {/* Hero */}
@@ -58,10 +70,8 @@ export default function HomePage() {
                 <br />
                 笑顔あふれる放課後を
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-fg-muted sm:text-lg">
-                星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。
-                約30名の児童が、宿題・遊び・おやつの時間を通じて、
-                のびのびと放課後を過ごしています。
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-fg-muted sm:text-lg whitespace-pre-wrap">
+                {heroText}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
