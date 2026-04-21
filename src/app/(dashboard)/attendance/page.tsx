@@ -91,6 +91,8 @@ export default function AttendancePage() {
             onScan={handleScan}
             onError={handleCameraError}
           />
+          <div className="qr-frame__inner" />
+          <div className="qr-frame__scan" />
         </div>
       ) : (
         <div className="qr-frame" style={{ aspectRatio: "1", maxWidth: 320 }}>
