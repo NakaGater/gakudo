@@ -32,11 +32,11 @@ export function AnnouncementCard({
 }: AnnouncementCardProps) {
   return (
     <Link href={`/announcements/${id}`} className="block">
-      <Card className="transition-shadow hover:shadow-md">
+      <Card className={`transition-shadow hover:shadow-md ${!isRead ? "border-l-4 border-l-cr-orange" : ""}`}>
         <CardContent className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-fg truncate">{title}</h2>
-            {!isRead && <Badge variant="warning">未読</Badge>}
+            <h2 className="text-lg font-semibold text-fg truncate font-story">{title}</h2>
+            {!isRead && <Badge variant="warning">🔔 未読</Badge>}
           </div>
           <p className="text-sm text-fg/70">{truncate(body, 80)}</p>
           <div className="flex items-center justify-between text-xs text-fg/50">

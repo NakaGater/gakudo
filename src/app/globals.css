@@ -240,6 +240,432 @@
   animation: starPulse 8s ease-in-out infinite;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Material Metaphor Classes
+   ══════════════════════════════════════════════════════════════ */
+
+/* Ledger — for billing/financial pages */
+.ledger-wrap {
+  position: relative;
+  background:
+    repeating-linear-gradient(transparent, transparent 31px, rgba(180,160,130,.12) 31px, rgba(180,160,130,.12) 32px),
+    linear-gradient(135deg, var(--paper-warm), #FFF8ED);
+  border-radius: var(--r-md);
+  padding: 20px;
+  border: 1.5px solid var(--page-edge);
+}
+.ledger-wrap::before {
+  content: '';
+  position: absolute;
+  left: 48px;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: rgba(209,75,64,.15);
+}
+
+/* Letter Paper — for announcements */
+.letter-paper {
+  position: relative;
+  background:
+    linear-gradient(90deg, transparent 39px, rgba(209,75,64,.1) 39px, rgba(209,75,64,.1) 40px, transparent 40px),
+    repeating-linear-gradient(transparent, transparent 27px, rgba(100,140,200,.08) 27px, rgba(100,140,200,.08) 28px),
+    var(--bg-elev);
+  border: 1.5px solid var(--page-edge);
+  border-radius: var(--r-md);
+  padding: 20px 20px 20px 52px;
+  box-shadow: var(--sh-sm);
+}
+
+/* Corkboard — for photos */
+.corkboard {
+  background:
+    repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(160,120,60,.03) 20px, rgba(160,120,60,.03) 21px),
+    linear-gradient(135deg, #F5E8D4, #EDE0CC);
+  border: 2px solid #D4BC94;
+  border-radius: var(--r-md);
+  padding: 20px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.06), var(--sh-sm);
+}
+
+/* Folder Jacket — for documents */
+.folder-jacket {
+  background: linear-gradient(180deg, #F5E6D0 0%, var(--paper-warm) 3px, var(--bg-elev) 3px);
+  border: 1.5px solid var(--page-edge);
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  padding: 20px;
+  position: relative;
+  box-shadow: var(--sh-sm);
+}
+.folder-tab {
+  display: inline-block;
+  background: #F5E6D0;
+  border: 1.5px solid var(--page-edge);
+  border-bottom: none;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  padding: 6px 16px;
+  font-family: var(--font-story);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-right: 4px;
+  position: relative;
+  top: 1.5px;
+  cursor: pointer;
+  transition: .2s;
+}
+.folder-tab:hover { background: #EDD9C0; }
+.folder-tab--active {
+  background: var(--bg-elev);
+  border-bottom-color: var(--bg-elev);
+  z-index: 1;
+}
+
+/* ID Card — for profile */
+.id-card {
+  background: var(--bg-elev);
+  border: 2px solid var(--page-edge);
+  border-radius: var(--r-md);
+  padding: 24px;
+  position: relative;
+  box-shadow: var(--sh-md);
+  overflow: hidden;
+}
+.id-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(255,217,61,.15), rgba(217,123,63,.1));
+  pointer-events: none;
+}
+.id-card::after {
+  content: '📌';
+  position: absolute;
+  top: -2px;
+  right: 16px;
+  font-size: 20px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
+}
+
+/* Clipboard — for admin users */
+.clipboard {
+  background: var(--bg-elev);
+  border: 2px solid #D4C4A8;
+  border-radius: var(--r-md);
+  padding: 20px;
+  padding-top: 28px;
+  position: relative;
+  box-shadow: var(--sh-md);
+}
+.clipboard::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 16px;
+  background: linear-gradient(180deg, #B8A88A, #8A7A5A);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.15);
+}
+.clipboard::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 8px;
+  background: linear-gradient(180deg, #A8986A, #786840);
+  border-radius: 2px;
+}
+
+/* Control Board — for admin site CMS */
+.control-board {
+  background: linear-gradient(135deg, var(--paper-warm), #FFF8ED);
+  border: 1.5px solid var(--page-edge);
+  border-radius: var(--r-md);
+  padding: 20px;
+  position: relative;
+  box-shadow: var(--sh-sm);
+}
+.control-board::before {
+  content: '⚙️ 管理パネル';
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  font-family: var(--font-hand);
+  font-size: 11px;
+  color: var(--ink-mid);
+  background: var(--bg-elev);
+  padding: 0 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Sticky Note Feature Cards
+   ══════════════════════════════════════════════════════════════ */
+
+.sticky-note {
+  padding: 20px 16px;
+  border-radius: 2px;
+  position: relative;
+  box-shadow: 2px 3px 6px rgba(59,47,32,.1);
+  font-family: var(--font-story);
+  text-align: center;
+  transition: transform .25s cubic-bezier(.34,1.2,.64,1), box-shadow .25s;
+}
+.sticky-note::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #D4D0C8 30%, #B8B4AC 50%, transparent 70%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  z-index: 2;
+}
+.sticky-note::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,.03) 50%);
+}
+.sticky-note:hover {
+  transform: rotate(0deg) translateY(-3px) scale(1.01) !important;
+  box-shadow: 3px 6px 12px rgba(59,47,32,.12);
+}
+.sticky-note--yellow  { background: #FFF8C5; transform: rotate(-1deg); }
+.sticky-note--green   { background: #D5F5E3; transform: rotate(0.8deg); }
+.sticky-note--blue    { background: #D6EEF8; transform: rotate(-0.5deg); }
+.sticky-note--pink    { background: #FFE0E8; transform: rotate(1.2deg); }
+
+/* ══════════════════════════════════════════════════════════════
+   Teacher Note
+   ══════════════════════════════════════════════════════════════ */
+
+.teacher-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #FFF8C5;
+  border-radius: 2px;
+  transform: rotate(-0.3deg);
+  box-shadow: 2px 3px 6px rgba(59,47,32,.06);
+  position: relative;
+  border-left: 3px solid var(--star-bright);
+}
+.teacher-note::before {
+  content: '📌';
+  position: absolute;
+  top: -8px;
+  right: 16px;
+  font-size: 14px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Sidebar Bookmark Ribbon (active item)
+   ══════════════════════════════════════════════════════════════ */
+
+.nav-bookmark-active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 24px;
+  background: var(--color-accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 1px 0 2px rgba(217,123,63,.2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Login Book Cover
+   ══════════════════════════════════════════════════════════════ */
+
+.book-cover {
+  width: 100%;
+  max-width: 420px;
+  background:
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='l'%3E%3CfeTurbulence baseFrequency='0.4' numOctaves='4' seed='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)' opacity='.08'/%3E%3C/svg%3E"),
+    linear-gradient(145deg, #D14B40 0%, #A83C32 100%);
+  border-radius: 6px 16px 16px 6px;
+  padding: 40px 36px;
+  position: relative;
+  box-shadow:
+    -4px 0 0 #8B2E25,
+    -6px 2px 12px rgba(59,47,32,.25),
+    4px 4px 16px rgba(59,47,32,.2);
+  border-left: 6px solid #8B2E25;
+}
+.book-cover::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 2px solid rgba(201,165,32,.4);
+  border-radius: 4px 10px 10px 4px;
+  pointer-events: none;
+}
+.book-cover__form {
+  background: rgba(255,255,255,.12);
+  border-radius: var(--r-md);
+  padding: 24px 20px;
+  backdrop-filter: blur(4px);
+}
+.book-cover__welcome {
+  text-align: center;
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px dashed rgba(255,255,255,.3);
+  border-radius: var(--r-sm);
+  font-family: var(--font-hand);
+  font-size: 12px;
+  color: rgba(255,255,255,.75);
+}
+
+/* Book cover form inputs */
+.book-cover input[type="email"],
+.book-cover input[type="password"] {
+  width: 100%;
+  height: 44px;
+  border: 2px solid rgba(255,255,255,.25);
+  border-radius: var(--r-sm);
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  background: rgba(255,255,255,.15);
+  color: white;
+  transition: .15s;
+}
+.book-cover input::placeholder { color: rgba(255,255,255,.4); }
+.book-cover input:focus {
+  outline: none;
+  border-color: var(--star-bright);
+  background: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 3px rgba(201,165,32,.25);
+}
+.book-cover label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,.85);
+  margin-bottom: 4px;
+  font-family: var(--font-story);
+}
+
+/* Book cover button */
+.book-cover .btn-star {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--star-bright);
+  color: var(--ink);
+  font-family: var(--font-story);
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--star-gold);
+  transition: .15s;
+}
+.book-cover .btn-star:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--star-gold);
+}
+.book-cover .btn-star:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 var(--star-gold);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Gallery Polaroid Styles
+   ══════════════════════════════════════════════════════════════ */
+
+.polaroid {
+  background: var(--bg-elev);
+  padding: 8px 8px 28px;
+  border-radius: 2px;
+  box-shadow: 1px 2px 6px rgba(59,47,32,.1), 0 0 0 1px rgba(59,47,32,.04);
+  cursor: pointer;
+  position: relative;
+  transition: transform .25s cubic-bezier(.34,1.3,.64,1), box-shadow .25s;
+}
+.polaroid:hover {
+  transform: translateY(-4px) rotate(0deg) !important;
+  box-shadow: 2px 6px 16px rgba(59,47,32,.14);
+  z-index: 2;
+}
+.polaroid--tape::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 48px;
+  height: 14px;
+  background: rgba(255,217,61,.55);
+  border-radius: 1px;
+  z-index: 3;
+  box-shadow: 0 1px 2px rgba(59,47,32,.06);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Ink Bleed Headings + Typography
+   ══════════════════════════════════════════════════════════════ */
+
+.ink-bleed {
+  text-shadow: 0 0 0.5px var(--ink), 0 0 1px rgba(59,47,32,.15);
+}
+
+/* Section header with crayon underline */
+.section-hdr {
+  font-family: var(--font-story);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  display: inline-block;
+  position: relative;
+}
+.section-hdr::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 2px;
+  opacity: .6;
+  background: var(--cr-orange);
+}
+
+/* Fold corner on cards */
+.fold-corner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background:
+    linear-gradient(225deg, var(--page) 50%, transparent 50%),
+    linear-gradient(225deg, var(--page-edge) 52%, transparent 52%);
+  border-radius: 0 0 0 4px;
+}
+
 /* ── Reduced Motion ─────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

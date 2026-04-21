@@ -28,7 +28,7 @@ export default async function PhotosPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-fg">写真一覧</h1>
+        <h1 className="text-xl font-bold text-fg font-story ink-bleed">📷 写真一覧</h1>
       </div>
 
       {isStaff && (
@@ -45,13 +45,15 @@ export default async function PhotosPage() {
       {photoList.length === 0 ? (
         <p className="text-fg-muted text-center py-12">写真がありません</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {photoList.map((photo) => (
+        <div className="corkboard">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {photoList.map((photo, i) => (
             <div
               key={photo.id}
-              className="overflow-hidden rounded-lg border border-border bg-bg-elev"
+              className="polaroid polaroid--tape"
+              style={{ transform: `rotate(${(i % 5 - 2) * 1.5}deg)` }}
             >
-              <div className="relative aspect-[4/3]">
+              <div className="relative aspect-[4/3] rounded-sm overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getPublicUrl(photo.storage_path)}
@@ -60,7 +62,7 @@ export default async function PhotosPage() {
                   loading="lazy"
                 />
               </div>
-              <div className="p-3 space-y-1">
+              <div className="p-2 pt-3 space-y-1">
                 {photo.event_name && (
                   <p className="text-sm font-medium text-fg">
                     {photo.event_name}
@@ -117,6 +119,7 @@ export default async function PhotosPage() {
               </div>
             </div>
           ))}
+        </div>
         </div>
       )}
     </div>

@@ -48,7 +48,7 @@ export default async function DocumentsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-fg">資料一覧</h1>
+        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">📁 資料一覧</h1>
         {isStaff && <UploadSection />}
       </div>
 
@@ -64,10 +64,10 @@ export default async function DocumentsPage() {
             if (docs.length === 0) return null;
             return (
               <section key={category}>
-                <h2 className="mb-3 text-lg font-semibold text-fg">
-                  {category}
-                </h2>
-                <div className="flex flex-col gap-3">
+                <div className="flex gap-1 mb-0">
+                  <span className="folder-tab folder-tab--active">{category}</span>
+                </div>
+                <div className="folder-jacket flex flex-col gap-3">
                   {docs.map((doc) => (
                     <Link key={doc.id} href={`/documents/${doc.id}`}>
                       <Card className="transition-colors hover:bg-bg-elev/80">

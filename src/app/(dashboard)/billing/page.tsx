@@ -123,7 +123,7 @@ export default async function BillingListPage({ searchParams }: Props) {
   return (
     <div className="p-6 max-w-4xl mx-auto flex flex-col gap-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-fg">月次請求一覧</h1>
+        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">📒 月次請求一覧</h1>
         {staff && (
           <div className="flex items-center gap-3">
             <Link
@@ -159,7 +159,8 @@ export default async function BillingListPage({ searchParams }: Props) {
         <>
           {/* Desktop table */}
           <div className="hidden md:block">
-            <Card>
+            <div className="ledger-wrap">
+              <Card className="border-0 shadow-none bg-transparent">
               <CardContent className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -202,6 +203,7 @@ export default async function BillingListPage({ searchParams }: Props) {
                 </table>
               </CardContent>
             </Card>
+            </div>
           </div>
 
           {/* Mobile card list */}

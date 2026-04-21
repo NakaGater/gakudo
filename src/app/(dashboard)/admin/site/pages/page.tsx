@@ -17,7 +17,7 @@ export default async function SitePagesPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-fg mb-6">HP管理</h1>
+      <h1 className="text-2xl font-bold text-fg mb-6 font-story ink-bleed">⚙️ HP管理</h1>
 
       <div className="flex gap-4 border-b border-border mb-6">
         <span className="pb-2 border-b-2 border-accent text-accent font-medium text-sm">
@@ -31,13 +31,13 @@ export default async function SitePagesPage() {
         </Link>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="control-board flex flex-col gap-4">
         {pages && pages.length > 0 ? (
           pages.map((page) => (
             <Card key={page.slug}>
               <CardContent className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-fg">{page.title}</p>
+                  <p className="font-medium text-fg font-story">{page.title}</p>
                   <p className="text-sm text-fg-muted">/{page.slug}</p>
                   <p className="text-xs text-fg-muted mt-1">
                     最終更新:{" "}

@@ -59,7 +59,7 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-fg">お知らせ</h1>
+        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">📬 お知らせ</h1>
         {isStaff && (
           <Link href="/announcements/new">
             <Button size="sm">新規作成</Button>
@@ -74,7 +74,7 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
           <p>お知らせはまだありません</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="letter-paper flex flex-col gap-4">
           {announcements.map((a) => {
             const isRead = isStaff
               ? true

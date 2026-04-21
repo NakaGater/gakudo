@@ -18,7 +18,7 @@ export default async function AdminNewsListPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-fg mb-6">HP管理</h1>
+      <h1 className="text-2xl font-bold text-fg mb-6 font-story ink-bleed">⚙️ HP管理</h1>
 
       <div className="flex gap-4 border-b border-border mb-6">
         <Link

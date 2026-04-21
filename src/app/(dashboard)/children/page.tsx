@@ -45,7 +45,7 @@ export default async function ChildrenPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-fg">児童一覧</h1>
+        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">👦 児童一覧</h1>
         <Link href="/children/new">
           <Button size="sm">新規登録</Button>
         </Link>

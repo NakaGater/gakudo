@@ -32,7 +32,7 @@ export default async function AdminUsersPage() {
   const users = (profiles ?? []) as Profile[];
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto clipboard">
       <UsersClient users={users} currentUserId={user.id} />
     </div>
   );

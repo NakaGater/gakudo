@@ -50,7 +50,7 @@ export default async function AttendanceDashboardPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-fg">本日の入退室状況</h1>
+        <h1 className="text-2xl font-bold text-fg font-story ink-bleed">🏫 本日の入退室状況</h1>
         <form action={handleRefresh}>
           <Button type="submit" variant="secondary" size="sm">
             更新

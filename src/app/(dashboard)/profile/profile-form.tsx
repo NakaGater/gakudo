@@ -34,9 +34,9 @@ export function ProfileForm({ user, success }: ProfileFormProps) {
   const showSuccess = state?.success || (success && state === null);
 
   return (
-    <Card className="max-w-lg">
+    <Card className="max-w-lg id-card">
       <CardHeader>
-        <h1 className="text-xl font-bold">プロフィール</h1>
+        <h1 className="text-xl font-bold font-story ink-bleed">👤 プロフィール</h1>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">

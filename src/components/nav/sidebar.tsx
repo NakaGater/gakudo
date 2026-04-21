@@ -53,9 +53,9 @@ export function Sidebar({ user }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold font-story transition-all",
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold font-story transition-all",
                 active
-                  ? "bg-accent-light text-accent shadow-sm border border-page-edge"
+                  ? "bg-accent-light text-accent shadow-sm border border-page-edge nav-bookmark-active"
                   : "text-ink-mid hover:bg-page-deep hover:text-ink",
               )}
             >
