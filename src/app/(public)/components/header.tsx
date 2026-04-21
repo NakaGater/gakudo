@@ -39,7 +39,7 @@ export function Header() {
           ))}
           <Link
             href="/login"
-            className="ml-2 inline-flex items-center rounded-lg bg-accent border-2 border-[#92400E] shadow-[0_3px_0_#92400E] px-4 py-2 text-sm font-bold font-story text-white transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_0_#92400E] active:translate-y-0.5 active:shadow-[0_1px_0_#92400E]"
+            className="ml-1.5 inline-flex items-center rounded-[10px] bg-cr-orange border-2 border-[#B5663A] shadow-[0_3px_0_#B5663A] px-[14px] py-[6px] text-xs font-bold font-story text-white leading-none transition-all hover:-translate-y-px hover:shadow-[0_4px_0_#B5663A] active:translate-y-px active:shadow-[0_1px_0_#B5663A]"
           >
             ログイン
           </Link>
@@ -73,7 +73,7 @@ export function Header() {
             ))}
             <Link
               href="/login"
-              className="mt-2 block rounded-lg bg-accent border-2 border-[#92400E] px-3 py-2 text-center text-base font-bold font-story text-white transition-colors hover:bg-accent-hv"
+              className="mt-2 block rounded-[10px] bg-cr-orange border-2 border-[#B5663A] shadow-[0_3px_0_#B5663A] px-3 py-2 text-center text-base font-bold font-story text-white transition-all hover:-translate-y-px hover:shadow-[0_4px_0_#B5663A] active:translate-y-px active:shadow-[0_1px_0_#B5663A]"
               onClick={() => setMenuOpen(false)}
             >
               ログイン
