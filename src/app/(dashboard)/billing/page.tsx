@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { currentYearMonthJST } from "@/lib/time/jst";
 import { MonthSelector } from "./month-selector";
 import { CalculateAllButton } from "./calculate-all-button";
 
@@ -14,12 +15,6 @@ type BillRow = {
   status: "draft" | "confirmed";
   child_name: string;
 };
-
-function currentYearMonth(): string {
-  const now = new Date();
-  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, "0")}`;
-}
 
 function formatAmount(amount: number): string {
   return new Intl.NumberFormat("ja-JP", {
@@ -46,7 +41,7 @@ export default async function BillingListPage({ searchParams }: Props) {
   const supabase = await createClient();
   const staff = isStaff(user.role);
 
-  const yearMonth = params.month || currentYearMonth();
+  const yearMonth = params.month || currentYearMonthJST();
 
   // Build child ID list and name map
   let childIds: string[] = [];

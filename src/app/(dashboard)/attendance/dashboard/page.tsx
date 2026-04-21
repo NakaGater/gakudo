@@ -7,12 +7,10 @@ import {
   type DashboardChildStatus,
 } from "../actions";
 
+import { formatTimeJST } from "@/lib/time/jst";
+
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Tokyo",
-  });
+  return formatTimeJST(iso);
 }
 
 const statusOrder: Record<DashboardChildStatus["status"], number> = {

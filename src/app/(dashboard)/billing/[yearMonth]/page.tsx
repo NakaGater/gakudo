@@ -36,10 +36,10 @@ function formatMinutes(minutes: number): string {
   return `${h}時間${m}分`;
 }
 
+import { formatTimeJST } from "@/lib/time/jst";
+
 function formatTime(isoString: string): string {
-  const d = new Date(isoString);
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  return `${String(jst.getUTCHours()).padStart(2, "0")}:${String(jst.getUTCMinutes()).padStart(2, "0")}`;
+  return formatTimeJST(isoString);
 }
 
 function formatDate(dateStr: string): string {

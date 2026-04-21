@@ -6,6 +6,7 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { sendAttendanceNotification } from "@/lib/notifications/send";
 import { ERROR_MESSAGES } from "@/config/constants";
+import { todayRangeJST } from "@/lib/time/jst";
 
 export type AttendanceResult = {
   success: boolean;
@@ -14,24 +15,6 @@ export type AttendanceResult = {
   type?: "enter" | "exit";
   recordedAt?: string;
 };
-
-/** JST today boundaries as ISO strings */
-function todayRangeJST(): { start: string; end: string } {
-  const now = new Date();
-  // JST = UTC+9
-  const jstOffset = 9 * 60 * 60 * 1000;
-  const jstNow = new Date(now.getTime() + jstOffset);
-  const y = jstNow.getUTCFullYear();
-  const m = String(jstNow.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(jstNow.getUTCDate()).padStart(2, "0");
-  // Start of day in JST → convert back to UTC
-  const start = new Date(`${y}-${m}-${d}T00:00:00+09:00`).toISOString();
-  const end = new Date(`${y}-${m}-${String(Number(d) + 1).padStart(2, "0")}T00:00:00+09:00`);
-  // Handle month rollover by adding 1 day to start instead
-  const startDate = new Date(start);
-  const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-  return { start, end: endDate.toISOString() };
-}
 
 export type ChildAttendanceStatus = {
   childId: string;

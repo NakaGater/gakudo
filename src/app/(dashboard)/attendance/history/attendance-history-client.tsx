@@ -36,14 +36,11 @@ export type AttendanceHistoryProps = {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-export function formatTime(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Tokyo",
-  });
-}
+import { formatTimeJST } from "@/lib/time/jst";
+
+const formatTime = formatTimeJST;
+
+export { formatTime };
 
 export function calcDuration(
   enterIso: string | null,
