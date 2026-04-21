@@ -6,11 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import type { Database } from "@/lib/supabase/types";
 import { uploadAttachment } from "@/lib/attachments/actions";
+import type { ActionState } from "@/lib/actions/types";
 
-export type ActionState = {
-  success: boolean;
-  message: string;
-} | null;
+export type { ActionState };
 
 type SiteNewsInsert = Database["public"]["Tables"]["site_news"]["Insert"];
 

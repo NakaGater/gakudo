@@ -3,22 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
+import type { ActionState } from "@/lib/actions/types";
+import { ERROR_MESSAGES } from "@/config/constants";
 
-export type ActionState = {
-  success: boolean;
-  message: string;
-} | null;
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
+export type { ActionState };
 
 export async function uploadPhoto(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const files = formData.getAll("files") as File[];
@@ -110,7 +106,7 @@ export async function setPhotoVisibility(
 export async function deletePhoto(id: string): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
@@ -127,7 +123,7 @@ export async function deletePhoto(id: string): Promise<ActionState> {
 
   // Only admin or uploader can delete
   if (user.role !== "admin" && photo.uploaded_by !== user.id) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   // Delete from storage

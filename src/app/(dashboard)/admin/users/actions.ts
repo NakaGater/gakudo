@@ -3,14 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";
+import type { ActionState } from "@/lib/actions/types";
+
+export type { ActionState };
 
 const VALID_ROLES = ["parent", "teacher", "admin"] as const;
 type Role = (typeof VALID_ROLES)[number];
-
-export type ActionState = {
-  success: boolean;
-  message: string;
-} | null;
 
 export async function inviteUser(
   _prev: ActionState,

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { Card, CardContent, CardHeader, Badge } from "@/components/ui";
 import { ConfirmButton } from "./confirm-button";
 import { CalculateSingleButton } from "./calculate-single-button";
@@ -19,10 +20,6 @@ type DailyBreakdown = {
   units: number;
   amount: number;
 };
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
 
 function formatAmount(amount: number): string {
   return new Intl.NumberFormat("ja-JP", {

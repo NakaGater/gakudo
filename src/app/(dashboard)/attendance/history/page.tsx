@@ -1,19 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import {
   AttendanceHistoryClient,
   type DayRecord,
   type ChildOption,
   type AttendancePair,
 } from "./attendance-history-client";
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
 
 /** Current week Mon–Sun in JST as YYYY-MM-DD */
 function defaultWeekRange(): { start: string; end: string } {

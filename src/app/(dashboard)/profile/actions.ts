@@ -3,11 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import type { ActionState } from "@/lib/actions/types";
 
-export type ActionState = {
-  success: boolean;
-  message: string;
-} | null;
+export type { ActionState };
 
 export async function updateProfile(
   _prev: ActionState,

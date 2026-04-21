@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { sendAttendanceNotification } from "@/lib/notifications/send";
+import { ERROR_MESSAGES } from "@/config/constants";
 
 export type AttendanceResult = {
   success: boolean;
@@ -12,10 +14,6 @@ export type AttendanceResult = {
   type?: "enter" | "exit";
   recordedAt?: string;
 };
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
 
 /** JST today boundaries as ISO strings */
 function todayRangeJST(): { start: string; end: string } {
@@ -171,7 +169,7 @@ export async function recordManualAttendance(
 ): Promise<AttendanceResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
@@ -242,7 +240,7 @@ export async function recordAttendance(
 ): Promise<AttendanceResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();

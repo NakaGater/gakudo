@@ -3,19 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { customAlphabet } from "nanoid";
+import type { ActionState as BaseActionState } from "@/lib/actions/types";
+import { QR_CODE, ERROR_MESSAGES } from "@/config/constants";
 
-const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 8);
+const nanoid = customAlphabet(QR_CODE.ALPHABET, QR_CODE.LENGTH);
 
-export type ActionState = {
-  success: boolean;
-  message: string;
-  childId?: string;
-} | null;
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
+export type ActionState = NonNullable<BaseActionState> & { childId?: string } | null;
 
 type ValidationOk = { ok: true; name: string; grade: number };
 type ValidationErr = { ok: false; error: NonNullable<ActionState> };
@@ -43,7 +38,7 @@ export async function createChild(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const validated = validateChildForm(formData);
@@ -77,7 +72,7 @@ export async function updateChild(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const validated = validateChildForm(formData);
@@ -175,7 +170,7 @@ export async function linkParent(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
@@ -200,7 +195,7 @@ export async function unlinkParent(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();

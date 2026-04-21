@@ -4,19 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { sendAnnouncementNotification } from "@/lib/notifications/send";
 import { uploadAttachment } from "@/lib/attachments/actions";
+import type { ActionState } from "@/lib/actions/types";
+import { ERROR_MESSAGES } from "@/config/constants";
 
-export type ActionState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: { title?: string; body?: string };
-  announcementId?: string;
-} | null;
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
+export type { ActionState };
 
 export async function createAnnouncement(
   _prev: ActionState,
@@ -24,7 +18,7 @@ export async function createAnnouncement(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const title = formData.get("title");

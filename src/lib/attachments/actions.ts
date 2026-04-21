@@ -2,19 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
+import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
+const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
+const MAX_FILE_SIZE = FILE_LIMITS.MAX_SIZE_BYTES;
 
 export type AttachmentRow = {
   id: string;
@@ -33,7 +25,7 @@ export async function uploadAttachment(
 ): Promise<{ success: boolean; message: string; attachment?: AttachmentRow }> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const file = formData.get("file");
@@ -89,7 +81,7 @@ export async function deleteAttachment(
 ): Promise<{ success: boolean; message: string }> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();

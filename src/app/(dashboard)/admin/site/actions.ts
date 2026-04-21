@@ -5,11 +5,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import type { Database, Json } from "@/lib/supabase/types";
+import type { ActionState } from "@/lib/actions/types";
 
-export type ActionState = {
-  success: boolean;
-  message: string;
-} | null;
+export type { ActionState };
 
 type SitePageUpdate = Database["public"]["Tables"]["site_pages"]["Update"];
 

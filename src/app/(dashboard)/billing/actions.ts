@@ -3,19 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
+import type { ActionState } from "@/lib/actions/types";
+import { ERROR_MESSAGES } from "@/config/constants";
 
-type FieldErrors = {
-  regular_end_time?: string;
-  rate_per_unit?: string;
-  unit_minutes?: string;
-  effective_from?: string;
-};
-
-export type BillingRuleActionState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: FieldErrors;
-} | null;
+export type { ActionState as BillingRuleActionState };
 
 export type BillingRule = {
   id: string;
@@ -64,7 +56,7 @@ export async function createBillingRule(
 ): Promise<BillingRuleActionState> {
   const user = await getUser();
   if (user.role !== "admin") {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const regularEndTime = formData.get("regular_end_time");
@@ -126,7 +118,7 @@ export async function calculateAllBills(
 ): Promise<{ success: boolean; message: string; processed?: number; totalAmount?: number }> {
   const user = await getUser();
   if (user.role !== "admin" && user.role !== "teacher") {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
@@ -178,7 +170,7 @@ export async function confirmBill(
 ): Promise<{ success: boolean; message: string }> {
   const user = await getUser();
   if (user.role !== "admin" && user.role !== "teacher") {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
@@ -209,7 +201,7 @@ export async function confirmAllBills(
 ): Promise<{ success: boolean; message: string; confirmed?: number }> {
   const user = await getUser();
   if (user.role !== "admin" && user.role !== "teacher") {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   if (!/^\d{4}-\d{2}$/.test(yearMonth)) {
@@ -252,7 +244,7 @@ export async function calculateSingleBill(
 ): Promise<{ success: boolean; message: string }> {
   const user = await getUser();
   if (user.role !== "admin" && user.role !== "teacher") {
-    return { success: false, message: "権限がありません" };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   if (!/^\d{4}-\d{2}$/.test(yearMonth)) {

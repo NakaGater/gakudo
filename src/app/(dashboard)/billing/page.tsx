@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { MonthSelector } from "./month-selector";
 import { CalculateAllButton } from "./calculate-all-button";
 
@@ -13,10 +14,6 @@ type BillRow = {
   status: "draft" | "confirmed";
   child_name: string;
 };
-
-function isStaff(role: string): boolean {
-  return role === "admin" || role === "teacher";
-}
 
 function currentYearMonth(): string {
   const now = new Date();
