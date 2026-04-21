@@ -46,6 +46,7 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 max_frequency = "1s"
+otp_expiry = 3600
 
 [edge_runtime]
 enabled = true
