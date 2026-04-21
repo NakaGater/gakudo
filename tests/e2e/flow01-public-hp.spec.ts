@@ -6,10 +6,29 @@ test.describe("Flow 1: Public HP renders (unauthenticated)", () => {
     const errors = collectConsoleErrors(page);
     await page.goto("/");
     await expect(
-      page.getByText("星ヶ丘こどもクラブ").first(),
+      page.getByRole("heading", { name: "ホーム" }),
     ).toBeVisible();
+    // Features section heading from seed data
     await expect(
-      page.getByText("子どもたちの笑顔あふれる放課後を"),
+      page.getByRole("heading", { name: "施設の特徴" }),
+    ).toBeVisible();
+    expect(errors).toHaveLength(0);
+  });
+
+  test("/about page renders", async ({ page }) => {
+    const errors = collectConsoleErrors(page);
+    await page.goto("/about");
+    await expect(
+      page.getByRole("heading", { name: "学童について" }),
+    ).toBeVisible();
+    expect(errors).toHaveLength(0);
+  });
+
+  test("/access page renders", async ({ page }) => {
+    const errors = collectConsoleErrors(page);
+    await page.goto("/access");
+    await expect(
+      page.getByRole("heading", { name: "アクセス" }),
     ).toBeVisible();
     expect(errors).toHaveLength(0);
   });
