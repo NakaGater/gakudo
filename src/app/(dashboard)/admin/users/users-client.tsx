@@ -49,7 +49,7 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
             <input
               name="name"
               defaultValue={user.name}
-              className="rounded-md border border-border bg-bg px-3 py-1.5 text-sm text-fg"
+              className="rounded-md border border-border bg-bg px-3 py-1.5 text-sm text-ink"
               required
             />
           </div>
@@ -59,7 +59,7 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
               name="role"
               defaultValue={user.role}
               disabled={isSelf}
-              className="rounded-md border border-border bg-bg px-3 py-1.5 text-sm text-fg"
+              className="rounded-md border border-border bg-bg px-3 py-1.5 text-sm text-ink"
             >
               <option value="parent">保護者</option>
               <option value="teacher">先生</option>
@@ -67,7 +67,7 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
             </select>
           </div>
           <Button type="submit" loading={isPending}>保存</Button>
-          <button type="button" onClick={onClose} className="p-2 text-fg-muted hover:text-fg">
+          <button type="button" onClick={onClose} className="p-2 text-ink-mid hover:text-ink">
             <X size={16} />
           </button>
           {state?.message && (
@@ -93,9 +93,9 @@ function DeleteConfirm({ user, onClose }: { user: Profile; onClose: () => void }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-sm mx-4 rounded-lg bg-bg-elev p-6 shadow-lg">
-        <h3 className="text-lg font-bold text-fg mb-2">ユーザー削除</h3>
-        <p className="text-sm text-fg-muted mb-4">
-          <span className="font-medium text-fg">{user.name}</span>（{user.email}）を削除しますか？
+        <h3 className="text-lg font-bold text-ink mb-2">ユーザー削除</h3>
+        <p className="text-sm text-ink-mid mb-4">
+          <span className="font-medium text-ink">{user.name}</span>（{user.email}）を削除しますか？
           <br />この操作は取り消せません。
         </p>
         {state?.message && (
@@ -121,8 +121,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="main__title">ユーザー管理</h1>
+      <div className="flex items-center justify-end mb-6">
         {!showInvite && (
           <Button onClick={() => setShowInvite(true)}>ユーザー招待</Button>
         )}
@@ -174,7 +173,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
                     <div className="flex gap-1">
                       <button
                         onClick={() => setEditingId(u.id)}
-                        className="p-1.5 rounded text-fg-muted hover:text-accent hover:bg-accent-light transition-colors"
+                        className="p-1.5 rounded text-ink-mid hover:text-accent hover:bg-accent-light transition-colors"
                         aria-label={`${u.name}を編集`}
                       >
                         <Pencil size={15} />
@@ -182,7 +181,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
                       {u.id !== currentUserId && (
                         <button
                           onClick={() => setDeletingUser(u)}
-                          className="p-1.5 rounded text-fg-muted hover:text-danger hover:bg-danger/10 transition-colors"
+                          className="p-1.5 rounded text-ink-mid hover:text-danger hover:bg-danger/10 transition-colors"
                           aria-label={`${u.name}を削除`}
                         >
                           <Trash2 size={15} />

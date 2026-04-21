@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import { Card, CardContent, Badge } from "@/components/ui";
 import { MonthSelector } from "./month-selector";
 import { CalculateAllButton } from "./calculate-all-button";
 
@@ -121,9 +120,9 @@ export default async function BillingListPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto flex flex-col gap-6">
+    <>
       <div className="main__hdr flex-wrap gap-3">
-        <h1 className="main__title">📒 月次請求一覧</h1>
+        <h1 className="main__title font-story">💰 月次請求一覧</h1>
         {staff && (
           <div className="flex items-center gap-3">
             <Link
@@ -136,46 +135,56 @@ export default async function BillingListPage({ searchParams }: Props) {
         )}
       </div>
 
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="rounded-xl p-4 text-center" style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}>
+          <p className="text-2xl font-bold text-ink">{bills.length}</p>
+          <p className="text-sm text-ink-mid">対象児童</p>
+        </div>
+        <div className="rounded-xl p-4 text-center" style={{ background: "linear-gradient(135deg, #dbeafe, #bfdbfe)" }}>
+          <p className="text-2xl font-bold text-ink">{formatMinutes(bills.reduce((s, b) => s + b.total_extended_minutes, 0))}</p>
+          <p className="text-sm text-ink-mid">延長合計</p>
+        </div>
+        <div className="rounded-xl p-4 text-center" style={{ background: "linear-gradient(135deg, #fce7f3, #fbcfe8)" }}>
+          <p className="text-2xl font-bold text-ink">{formatAmount(bills.reduce((s, b) => s + b.total_amount, 0))}</p>
+          <p className="text-sm text-ink-mid">合計金額</p>
+        </div>
+      </div>
+
       {/* Month filter */}
-      <Card>
-        <CardContent>
-          <MonthSelector options={monthOptions} current={yearMonth} />
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-3">
+        <MonthSelector options={monthOptions} current={yearMonth} />
+      </div>
 
       {/* Admin: Calculate all button */}
       {staff && <CalculateAllButton yearMonth={yearMonth} />}
 
       {/* Bills table */}
       {bills.length === 0 ? (
-        <Card>
-          <CardContent>
-            <p className="text-ink-mid text-center py-4">
-              {yearMonth.replace("-", "年")}月の請求データはありません
-            </p>
-          </CardContent>
-        </Card>
+        <p className="text-ink-mid text-center py-4">
+          {yearMonth.replace("-", "年")}月の請求データはありません
+        </p>
       ) : (
         <>
           {/* Desktop table */}
           <div className="hidden md:block">
             <div className="ledger-wrap">
-              <Card className="border-0 shadow-none bg-transparent">
-              <CardContent className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="ledger-stamp" />
+              <div className="overflow-x-auto">
+                <table className="billing-table w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left">
-                      <th className="px-4 py-3 font-medium text-fg-muted">年月</th>
-                      <th className="px-4 py-3 font-medium text-fg-muted">児童名</th>
-                      <th className="px-4 py-3 font-medium text-fg-muted">延長時間</th>
-                      <th className="px-4 py-3 font-medium text-fg-muted text-right">金額</th>
-                      <th className="px-4 py-3 font-medium text-fg-muted">状態</th>
+                      <th className="px-4 py-3 font-medium text-ink-mid">年月</th>
+                      <th className="px-4 py-3 font-medium text-ink-mid">児童名</th>
+                      <th className="px-4 py-3 font-medium text-ink-mid">延長時間</th>
+                      <th className="px-4 py-3 font-medium text-ink-mid text-right">金額</th>
+                      <th className="px-4 py-3 font-medium text-ink-mid">状態</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bills.map((bill) => (
                       <tr key={bill.id} className="border-b border-border last:border-0">
-                        <td className="px-4 py-3 text-fg">
+                        <td className="px-4 py-3 text-ink">
                           {bill.year_month.replace("-", "年")}月
                         </td>
                         <td className="px-4 py-3">
@@ -186,23 +195,25 @@ export default async function BillingListPage({ searchParams }: Props) {
                             {bill.child_name}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-fg">
+                        <td className="px-4 py-3 text-ink">
                           {formatMinutes(bill.total_extended_minutes)}
                         </td>
-                        <td className="px-4 py-3 text-fg text-right font-medium">
+                        <td className="px-4 py-3 amt text-right font-medium">
                           {formatAmount(bill.total_amount)}
                         </td>
                         <td className="px-4 py-3">
-                          <Badge variant={bill.status === "confirmed" ? "success" : "warning"}>
+                          <span className={`status-badge ${bill.status === "confirmed" ? "status-badge--confirmed" : "status-badge--draft"}`}>
                             {bill.status === "confirmed" ? "確定済" : "下書き"}
-                          </Badge>
+                          </span>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="billing-total">
+                合計: {formatAmount(bills.reduce((s, b) => s + b.total_amount, 0))}
+              </div>
             </div>
           </div>
 
@@ -213,25 +224,23 @@ export default async function BillingListPage({ searchParams }: Props) {
                 key={bill.id}
                 href={`/billing/${bill.year_month}?child=${bill.child_id}`}
               >
-                <Card>
-                  <CardContent className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{bill.child_name}</p>
-                      <p className="text-sm text-ink-mid">
-                        {formatMinutes(bill.total_extended_minutes)} ・{" "}
-                        {formatAmount(bill.total_amount)}
-                      </p>
-                    </div>
-                    <Badge variant={bill.status === "confirmed" ? "success" : "warning"}>
-                      {bill.status === "confirmed" ? "確定済" : "下書き"}
-                    </Badge>
-                  </CardContent>
-                </Card>
+                <div className="rounded-lg border border-border p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-ink">{bill.child_name}</p>
+                    <p className="text-sm text-ink-mid">
+                      {formatMinutes(bill.total_extended_minutes)} ・{" "}
+                      <span className="amt">{formatAmount(bill.total_amount)}</span>
+                    </p>
+                  </div>
+                  <span className={`status-badge ${bill.status === "confirmed" ? "status-badge--confirmed" : "status-badge--draft"}`}>
+                    {bill.status === "confirmed" ? "確定済" : "下書き"}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

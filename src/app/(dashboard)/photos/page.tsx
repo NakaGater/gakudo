@@ -26,15 +26,15 @@ export default async function PhotosPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="main__title">📷 写真一覧</h1>
+    <>
+      <div className="main__hdr">
+        <h1 className="main__title font-story">📷 写真管理</h1>
       </div>
 
       {isStaff && (
-        <details className="rounded-lg border border-border bg-bg-elev p-4">
-          <summary className="cursor-pointer font-medium text-fg">
-            アップロード
+        <details className="gallery-upload">
+          <summary className="cursor-pointer font-medium text-ink">
+            📁 アップロード
           </summary>
           <div className="mt-4">
             <UploadForm isAdmin={isAdmin} />
@@ -46,78 +46,78 @@ export default async function PhotosPage() {
         <p className="text-ink-mid text-center py-12">写真がありません</p>
       ) : (
         <div className="corkboard">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {photoList.map((photo, i) => (
-            <div
-              key={photo.id}
-              className="polaroid polaroid--tape"
-              style={{ transform: `rotate(${(i % 5 - 2) * 1.5}deg)` }}
-            >
-              <div className="relative aspect-[4/3] rounded-sm overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={getPublicUrl(photo.storage_path)}
-                  alt={photo.caption ?? "写真"}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-2 pt-3 space-y-1">
-                {photo.event_name && (
-                  <p className="photo-mgmt__title">
-                    {photo.event_name}
-                  </p>
-                )}
-                {photo.caption && (
-                  <p className="photo-mgmt__caption">{photo.caption}</p>
-                )}
-                <div className="photo-mgmt__actions">
-                  <span className={`status-badge ${photo.visibility === "public" ? "status-badge--public" : "status-badge--private"}`}>
-                    {photo.visibility === "public" ? "公開" : "非公開"}
-                  </span>
-
-                  {isAdmin && (
-                    <div className="flex gap-1">
-                      <form
-                        action={async () => {
-                          "use server";
-                          await setPhotoVisibility(
-                            photo.id,
-                            photo.visibility === "public"
-                              ? "private"
-                              : "public",
-                          );
-                        }}
-                      >
-                        <Button variant="ghost" size="sm" type="submit">
-                          {photo.visibility === "public"
-                            ? "非公開にする"
-                            : "公開する"}
-                        </Button>
-                      </form>
-                      <form
-                        action={async () => {
-                          "use server";
-                          await deletePhoto(photo.id);
-                        }}
-                      >
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          type="submit"
-                        >
-                          削除
-                        </Button>
-                      </form>
-                    </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {photoList.map((photo, i) => (
+              <div
+                key={photo.id}
+                className="photo-mgmt"
+                style={{ transform: `rotate(${(i % 5 - 2) * 1.5}deg)` }}
+              >
+                <div className="photo-mgmt__img relative aspect-[4/3] rounded-sm overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getPublicUrl(photo.storage_path)}
+                    alt={photo.caption ?? "写真"}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="photo-mgmt__info">
+                  {photo.event_name && (
+                    <p className="photo-mgmt__title">
+                      {photo.event_name}
+                    </p>
                   )}
+                  {photo.caption && (
+                    <p className="photo-mgmt__caption">{photo.caption}</p>
+                  )}
+                  <div className="photo-mgmt__actions">
+                    <span className={`status-badge ${photo.visibility === "public" ? "status-badge--public" : "status-badge--private"}`}>
+                      {photo.visibility === "public" ? "公開" : "非公開"}
+                    </span>
+
+                    {isAdmin && (
+                      <div className="flex gap-1">
+                        <form
+                          action={async () => {
+                            "use server";
+                            await setPhotoVisibility(
+                              photo.id,
+                              photo.visibility === "public"
+                                ? "private"
+                                : "public",
+                            );
+                          }}
+                        >
+                          <Button variant="ghost" size="sm" type="submit">
+                            {photo.visibility === "public"
+                              ? "非公開にする"
+                              : "公開する"}
+                          </Button>
+                        </form>
+                        <form
+                          action={async () => {
+                            "use server";
+                            await deletePhoto(photo.id);
+                          }}
+                        >
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            type="submit"
+                          >
+                            削除
+                          </Button>
+                        </form>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

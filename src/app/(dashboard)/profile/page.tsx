@@ -10,8 +10,11 @@ export default async function ProfilePage({
   const params = await searchParams;
 
   return (
-    <div className="p-6">
+    <>
+      <div className="main__hdr">
+        <h1 className="main__title font-story">👤 プロフィール</h1>
+      </div>
       <ProfileForm user={user} success={params.success === "1"} />
-    </div>
+    </>
   );
 }

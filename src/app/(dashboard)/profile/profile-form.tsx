@@ -27,9 +27,17 @@ export function ProfileForm({ user, success }: ProfileFormProps) {
   const showSuccess = state?.success || (success && state === null);
 
   return (
-    <Card className="max-w-lg id-card">
+    <Card className="max-w-lg id-card" style={{ maxWidth: 480 }}>
       <CardHeader>
-        <h1 className="main__title">👤 プロフィール</h1>
+        <div className="flex flex-col items-center gap-3">
+          <div className="avatar-lg flex items-center justify-center rounded-full text-3xl font-bold" style={{ width: 72, height: 72, background: "linear-gradient(135deg, #fbbf24, #f59e0b)", color: "#fff" }}>
+            {user.name?.charAt(0) ?? "?"}
+          </div>
+          <p className="text-lg font-bold text-ink">{user.name}</p>
+          <span className={`role-badge role-badge--${user.role}`}>
+            {roleLabels[user.role]}
+          </span>
+        </div>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
@@ -50,6 +58,7 @@ export function ProfileForm({ user, success }: ProfileFormProps) {
             defaultValue={user.name}
             required
             maxLength={50}
+            className="profile-input"
           />
 
           <Input
@@ -57,19 +66,11 @@ export function ProfileForm({ user, success }: ProfileFormProps) {
             name="email"
             value={user.email}
             disabled
+            className="profile-input"
           />
-
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">役割</span>
-            <div>
-              <span className={`role-badge role-badge--${user.role}`}>
-                {roleLabels[user.role]}
-              </span>
-            </div>
-          </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" loading={isPending}>
+          <Button type="submit" className="btn btn-primary" loading={isPending}>
             保存
           </Button>
         </CardFooter>

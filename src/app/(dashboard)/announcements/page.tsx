@@ -56,20 +56,20 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
   const announcements = (data ?? []) as unknown as AnnouncementRow[];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <>
       {/* Header */}
       <div className="main__hdr">
-        <h1 className="main__title">📬 お知らせ</h1>
+        <h1 className="main__title font-story">📢 お知らせ</h1>
         {isStaff && (
           <Link href="/announcements/new">
-            <Button size="sm">新規作成</Button>
+            <Button size="sm">＋ 新規作成</Button>
           </Link>
         )}
       </div>
 
       {/* List */}
       {announcements.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-20 text-fg/50">
+        <div className="flex flex-col items-center gap-3 py-20 text-ink-mid">
           <Bell className="h-10 w-10" />
           <p>お知らせはまだありません</p>
         </div>
@@ -108,7 +108,7 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
               前のページ
             </Button>
           )}
-          <span className="text-sm text-fg/60">
+          <span className="text-sm text-ink-mid">
             {page} / {totalPages}
           </span>
           {page < totalPages ? (
@@ -124,6 +124,6 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
           )}
         </nav>
       )}
-    </div>
+    </>
   );
 }

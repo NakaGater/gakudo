@@ -2,7 +2,6 @@ import Link from "next/link";
 import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import { Badge } from "@/components/ui";
 import { UploadSection } from "./upload-section";
 
 type DocumentRow = {
@@ -46,20 +45,28 @@ export default async function DocumentsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <>
       <div className="main__hdr">
-        <h1 className="main__title">📁 資料一覧</h1>
+        <h1 className="main__title font-story">📄 資料一覧</h1>
         {isStaff && <UploadSection />}
       </div>
 
       {documents.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-20 text-fg/50">
+        <div className="flex flex-col items-center gap-3 py-20 text-ink-mid">
           <FileText className="h-10 w-10" />
           <p>資料はまだありません</p>
         </div>
       ) : (
         <div className="flex flex-col gap-8">
           {CATEGORY_ORDER.map((category) => {
+            const catClass =
+              category === "お便り"
+                ? "doc-cat--letter"
+                : category === "スケジュール"
+                  ? "doc-cat--schedule"
+                  : category === "書類"
+                    ? "doc-cat--form"
+                    : "";
             const docs = grouped.get(category)!;
             if (docs.length === 0) return null;
             return (
@@ -68,6 +75,7 @@ export default async function DocumentsPage() {
                   <span className="folder-tab folder-tab--active">{category}</span>
                 </div>
                 <div className="folder-jacket flex flex-col gap-3">
+                  <h3 className={`doc-cat ${catClass}`}>{category}</h3>
                   {docs.map((doc) => (
                     <Link key={doc.id} href={`/documents/${doc.id}`}>
                       <div className="doc-card">
@@ -82,7 +90,7 @@ export default async function DocumentsPage() {
                             )}
                           </p>
                         </div>
-                        <Badge>{doc.category}</Badge>
+                        <span className="status-badge">{doc.category}</span>
                       </div>
                     </Link>
                   ))}
@@ -92,6 +100,6 @@ export default async function DocumentsPage() {
           })}
         </div>
       )}
-    </div>
+    </>
   );
 }

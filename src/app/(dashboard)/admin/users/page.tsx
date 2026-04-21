@@ -32,7 +32,19 @@ export default async function AdminUsersPage() {
   const users = (profiles ?? []) as Profile[];
 
   return (
-    <div className="p-6 max-w-4xl mx-auto clipboard">
+    <div className="clipboard">
+      <div className="main__hdr">
+        <h1 className="main__title font-story">👥 ユーザー管理</h1>
+      </div>
+
+      {/* Summary pills */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-ink">{users.length} ユーザー</span>
+        <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-ink">{users.filter(u => u.role === "admin").length} 管理者</span>
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-ink">{users.filter(u => u.role === "teacher").length} 先生</span>
+        <span className="rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-ink">{users.filter(u => u.role === "parent").length} 保護者</span>
+      </div>
+
       <UsersClient users={users} currentUserId={user.id} />
     </div>
   );

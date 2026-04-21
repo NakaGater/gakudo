@@ -15,8 +15,10 @@ export default async function SitePagesPage() {
     .returns<{ slug: string; title: string; updated_at: string }[]>();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="main__title mb-6">⚙️ HP管理</h1>
+    <>
+      <div className="main__hdr">
+        <h1 className="main__title font-story">🌐 HP管理</h1>
+      </div>
 
       <div className="flex gap-4 border-b border-border mb-6">
         <span className="pb-2 border-b-2 border-cr-orange text-cr-orange font-medium text-sm">
@@ -54,6 +56,6 @@ export default async function SitePagesPage() {
           <p className="text-ink-mid">ページがありません</p>
         )}
       </div>
-    </div>
+    </>
   );
 }
