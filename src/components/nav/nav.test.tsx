@@ -101,8 +101,7 @@ describe("Sidebar", () => {
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const announcementsLink = screen.getByRole("link", { name: /連絡/ });
-    expect(announcementsLink.className).toContain("bg-accent-light");
-    expect(announcementsLink.className).toContain("text-accent");
+    expect(announcementsLink.className).toContain("active");
   });
 
   it("does not apply active styling to non-current paths", () => {
@@ -111,7 +110,7 @@ describe("Sidebar", () => {
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const photosLink = screen.getByRole("link", { name: /写真/ });
-    expect(photosLink.className).not.toContain("bg-accent-light");
+    expect(photosLink.className).not.toContain("active");
   });
 });
 

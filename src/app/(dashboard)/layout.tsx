@@ -2,22 +2,47 @@ import { getUser } from "@/lib/auth/get-user";
 import { Sidebar } from "@/components/nav/sidebar";
 import { MobileTabs } from "@/components/nav/mobile-tabs";
 
+function getSeasonClass(): string {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 11) return "season--morning";
+  if (h >= 11 && h < 16) return "season--afternoon";
+  if (h >= 16 && h < 19) return "season--evening";
+  return "season--night";
+}
+
+function getMoodMessage(): { icon: string; text: string } {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 11) return { icon: "🌅", text: "おはよう！ きょうも たのしもう ⭐" };
+  if (h >= 11 && h < 16) return { icon: "☀️", text: "みんな おかえりなさい ⭐" };
+  if (h >= 16 && h < 19) return { icon: "🌇", text: "きょうも よくがんばったね ⭐" };
+  return { icon: "🌙", text: "おつかれさま ⭐ また あした！" };
+}
+
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Auth gate — redirects to /login if no valid session
   const user = await getUser();
+  const mood = getMoodMessage();
 
   return (
-    <div data-user-role={user.role} className="min-h-screen bg-page-deep">
-      <Sidebar user={user} />
-      <main className="md:pl-64 pb-16 md:pb-0 min-h-screen">
-        <div className="mx-auto max-w-5xl p-4 md:p-6">
-          {children}
+    <div data-user-role={user.role} className="desk-bg min-h-screen">
+      <div className="clean-page">
+        <div className={`season-strip ${getSeasonClass()}`} />
+        <div className="dash">
+          <Sidebar user={user} />
+          <div className="main">
+            <div className="main__mood">
+              <span>{mood.icon}</span>
+              <span>{mood.text}</span>
+            </div>
+            <div className="main__content">
+              {children}
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
       <MobileTabs user={user} />
     </div>
   );

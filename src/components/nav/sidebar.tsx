@@ -31,20 +31,18 @@ export function Sidebar({ user }: SidebarProps) {
     window.location.href = "/";
   }
 
+  const roleLabel = user.role === "admin" ? "管理者" : user.role === "teacher" ? "先生" : "保護者";
+
   return (
-    <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-page border-r-2 border-dashed border-page-edge">
-      {/* Facility name with star mascot */}
-      <div className="flex items-center h-16 px-5 border-b-2 border-dashed border-page-edge">
-        <Link href="/attendance/dashboard" className="flex items-center gap-2.5 font-story font-bold text-base text-ink no-underline">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-star border-2 border-star-gold shadow-[2px_2px_0_var(--star-gold)] text-lg">
-            ⭐
-          </span>
-          <span>星ヶ丘こどもクラブ</span>
+    <aside className="sidebar hidden md:flex">
+      <div className="sb__hd">
+        <Link href="/attendance/dashboard">
+          <span className="sb__mark">⭐</span>
+          <span className="sb__name">星ヶ丘<br />こどもクラブ</span>
         </Link>
       </div>
 
-      {/* Nav items */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <nav className="sb__nav">
         {items.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -52,35 +50,28 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold font-story transition-all",
-                active
-                  ? "bg-accent-light text-accent shadow-sm border border-page-edge nav-bookmark-active"
-                  : "text-ink-mid hover:bg-page-deep hover:text-ink",
-              )}
+              className={cn("ni", active && "active")}
             >
-              <Icon size={20} strokeWidth={1.75} />
+              <span className="ni__ic"><Icon size={16} strokeWidth={2} /></span>
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      {/* User info + logout */}
-      <div className="border-t-2 border-dashed border-page-edge px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-sm font-bold font-story text-ink truncate">{user.name}</p>
-            <p className="text-xs text-ink-light truncate">{user.role}</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg text-ink-light hover:text-cr-red hover:bg-absent-bg transition-colors"
-            aria-label="ログアウト"
-          >
-            <LogOut size={18} strokeWidth={1.75} />
-          </button>
+      <div className="sb__ft">
+        <div className="sb__av">{user.name.charAt(0)}</div>
+        <div className="min-w-0 flex-1">
+          <div className="sb__uname truncate">{user.name}</div>
+          <div className="sb__urole">{roleLabel}</div>
         </div>
+        <button
+          onClick={handleLogout}
+          className="ml-auto p-1 text-ink-light hover:text-cr-red transition-colors flex-shrink-0"
+          aria-label="ログアウト"
+        >
+          <LogOut size={16} strokeWidth={1.75} />
+        </button>
       </div>
     </aside>
   );
