@@ -43,19 +43,24 @@ const features = [
   },
 ] as const;
 
+const DEFAULT_HERO_TITLE = "子どもたちの\n笑顔あふれる放課後を";
 const DEFAULT_HERO_TEXT =
   "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
 
 export default async function HomePage() {
+  let heroTitle = DEFAULT_HERO_TITLE;
   let heroText = DEFAULT_HERO_TEXT;
   try {
     const supabase = await createClient();
     const { data: homePage } = await supabase
       .from("site_pages")
-      .select("content")
+      .select("title, content")
       .eq("slug", "home")
-      .single() as { data: { content: string } | null };
+      .single() as { data: { title: string; content: string } | null };
 
+    if (homePage?.title) {
+      heroTitle = homePage.title;
+    }
     if (homePage?.content) {
       heroText = homePage.content;
     }
@@ -72,10 +77,8 @@ export default async function HomePage() {
               <p className="mb-3 text-sm font-semibold tracking-wide text-accent">
                 父母運営型 学童保育
               </p>
-              <h1 className="text-3xl font-bold leading-tight text-fg sm:text-4xl lg:text-5xl">
-                子どもたちの
-                <br />
-                笑顔あふれる放課後を
+              <h1 className="text-3xl font-bold leading-tight text-fg sm:text-4xl lg:text-5xl whitespace-pre-wrap">
+                {heroTitle}
               </h1>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-fg-muted sm:text-lg whitespace-pre-wrap">
                 {heroText}
