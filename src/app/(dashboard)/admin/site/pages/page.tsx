@@ -3,6 +3,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 
+const PAGE_ORDER: Record<string, { order: number; icon: string; description: string }> = {
+  home: { order: 1, icon: "🏠", description: "トップページ" },
+  about: { order: 2, icon: "📖", description: "施設紹介・職員紹介・施設概要" },
+  "daily-life": { order: 3, icon: "🌈", description: "活動内容・季節行事" },
+  enrollment: { order: 4, icon: "📋", description: "料金・入所手続き" },
+  faq: { order: 5, icon: "❓", description: "よくある質問" },
+};
+
 export default async function SitePagesPage() {
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
@@ -11,8 +19,11 @@ export default async function SitePagesPage() {
   const { data: pages } = await supabase
     .from("site_pages")
     .select("slug, title, updated_at")
-    .order("slug")
     .returns<{ slug: string; title: string; updated_at: string }[]>();
+
+  const sorted = (pages ?? []).sort(
+    (a, b) => (PAGE_ORDER[a.slug]?.order ?? 99) - (PAGE_ORDER[b.slug]?.order ?? 99),
+  );
 
   return (
     <>
@@ -33,25 +44,31 @@ export default async function SitePagesPage() {
       </div>
 
       <div className="control-board flex flex-col gap-4">
-        {pages && pages.length > 0 ? (
-          pages.map((page) => (
-            <div key={page.slug} className="cms-card flex items-center justify-between">
-              <div>
-                <p className="cms-card__title">{page.title}</p>
-                <p className="cms-card__slug">/{page.slug}</p>
-                <p className="cms-card__date mt-1">
-                  最終更新:{" "}
-                  {new Date(page.updated_at).toLocaleDateString("ja-JP")}
-                </p>
+        {sorted.length > 0 ? (
+          sorted.map((page) => {
+            const info = PAGE_ORDER[page.slug];
+            return (
+              <div key={page.slug} className="cms-card flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {info && <span className="text-2xl">{info.icon}</span>}
+                  <div>
+                    <p className="cms-card__title">{page.title}</p>
+                    {info && <p className="text-xs text-ink-light mt-0.5">{info.description}</p>}
+                    <p className="cms-card__date mt-1">
+                      最終更新:{" "}
+                      {new Date(page.updated_at).toLocaleDateString("ja-JP")}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href={`/admin/site/pages/${page.slug}/edit`}
+                  className="cms-card__edit"
+                >
+                  編集
+                </Link>
               </div>
-              <Link
-                href={`/admin/site/pages/${page.slug}/edit`}
-                className="cms-card__edit"
-              >
-                編集
-              </Link>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className="text-ink-mid">ページがありません</p>
         )}

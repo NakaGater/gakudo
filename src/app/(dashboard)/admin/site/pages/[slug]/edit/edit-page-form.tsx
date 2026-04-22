@@ -103,11 +103,6 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
         <AboutMetaFields meta={meta} updateMeta={updateMeta} />
       )}
 
-      {/* Access ページ固有フィールド */}
-      {slug === "access" && (
-        <AccessMetaFields meta={meta} updateMeta={updateMeta} />
-      )}
-
       {/* FAQ ページ固有フィールド */}
       {slug === "faq" && (
         <FaqMetaFields meta={meta} setMeta={setMeta} />
