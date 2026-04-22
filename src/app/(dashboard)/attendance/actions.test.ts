@@ -49,10 +49,12 @@ const createChain = (table: string): Record<string, unknown> => {
   return handler();
 };
 const mockFrom = vi.fn((table: string) => createChain(table));
+const mockRpc = vi.fn().mockResolvedValue({ data: { entered: 5, exited: 2, none: 3, total: 10 } });
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
       from: (...args: [string]) => mockFrom(...args),
+      rpc: (...args: unknown[]) => mockRpc(...args),
     }),
   ),
 }));
@@ -62,6 +64,7 @@ import {
   recordAttendance,
   getTodayAttendanceStatus,
   getDashboardAttendanceStatus,
+  getParentAttendanceStatus,
 } from "./actions";
 
 describe("recordManualAttendance", () => {
@@ -352,5 +355,99 @@ describe("getDashboardAttendanceStatus", () => {
     const result = await getDashboardAttendanceStatus();
     expect(result).toHaveLength(1);
     expect(result[0].status).toBe("none");
+  });
+});
+
+describe("getParentAttendanceStatus", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    callQueues.clear();
+    mockRpc.mockResolvedValue({ data: { entered: 5, exited: 2, none: 3, total: 10 } });
+  });
+
+  it("returns empty children with summary when parent has no children", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    enqueue("children", { data: [], error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.myChildren).toEqual([]);
+    expect(result.summary.total).toBe(10);
+  });
+
+  it("returns summary with default zeros when RPC returns null", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    mockRpc.mockResolvedValue({ data: null });
+    enqueue("children", { data: [], error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.summary).toEqual({ entered: 0, exited: 0, none: 0, total: 0 });
+  });
+
+  it("returns children with none status when no attendance records", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: [], error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.myChildren).toHaveLength(1);
+    expect(result.myChildren[0]).toMatchObject({
+      childId: "c1", name: "太郎", status: "none",
+      enterTime: null, exitTime: null,
+    });
+  });
+
+  it("returns entered status when latest record is enter", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: [
+      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+    ], error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.myChildren[0]).toMatchObject({
+      status: "entered", enterTime: "2025-01-01T08:00:00Z", exitTime: null,
+    });
+  });
+
+  it("returns exited status when latest record is exit", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: [
+      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+      { child_id: "c1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+    ], error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.myChildren[0]).toMatchObject({
+      status: "exited", enterTime: "2025-01-01T08:00:00Z", exitTime: "2025-01-01T17:00:00Z",
+    });
+  });
+
+  it("handles null attendances data gracefully", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
+    enqueue("attendances", { data: null, error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.myChildren).toHaveLength(1);
+    expect(result.myChildren[0].status).toBe("none");
+  });
+
+  it("handles multiple children with different statuses", async () => {
+    mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
+    enqueue("children", { data: [
+      { id: "c1", name: "太郎", grade: 1 },
+      { id: "c2", name: "花子", grade: 3 },
+    ], error: null });
+    enqueue("attendances", { data: [
+      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+      { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+      { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+    ], error: null });
+
+    const result = await getParentAttendanceStatus();
+    expect(result.myChildren).toHaveLength(2);
+    expect(result.myChildren[0].status).toBe("entered");
+    expect(result.myChildren[1].status).toBe("exited");
   });
 });
