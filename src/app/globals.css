@@ -754,8 +754,9 @@
 
 /* ═══ Instagram embeds ═══ */
 .ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:8px 0}
-.ig-embed-wrap{display:flex;flex-direction:column;align-items:center;transform:scale(0.85);transform-origin:top center}
+.ig-embed-wrap{display:flex;flex-direction:column;align-items:center;max-height:320px;overflow:hidden;border-radius:12px}
 .ig-embed-wrap .instagram-media{margin:0!important;min-width:200px!important;max-width:300px!important;width:100%!important}
+.ig-embed-wrap iframe{max-height:320px!important}
 .ig-embed-caption{font-family:var(--font-story);font-size:11px;color:var(--ink-mid);margin-top:4px;text-align:center}
 
 /* ═══ Instagram admin ═══ */

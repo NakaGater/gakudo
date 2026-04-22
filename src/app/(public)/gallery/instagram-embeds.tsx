@@ -48,7 +48,6 @@ export function InstagramEmbeds({ posts }: InstagramEmbedProps) {
           <div key={post.id} className="ig-embed-wrap">
             <blockquote
               className="instagram-media"
-              data-instgrm-captioned
               data-instgrm-permalink={post.post_url}
               data-instgrm-version="14"
               style={{
