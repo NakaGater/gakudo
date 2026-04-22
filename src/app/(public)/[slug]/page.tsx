@@ -178,6 +178,7 @@ function AccessPage({ title, content, metadata }: { title: string; content: stri
   const openingHours = (metadata?.opening_hours as string) || "平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00";
   const visitHeading = (metadata?.visit_heading as string) || "見学のお申し込み";
   const visitText = (metadata?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。";
+  const mapEmbedUrl = (metadata?.map_embed_url as string) || "";
 
   return (
     <>
@@ -196,15 +197,28 @@ function AccessPage({ title, content, metadata }: { title: string; content: stri
       <section style={{ padding: "24px 24px" }}>
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-8 md:grid-cols-2">
-            <div className="rounded-xl bg-page-deep border-2 border-page-edge flex items-center justify-center aspect-square md:aspect-auto shadow-[4px_4px_0_var(--page-edge)]">
-              <div className="text-center p-8">
-                <MapPin size={48} className="mx-auto mb-3 text-cr-orange" strokeWidth={1.5} />
-                <p className="text-xs text-ink-mid font-story">
-                  Google Maps 埋め込みエリア
-                  <br />
-                  （本番環境で設定）
-                </p>
-              </div>
+            <div className="rounded-xl bg-page-deep border-2 border-page-edge flex items-center justify-center aspect-square md:aspect-auto shadow-[4px_4px_0_var(--page-edge)] overflow-hidden">
+              {mapEmbedUrl ? (
+                <iframe
+                  src={mapEmbedUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, minHeight: "300px" }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Google Maps"
+                />
+              ) : (
+                <div className="text-center p-8">
+                  <MapPin size={48} className="mx-auto mb-3 text-cr-orange" strokeWidth={1.5} />
+                  <p className="text-xs text-ink-mid font-story">
+                    Google Maps 埋め込みエリア
+                    <br />
+                    （管理画面で設定）
+                  </p>
+                </div>
+              )}
             </div>
             <div className="space-y-5">
               <div className="flex gap-3">

@@ -482,6 +482,19 @@ function AccessMetaFields({
             className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm resize-y"
           />
         </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-fg-muted">Google Maps 埋め込みURL</label>
+          <input
+            type="url"
+            value={(meta.map_embed_url as string) ?? ""}
+            onChange={(e) => updateMeta("map_embed_url", e.target.value)}
+            placeholder="https://www.google.com/maps/embed?pb=..."
+            className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+          />
+          <p className="text-[10px] text-fg-muted">
+            Google Mapsで「共有→地図を埋め込む」からiframeのsrc URLをコピーして貼り付け
+          </p>
+        </div>
       </div>
     </fieldset>
   );
