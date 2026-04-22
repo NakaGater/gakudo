@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { href: "/", label: "ホーム" },
   { href: "/about", label: "施設紹介" },
+  { href: "/daily-life", label: "日々の生活" },
   { href: "/faq", label: "Q&A" },
   { href: "/access", label: "アクセス" },
   { href: "/news", label: "お知らせ" },
