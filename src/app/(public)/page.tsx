@@ -382,7 +382,7 @@ export default async function HomePage() {
           <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
             {(accessMeta?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
           </p>
-          <span className="mt-4 inline-block rounded-full bg-cr-orange text-white font-bold font-story text-base px-8 py-3 shadow-sm group-open:hidden">
+          <span className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-[10px] border-2 border-page-edge bg-white px-[22px] py-[10px] text-sm font-bold font-story text-ink shadow-[0_2px_0_var(--page-edge)] transition-all hover:border-cr-orange hover:text-cr-orange hover:-translate-y-px group-open:hidden">
             ▼ フォームを開く
           </span>
         </summary>
