@@ -27,6 +27,7 @@ export function Footer() {
             <ul className="space-y-0.5 text-[11px]">
               <li><Link href="/" className="transition-colors hover:text-cr-yellow no-underline">ホーム</Link></li>
               <li><Link href="/about" className="transition-colors hover:text-cr-yellow no-underline">施設紹介</Link></li>
+              <li><Link href="/faq" className="transition-colors hover:text-cr-yellow no-underline">Q&A</Link></li>
               <li><Link href="/news" className="transition-colors hover:text-cr-yellow no-underline">お知らせ</Link></li>
               <li><Link href="/access" className="transition-colors hover:text-cr-yellow no-underline">アクセス</Link></li>
               <li><Link href="/login" className="transition-colors hover:text-cr-yellow no-underline">保護者ログイン</Link></li>
