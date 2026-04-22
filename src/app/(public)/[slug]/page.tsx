@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { MapPin, Clock, Phone, Send } from "lucide-react";
-import { InquiryForm } from "@/app/(public)/access/inquiry-form";
 import { FaqAccordion } from "@/app/(public)/components/faq-accordion";
 
 type PageProps = {
@@ -29,8 +27,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function SitePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // news と gallery は専用ページがあるためスキップ
-  if (slug === "news" || slug === "gallery") notFound();
+  // news, gallery, access は専用ページがあるかホームにマージ済みのためスキップ
+  if (slug === "news" || slug === "gallery" || slug === "access") notFound();
 
   let page: { title: string; content: string; updated_at: string; metadata: Record<string, unknown> } | null = null;
   try {
@@ -46,10 +44,6 @@ export default async function SitePage({ params }: PageProps) {
   }
 
   if (!page) notFound();
-
-  if (slug === "access") {
-    return <AccessPage title={page.title} content={page.content} metadata={page.metadata} />;
-  }
 
   if (slug === "about") {
     return <AboutPage title={page.title} content={page.content} metadata={page.metadata} />;
@@ -220,7 +214,7 @@ function FaqPage({ title, content, metadata }: { title: string; content: string;
               💬 その他のご質問は
             </p>
             <p className="text-xs text-ink-mid leading-relaxed">
-              お気軽に<a href="/access" className="text-cr-orange font-bold hover:underline">お問い合わせフォーム</a>からご連絡ください。
+              お気軽に<a href="/#inquiry" className="text-cr-orange font-bold hover:underline">お問い合わせフォーム</a>からご連絡ください。
               <br />見学のお申し込みも随時受け付けております。
             </p>
           </div>
@@ -327,108 +321,6 @@ function DailyLifePage({ title, content, metadata }: { title: string; content: s
           </div>
         </section>
       )}
-    </>
-  );
-}
-
-function AccessPage({ title, content, metadata }: { title: string; content: string; metadata: Record<string, unknown> }) {
-  const subtitle = (metadata?.subtitle as string) || "お気軽にお越しください。見学も随時受け付けております。";
-  const phone = (metadata?.phone as string) || "03-1234-5678";
-  const phoneHours = (metadata?.phone_hours as string) || "受付: 平日 9:00〜18:00";
-  const openingHours = (metadata?.opening_hours as string) || "平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00";
-  const visitHeading = (metadata?.visit_heading as string) || "見学のお申し込み";
-  const visitText = (metadata?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。";
-  const mapEmbedUrl = (metadata?.map_embed_url as string) || "";
-
-  return (
-    <>
-      <section style={{ padding: "32px 24px 0" }}>
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい４しょう</div>
-          <h1 className="font-story font-black text-ink ink-bleed" style={{ fontSize: "28px" }}>
-            <span className="crayon-underline">{title}</span>
-          </h1>
-          <p className="mt-3 text-sm text-ink-mid">
-            {subtitle}
-          </p>
-        </div>
-      </section>
-
-      <section style={{ padding: "24px 24px" }}>
-        <div className="mx-auto max-w-4xl">
-          <div className="grid gap-8 md:grid-cols-2">
-            <div className="rounded-xl bg-page-deep border-2 border-page-edge flex items-center justify-center aspect-square md:aspect-auto shadow-[4px_4px_0_var(--page-edge)] overflow-hidden">
-              {mapEmbedUrl ? (
-                <iframe
-                  src={mapEmbedUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, minHeight: "300px" }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Google Maps"
-                />
-              ) : (
-                <div className="text-center p-8">
-                  <MapPin size={48} className="mx-auto mb-3 text-cr-orange" strokeWidth={1.5} />
-                  <p className="text-xs text-ink-mid font-story">
-                    Google Maps 埋め込みエリア
-                    <br />
-                    （管理画面で設定）
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="space-y-5">
-              <div className="flex gap-3">
-                <MapPin size={20} className="mt-1 text-cr-orange shrink-0" />
-                <div>
-                  <h3 className="font-bold font-story text-ink mb-1">所在地</h3>
-                  <p className="text-ink-mid text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Phone size={20} className="mt-1 text-cr-orange shrink-0" />
-                <div>
-                  <h3 className="font-bold font-story text-ink mb-1">お電話</h3>
-                  <p className="text-ink-mid text-sm">TEL: {phone}</p>
-                  <p className="text-ink-light text-xs mt-1">{phoneHours}</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Clock size={20} className="mt-1 text-cr-orange shrink-0" />
-                <div>
-                  <h3 className="font-bold font-story text-ink mb-1">開所時間</h3>
-                  <p className="text-ink-mid text-sm whitespace-pre-wrap">{openingHours}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section style={{
-        padding: "28px 36px",
-        margin: "0 24px 32px",
-        background: "var(--page-deep)",
-        border: "2px dashed var(--cr-yellow)",
-        borderRadius: "12px",
-      }}>
-        <div className="text-center mb-5">
-          <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
-          <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>{visitHeading}</h2>
-          <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
-            {visitText}
-          </p>
-        </div>
-        <div className="mx-auto max-w-lg">
-          <InquiryForm />
-        </div>
-        <p className="text-center text-xs text-ink-light mt-4">
-          お電話でも受付中: <a href={`tel:${phone.replace(/-/g, "")}`} className="text-cr-orange hover:underline">{phone}</a>（{phoneHours}）
-        </p>
-      </section>
     </>
   );
 }

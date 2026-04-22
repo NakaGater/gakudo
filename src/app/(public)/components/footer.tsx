@@ -30,8 +30,6 @@ export function Footer() {
               <li><Link href="/daily-life" className="transition-colors hover:text-cr-yellow no-underline">日々の生活</Link></li>
               <li><Link href="/enrollment" className="transition-colors hover:text-cr-yellow no-underline">入所案内</Link></li>
               <li><Link href="/faq" className="transition-colors hover:text-cr-yellow no-underline">Q&A</Link></li>
-              <li><Link href="/news" className="transition-colors hover:text-cr-yellow no-underline">お知らせ</Link></li>
-              <li><Link href="/access" className="transition-colors hover:text-cr-yellow no-underline">アクセス</Link></li>
               <li><Link href="/login" className="transition-colors hover:text-cr-yellow no-underline">保護者ログイン</Link></li>
             </ul>
           </div>

@@ -5,9 +5,9 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
   // テスト毎にユニークな名前を使用（複数回実行しても衝突しない）
   const uniqueId = Date.now().toString(36);
 
-  test("access page shows inquiry form", async ({ page }) => {
+  test("home page shows inquiry form", async ({ page }) => {
     const errors = collectConsoleErrors(page);
-    await page.goto("/access");
+    await page.goto("/");
 
     // フォームが表示される
     await expect(page.getByRole("button", { name: /見学予約/ })).toBeVisible();
@@ -19,7 +19,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
   });
 
   test("visit type shows preferred date field", async ({ page }) => {
-    await page.goto("/access");
+    await page.goto("/");
 
     // デフォルトは見学予約 → 希望日時が表示
     await expect(page.getByLabel(/見学希望日時/)).toBeVisible();
@@ -30,7 +30,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
   });
 
   test("form validates required fields", async ({ page }) => {
-    await page.goto("/access");
+    await page.goto("/");
 
     // 一般問い合わせに切替（希望日時不要）
     await page.getByRole("button", { name: /一般お問い合わせ/ }).click();
@@ -45,7 +45,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
   });
 
   test("inquiry form submission works (visit type)", async ({ page }) => {
-    await page.goto("/access");
+    await page.goto("/");
 
     await page.getByLabel("お名前").fill("テスト太郎");
     await page.getByLabel("メールアドレス").fill("test-inquiry@example.com");
@@ -64,7 +64,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
     const testName = `一覧テスト${uniqueId}`;
 
     // まず問い合わせを送信
-    await page.goto("/access");
+    await page.goto("/");
     await page.getByRole("button", { name: /一般お問い合わせ/ }).click();
     await page.getByLabel("お名前").fill(testName);
     await page.getByLabel("メールアドレス").fill("list-test@example.com");
@@ -85,7 +85,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
     const testName = `詳細テスト${uniqueId}`;
 
     // 問い合わせを送信
-    await page.goto("/access");
+    await page.goto("/");
     await page.getByLabel("お名前").fill(testName);
     await page.getByLabel("メールアドレス").fill("detail-test@example.com");
     await page.getByLabel("電話番号").fill("090-1234-5678");

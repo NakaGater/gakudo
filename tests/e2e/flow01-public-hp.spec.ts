@@ -16,28 +16,30 @@ test.describe("Flow 1: Public HP renders (unauthenticated)", () => {
     expect(errors).toHaveLength(0);
   });
 
-  test("/about page renders", async ({ page }) => {
+  test("homepage shows news section", async ({ page }) => {
     const errors = collectConsoleErrors(page);
-    await page.goto("/about");
+    await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "学童について" }),
+      page.getByRole("heading", { name: "お知らせ" }),
     ).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 
-  test("/access page renders", async ({ page }) => {
+  test("homepage shows access section", async ({ page }) => {
     const errors = collectConsoleErrors(page);
-    await page.goto("/access");
+    await page.goto("/");
     await expect(
       page.getByRole("heading", { name: "アクセス" }),
     ).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 
-  test("/news page renders", async ({ page }) => {
+  test("/about page renders", async ({ page }) => {
     const errors = collectConsoleErrors(page);
-    await page.goto("/news");
-    await expect(page.getByText("お知らせ一覧")).toBeVisible();
+    await page.goto("/about");
+    await expect(
+      page.getByRole("heading", { name: "学童について" }),
+    ).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 

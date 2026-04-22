@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { HeroSlideshow } from "./components/hero-slideshow";
 import { getFeatureIcon } from "@/config/feature-icons";
+import { MapPin, Clock, Phone, Send } from "lucide-react";
+import { InquiryForm } from "@/app/(public)/access/inquiry-form";
 
 export const metadata: Metadata = {
   title: "星ヶ丘こどもクラブ — 子どもたちの笑顔あふれる放課後を",
@@ -55,7 +57,9 @@ export default async function HomePage() {
   let featuresSubtitle = "デジタルの力で、保護者の安心と運営の効率化を両立します。";
   let featureItems: FeatureItem[] = DEFAULT_FEATURES;
   let photoUrls: string[] = [];
-  let newsItems: { id: string; title: string; published_at: string }[] = [];
+  let newsItems: { id: string; title: string; body: string; published_at: string }[] = [];
+  let accessContent = "";
+  let accessMeta: Record<string, unknown> = {};
   try {
     const supabase = await createClient();
     const { data: homePage } = await supabase
@@ -93,15 +97,26 @@ export default async function HomePage() {
       );
     }
 
-    // 最新お知らせを取得（トップページ用、最大5件）
+    // 最新お知らせを取得（全件）
     const { data: news } = await supabase
       .from("site_news")
-      .select("id, title, published_at")
-      .order("published_at", { ascending: false })
-      .limit(5) as { data: { id: string; title: string; published_at: string }[] | null };
+      .select("id, title, body, published_at")
+      .order("published_at", { ascending: false }) as { data: { id: string; title: string; body: string; published_at: string }[] | null };
 
     if (news && news.length > 0) {
       newsItems = news;
+    }
+
+    // アクセスページデータ取得
+    const { data: accessPage } = await supabase
+      .from("site_pages")
+      .select("content, metadata")
+      .eq("slug", "access")
+      .single() as { data: { content: string; metadata: Record<string, unknown> } | null };
+
+    if (accessPage) {
+      accessContent = accessPage.content;
+      accessMeta = accessPage.metadata || {};
     }
   } catch {
     // DB接続エラー時はデフォルトテキストを使用
@@ -150,7 +165,7 @@ export default async function HomePage() {
                 施設について詳しく →
               </Link>
               <Link
-                href="/access"
+                href="#inquiry"
                 className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border-2 border-page-edge bg-white px-[22px] py-[10px] text-sm font-bold font-story text-ink shadow-[0_2px_0_var(--page-edge)] transition-all hover:border-cr-orange hover:text-cr-orange hover:-translate-y-px"
               >
                 🗺️ 見学のお申し込み
@@ -263,7 +278,7 @@ export default async function HomePage() {
 
       {/* News — お知らせ一覧 */}
       <section
-        className="relative rounded-xl border-2 border-page-edge text-center"
+        className="relative rounded-xl border-2 border-page-edge"
         style={{
           padding: "28px 36px",
           margin: "0 40px 32px",
@@ -275,33 +290,118 @@ export default async function HomePage() {
         >
           📢 おしらせ
         </span>
-        <h2 className="font-story font-black text-ink mb-4" style={{ fontSize: "20px" }}>
+        <h2 className="font-story font-black text-ink mb-4 text-center" style={{ fontSize: "20px" }}>
           <span className="crayon-underline">お知らせ</span>
         </h2>
         {newsItems.length > 0 ? (
-          <div className="flex flex-col gap-2 text-left max-w-2xl mx-auto">
+          <div className="flex flex-col gap-3 max-w-2xl mx-auto">
             {newsItems.map((item) => (
               <Link
                 key={item.id}
                 href={`/news/${item.id}`}
-                className="flex items-baseline gap-3 rounded-lg px-4 py-2.5 hover:bg-page transition-colors no-underline"
+                className="news-card"
               >
-                <time className="text-[11px] text-ink-mid shrink-0 font-mono">
-                  {new Date(item.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })}
-                </time>
-                <span className="text-sm text-ink font-story">{item.title}</span>
+                <p className="news-card__date">
+                  {new Date(item.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+                </p>
+                <h3 className="news-card__title">{item.title}</h3>
+                <p className="news-card__body">
+                  {item.body.length > 100 ? `${item.body.slice(0, 100)}…` : item.body}
+                </p>
               </Link>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-ink-mid">現在お知らせはありません。</p>
+          <p className="text-sm text-ink-mid text-center">現在お知らせはありません。</p>
         )}
-        <Link
-          href="/news"
-          className="inline-flex items-center gap-1 mt-4 text-xs text-cr-orange font-bold hover:underline"
-        >
-          お知らせ一覧を見る →
-        </Link>
+      </section>
+
+      {/* Access — アクセス・お問い合わせ */}
+      <section id="access" style={{ padding: "32px 40px 0" }}>
+        <div className="text-center mb-5">
+          <h2 className="font-story font-black text-ink inline-block" style={{ fontSize: "22px" }}>
+            <span className="crayon-underline">アクセス</span>
+          </h2>
+          <p className="text-[13px] text-ink-mid mt-1.5">
+            {(accessMeta?.subtitle as string) || "お気軽にお越しください。見学も随時受け付けております。"}
+          </p>
+        </div>
+        <div className="mx-auto max-w-4xl">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="rounded-xl bg-page-deep border-2 border-page-edge flex items-center justify-center aspect-square md:aspect-auto shadow-[4px_4px_0_var(--page-edge)] overflow-hidden">
+              {(accessMeta?.map_embed_url as string) ? (
+                <iframe
+                  src={accessMeta.map_embed_url as string}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, minHeight: "300px" }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Google Maps"
+                />
+              ) : (
+                <div className="text-center p-8">
+                  <MapPin size={48} className="mx-auto mb-3 text-cr-orange" strokeWidth={1.5} />
+                  <p className="text-xs text-ink-mid font-story">
+                    Google Maps 埋め込みエリア
+                    <br />
+                    （管理画面で設定）
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="space-y-5">
+              <div className="flex gap-3">
+                <MapPin size={20} className="mt-1 text-cr-orange shrink-0" />
+                <div>
+                  <h3 className="font-bold font-story text-ink mb-1">所在地</h3>
+                  <p className="text-ink-mid text-sm leading-relaxed whitespace-pre-wrap">{accessContent || "住所未設定"}</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Phone size={20} className="mt-1 text-cr-orange shrink-0" />
+                <div>
+                  <h3 className="font-bold font-story text-ink mb-1">お電話</h3>
+                  <p className="text-ink-mid text-sm">TEL: {(accessMeta?.phone as string) || "03-1234-5678"}</p>
+                  <p className="text-ink-light text-xs mt-1">{(accessMeta?.phone_hours as string) || "受付: 平日 9:00〜18:00"}</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Clock size={20} className="mt-1 text-cr-orange shrink-0" />
+                <div>
+                  <h3 className="font-bold font-story text-ink mb-1">開所時間</h3>
+                  <p className="text-ink-mid text-sm whitespace-pre-wrap">{(accessMeta?.opening_hours as string) || "平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Inquiry — 見学申し込み・お問い合わせフォーム */}
+      <section id="inquiry" style={{
+        padding: "28px 36px",
+        margin: "24px 40px 32px",
+        background: "var(--page-deep)",
+        border: "2px dashed var(--cr-yellow)",
+        borderRadius: "12px",
+      }}>
+        <div className="text-center mb-5">
+          <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
+          <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>
+            {(accessMeta?.visit_heading as string) || "見学のお申し込み"}
+          </h2>
+          <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
+            {(accessMeta?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
+          </p>
+        </div>
+        <div className="mx-auto max-w-lg">
+          <InquiryForm />
+        </div>
+        <p className="text-center text-xs text-ink-light mt-4">
+          お電話でも受付中: <a href={`tel:${((accessMeta?.phone as string) || "03-1234-5678").replace(/-/g, "")}`} className="text-cr-orange hover:underline">{(accessMeta?.phone as string) || "03-1234-5678"}</a>（{(accessMeta?.phone_hours as string) || "受付: 平日 9:00〜18:00"}）
+        </p>
       </section>
     </>
   );

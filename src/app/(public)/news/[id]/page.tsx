@@ -63,11 +63,11 @@ export default async function NewsDetailPage({ params }: Props) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">
       <Link
-        href="/news"
+        href="/"
         className="inline-flex items-center gap-1 text-sm text-cr-orange hover:underline transition-colors font-story"
       >
         <ArrowLeft size={16} />
-        お知らせ一覧へ戻る
+        トップページへ戻る
       </Link>
 
       <h1 className="mt-6 font-story font-black text-ink ink-bleed" style={{ fontSize: "24px" }}>

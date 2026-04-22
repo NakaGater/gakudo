@@ -47,8 +47,8 @@ test.describe("Flow 15: CMS / HP management (admin)", () => {
     await expect(page.getByText("E2Eニュース記事").first()).toBeVisible();
   });
 
-  test("public news page shows created article", async ({ page }) => {
-    await page.goto("/news");
+  test("public home page shows created article", async ({ page }) => {
+    await page.goto("/");
     await expect(page.getByText("E2Eニュース記事").first()).toBeVisible({ timeout: 10000 });
   });
 });
