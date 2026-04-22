@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { Button } from "@/components/ui";
 import { InstagramAddForm } from "./instagram-add-form";
 import { deleteInstagramPost, toggleInstagramPostVisibility } from "./actions";
@@ -9,8 +10,8 @@ type IgPost = Database["public"]["Tables"]["instagram_posts"]["Row"];
 
 export default async function InstagramManagePage() {
   const user = await getUser();
-  if (user.role !== "admin") {
-    return <p className="text-center py-12 text-ink-mid">管理者のみアクセスできます</p>;
+  if (!isStaff(user.role)) {
+    return <p className="text-center py-12 text-ink-mid">スタッフのみアクセスできます</p>;
   }
 
   const supabase = await createClient();

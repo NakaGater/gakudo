@@ -16,18 +16,18 @@ ALTER TABLE instagram_posts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "instagram_posts_select" ON instagram_posts
   FOR SELECT USING (true);
 
--- admin のみ INSERT/UPDATE/DELETE
+-- admin/teacher のみ INSERT/UPDATE/DELETE
 CREATE POLICY "instagram_posts_insert" ON instagram_posts
   FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'teacher'))
   );
 
 CREATE POLICY "instagram_posts_update" ON instagram_posts
   FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'teacher'))
   );
 
 CREATE POLICY "instagram_posts_delete" ON instagram_posts
   FOR DELETE USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'teacher'))
   );

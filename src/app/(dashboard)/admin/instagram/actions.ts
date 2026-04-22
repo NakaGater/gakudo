@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import { isAdmin } from "@/lib/auth/roles";
+import { isStaff } from "@/lib/auth/roles";
 import { ERROR_MESSAGES } from "@/config/constants";
 import type { ActionState } from "@/lib/actions/types";
 
@@ -12,7 +12,7 @@ export async function addInstagramPost(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await getUser();
-  if (!isAdmin(user.role)) {
+  if (!isStaff(user.role)) {
     return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -59,7 +59,7 @@ export async function addInstagramPost(
 
 export async function deleteInstagramPost(id: string): Promise<ActionState> {
   const user = await getUser();
-  if (!isAdmin(user.role)) {
+  if (!isStaff(user.role)) {
     return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -80,7 +80,7 @@ export async function toggleInstagramPostVisibility(
   currentVisible: boolean,
 ): Promise<ActionState> {
   const user = await getUser();
-  if (!isAdmin(user.role)) {
+  if (!isStaff(user.role)) {
     return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
   }
 

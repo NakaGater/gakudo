@@ -34,9 +34,9 @@ describe("getNavItems", () => {
     ]);
   });
 
-  it("returns 7 items for teacher role", () => {
+  it("returns 8 items for teacher role", () => {
     const items = getNavItems("teacher");
-    expect(items).toHaveLength(7);
+    expect(items).toHaveLength(8);
     expect(items.map((i) => i.label)).toContain("児童管理");
     expect(items.map((i) => i.label)).toContain("お問い合わせ");
   });
@@ -69,7 +69,7 @@ describe("Sidebar", () => {
     expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(5);
   });
 
-  it("renders teacher nav items (7 links)", () => {
+  it("renders teacher nav items (8 links)", () => {
     render(
       <Sidebar user={{ id: "2", email: "t@b.c", name: "鈴木先生", role: "teacher" }} />,
     );
