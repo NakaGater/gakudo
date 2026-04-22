@@ -102,6 +102,24 @@ export function InquiryForm() {
         />
       </div>
 
+      {/* 電話 */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="inquiry-phone" className="text-xs font-bold font-story text-ink">
+          電話番号
+        </label>
+        <input
+          id="inquiry-phone"
+          name="phone"
+          type="tel"
+          placeholder="03-1234-5678"
+          className={cn(
+            "w-full rounded-lg border-2 border-page-edge bg-white px-3 py-2 text-sm text-ink",
+            "placeholder:text-ink-light",
+            "focus:border-cr-orange focus:ring-2 focus:ring-cr-orange/20 focus:outline-none",
+          )}
+        />
+      </div>
+
       {/* 希望日時（見学予約時のみ） */}
       {type === "visit" && (
         <div className="flex flex-col gap-1">

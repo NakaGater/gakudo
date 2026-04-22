@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { HeroSlideshow } from "./components/hero-slideshow";
 import { getFeatureIcon } from "@/config/feature-icons";
-import { MapPin, Clock, Phone, Send } from "lucide-react";
+import { MapPin, Clock, Send } from "lucide-react";
 import { InquiryForm } from "@/app/(public)/access/inquiry-form";
 
 export const metadata: Metadata = {
@@ -357,14 +357,6 @@ export default async function HomePage() {
                 <div>
                   <h3 className="font-bold font-story text-ink mb-1">所在地</h3>
                   <p className="text-ink-mid text-sm leading-relaxed whitespace-pre-wrap">{accessContent || "住所未設定"}</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Phone size={20} className="mt-1 text-cr-orange shrink-0" />
-                <div>
-                  <h3 className="font-bold font-story text-ink mb-1">お電話</h3>
-                  <p className="text-ink-mid text-sm">TEL: {(accessMeta?.phone as string) || "03-1234-5678"}</p>
-                  <p className="text-ink-light text-xs mt-1">{(accessMeta?.phone_hours as string) || "受付: 平日 9:00〜18:00"}</p>
                 </div>
               </div>
               <div className="flex gap-3">

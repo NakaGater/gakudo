@@ -43,7 +43,6 @@ export function Footer() {
               <p>〒464-0021</p>
               <p>名古屋市千種区星が丘1-5</p>
               <p>アーバンラフレ集会所内</p>
-              <p>TEL: 052-783-1447</p>
             </address>
           </div>
         </div>
