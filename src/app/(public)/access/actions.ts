@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionState } from "@/lib/actions/types";
 
 export async function submitInquiry(
@@ -32,7 +32,7 @@ export async function submitInquiry(
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { error } = await supabase.from("inquiries").insert({
       type,
       name,

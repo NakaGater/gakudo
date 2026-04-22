@@ -74,11 +74,11 @@ const REPLY_TEMPLATES = {
     `${name} 様\n\nこの度はお問い合わせいただき、ありがとうございます。\n誠に申し訳ございませんが、ご希望の日程での対応が難しい状況です。\n\n別の日程をご検討いただけますと幸いです。\nお手数ですが、改めてお申し込みいただけますようお願いいたします。\n\n星ヶ丘こどもクラブ`,
 };
 
-export function getReplyTemplate(
+export async function getReplyTemplate(
   action: "approved" | "declined",
   name: string,
   preferredDate: string | null,
-): string {
+): Promise<string> {
   if (action === "approved") return REPLY_TEMPLATES.approved(name, preferredDate);
   return REPLY_TEMPLATES.declined(name);
 }

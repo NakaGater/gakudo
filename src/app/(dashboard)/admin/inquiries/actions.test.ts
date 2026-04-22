@@ -56,21 +56,21 @@ vi.mock("resend", () => ({
 import { getReplyTemplate, replyToInquiry } from "./actions";
 
 describe("getReplyTemplate", () => {
-  it("generates approved template with preferred date", () => {
-    const result = getReplyTemplate("approved", "太郎", "12月15日");
+  it("generates approved template with preferred date", async () => {
+    const result = await getReplyTemplate("approved", "太郎", "12月15日");
     expect(result).toContain("太郎 様");
     expect(result).toContain("12月15日にお待ちしております");
     expect(result).toContain("星ヶ丘こどもクラブ");
   });
 
-  it("generates approved template without preferred date", () => {
-    const result = getReplyTemplate("approved", "太郎", null);
+  it("generates approved template without preferred date", async () => {
+    const result = await getReplyTemplate("approved", "太郎", null);
     expect(result).toContain("太郎 様");
     expect(result).toContain("日程の詳細は追ってご連絡");
   });
 
-  it("generates declined template", () => {
-    const result = getReplyTemplate("declined", "太郎", null);
+  it("generates declined template", async () => {
+    const result = await getReplyTemplate("declined", "太郎", null);
     expect(result).toContain("太郎 様");
     expect(result).toContain("対応が難しい");
   });

@@ -7,8 +7,8 @@ const { mockInsert, mockFrom } = vi.hoisted(() => {
   return { mockInsert, mockFrom };
 });
 
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue({ from: mockFrom }),
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: vi.fn().mockReturnValue({ from: mockFrom }),
 }));
 
 // Mock Resend (dynamic import in the action)

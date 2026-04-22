@@ -17,8 +17,8 @@ export default async function InquiryDetailPage({
   const inquiry = await getInquiry(id);
   if (!inquiry) notFound();
 
-  const approveTemplate = getReplyTemplate("approved", inquiry.name, inquiry.preferred_date);
-  const declineTemplate = getReplyTemplate("declined", inquiry.name, inquiry.preferred_date);
+  const approveTemplate = await getReplyTemplate("approved", inquiry.name, inquiry.preferred_date);
+  const declineTemplate = await getReplyTemplate("declined", inquiry.name, inquiry.preferred_date);
 
   const typeLabel = inquiry.type === "visit" ? "🏫 見学予約" : "💬 一般お問い合わせ";
   const statusLabels: Record<string, string> = {
