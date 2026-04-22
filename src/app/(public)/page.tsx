@@ -382,9 +382,9 @@ export default async function HomePage() {
           <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
             {(accessMeta?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
           </p>
-          <p className="mt-3 text-xs font-bold font-story text-cr-orange group-open:hidden">
+          <span className="mt-4 inline-block rounded-full bg-cr-orange text-white font-bold font-story text-base px-8 py-3 shadow-sm group-open:hidden">
             ▼ フォームを開く
-          </p>
+          </span>
         </summary>
         <div style={{ padding: "0 36px 28px" }}>
           <div className="mx-auto max-w-lg">
