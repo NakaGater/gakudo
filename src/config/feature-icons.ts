@@ -19,6 +19,7 @@ import {
   Home,
   MapPin,
   Phone,
+  Apple,
 } from "lucide-react";
 
 type IconEntry = {
@@ -43,6 +44,7 @@ export const FEATURE_ICONS: Record<string, IconEntry> = {
   Home:      { component: Home,      label: "家" },
   MapPin:    { component: MapPin,    label: "地図ピン" },
   Phone:     { component: Phone,     label: "電話" },
+  Apple:     { component: Apple,     label: "りんご" },
 };
 
 /** アイコン名の一覧（CMS選択用） */

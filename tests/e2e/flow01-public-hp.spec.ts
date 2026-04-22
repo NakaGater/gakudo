@@ -11,7 +11,7 @@ test.describe("Flow 1: Public HP renders (unauthenticated)", () => {
     ).toBeVisible();
     // Features section heading from seed data
     await expect(
-      page.getByRole("heading", { name: "施設の特徴" }),
+      page.getByRole("heading", { name: "星ヶ丘こどもクラブの特徴" }),
     ).toBeVisible();
     expect(errors).toHaveLength(0);
   });

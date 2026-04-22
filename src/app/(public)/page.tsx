@@ -20,28 +20,28 @@ type FeatureItem = { icon: string; title: string; description: string };
 
 const DEFAULT_FEATURES: FeatureItem[] = [
   {
-    icon: "QrCode",
-    title: "安全管理（QR入退場）",
+    icon: "Users",
+    title: "父母運営のあたたかさ",
     description:
-      "専用QRコードで入室・退室をワンタッチ記録。保護者のスマホにリアルタイムで通知が届きます。",
+      "保護者が運営に参加することで、家庭とクラブが一体となってお子さまの成長を見守ります。",
   },
   {
-    icon: "Megaphone",
-    title: "連絡配信",
+    icon: "Heart",
+    title: "異年齢の交流",
     description:
-      "行事予定やお知らせをアプリから配信。紙のプリントをなくし、既読確認も可能です。",
+      "1年生から6年生まで一緒に過ごすことで、思いやりやリーダーシップが自然と育まれます。",
   },
   {
-    icon: "Camera",
-    title: "写真共有",
+    icon: "Calendar",
+    title: "季節の行事",
     description:
-      "施設での活動写真を保護者限定で安全に共有。行事の様子をいつでも振り返れます。",
+      "お花見、七夕、クリスマス会など四季折々の行事を通じて、豊かな思い出を育みます。",
   },
   {
-    icon: "Receipt",
-    title: "請求管理",
+    icon: "Apple",
+    title: "食育・おやつ",
     description:
-      "延長保育の料金を退室時間から自動計算。月次の請求書をオンラインで確認できます。",
+      "栄養バランスを考えたおやつで、旬の味覚を楽しみます。みんなで食べる時間も大切にしています。",
   },
 ];
 
@@ -280,7 +280,7 @@ export default async function HomePage() {
           🗺️ アクセス・お問い合わせ
         </Link>
         <div className="text-xs text-ink-light mt-2.5">
-          TEL: 03-1234-5678（平日 9:00〜18:00）
+          TEL: 052-783-1447（平日 14:00〜19:00）
         </div>
       </section>
     </>
