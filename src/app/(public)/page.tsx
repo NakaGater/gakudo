@@ -55,6 +55,7 @@ export default async function HomePage() {
   let featuresSubtitle = "デジタルの力で、保護者の安心と運営の効率化を両立します。";
   let featureItems: FeatureItem[] = DEFAULT_FEATURES;
   let photoUrls: string[] = [];
+  let newsItems: { id: string; title: string; published_at: string }[] = [];
   try {
     const supabase = await createClient();
     const { data: homePage } = await supabase
@@ -90,6 +91,17 @@ export default async function HomePage() {
       photoUrls = photos.map(
         (p) => `${supabaseUrl}/storage/v1/object/public/photos/${p.storage_path}`,
       );
+    }
+
+    // 最新お知らせを取得（トップページ用、最大5件）
+    const { data: news } = await supabase
+      .from("site_news")
+      .select("id, title, published_at")
+      .order("published_at", { ascending: false })
+      .limit(5) as { data: { id: string; title: string; published_at: string }[] | null };
+
+    if (news && news.length > 0) {
+      newsItems = news;
     }
   } catch {
     // DB接続エラー時はデフォルトテキストを使用
@@ -249,39 +261,47 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA — dashed border with washi tape */}
+      {/* News — お知らせ一覧 */}
       <section
-        className="relative rounded-xl border-2 border-dashed border-cr-yellow text-center"
+        className="relative rounded-xl border-2 border-page-edge text-center"
         style={{
           padding: "28px 36px",
           margin: "0 40px 32px",
-          background: "linear-gradient(135deg, rgba(255,248,197,.4), rgba(213,245,227,.3), rgba(255,224,232,.2))",
+          background: "var(--page-deep)",
         }}
       >
-        {/* Washi tape label */}
         <span className="absolute -top-2 left-8 z-[2] rounded-sm px-6 py-0.5 text-[11px] font-hand text-ink-mid"
           style={{ background: "rgba(200,110,138,.25)" }}
         >
-          ✉️ おしらせ
+          📢 おしらせ
         </span>
-        <div className="text-[32px] mb-2">⭐</div>
-        <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>
-          見学・お問い合わせ
+        <h2 className="font-story font-black text-ink mb-4" style={{ fontSize: "20px" }}>
+          <span className="crayon-underline">お知らせ</span>
         </h2>
-        <p className="text-[13px] text-ink-mid leading-[1.8]" style={{ margin: "8px 0 20px" }}>
-          入所をご検討の方は、お気軽にお電話またはお問い合わせください。
-          <br />
-          施設の見学も随時受け付けております。
-        </p>
+        {newsItems.length > 0 ? (
+          <div className="flex flex-col gap-2 text-left max-w-2xl mx-auto">
+            {newsItems.map((item) => (
+              <Link
+                key={item.id}
+                href={`/news/${item.id}`}
+                className="flex items-baseline gap-3 rounded-lg px-4 py-2.5 hover:bg-page transition-colors no-underline"
+              >
+                <time className="text-[11px] text-ink-mid shrink-0 font-mono">
+                  {new Date(item.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })}
+                </time>
+                <span className="text-sm text-ink font-story">{item.title}</span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-ink-mid">現在お知らせはありません。</p>
+        )}
         <Link
-          href="/access"
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border-2 border-[#B5663A] bg-cr-orange px-[22px] py-[10px] text-sm font-bold font-story text-white shadow-[0_3px_0_#B5663A] transition-all hover:-translate-y-px hover:shadow-[0_4px_0_#B5663A] active:translate-y-px active:shadow-[0_1px_0_#B5663A]"
+          href="/news"
+          className="inline-flex items-center gap-1 mt-4 text-xs text-cr-orange font-bold hover:underline"
         >
-          🗺️ アクセス・お問い合わせ
+          お知らせ一覧を見る →
         </Link>
-        <div className="text-xs text-ink-light mt-2.5">
-          TEL: 052-783-1447（平日 14:00〜19:00）
-        </div>
       </section>
     </>
   );
