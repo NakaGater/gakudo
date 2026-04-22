@@ -145,6 +145,30 @@ function HomeMetaFields({
   return (
     <>
       <fieldset className="border border-border rounded-md p-4">
+        <legend className="text-sm font-bold text-fg px-2">ヒーローセクション</legend>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-fg-muted">メインタイトル（改行で行分割）</label>
+            <textarea
+              value={(meta.hero_title as string) ?? "子どもたちの\n笑顔あふれる\n放課後を"}
+              onChange={(e) => updateMeta("hero_title", e.target.value)}
+              rows={3}
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm resize-y"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-fg-muted">強調キーワード（クレヨン下線）</label>
+            <input
+              type="text"
+              value={(meta.hero_emphasis as string) ?? "笑顔あふれる"}
+              onChange={(e) => updateMeta("hero_emphasis", e.target.value)}
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="border border-border rounded-md p-4">
         <legend className="text-sm font-bold text-fg px-2">特徴セクション</legend>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">

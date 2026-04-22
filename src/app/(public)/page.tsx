@@ -18,6 +18,9 @@ export const metadata: Metadata = {
 const DEFAULT_HERO_TEXT =
   "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
 
+const DEFAULT_HERO_TITLE = "子どもたちの\n笑顔あふれる\n放課後を";
+const DEFAULT_HERO_EMPHASIS = "笑顔あふれる";
+
 type FeatureItem = { icon: string; title: string; description: string };
 
 const DEFAULT_FEATURES: FeatureItem[] = [
@@ -55,6 +58,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; strokeWidth?
 
 export default async function HomePage() {
   let heroText = DEFAULT_HERO_TEXT;
+  let heroTitle = DEFAULT_HERO_TITLE;
+  let heroEmphasis = DEFAULT_HERO_EMPHASIS;
   let featuresHeading = "施設の特徴";
   let featuresSubtitle = "デジタルの力で、保護者の安心と運営の効率化を両立します。";
   let featureItems: FeatureItem[] = DEFAULT_FEATURES;
@@ -72,6 +77,8 @@ export default async function HomePage() {
     }
     if (homePage?.metadata) {
       const m = homePage.metadata;
+      if (m.hero_title) heroTitle = m.hero_title as string;
+      if (m.hero_emphasis) heroEmphasis = m.hero_emphasis as string;
       if (m.features_heading) featuresHeading = m.features_heading as string;
       if (m.features_subtitle) featuresSubtitle = m.features_subtitle as string;
       if (Array.isArray(m.features) && m.features.length > 0) {
@@ -114,11 +121,20 @@ export default async function HomePage() {
               letterSpacing: "-.025em",
               textWrap: "balance",
             }}>
-              子どもたちの
-              <br />
-              <span className="crayon-underline">笑顔あふれる</span>
-              <br />
-              放課後を
+              {heroTitle.split("\n").map((line, i, arr) => (
+                <span key={i}>
+                  {line.includes(heroEmphasis) ? (
+                    <>
+                      {line.split(heroEmphasis)[0]}
+                      <span className="crayon-underline">{heroEmphasis}</span>
+                      {line.split(heroEmphasis)[1]}
+                    </>
+                  ) : (
+                    line
+                  )}
+                  {i < arr.length - 1 && <br />}
+                </span>
+              ))}
             </h1>
             <p className="mt-3 text-[13px] leading-[1.9] text-ink-mid" style={{ maxWidth: "420px" }}>
               {heroText}
