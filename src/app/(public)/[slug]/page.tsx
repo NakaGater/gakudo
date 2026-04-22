@@ -99,7 +99,7 @@ function AboutPage({ title, content, metadata }: { title: string; content: strin
     <>
       <section style={{ padding: "32px 24px 0" }}>
         <div className="mx-auto max-w-4xl text-center">
-          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい３しょう</div>
+          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい２しょう</div>
           <h1 className="font-story font-black text-ink ink-bleed" style={{ fontSize: "28px" }}>
             <span className="crayon-underline">{title}</span>
           </h1>
@@ -154,6 +154,54 @@ function AboutPage({ title, content, metadata }: { title: string; content: strin
         </section>
       )}
 
+      {staffMembers.length > 0 && (
+        <section style={{ padding: "24px 24px" }}>
+          <div className="mx-auto max-w-4xl">
+            <h2 className="font-story font-black text-ink text-center mb-6" style={{ fontSize: "20px" }}>
+              <span className="crayon-underline">職員紹介</span>
+            </h2>
+            <div className="gallery-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {staffMembers.map((member, i) => {
+                const tapes = ["polaroid--tape", "", "polaroid--tape-pink", "", "polaroid--tape-green", ""];
+                const tape = tapes[i % 6];
+                return (
+                  <div
+                    key={member.name + i}
+                    className={`polaroid${tape ? ` ${tape}` : ""}`}
+                    style={{ position: "relative" }}
+                  >
+                    {member.photo_url ? (
+                      <img
+                        src={member.photo_url}
+                        alt={member.name}
+                        className="polaroid__img"
+                      />
+                    ) : (
+                      <div className="polaroid__img flex items-center justify-center text-5xl bg-[var(--paper-warm)]">
+                        👤
+                      </div>
+                    )}
+                    <div style={{ padding: "4px 0 0" }}>
+                      <p className="font-story font-bold text-ink text-sm">{member.name}</p>
+                      {member.role && (
+                        <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-cr-orange/10 text-cr-orange">
+                          {member.role}
+                        </span>
+                      )}
+                      {member.profile && (
+                        <p className="mt-1 font-hand text-[11px] text-ink-mid leading-relaxed">
+                          {member.profile}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {facilityInfo.length > 0 && (
         <section style={{ padding: "24px 24px 32px" }}>
           <div className="mx-auto max-w-4xl">
@@ -171,55 +219,6 @@ function AboutPage({ title, content, metadata }: { title: string; content: strin
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {staffMembers.length > 0 && (
-        <section style={{ padding: "0 24px 32px" }}>
-          <div className="mx-auto max-w-4xl">
-            <h2 className="font-story font-black text-ink text-center mb-6" style={{ fontSize: "20px" }}>
-              <span className="crayon-underline">職員紹介</span>
-            </h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {staffMembers.map((member, i) => {
-                const rotations = ["-0.8deg", "0.5deg", "-0.3deg", "0.7deg", "-0.6deg", "0.4deg"];
-                const bgColors = ["#FFF8C5", "#D5F5E3", "#D6EEF8", "#FFE0E8", "#E8DAEF", "#FDEBD0"];
-                return (
-                  <div
-                    key={member.name + i}
-                    className="sticky-note p-5 flex flex-col items-center text-center"
-                    style={{
-                      background: bgColors[i % 6],
-                      transform: `rotate(${rotations[i % 6]})`,
-                    }}
-                  >
-                    {member.photo_url ? (
-                      <img
-                        src={member.photo_url}
-                        alt={member.name}
-                        className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-sm mb-3"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 rounded-full bg-white/60 border-2 border-white shadow-sm mb-3 flex items-center justify-center text-3xl">
-                        👤
-                      </div>
-                    )}
-                    <p className="font-story font-bold text-ink text-base">{member.name}</p>
-                    {member.role && (
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold bg-white/60 text-cr-orange">
-                        {member.role}
-                      </span>
-                    )}
-                    {member.profile && (
-                      <p className="mt-2 text-xs text-ink-mid leading-relaxed whitespace-pre-wrap">
-                        {member.profile}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           </div>
         </section>
@@ -294,7 +293,7 @@ function DailyLifePage({ title, content, metadata }: { title: string; content: s
     <>
       <section style={{ padding: "32px 24px 0" }}>
         <div className="mx-auto max-w-4xl text-center">
-          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい４しょう</div>
+          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい３しょう</div>
           <h1 className="font-story font-black text-ink ink-bleed" style={{ fontSize: "28px" }}>
             <span className="crayon-underline">{title}</span>
           </h1>
@@ -389,7 +388,7 @@ function EnrollmentPage({ title, content, metadata }: { title: string; content: 
     <>
       <section style={{ padding: "32px 24px 0" }}>
         <div className="mx-auto max-w-4xl text-center">
-          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい６しょう</div>
+          <div className="font-hand text-xs text-cr-orange mb-2">📖 だい４しょう</div>
           <h1 className="font-story font-black text-ink ink-bleed" style={{ fontSize: "28px" }}>
             <span className="crayon-underline">{title}</span>
           </h1>
