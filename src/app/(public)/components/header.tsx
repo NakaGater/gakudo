@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/", label: "ホーム" },
   { href: "/about", label: "施設紹介" },
   { href: "/daily-life", label: "日々の生活" },
+  { href: "/enrollment", label: "入所案内" },
   { href: "/faq", label: "Q&A" },
   { href: "/access", label: "アクセス" },
   { href: "/news", label: "お知らせ" },
