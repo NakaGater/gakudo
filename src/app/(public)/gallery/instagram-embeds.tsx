@@ -57,8 +57,8 @@ export function InstagramEmbeds({ posts }: InstagramEmbedProps) {
                 borderRadius: "12px",
                 boxShadow: "0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)",
                 margin: "0",
-                maxWidth: "540px",
-                minWidth: "280px",
+                maxWidth: "300px",
+                minWidth: "200px",
                 padding: 0,
                 width: "100%",
               }}

@@ -753,10 +753,10 @@
 .gallery-empty__sub{font-size:13px;margin-top:6px;color:var(--ink-light)}
 
 /* ═══ Instagram embeds ═══ */
-.ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;padding:8px 0}
-.ig-embed-wrap{display:flex;flex-direction:column;align-items:center}
-.ig-embed-wrap .instagram-media{margin:0!important;min-width:280px!important}
-.ig-embed-caption{font-family:var(--font-story);font-size:12px;color:var(--ink-mid);margin-top:6px;text-align:center}
+.ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:8px 0}
+.ig-embed-wrap{display:flex;flex-direction:column;align-items:center;transform:scale(0.85);transform-origin:top center}
+.ig-embed-wrap .instagram-media{margin:0!important;min-width:200px!important;max-width:300px!important;width:100%!important}
+.ig-embed-caption{font-family:var(--font-story);font-size:11px;color:var(--ink-mid);margin-top:4px;text-align:center}
 
 /* ═══ Instagram admin ═══ */
 .ig-add-form{background:var(--page-deep);border:1.5px solid var(--page-edge);border-radius:10px;padding:16px}
