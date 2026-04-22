@@ -5,7 +5,7 @@ import { Button } from "@/components/ui";
 import { addInstagramPost } from "./actions";
 import type { ActionState } from "@/lib/actions/types";
 
-const initialState: ActionState = { success: false, error: "" };
+const initialState: ActionState = { success: false, message: "" };
 
 export function InstagramAddForm() {
   const [state, formAction, pending] = useActionState(addInstagramPost, initialState);
@@ -44,10 +44,10 @@ export function InstagramAddForm() {
           </Button>
         </div>
       </div>
-      {state.error && (
-        <p className="text-cr-red text-xs mt-2">{state.error}</p>
+      {state?.message && !state.success && (
+        <p className="text-cr-red text-xs mt-2">{state.message}</p>
       )}
-      {state.success && (
+      {state?.success && (
         <p className="text-cr-green text-xs mt-2">✅ 登録しました</p>
       )}
     </form>

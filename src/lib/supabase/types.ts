@@ -1,4 +1,3 @@
-Connecting to db 5432
 export type Json =
   | string
   | number
@@ -656,6 +655,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_attendance_summary: {
+        Args: Record<string, never>
+        Returns: { entered: number; exited: number; none: number; total: number }
+      }
       get_user_role: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }

@@ -13,18 +13,18 @@ export async function addInstagramPost(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const postUrl = formData.get("post_url") as string;
   if (!postUrl?.trim()) {
-    return { success: false, error: "Instagram URLを入力してください" };
+    return { success: false, message: "Instagram URLを入力してください" };
   }
 
   // Instagram URL validation
   const igPattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[\w-]+/;
   if (!igPattern.test(postUrl.trim())) {
-    return { success: false, error: "有効なInstagram投稿URLを入力してください（例: https://www.instagram.com/p/xxx/）" };
+    return { success: false, message: "有効なInstagram投稿URLを入力してください（例: https://www.instagram.com/p/xxx/）" };
   }
 
   const caption = (formData.get("caption") as string) || null;
@@ -49,30 +49,30 @@ export async function addInstagramPost(
   });
 
   if (error) {
-    return { success: false, error: "登録に失敗しました" };
+    return { success: false, message: "登録に失敗しました" };
   }
 
   revalidatePath("/admin/instagram");
   revalidatePath("/gallery");
-  return { success: true };
+  return { success: true, message: "" };
 }
 
 export async function deleteInstagramPost(id: string): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.from("instagram_posts").delete().eq("id", id);
 
   if (error) {
-    return { success: false, error: "削除に失敗しました" };
+    return { success: false, message: "削除に失敗しました" };
   }
 
   revalidatePath("/admin/instagram");
   revalidatePath("/gallery");
-  return { success: true };
+  return { success: true, message: "" };
 }
 
 export async function toggleInstagramPostVisibility(
@@ -81,7 +81,7 @@ export async function toggleInstagramPostVisibility(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!isStaff(user.role)) {
-    return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
+    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
@@ -91,10 +91,10 @@ export async function toggleInstagramPostVisibility(
     .eq("id", id);
 
   if (error) {
-    return { success: false, error: "更新に失敗しました" };
+    return { success: false, message: "更新に失敗しました" };
   }
 
   revalidatePath("/admin/instagram");
   revalidatePath("/gallery");
-  return { success: true };
+  return { success: true, message: "" };
 }
