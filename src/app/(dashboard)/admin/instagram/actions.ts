@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isStaff } from "@/lib/auth/roles";
+import { getUser } from "@/lib/auth/get-user";
+import { isAdmin } from "@/lib/auth/roles";
 import { ERROR_MESSAGES } from "@/config/constants";
 import type { ActionState } from "@/lib/actions/types";
 
@@ -10,8 +11,8 @@ export async function addInstagramPost(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const staff = await isStaff();
-  if (!staff || staff.role !== "admin") {
+  const user = await getUser();
+  if (!isAdmin(user.role)) {
     return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -44,7 +45,7 @@ export async function addInstagramPost(
     post_url: postUrl.trim(),
     caption,
     display_order: nextOrder,
-    created_by: staff.id,
+    created_by: user.id,
   });
 
   if (error) {
@@ -57,8 +58,8 @@ export async function addInstagramPost(
 }
 
 export async function deleteInstagramPost(id: string): Promise<ActionState> {
-  const staff = await isStaff();
-  if (!staff || staff.role !== "admin") {
+  const user = await getUser();
+  if (!isAdmin(user.role)) {
     return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -78,8 +79,8 @@ export async function toggleInstagramPostVisibility(
   id: string,
   currentVisible: boolean,
 ): Promise<ActionState> {
-  const staff = await isStaff();
-  if (!staff || staff.role !== "admin") {
+  const user = await getUser();
+  if (!isAdmin(user.role)) {
     return { success: false, error: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
