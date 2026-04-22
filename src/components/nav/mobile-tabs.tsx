@@ -19,9 +19,9 @@ export function MobileTabs({ user }: MobileTabsProps) {
   const isActive = (href: string) =>
     (() => {
       if (pathname === href) return true;
-      if (href === "/attendance/dashboard") return false;
+      if (href === "/attendance/dashboard" || href === "/attendance/status") return false;
       if (href === "/attendance") {
-        return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard";
+        return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard" && pathname !== "/attendance/status";
       }
       return pathname.startsWith(href + "/");
     })();

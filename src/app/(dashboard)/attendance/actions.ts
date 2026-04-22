@@ -143,6 +143,65 @@ export async function getDashboardAttendanceStatus(): Promise<
   );
 }
 
+export type ParentAttendanceData = {
+  myChildren: DashboardChildStatus[];
+  summary: { entered: number; exited: number; none: number; total: number };
+};
+
+export async function getParentAttendanceStatus(): Promise<ParentAttendanceData> {
+  const user = await getUser();
+  const supabase = await createClient();
+  const { start, end } = todayRangeJST();
+
+  // Get summary via RPC (SECURITY DEFINER, bypasses RLS)
+  const { data: summaryData } = await supabase.rpc("get_attendance_summary");
+  const summary = (summaryData as { entered: number; exited: number; none: number; total: number } | null) ?? {
+    entered: 0, exited: 0, none: 0, total: 0,
+  };
+
+  // Get parent's children (RLS allows parent to see own children)
+  const { data: myChildren } = await supabase.from("children")
+    .select("id, name, grade")
+    .order("grade", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (!myChildren || myChildren.length === 0) {
+    return { myChildren: [], summary };
+  }
+
+  // Get attendance for parent's children (RLS filters automatically)
+  const { data: attendances } = await supabase.from("attendances")
+    .select("child_id, type, recorded_at")
+    .gte("recorded_at", start)
+    .lt("recorded_at", end)
+    .order("recorded_at", { ascending: true });
+
+  const enterMap = new Map<string, string>();
+  const latestMap = new Map<string, { type: string; recorded_at: string }>();
+  for (const a of (attendances ?? []) as { child_id: string; type: string; recorded_at: string }[]) {
+    if (a.type === "enter" && !enterMap.has(a.child_id)) {
+      enterMap.set(a.child_id, a.recorded_at);
+    }
+    latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
+  }
+
+  const myChildrenStatus: DashboardChildStatus[] = myChildren.map((c) => {
+    const latest = latestMap.get(c.id);
+    let status: "none" | "entered" | "exited" = "none";
+    let exitTime: string | null = null;
+    if (latest) {
+      status = latest.type === "enter" ? "entered" : "exited";
+      if (status === "exited") exitTime = latest.recorded_at;
+    }
+    return {
+      childId: c.id, name: c.name, grade: c.grade, status,
+      enterTime: enterMap.get(c.id) ?? null, exitTime,
+    };
+  });
+
+  return { myChildren: myChildrenStatus, summary };
+}
+
 export async function recordManualAttendance(
   childId: string,
 ): Promise<AttendanceResult> {

@@ -18,9 +18,9 @@ export function Sidebar({ user }: SidebarProps) {
 
   const isActive = (href: string) => {
     if (pathname === href) return true;
-    if (href === "/attendance/dashboard") return false;
+    if (href === "/attendance/dashboard" || href === "/attendance/status") return false;
     if (href === "/attendance") {
-      return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard";
+      return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard" && pathname !== "/attendance/status";
     }
     return pathname.startsWith(href + "/");
   };
@@ -36,7 +36,7 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="sidebar hidden md:flex">
       <div className="sb__hd">
-        <Link href="/attendance/dashboard">
+        <Link href={user.role === "parent" ? "/attendance/status" : "/attendance/dashboard"}>
           <span className="sb__mark">⭐</span>
           <span className="sb__name">星ヶ丘<br />こどもクラブ</span>
         </Link>
