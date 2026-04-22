@@ -1,4 +1,6 @@
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/nav/sidebar";
 import { MobileTabs } from "@/components/nav/mobile-tabs";
 
@@ -26,12 +28,23 @@ export default async function DashboardLayout({
   const user = await getUser();
   const mood = getMoodMessage();
 
+  // Fetch pending inquiry count for staff badge
+  let pendingInquiries = 0;
+  if (isStaff(user.role)) {
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from("inquiries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending");
+    pendingInquiries = count ?? 0;
+  }
+
   return (
     <div data-user-role={user.role} className="desk-bg min-h-screen">
       <div className="clean-page">
         <div className={`season-strip ${getSeasonClass()}`} />
         <div className="dash">
-          <Sidebar user={user} />
+          <Sidebar user={user} pendingInquiries={pendingInquiries} />
           <div className="main">
             <div className="main__mood">
               <span>{mood.icon}</span>
@@ -43,7 +56,7 @@ export default async function DashboardLayout({
           </div>
         </div>
       </div>
-      <MobileTabs user={user} />
+      <MobileTabs user={user} pendingInquiries={pendingInquiries} />
     </div>
   );
 }

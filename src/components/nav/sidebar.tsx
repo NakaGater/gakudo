@@ -10,9 +10,10 @@ import type { AuthUser } from "@/lib/auth/get-user";
 
 type SidebarProps = {
   user: AuthUser;
+  pendingInquiries?: number;
 };
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, pendingInquiries = 0 }: SidebarProps) {
   const pathname = usePathname();
   const items = getNavItems(user.role);
 
@@ -54,6 +55,11 @@ export function Sidebar({ user }: SidebarProps) {
             >
               <span className="ni__ic"><Icon size={16} strokeWidth={2} /></span>
               {item.label}
+              {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1">
+                  {pendingInquiries}
+                </span>
+              )}
             </Link>
           );
         })}

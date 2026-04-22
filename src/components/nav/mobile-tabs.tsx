@@ -10,9 +10,10 @@ const MAX_TABS = 5;
 
 type MobileTabsProps = {
   user: AuthUser;
+  pendingInquiries?: number;
 };
 
-export function MobileTabs({ user }: MobileTabsProps) {
+export function MobileTabs({ user, pendingInquiries = 0 }: MobileTabsProps) {
   const pathname = usePathname();
   const items = getNavItems(user.role).slice(0, MAX_TABS);
 
@@ -37,12 +38,17 @@ export function MobileTabs({ user }: MobileTabsProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs font-story font-bold transition-colors",
+                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs font-story font-bold transition-colors relative",
                 active ? "text-accent" : "text-ink-light",
               )}
             >
               <Icon size={20} strokeWidth={1.75} />
               <span className="truncate">{item.label}</span>
+              {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
+                  {pendingInquiries}
+                </span>
+              )}
             </Link>
           );
         })}
