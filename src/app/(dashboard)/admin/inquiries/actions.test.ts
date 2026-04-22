@@ -47,10 +47,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock("resend", () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    emails: { send: vi.fn().mockResolvedValue({ id: "test" }) },
-  })),
+vi.mock("@/lib/email/send", () => ({
+  sendEmail: vi.fn().mockResolvedValue({ id: "test" }),
 }));
 
 import { getReplyTemplate, replyToInquiry } from "./actions";

@@ -146,15 +146,7 @@ async function sendReplyEmail(
   action: string,
   replyText: string,
 ) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-
-  const { Resend } = await import("resend");
-  const resend = new Resend(apiKey);
-
-  const fromAddress =
-    process.env.NOTIFICATION_EMAIL_FROM ??
-    "星ヶ丘こどもクラブ <noreply@yourdomain.com>";
+  const { sendEmail } = await import("@/lib/email/send");
 
   const subjectMap: Record<string, string> = {
     approved: "見学のお申し込みを承認しました",
@@ -162,8 +154,7 @@ async function sendReplyEmail(
     replied: "お問い合わせへのご返信",
   };
 
-  await resend.emails.send({
-    from: fromAddress,
+  await sendEmail({
     to: email,
     subject: `【星ヶ丘こどもクラブ】${subjectMap[action] ?? "ご返信"}`,
     text: replyText,

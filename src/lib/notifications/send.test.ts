@@ -17,10 +17,8 @@ vi.mock("web-push", () => ({
 }));
 
 const mockEmailSend = vi.fn();
-vi.mock("resend", () => ({
-  Resend: class MockResend {
-    emails = { send: mockEmailSend };
-  },
+vi.mock("@/lib/email/send", () => ({
+  sendEmail: (...args: unknown[]) => mockEmailSend(...args),
 }));
 
 import { sendAnnouncementNotification, sendAttendanceNotification } from "./send";
@@ -289,24 +287,35 @@ describe("sendAnnouncementNotification", () => {
     consoleSpy.mockRestore();
   });
 
-  it("skips email when RESEND_API_KEY is not configured", async () => {
+  it("sends email via fallback (Mailpit) when RESEND_API_KEY is not configured", async () => {
     delete process.env.RESEND_API_KEY;
 
     const prefsQuery = mockSupabaseQuery({
       data: [{ user_id: "user-e1", method: "email" }],
       error: null,
     });
+    const profilesQuery = mockSupabaseQuery({
+      data: [{ id: "user-e1", email: "fallback@example.com" }],
+      error: null,
+    });
 
-    mockFrom.mockImplementation(() => prefsQuery);
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "notification_preferences") return prefsQuery;
+      if (table === "profiles") return profilesQuery;
+      return mockSupabaseQuery({ data: [], error: null });
+    });
 
-    await sendAnnouncementNotification("ann-e1", "Resend欠落", "本文");
+    mockEmailSend.mockResolvedValue({ id: "mailpit-1" });
 
-    expect(mockEmailSend).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining("RESEND_API_KEY not configured"),
+    await sendAnnouncementNotification("ann-e1", "Mailpitテスト", "本文");
+
+    expect(mockEmailSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "fallback@example.com",
+        subject: "【星ヶ丘こどもクラブ】Mailpitテスト",
+        text: "本文",
+      }),
     );
-    consoleSpy.mockRestore();
   });
 
   it("handles push subscriptions fetch error", async () => {

@@ -11,11 +11,9 @@ vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: vi.fn().mockReturnValue({ from: mockFrom }),
 }));
 
-// Mock Resend (dynamic import in the action)
-vi.mock("resend", () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    emails: { send: vi.fn().mockResolvedValue({ id: "test" }) },
-  })),
+// Mock email (dynamic import in the action)
+vi.mock("@/lib/email/send", () => ({
+  sendEmail: vi.fn().mockResolvedValue({ id: "test" }),
 }));
 
 import { submitInquiry } from "./actions";

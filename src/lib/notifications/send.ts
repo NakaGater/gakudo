@@ -1,10 +1,6 @@
 import webpush from "web-push";
-import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const EMAIL_FROM =
-  process.env.NOTIFICATION_EMAIL_FROM ??
-  "星ヶ丘こどもクラブ <noreply@yourdomain.com>";
+import { sendEmail } from "@/lib/email/send";
 
 function getVapidKeys() {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -128,14 +124,6 @@ async function sendEmailNotifications(
   subject: string,
   body: string,
 ): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error("[notifications] RESEND_API_KEY not configured, skipping email");
-    return;
-  }
-
-  const resend = new Resend(apiKey);
-
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
     .select("id, email")
@@ -148,8 +136,7 @@ async function sendEmailNotifications(
 
   for (const profile of profiles as ProfileRow[]) {
     try {
-      await resend.emails.send({
-        from: EMAIL_FROM,
+      await sendEmail({
         to: profile.email,
         subject,
         text: body,

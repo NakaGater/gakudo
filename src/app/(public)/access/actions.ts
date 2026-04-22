@@ -61,19 +61,11 @@ export async function submitInquiry(
 }
 
 async function sendConfirmationEmail(name: string, email: string, type: string) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-
-  const { Resend } = await import("resend");
-  const resend = new Resend(apiKey);
+  const { sendEmail } = await import("@/lib/email/send");
 
   const typeLabel = type === "visit" ? "見学予約" : "お問い合わせ";
-  const fromAddress =
-    process.env.NOTIFICATION_EMAIL_FROM ??
-    "星ヶ丘こどもクラブ <noreply@yourdomain.com>";
 
-  await resend.emails.send({
-    from: fromAddress,
+  await sendEmail({
     to: email,
     subject: `【星ヶ丘こどもクラブ】${typeLabel}を受け付けました`,
     text: `${name} 様\n\nこの度は${typeLabel}のお申し込みをいただき、ありがとうございます。\n内容を確認の上、担当者よりご連絡いたします。\n\nしばらくお待ちくださいますようお願いいたします。\n\n星ヶ丘こどもクラブ`,
