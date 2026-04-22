@@ -25,7 +25,7 @@ export type ChildOption = {
 
 export type AttendanceHistoryProps = {
   days: DayRecord[];
-  children: ChildOption[];
+  childOptions: ChildOption[];
   startDate: string;
   endDate: string;
   selectedChildId: string;
@@ -69,7 +69,7 @@ function formatDateLabel(dateStr: string): string {
 
 export function AttendanceHistoryClient({
   days,
-  children,
+  childOptions,
   startDate,
   endDate,
   selectedChildId,
@@ -121,7 +121,7 @@ export function AttendanceHistoryClient({
             onChange={(e) => applyFilter("end", e.target.value)}
           />
         </div>
-        {children.length > 1 && (
+        {childOptions.length > 1 && (
           <div>
             <label htmlFor="childFilter" className="block text-sm text-fg-muted mb-1">
               児童
@@ -133,7 +133,7 @@ export function AttendanceHistoryClient({
               onChange={(e) => applyFilter("child", e.target.value)}
             >
               <option value="">全員</option>
-              {children.map((c) => (
+              {childOptions.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>

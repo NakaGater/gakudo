@@ -106,6 +106,7 @@ export function extractLinkFromEmail(html: string): string {
 /**
  * Mailpitの全メッセージを削除する。
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function clearMailbox(_emailAddress?: string): Promise<void> {
   await fetch(`${MAILPIT_API}/messages`, { method: "DELETE" });
 }

@@ -43,7 +43,7 @@ const createChain = (table: string): Record<string, unknown> => {
         if (prop === "single") {
           return () => Promise.resolve(dequeue(table));
         }
-        return (..._args: unknown[]) => handler();
+        return (..._: unknown[]) => handler();
       },
     });
   return handler();

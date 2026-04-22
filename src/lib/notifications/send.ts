@@ -82,7 +82,7 @@ async function sendPushNotifications(
   let vapidKeys: { publicKey: string; privateKey: string };
   try {
     vapidKeys = getVapidKeys();
-  } catch (_e) {
+  } catch {
     console.error("[notifications] VAPID keys not configured, skipping push");
     return;
   }

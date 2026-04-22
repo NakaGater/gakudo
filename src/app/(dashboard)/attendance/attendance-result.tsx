@@ -22,6 +22,10 @@ const exitMessages = [
 
 export function AttendanceResult({ type, childName, recordedAt, onDismiss }: Props) {
   const [visible, setVisible] = useState(false);
+  const [msg] = useState(() => {
+    const msgs = type === "enter" ? enterMessages : exitMessages;
+    return msgs[Math.floor(Math.random() * msgs.length)];
+  });
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -31,8 +35,6 @@ export function AttendanceResult({ type, childName, recordedAt, onDismiss }: Pro
 
   const label = type === "enter" ? "入室しました" : "退室しました";
   const stClass = type === "enter" ? "res-st--in" : "res-st--out";
-  const msgs = type === "enter" ? enterMessages : exitMessages;
-  const msg = msgs[Math.floor(Math.random() * msgs.length)];
 
   const time = new Date(recordedAt).toLocaleTimeString("ja-JP", {
     hour: "2-digit",

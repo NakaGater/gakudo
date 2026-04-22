@@ -151,7 +151,7 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
     return (
       <AttendanceHistoryClient
         days={[]}
-        children={childrenOptions}
+        childOptions={childrenOptions}
         startDate={startDate}
         endDate={endDate}
         selectedChildId={params.child ?? ""}
@@ -183,7 +183,7 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
   return (
     <AttendanceHistoryClient
       days={days}
-      children={childrenOptions}
+      childOptions={childrenOptions}
       startDate={startDate}
       endDate={endDate}
       selectedChildId={params.child ?? ""}

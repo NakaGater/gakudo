@@ -13,18 +13,6 @@ function formatTime(iso: string): string {
   return formatTimeJST(iso);
 }
 
-const statusOrder: Record<DashboardChildStatus["status"], number> = {
-  entered: 0,
-  none: 1,
-  exited: 2,
-};
-
-const statusConfig = {
-  none: { label: "未入室", variant: "default" as const },
-  entered: { label: "入室中", variant: "enter" as const },
-  exited: { label: "退室済", variant: "exit" as const },
-} as const;
-
 export default async function AttendanceDashboardPage() {
   const user = await getUser();
   if (user.role !== "admin" && user.role !== "teacher" && user.role !== "entrance") redirect("/");

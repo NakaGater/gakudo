@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 const DISMISSED_KEY = 'push-prompt-dismissed'
@@ -17,21 +17,19 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export function PushPrompt() {
-  const [visible, setVisible] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
+  const [visible, setVisible] = useState(() => {
     try {
-      if (typeof window === 'undefined') return
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) return
-      if (Notification.permission === 'granted') return
-      if (Notification.permission === 'denied') return
-      if (localStorage.getItem(DISMISSED_KEY)) return
-      setVisible(true)
+      if (typeof window === 'undefined') return false
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) return false
+      if (Notification.permission === 'granted') return false
+      if (Notification.permission === 'denied') return false
+      if (localStorage.getItem(DISMISSED_KEY)) return false
+      return true
     } catch {
-      // Silently ignore — browser may not support these APIs
+      return false
     }
-  }, [])
+  })
+  const [loading, setLoading] = useState(false)
 
   const handleEnable = useCallback(async () => {
     setLoading(true)

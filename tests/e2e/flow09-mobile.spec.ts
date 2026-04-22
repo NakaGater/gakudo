@@ -28,7 +28,7 @@ test.describe("Flow 9: Mobile viewport", () => {
 
     // Mobile tabs should be visible (bottom nav), sidebar should be hidden
     const mobileTabs = page.locator("nav.fixed.bottom-0, [class*='fixed'][class*='bottom-0']").first();
-    const isMobileNavVisible = await mobileTabs.isVisible().catch(() => false);
+    await mobileTabs.isVisible().catch(() => false);
     // At minimum, the page shouldn't have horizontal scroll issues
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
   });

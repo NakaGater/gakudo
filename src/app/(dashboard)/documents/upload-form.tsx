@@ -9,6 +9,12 @@ const CATEGORIES = ["お便り", "スケジュール", "書類", "その他"] as
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [clientError, setClientError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prev, formData) => {
       const result = await uploadDocument(prev, formData);
@@ -21,12 +27,6 @@ export function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
     },
     null,
   );
-
-  const formRef = useRef<HTMLFormElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [clientError, setClientError] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   const validateFile = useCallback((file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) {

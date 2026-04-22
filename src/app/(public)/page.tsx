@@ -15,7 +15,6 @@ export const metadata: Metadata = {
     "星ヶ丘こどもクラブは、保護者が運営する学童保育施設です。安心・安全な放課後の居場所を提供します。",
 };
 
-const DEFAULT_HERO_TITLE = "子どもたちの\n笑顔あふれる放課後を";
 const DEFAULT_HERO_TEXT =
   "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
 
@@ -52,16 +51,9 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; strokeWidth?
   QrCode, Megaphone, Camera, Receipt,
 };
 
-/* Crayon color per feature index */
-const CRAYON_COLORS = [
-  { bg: "bg-cr-green/10", text: "text-cr-green", border: "border-cr-green/30" },
-  { bg: "bg-cr-blue/10", text: "text-cr-blue", border: "border-cr-blue/30" },
-  { bg: "bg-cr-purple/10", text: "text-cr-purple", border: "border-cr-purple/30" },
-  { bg: "bg-cr-pink/10", text: "text-cr-pink", border: "border-cr-pink/30" },
-];
+/* Crayon color per feature index — reserved for future theming */
 
 export default async function HomePage() {
-  let heroTitle = DEFAULT_HERO_TITLE;
   let heroText = DEFAULT_HERO_TEXT;
   let featuresHeading = "施設の特徴";
   let featuresSubtitle = "デジタルの力で、保護者の安心と運営の効率化を両立します。";
@@ -75,9 +67,6 @@ export default async function HomePage() {
       .eq("slug", "home")
       .single() as { data: { title: string; content: string; metadata: Record<string, unknown> } | null };
 
-    if (homePage?.title) {
-      heroTitle = homePage.title;
-    }
     if (homePage?.content) {
       heroText = homePage.content;
     }

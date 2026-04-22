@@ -15,7 +15,6 @@ const mockSelect = vi.fn();
 const mockEq = vi.fn();
 const mockOrder = vi.fn();
 const mockSingle = vi.fn();
-const mockDelete = vi.fn();
 const mockFrom = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({

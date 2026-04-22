@@ -27,12 +27,12 @@ const defaultChildren: ChildOption[] = [
 
 function renderHistory(overrides?: {
   days?: DayRecord[];
-  children?: ChildOption[];
+  childOptions?: ChildOption[];
   isStaff?: boolean;
 }) {
   const props = {
     days: overrides?.days ?? [],
-    children: overrides?.children ?? defaultChildren,
+    childOptions: overrides?.childOptions ?? defaultChildren,
     startDate: "2024-06-10",
     endDate: "2024-06-16",
     selectedChildId: "",
@@ -67,7 +67,7 @@ describe("AttendanceHistoryClient", () => {
   });
 
   it("hides child filter when single child", () => {
-    renderHistory({ children: [{ id: "c1", name: "山田太郎" }] });
+    renderHistory({ childOptions: [{ id: "c1", name: "山田太郎" }] });
 
     expect(screen.queryByLabelText("児童")).not.toBeInTheDocument();
   });
@@ -130,7 +130,7 @@ describe("AttendanceHistoryClient", () => {
     const { container } = render(
       <AttendanceHistoryClient
         days={[]}
-        children={defaultChildren}
+        childOptions={defaultChildren}
         startDate="2024-06-10"
         endDate="2024-06-16"
         selectedChildId=""

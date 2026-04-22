@@ -67,15 +67,6 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
   const groups = groupByEvent(photos);
 
   const tapeVariants = ["polaroid--tape", "", "polaroid--tape-pink", "", "polaroid--tape-green", ""];
-  const placeholderGradients = [
-    "linear-gradient(135deg,#FFE5D5,#FFEEF0)",
-    "linear-gradient(135deg,#FFF5CC,#FFE5D5)",
-    "linear-gradient(135deg,#FFEEF0,#F0E5FF)",
-    "linear-gradient(135deg,#D5F5E3,#E5F7FF)",
-    "linear-gradient(135deg,#E5F7FF,#D5F5E3)",
-    "linear-gradient(135deg,#FFF5CC,#FFEEF0)",
-  ];
-  const placeholderEmoji = ["🌈", "🌻", "🦋", "🐠", "⚽", "🏅", "🍉", "🎨", "🏃"];
 
   return (
     <>
