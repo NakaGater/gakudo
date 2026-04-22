@@ -5,6 +5,7 @@ import { Button, Input } from "@/components/ui";
 import type { ActionState } from "@/lib/actions/types";
 import { updateSitePage } from "../../../actions";
 import { cn } from "@/lib/utils";
+import { FEATURE_ICONS, FEATURE_ICON_KEYS } from "@/config/feature-icons";
 
 type ScheduleItem = { time: string; label: string; emoji: string };
 type FacilityItem = { label: string; value: string };
@@ -135,7 +136,7 @@ function HomeMetaFields({
   };
 
   const addFeatureItem = () => {
-    updateMeta("features", [...features, { icon: "⭐", title: "", description: "" }]);
+    updateMeta("features", [...features, { icon: "Star", title: "", description: "" }]);
   };
 
   const removeFeatureItem = (idx: number) => {
@@ -198,13 +199,24 @@ function HomeMetaFields({
           {features.map((item, idx) => (
             <div key={idx} className="flex flex-col gap-2 p-3 border border-border/50 rounded-md bg-bg">
               <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="アイコン（絵文字）"
-                  value={item.icon}
-                  onChange={(e) => updateFeatureItem(idx, "icon", e.target.value)}
-                  className="w-20 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm text-center"
-                />
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const entry = FEATURE_ICONS[item.icon];
+                    const Icon = entry?.component;
+                    return Icon ? <Icon size={16} strokeWidth={1.75} /> : null;
+                  })()}
+                  <select
+                    value={item.icon}
+                    onChange={(e) => updateFeatureItem(idx, "icon", e.target.value)}
+                    className="w-32 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                  >
+                    {FEATURE_ICON_KEYS.map((key) => (
+                      <option key={key} value={key}>
+                        {FEATURE_ICONS[key].label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <input
                   type="text"
                   placeholder="タイトル"

@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import {
-  QrCode,
-  Megaphone,
-  Camera,
-  Receipt,
-} from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { HeroSlideshow } from "./components/hero-slideshow";
+import { getFeatureIcon } from "@/config/feature-icons";
 
 export const metadata: Metadata = {
   title: "星ヶ丘こどもクラブ — 子どもたちの笑顔あふれる放課後を",
@@ -49,10 +44,6 @@ const DEFAULT_FEATURES: FeatureItem[] = [
       "延長保育の料金を退室時間から自動計算。月次の請求書をオンラインで確認できます。",
   },
 ];
-
-const ICON_MAP: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
-  QrCode, Megaphone, Camera, Receipt,
-};
 
 /* Crayon color per feature index — reserved for future theming */
 
@@ -224,7 +215,7 @@ export default async function HomePage() {
         </div>
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
           {featureItems.map((feature, i) => {
-            const IconComponent = ICON_MAP[feature.icon];
+            const IconComponent = getFeatureIcon(feature.icon);
             const stickyColors = [
               { bg: "sticky-note--yellow", iconBg: "#FFE5D5", iconColor: "var(--cr-orange)", iconBorder: "var(--cr-orange)" },
               { bg: "sticky-note--green", iconBg: "#D5F5E3", iconColor: "var(--cr-green)", iconBorder: "var(--cr-green)" },
