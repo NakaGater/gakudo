@@ -26,24 +26,24 @@ CREATE POLICY "Anyone can submit inquiry"
   ON inquiries FOR INSERT
   WITH CHECK (true);
 
--- admin/staffは全件閲覧可能
+-- admin/teacherは全件閲覧可能
 CREATE POLICY "Staff can view inquiries"
   ON inquiries FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM profiles
       WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('admin', 'staff')
+      AND profiles.role IN ('admin', 'teacher')
     )
   );
 
--- admin/staffは更新可能（返信時のステータス更新用）
+-- admin/teacherは更新可能（返信時のステータス更新用）
 CREATE POLICY "Staff can update inquiries"
   ON inquiries FOR UPDATE
   USING (
     EXISTS (
       SELECT 1 FROM profiles
       WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('admin', 'staff')
+      AND profiles.role IN ('admin', 'teacher')
     )
   );
