@@ -124,7 +124,7 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative" style={{ padding: "36px 40px 0" }}>
+      <section className="relative" style={{ padding: "40px 40px 0" }}>
         {/* Ambient stars */}
         <span className="absolute top-[8%] right-[12%] text-[10px] opacity-30 animate-float pointer-events-none" style={{ color: "var(--cr-yellow)" }} aria-hidden="true">⭐</span>
         <span className="absolute top-[5%] left-[8%] text-[7px] opacity-30 animate-float pointer-events-none" style={{ color: "var(--cr-yellow)", animationDelay: "2s" }} aria-hidden="true">⭐</span>
@@ -233,7 +233,7 @@ export default async function HomePage() {
       </section>
 
       {/* Features — sticky note grid */}
-      <section style={{ padding: "32px 40px", background: "linear-gradient(180deg, transparent 0%, rgba(255,217,61,.03) 50%, transparent 100%)" }}>
+      <section style={{ padding: "40px 40px", background: "linear-gradient(180deg, transparent 0%, rgba(255,217,61,.03) 50%, transparent 100%)" }}>
         <div className="text-center mb-5">
           <h2 className="font-story font-black text-ink inline-block" style={{ fontSize: "22px" }}>
             <span className="crayon-underline">{featuresHeading}</span>
@@ -278,18 +278,13 @@ export default async function HomePage() {
 
       {/* News — お知らせ一覧 */}
       <section
-        className="relative rounded-xl border-2 border-page-edge"
+        className="relative rounded-xl border border-page-edge/60"
         style={{
           padding: "28px 36px",
-          margin: "0 40px 32px",
+          margin: "8px 40px 40px",
           background: "var(--page-deep)",
         }}
       >
-        <span className="absolute -top-2 left-8 z-[2] rounded-sm px-6 py-0.5 text-[11px] font-hand text-ink-mid"
-          style={{ background: "rgba(200,110,138,.25)" }}
-        >
-          📢 おしらせ
-        </span>
         <h2 className="font-story font-black text-ink mb-4 text-center" style={{ fontSize: "20px" }}>
           <span className="crayon-underline">お知らせ</span>
         </h2>
@@ -317,7 +312,7 @@ export default async function HomePage() {
       </section>
 
       {/* Access — アクセス・お問い合わせ */}
-      <section id="access" style={{ padding: "32px 40px 0" }}>
+      <section id="access" style={{ padding: "40px 40px 0" }}>
         <div className="text-center mb-5">
           <h2 className="font-story font-black text-ink inline-block" style={{ fontSize: "22px" }}>
             <span className="crayon-underline">アクセス</span>
@@ -328,7 +323,7 @@ export default async function HomePage() {
         </div>
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-8 md:grid-cols-2">
-            <div className="rounded-xl bg-page-deep border-2 border-page-edge flex items-center justify-center aspect-square md:aspect-auto shadow-[4px_4px_0_var(--page-edge)] overflow-hidden">
+            <div className="rounded-xl bg-page-deep border border-page-edge/60 flex items-center justify-center aspect-square md:aspect-auto shadow-sm overflow-hidden">
               {(accessMeta?.map_embed_url as string) ? (
                 <iframe
                   src={accessMeta.map_embed_url as string}
@@ -373,9 +368,9 @@ export default async function HomePage() {
 
       {/* Inquiry — 見学申し込み・お問い合わせフォーム（折りたたみ） */}
       <details id="inquiry" className="group" style={{
-        margin: "24px 40px 32px",
+        margin: "32px 40px 40px",
         background: "var(--page-deep)",
-        border: "2px dashed var(--cr-yellow)",
+        border: "1px solid var(--page-edge)",
         borderRadius: "12px",
         overflow: "hidden",
       }}>
