@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { MapPin, Clock, Phone } from "lucide-react";
+import { MapPin, Clock, Phone, Send } from "lucide-react";
+import { InquiryForm } from "@/app/(public)/access/inquiry-form";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -239,20 +240,20 @@ function AccessPage({ title, content, metadata }: { title: string; content: stri
         background: "var(--page-deep)",
         border: "2px dashed var(--cr-yellow)",
         borderRadius: "12px",
-        textAlign: "center",
       }}>
-        <div className="text-2xl mb-2">📞</div>
-        <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>{visitHeading}</h2>
-        <p className="text-sm text-ink-mid mt-2 mb-4 whitespace-pre-wrap leading-relaxed">
-          {visitText}
+        <div className="text-center mb-5">
+          <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
+          <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>{visitHeading}</h2>
+          <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
+            {visitText}
+          </p>
+        </div>
+        <div className="mx-auto max-w-lg">
+          <InquiryForm />
+        </div>
+        <p className="text-center text-xs text-ink-light mt-4">
+          お電話でも受付中: <a href={`tel:${phone.replace(/-/g, "")}`} className="text-cr-orange hover:underline">{phone}</a>（{phoneHours}）
         </p>
-        <a
-          href={`tel:${phone.replace(/-/g, "")}`}
-          className="inline-flex items-center gap-2 rounded-[10px] border-2 border-[#B5663A] bg-cr-orange px-[22px] py-[10px] text-sm font-bold font-story text-white shadow-[0_3px_0_#B5663A] transition-all hover:-translate-y-px hover:shadow-[0_4px_0_#B5663A] active:translate-y-px active:shadow-[0_1px_0_#B5663A]"
-        >
-          <Phone size={16} />
-          {phone} に電話する
-        </a>
       </section>
     </>
   );

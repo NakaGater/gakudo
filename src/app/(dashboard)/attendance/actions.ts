@@ -47,7 +47,7 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
     .order("recorded_at", { ascending: false });
 
   // Build a map of child_id → latest attendance record
-  const latestMap = new Map<string, { type: string; recorded_at: string }>();
+  const latestMap = new Map<string, { type: string; recorded_at: string | null }>();
   for (const a of attendances ?? []) {
     if (!latestMap.has(a.child_id)) {
       latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
@@ -198,7 +198,7 @@ export async function recordManualAttendance(
   revalidatePath("/attendance/manual");
 
   // Non-blocking: fire and forget
-  sendAttendanceNotification(child.id, actionType, record.recorded_at).catch((err) => {
+  sendAttendanceNotification(child.id, actionType, record.recorded_at ?? new Date().toISOString()).catch((err) => {
     console.error("[attendance] notification error:", err);
   });
 
@@ -206,8 +206,8 @@ export async function recordManualAttendance(
     success: true,
     message: actionType === "enter" ? "入室しました" : "退室しました",
     childName: child.name,
-    type: record.type,
-    recordedAt: record.recorded_at,
+    type: record.type as "enter" | "exit",
+    recordedAt: record.recorded_at ?? undefined,
   };
 }
 
@@ -269,7 +269,7 @@ export async function recordAttendance(
   revalidatePath("/attendance");
 
   // Non-blocking: fire and forget
-  sendAttendanceNotification(child.id, actionType, record.recorded_at).catch((err) => {
+  sendAttendanceNotification(child.id, actionType, record.recorded_at ?? new Date().toISOString()).catch((err) => {
     console.error("[attendance] notification error:", err);
   });
 
@@ -277,7 +277,7 @@ export async function recordAttendance(
     success: true,
     message: actionType === "enter" ? "入室しました" : "退室しました",
     childName: child.name,
-    type: record.type,
-    recordedAt: record.recorded_at,
+    type: record.type as "enter" | "exit",
+    recordedAt: record.recorded_at ?? undefined,
   };
 }

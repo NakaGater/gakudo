@@ -45,7 +45,7 @@ export async function calculateMonthlyBill(
 
   // exit レコードだけを抽出して延長時間を計算
   const exitRecords = (attendances ?? []).filter(
-    (a: { type: string }) => a.type === "exit",
+    (a: { type: string; recorded_at: string | null }) => a.type === "exit" && a.recorded_at,
   );
 
   // regular_end_time を分に変換 (例: "18:00:00" → 1080)
@@ -56,7 +56,7 @@ export async function calculateMonthlyBill(
 
   for (const record of exitRecords) {
     // recorded_at を JST に変換して時刻部分を取得
-    const exitDate = new Date(record.recorded_at);
+    const exitDate = new Date(record.recorded_at!);
     const jstOffset = 9 * 60; // JST = UTC+9
     const utcMinutes = exitDate.getUTCHours() * 60 + exitDate.getUTCMinutes();
     const jstMinutes = utcMinutes + jstOffset;

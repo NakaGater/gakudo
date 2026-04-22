@@ -14,7 +14,7 @@ export type AttachmentRow = {
   file_path: string;
   file_size: number;
   mime_type: string;
-  created_at: string;
+  created_at: string | null;
 };
 
 /** 添付ファイルをアップロードし、attachments テーブルに記録する */
