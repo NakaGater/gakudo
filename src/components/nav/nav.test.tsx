@@ -40,11 +40,12 @@ describe("getNavItems", () => {
     expect(items.map((i) => i.label)).toContain("お問い合わせ");
   });
 
-  it("returns 9 items for admin role", () => {
+  it("returns 10 items for admin role", () => {
     const items = getNavItems("admin");
-    expect(items).toHaveLength(9);
+    expect(items).toHaveLength(10);
     expect(items.map((i) => i.label)).toContain("ユーザー");
     expect(items.map((i) => i.label)).toContain("お問い合わせ");
+    expect(items.map((i) => i.label)).toContain("Instagram");
     expect(items.map((i) => i.label)).toContain("HP管理");
   });
 });
@@ -74,11 +75,12 @@ describe("Sidebar", () => {
     expect(screen.getByText("児童管理")).toBeInTheDocument();
   });
 
-  it("renders admin nav items (9 links)", () => {
+  it("renders admin nav items (10 links)", () => {
     render(
       <Sidebar user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} />,
     );
     expect(screen.getByText("ユーザー")).toBeInTheDocument();
+    expect(screen.getByText("Instagram")).toBeInTheDocument();
     expect(screen.getByText("HP管理")).toBeInTheDocument();
   });
 

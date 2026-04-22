@@ -752,6 +752,23 @@
 .gallery-empty__text{font-family:var(--font-story);font-size:16px;color:var(--ink-mid)}
 .gallery-empty__sub{font-size:13px;margin-top:6px;color:var(--ink-light)}
 
+/* ═══ Instagram embeds ═══ */
+.ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;padding:8px 0}
+.ig-embed-wrap{display:flex;flex-direction:column;align-items:center}
+.ig-embed-wrap .instagram-media{margin:0!important;min-width:280px!important}
+.ig-embed-caption{font-family:var(--font-story);font-size:12px;color:var(--ink-mid);margin-top:6px;text-align:center}
+
+/* ═══ Instagram admin ═══ */
+.ig-add-form{background:var(--page-deep);border:1.5px solid var(--page-edge);border-radius:10px;padding:16px}
+.ig-add-form__fields{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.ig-add-form__field{flex:1;min-width:200px}
+.ig-add-form__field input{width:100%;margin-top:4px}
+.ig-add-form__submit{flex-shrink:0}
+.ig-post-card{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--page-deep);border:1.5px solid var(--page-edge);border-radius:8px;padding:12px 16px}
+.ig-post-card__info{flex:1;min-width:0}
+.ig-post-card__actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
 /* ═══ Warm form inputs ═══ */
 .warm-input{width:100%;padding:8px 10px;border:1.5px solid var(--page-edge);border-radius:6px;
   font-size:13px;font-family:var(--font-body);transition:border-color .15s,box-shadow .15s;

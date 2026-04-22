@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { GalleryGrid, type GalleryPhoto } from "./gallery-grid";
+import { InstagramEmbeds } from "./instagram-embeds";
 
 export const revalidate = 3600;
 
@@ -40,6 +41,21 @@ export default async function GalleryPage() {
     event_name: row.event_name,
   }));
 
+  // Instagram投稿を取得
+  const { data: igRows } = await supabase
+    .from("instagram_posts")
+    .select("id, post_url, caption")
+    .eq("is_visible", true)
+    .order("display_order", { ascending: true });
+
+  const igPosts = (igRows ?? []).map((r) => ({
+    id: r.id,
+    post_url: r.post_url,
+    caption: r.caption,
+  }));
+
+  const hasContent = photos.length > 0 || igPosts.length > 0;
+
   return (
     <section style={{ maxWidth: "960px", margin: "0 auto", padding: "32px 24px", width: "100%" }}>
       <h1 className="font-story font-black text-ink text-center" style={{ fontSize: "28px" }}>
@@ -50,8 +66,11 @@ export default async function GalleryPage() {
       </p>
 
       <div className="mt-8">
-        {photos.length > 0 ? (
-          <GalleryGrid photos={photos} />
+        {hasContent ? (
+          <>
+            {photos.length > 0 && <GalleryGrid photos={photos} />}
+            {igPosts.length > 0 && <InstagramEmbeds posts={igPosts} />}
+          </>
         ) : (
           <div className="gallery-empty">
             <div className="gallery-empty__icon">📷</div>

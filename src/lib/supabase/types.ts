@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -365,6 +366,44 @@ export type Database = {
           {
             foreignKeyName: "inquiries_replied_by_fkey"
             columns: ["replied_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_posts: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          created_by: string | null
+          display_order: number
+          id: string
+          is_visible: boolean
+          post_url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          is_visible?: boolean
+          post_url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          is_visible?: boolean
+          post_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_posts_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

@@ -8,6 +8,7 @@ import {
   UserPlus,
   Globe,
   MessageSquare,
+  ImageIcon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ export const navItems: NavItem[] = [
   { label: "児童管理", icon: Users, href: "/children", roles: ["teacher", "admin"] },
   { label: "ユーザー", icon: UserPlus, href: "/admin/users", roles: ["admin"] },
   { label: "お問い合わせ", icon: MessageSquare, href: "/admin/inquiries", roles: ["admin", "teacher"] },
+  { label: "Instagram", icon: ImageIcon, href: "/admin/instagram", roles: ["admin"] },
   { label: "HP管理", icon: Globe, href: "/admin/site/pages", roles: ["admin"] },
 ];
 

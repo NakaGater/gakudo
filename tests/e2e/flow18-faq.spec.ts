@@ -6,7 +6,7 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
     const errors = collectConsoleErrors(page);
     await page.goto("/faq");
     await expect(
-      page.getByRole("heading", { name: "よくある質問" }),
+      page.getByRole("heading", { name: "Q&A" }),
     ).toBeVisible({ timeout: 10000 });
     // Subtitle
     await expect(page.getByText("はじめての方もご安心ください")).toBeVisible();
@@ -50,7 +50,7 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
     await nav.getByRole("link", { name: "Q&A" }).click();
     await page.waitForURL("/faq", { timeout: 10000 });
     await expect(
-      page.getByRole("heading", { name: "よくある質問" }),
+      page.getByRole("heading", { name: "Q&A" }),
     ).toBeVisible();
   });
 
