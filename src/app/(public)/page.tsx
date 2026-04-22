@@ -168,7 +168,7 @@ export default async function HomePage() {
                 href="#inquiry"
                 className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border-2 border-page-edge bg-white px-[22px] py-[10px] text-sm font-bold font-story text-ink shadow-[0_2px_0_var(--page-edge)] transition-all hover:border-cr-orange hover:text-cr-orange hover:-translate-y-px"
               >
-                🗺️ 見学のお申し込み
+                📩 見学・お問い合わせ
               </Link>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default async function HomePage() {
         <summary className="cursor-pointer list-none text-center" style={{ padding: "28px 36px" }}>
           <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
           <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>
-            {(accessMeta?.visit_heading as string) || "見学のお申し込み"}
+            {(accessMeta?.visit_heading as string) || "見学申し込み・お問い合わせ"}
           </h2>
           <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
             {(accessMeta?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
