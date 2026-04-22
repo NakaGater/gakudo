@@ -7,6 +7,7 @@ import {
   Users,
   UserPlus,
   Globe,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +26,7 @@ export const navItems: NavItem[] = [
   { label: "請求", icon: Receipt, href: "/billing", roles: ["parent", "teacher", "admin"] },
   { label: "児童管理", icon: Users, href: "/children", roles: ["teacher", "admin"] },
   { label: "ユーザー", icon: UserPlus, href: "/admin/users", roles: ["admin"] },
+  { label: "お問い合わせ", icon: MessageSquare, href: "/admin/inquiries", roles: ["admin", "teacher"] },
   { label: "HP管理", icon: Globe, href: "/admin/site/pages", roles: ["admin"] },
 ];
 

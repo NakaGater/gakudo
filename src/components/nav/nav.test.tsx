@@ -33,16 +33,18 @@ describe("getNavItems", () => {
     ]);
   });
 
-  it("returns 6 items for teacher role", () => {
+  it("returns 7 items for teacher role", () => {
     const items = getNavItems("teacher");
-    expect(items).toHaveLength(6);
+    expect(items).toHaveLength(7);
     expect(items.map((i) => i.label)).toContain("児童管理");
+    expect(items.map((i) => i.label)).toContain("お問い合わせ");
   });
 
-  it("returns 8 items for admin role", () => {
+  it("returns 9 items for admin role", () => {
     const items = getNavItems("admin");
-    expect(items).toHaveLength(8);
+    expect(items).toHaveLength(9);
     expect(items.map((i) => i.label)).toContain("ユーザー");
+    expect(items.map((i) => i.label)).toContain("お問い合わせ");
     expect(items.map((i) => i.label)).toContain("HP管理");
   });
 });
@@ -65,14 +67,14 @@ describe("Sidebar", () => {
     expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(4);
   });
 
-  it("renders teacher nav items (6 links)", () => {
+  it("renders teacher nav items (7 links)", () => {
     render(
       <Sidebar user={{ id: "2", email: "t@b.c", name: "鈴木先生", role: "teacher" }} />,
     );
     expect(screen.getByText("児童管理")).toBeInTheDocument();
   });
 
-  it("renders admin nav items (8 links)", () => {
+  it("renders admin nav items (9 links)", () => {
     render(
       <Sidebar user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} />,
     );
