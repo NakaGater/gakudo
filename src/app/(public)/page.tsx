@@ -379,15 +379,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Inquiry — 見学申し込み・お問い合わせフォーム */}
-      <section id="inquiry" style={{
-        padding: "28px 36px",
+      {/* Inquiry — 見学申し込み・お問い合わせフォーム（折りたたみ） */}
+      <details id="inquiry" className="group" style={{
         margin: "24px 40px 32px",
         background: "var(--page-deep)",
         border: "2px dashed var(--cr-yellow)",
         borderRadius: "12px",
+        overflow: "hidden",
       }}>
-        <div className="text-center mb-5">
+        <summary className="cursor-pointer list-none text-center" style={{ padding: "28px 36px" }}>
           <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
           <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>
             {(accessMeta?.visit_heading as string) || "見学のお申し込み"}
@@ -395,14 +395,16 @@ export default async function HomePage() {
           <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
             {(accessMeta?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
           </p>
+          <p className="mt-3 text-xs font-bold font-story text-cr-orange group-open:hidden">
+            ▼ フォームを開く
+          </p>
+        </summary>
+        <div style={{ padding: "0 36px 28px" }}>
+          <div className="mx-auto max-w-lg">
+            <InquiryForm />
+          </div>
         </div>
-        <div className="mx-auto max-w-lg">
-          <InquiryForm />
-        </div>
-        <p className="text-center text-xs text-ink-light mt-4">
-          お電話でも受付中: <a href={`tel:${((accessMeta?.phone as string) || "03-1234-5678").replace(/-/g, "")}`} className="text-cr-orange hover:underline">{(accessMeta?.phone as string) || "03-1234-5678"}</a>（{(accessMeta?.phone_hours as string) || "受付: 平日 9:00〜18:00"}）
-        </p>
-      </section>
+      </details>
     </>
   );
 }

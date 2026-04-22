@@ -9,6 +9,9 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
     const errors = collectConsoleErrors(page);
     await page.goto("/");
 
+    // 折りたたみを開く
+    await page.locator("details#inquiry summary").click();
+
     // フォームが表示される
     await expect(page.getByRole("button", { name: /見学予約/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /一般お問い合わせ/ })).toBeVisible();
@@ -20,6 +23,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
 
   test("visit type shows preferred date field", async ({ page }) => {
     await page.goto("/");
+    await page.locator("details#inquiry summary").click();
 
     // デフォルトは見学予約 → 希望日時が表示
     await expect(page.getByLabel(/見学希望日時/)).toBeVisible();
@@ -31,6 +35,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
 
   test("form validates required fields", async ({ page }) => {
     await page.goto("/");
+    await page.locator("details#inquiry summary").click();
 
     // 一般問い合わせに切替（希望日時不要）
     await page.getByRole("button", { name: /一般お問い合わせ/ }).click();
@@ -46,10 +51,10 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
 
   test("inquiry form submission works (visit type)", async ({ page }) => {
     await page.goto("/");
+    await page.locator("details#inquiry summary").click();
 
     await page.getByLabel("お名前").fill("テスト太郎");
     await page.getByLabel("メールアドレス").fill("test-inquiry@example.com");
-    await page.getByLabel("電話番号").fill("03-1234-5678");
     await page.getByLabel(/見学希望日時/).fill("12月20日 15:00");
     await page.getByLabel("メッセージ").fill("見学を希望します。よろしくお願いします。");
 
@@ -65,6 +70,7 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
 
     // まず問い合わせを送信
     await page.goto("/");
+    await page.locator("details#inquiry summary").click();
     await page.getByRole("button", { name: /一般お問い合わせ/ }).click();
     await page.getByLabel("お名前").fill(testName);
     await page.getByLabel("メールアドレス").fill("list-test@example.com");
@@ -86,9 +92,9 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
 
     // 問い合わせを送信
     await page.goto("/");
+    await page.locator("details#inquiry summary").click();
     await page.getByLabel("お名前").fill(testName);
     await page.getByLabel("メールアドレス").fill("detail-test@example.com");
-    await page.getByLabel("電話番号").fill("090-1234-5678");
     await page.getByLabel(/見学希望日時/).fill("1月10日 14:00");
     await page.getByLabel("メッセージ").fill("詳細画面のテストです。");
     await page.getByRole("button", { name: /送信する/ }).click();
@@ -103,7 +109,6 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
     // 詳細ページの内容
     await expect(page.getByText(`${testName} さんからのお問い合わせ`)).toBeVisible({ timeout: 10000 });
     await expect(page.getByText("detail-test@example.com")).toBeVisible();
-    await expect(page.getByText("090-1234-5678")).toBeVisible();
     await expect(page.getByText("1月10日 14:00")).toBeVisible();
     await expect(page.getByText("詳細画面のテストです。")).toBeVisible();
 
