@@ -41,9 +41,10 @@ export function Footer() {
               お問い合わせ
             </h3>
             <address className="text-[11px] not-italic leading-[1.8]">
-              <p>〒123-4567</p>
-              <p>東京都世田谷区桜丘3-12-8</p>
-              <p>TEL: 03-1234-5678</p>
+              <p>〒464-0021</p>
+              <p>名古屋市千種区星が丘1-5</p>
+              <p>アーバンラフレ集会所内</p>
+              <p>TEL: 052-783-1447</p>
             </address>
           </div>
         </div>
