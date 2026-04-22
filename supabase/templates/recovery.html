@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#FFF8F0;font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FFF8F0;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="480" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:16px;border:2px solid #E8DCC8;overflow:hidden;">
+          <tr>
+            <td style="background:#FFD93D;padding:24px;text-align:center;">
+              <div style="font-size:32px;">⭐</div>
+              <h1 style="margin:8px 0 0;font-size:20px;color:#3B2F20;font-weight:900;">
+                星ヶ丘こどもクラブ
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 28px;">
+              <p style="font-size:15px;color:#3B2F20;line-height:1.8;margin:0 0 20px;">
+                パスワードのリセットが要求されました。<br>
+                下のボタンから新しいパスワードを設定してください。
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:12px 0 24px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="display:inline-block;background:#FF8C42;color:#FFFFFF;font-size:16px;font-weight:bold;text-decoration:none;padding:14px 36px;border-radius:10px;border:none;box-shadow:0 3px 0 #E06A20;">
+                      パスワードをリセット
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:13px;color:#8B7E6A;line-height:1.7;margin:0 0 16px;">
+                このリンクは24時間有効です。<br>
+                心当たりがない場合は、このメールを無視してください。
+              </p>
+              <hr style="border:none;border-top:1px dashed #E8DCC8;margin:20px 0;">
+              <p style="font-size:12px;color:#A89880;line-height:1.6;margin:0;">
+                ボタンが表示されない場合は、以下のURLをブラウザに貼り付けてください：<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#FF8C42;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#FFF5E6;padding:16px 28px;text-align:center;border-top:1px solid #E8DCC8;">
+              <p style="font-size:11px;color:#A89880;margin:0;line-height:1.6;">
+                ⭐ 星ヶ丘こどもクラブ<br>
+                〒464-0021 名古屋市千種区星が丘1-5<br>
+                TEL: 052-783-1447
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

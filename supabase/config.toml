@@ -48,6 +48,14 @@ enable_confirmations = false
 max_frequency = "1s"
 otp_expiry = 3600
 
+[auth.email.template.invite]
+subject = "星ヶ丘こどもクラブ — アカウント設定のご案内"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "星ヶ丘こどもクラブ — パスワードリセット"
+content_path = "./supabase/templates/recovery.html"
+
 [edge_runtime]
 enabled = true
 policy = "per_worker"
