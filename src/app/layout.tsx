@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Zen_Maru_Gothic, Yusei_Magic } from "next/font/google";
 import { validateEnv } from "@/lib/env";
+import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -39,6 +40,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-bg text-fg font-sans">
         {children}
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

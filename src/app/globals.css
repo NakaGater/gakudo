@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* ── Hide scrollbars (keep scroll functionality) ─────────── */
+* {
+  scrollbar-width: none;          /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none;                  /* Chrome, Safari, Edge */
+}
+
 /* ══════════════════════════════════════════════════════════════
    星ヶ丘こどもクラブ — Design System Tokens
    Storybook / Craft Theme — GAN Refresh 58/60

@@ -16,16 +16,23 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification.data?.url || "/";
+  const urlToOpen = new URL(url, self.location.origin).href;
+
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((windowClients) => {
+        // Find an existing PWA (standalone) window first
         for (const client of windowClients) {
-          if (client.url.includes(self.location.origin) && "focus" in client) {
-            return client.focus().then((c) => c.navigate(url));
+          if (new URL(client.url).origin === self.location.origin) {
+            return client.focus().then((c) => {
+              if (c.url !== urlToOpen) c.navigate(urlToOpen);
+              return c;
+            });
           }
         }
-        return clients.openWindow(url);
+        // No existing window — open new (will launch PWA if installed)
+        return clients.openWindow(urlToOpen);
       }),
   );
 });

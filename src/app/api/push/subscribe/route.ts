@@ -74,6 +74,26 @@ export async function POST(request: Request) {
     )
   }
 
+  // Ensure notification preference is set to "push" (or keep "both" if already set)
+  const { data: existingPref } = await supabase
+    .from('notification_preferences')
+    .select('method')
+    .eq('user_id', user.id)
+    .single()
+
+  const currentMethod = (existingPref as { method: string } | null)?.method
+  if (!currentMethod || currentMethod === 'off') {
+    await supabase.from('notification_preferences').upsert({
+      user_id: user.id,
+      method: 'push',
+    })
+  } else if (currentMethod === 'email') {
+    await supabase.from('notification_preferences').upsert({
+      user_id: user.id,
+      method: 'both',
+    })
+  }
+
   return NextResponse.json(
     { message: 'プッシュ通知を登録しました' },
     { status: 201 },
