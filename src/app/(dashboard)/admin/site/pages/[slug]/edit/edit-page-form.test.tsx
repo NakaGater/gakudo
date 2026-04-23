@@ -1,0 +1,53 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
+import { EditPageForm } from "./edit-page-form";
+
+// Mock server action
+vi.mock("../../../actions", () => ({
+  updateSitePage: vi.fn(),
+}));
+
+// Mock useActionState
+vi.mock("react", async () => {
+  const actual = await vi.importActual("react");
+  return {
+    ...actual,
+    useActionState: () => [null, vi.fn(), false],
+  };
+});
+
+const baseProps = {
+  title: "テスト",
+  content: "テスト本文",
+  metadata: {},
+};
+
+describe("EditPageForm", () => {
+  afterEach(() => cleanup());
+  it("renders AccessMetaFields when slug is 'access'", () => {
+    render(<EditPageForm slug="access" {...baseProps} />);
+    expect(screen.getByText("アクセス情報")).toBeInTheDocument();
+  });
+
+  it("renders HomeMetaFields when slug is 'home'", () => {
+    render(<EditPageForm slug="home" {...baseProps} />);
+    expect(screen.getByText("ヒーローセクション")).toBeInTheDocument();
+  });
+
+  it("renders AboutMetaFields when slug is 'about'", () => {
+    render(<EditPageForm slug="about" {...baseProps} />);
+    expect(screen.getByText("理念セクション")).toBeInTheDocument();
+  });
+
+  it("does not render AccessMetaFields for other slugs", () => {
+    render(<EditPageForm slug="home" {...baseProps} />);
+    expect(screen.queryByText("アクセス情報")).not.toBeInTheDocument();
+  });
+
+  it("renders common fields for all slugs", () => {
+    render(<EditPageForm slug="access" {...baseProps} />);
+    expect(screen.getByLabelText("サブタイトル")).toBeInTheDocument();
+    expect(screen.getByLabelText("本文")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "保存する" }).length).toBeGreaterThan(0);
+  });
+});

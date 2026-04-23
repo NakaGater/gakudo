@@ -119,6 +119,11 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
         <EnrollmentMetaFields meta={meta} setMeta={setMeta} />
       )}
 
+      {/* アクセスページ固有フィールド */}
+      {slug === "access" && (
+        <AccessMetaFields meta={meta} updateMeta={updateMeta} />
+      )}
+
       <div className="flex justify-end">
         <Button type="submit" loading={isPending}>
           保存する
