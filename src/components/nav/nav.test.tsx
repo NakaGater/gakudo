@@ -10,9 +10,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock supabase client
+const mockSelect = vi.fn().mockReturnValue({
+  eq: vi.fn().mockResolvedValue({ count: 0, data: [], error: null }),
+});
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     auth: { signOut: vi.fn().mockResolvedValue({ error: null }) },
+    from: () => ({ select: mockSelect }),
   }),
 }));
 
