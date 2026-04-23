@@ -25,8 +25,8 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session cookie — this is the only job of middleware now
-  await supabase.auth.getUser()
+  // Refresh session cookie — reads JWT from cookie without network call
+  await supabase.auth.getSession()
 
   // Set pathname header so layout can use it for entrance role restriction
   supabaseResponse.headers.set('x-pathname', request.nextUrl.pathname)

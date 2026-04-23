@@ -17,11 +17,11 @@ vi.mock('next/server', () => ({
 }))
 
 // Mock supabase auth
-const mockSupabaseGetUser = vi.fn()
+const mockSupabaseGetSession = vi.fn()
 
 vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
-    auth: { getUser: () => mockSupabaseGetUser() },
+    auth: { getSession: () => mockSupabaseGetSession() },
   }),
 }))
 
@@ -43,17 +43,17 @@ describe('updateSession middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockHeaders.clear()
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: null },
+    mockSupabaseGetSession.mockResolvedValue({
+      data: { session: null },
       error: null,
     })
   })
 
-  it('calls getUser to refresh session cookie', async () => {
+  it('calls getSession to refresh session cookie', async () => {
     const req = makeNextRequest('/attendance')
     await updateSession(req)
 
-    expect(mockSupabaseGetUser).toHaveBeenCalledOnce()
+    expect(mockSupabaseGetSession).toHaveBeenCalledOnce()
   })
 
   it('returns next response for any path', async () => {
