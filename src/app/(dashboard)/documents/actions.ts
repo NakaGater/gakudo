@@ -4,12 +4,11 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { validateFile, validateFileType } from "@/lib/files/validation";
 import type { ActionState } from "@/lib/actions/types";
 import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 
 const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
-
-const MAX_FILE_SIZE = FILE_LIMITS.MAX_SIZE_BYTES;
 
 export async function uploadDocument(
   _prev: ActionState,
@@ -37,10 +36,16 @@ export async function uploadDocument(
 
   if (!(file instanceof File) || file.size === 0) {
     fieldErrors.file = "ファイルを選択してください";
-  } else if (file.size > MAX_FILE_SIZE) {
-    fieldErrors.file = "ファイルサイズは10MB以下にしてください";
-  } else if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
-    fieldErrors.file = "PDF または画像ファイルを選択してください";
+  } else {
+    const fileVal = validateFile(file);
+    if (!fileVal.valid) {
+      fieldErrors.file = fileVal.message;
+    } else {
+      const typeVal = validateFileType(file, ALLOWED_TYPES, "PDF または画像ファイルを選択してください");
+      if (!typeVal.valid) {
+        fieldErrors.file = typeVal.message;
+      }
+    }
   }
 
   if (fieldErrors.title || fieldErrors.category || fieldErrors.file) {

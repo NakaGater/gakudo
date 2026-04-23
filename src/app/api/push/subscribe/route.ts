@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/api/auth'
 import type { Json } from '@/lib/supabase/types'
 
 interface PushSubscriptionBody {
@@ -22,20 +22,15 @@ function isValidSubscription(body: unknown): body is PushSubscriptionBody {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireAuth()
+  if (auth.error) return auth.error
+  const { user, supabase } = auth
 
   let body: unknown
   try {
     body = await request.json()
-  } catch {
+  } catch (error) {
+    console.error('[push/subscribe] Failed to parse request body:', error)
     return NextResponse.json(
       { error: 'リクエストボディが不正です' },
       { status: 400 },
@@ -86,20 +81,15 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireAuth()
+  if (auth.error) return auth.error
+  const { user, supabase } = auth
 
   let body: unknown
   try {
     body = await request.json()
-  } catch {
+  } catch (error) {
+    console.error('[push/subscribe] Failed to parse DELETE request body:', error)
     return NextResponse.json(
       { error: 'リクエストボディが不正です' },
       { status: 400 },

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isAdminOrTeacher } from "@/lib/auth/roles";
 import type { ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 import type { BillingRule } from "./types";
@@ -105,7 +106,7 @@ export async function calculateAllBills(
   yearMonth: string,
 ): Promise<{ success: boolean; message: string; processed?: number; totalAmount?: number }> {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") {
+  if (!isAdminOrTeacher(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -156,7 +157,7 @@ export async function confirmBill(
   billId: string,
 ): Promise<{ success: boolean; message: string }> {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") {
+  if (!isAdminOrTeacher(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -186,7 +187,7 @@ export async function confirmAllBills(
   yearMonth: string,
 ): Promise<{ success: boolean; message: string; confirmed?: number }> {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") {
+  if (!isAdminOrTeacher(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -228,7 +229,7 @@ export async function calculateSingleBill(
   yearMonth: string,
 ): Promise<{ success: boolean; message: string }> {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") {
+  if (!isAdminOrTeacher(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 

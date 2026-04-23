@@ -57,7 +57,8 @@ export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
         setFiles([]);
         if (fileRef.current) fileRef.current.value = "";
       }
-    } catch {
+    } catch (error) {
+      console.error("[photos/upload] Upload failed:", error);
       setResult({ success: false, message: "アップロードに失敗しました" });
     } finally {
       setUploading(false);

@@ -1,6 +1,7 @@
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
+import { TEXT_LIMITS } from "@/config/constants";
 
 function getVapidKeys() {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -78,8 +79,8 @@ async function sendPushNotifications(
   let vapidKeys: { publicKey: string; privateKey: string };
   try {
     vapidKeys = getVapidKeys();
-  } catch {
-    console.error("[notifications] VAPID keys not configured, skipping push");
+  } catch (error) {
+    console.error("[notifications] VAPID keys not configured, skipping push:", error);
     return;
   }
 
@@ -99,7 +100,7 @@ async function sendPushNotifications(
     return;
   }
 
-  const truncatedBody = body.length > 100 ? body.slice(0, 100) + "…" : body;
+  const truncatedBody = body.length > TEXT_LIMITS.NOTIFICATION_BODY_LENGTH ? body.slice(0, TEXT_LIMITS.NOTIFICATION_BODY_LENGTH) + "…" : body;
   const payload = JSON.stringify({
     title,
     body: truncatedBody,

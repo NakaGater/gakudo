@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
 import { Button } from "@/components/ui";
 import {
   getDashboardAttendanceStatus,
@@ -15,7 +16,7 @@ function formatTime(iso: string): string {
 
 export default async function AttendanceDashboardPage() {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher" && user.role !== "entrance") redirect("/");
+  if (!isStaff(user.role)) redirect("/");
 
   const children = await getDashboardAttendanceStatus();
 

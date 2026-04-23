@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isStaff, isAdmin, isEntrance } from "./roles";
+import { isStaff, isAdmin, isEntrance, isAdminOrTeacher } from "./roles";
 
 describe("isStaff", () => {
   it("returns true for admin", () => {
@@ -38,6 +38,28 @@ describe("isAdmin", () => {
 
   it("returns false for parent", () => {
     expect(isAdmin("parent")).toBe(false);
+  });
+});
+
+describe("isAdminOrTeacher", () => {
+  it("returns true for admin", () => {
+    expect(isAdminOrTeacher("admin")).toBe(true);
+  });
+
+  it("returns true for teacher", () => {
+    expect(isAdminOrTeacher("teacher")).toBe(true);
+  });
+
+  it("returns false for entrance", () => {
+    expect(isAdminOrTeacher("entrance")).toBe(false);
+  });
+
+  it("returns false for parent", () => {
+    expect(isAdminOrTeacher("parent")).toBe(false);
+  });
+
+  it("returns false for unknown role", () => {
+    expect(isAdminOrTeacher("unknown")).toBe(false);
   });
 });
 

@@ -5,6 +5,7 @@ import { ArrowLeft, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { Badge, Card, CardContent } from "@/components/ui";
+import { STORAGE } from "@/config/constants";
 import { DeleteButton } from "./delete-button";
 
 type DocumentDetail = {
@@ -59,7 +60,7 @@ export default async function DocumentDetailPage({
   // Generate signed URL
   const { data: signedUrlData } = await supabase.storage
     .from("documents")
-    .createSignedUrl(doc.file_path, 3600);
+    .createSignedUrl(doc.file_path, STORAGE.SIGNED_URL_EXPIRY_SECONDS);
 
   const signedUrl = signedUrlData?.signedUrl ?? null;
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isAdminOrTeacher } from "@/lib/auth/roles";
 import { Card, CardContent, CardHeader, Badge, Button } from "@/components/ui";
 import { ChildEditForm } from "./child-edit-form";
 import { ChildDeleteButton } from "./child-delete-button";
@@ -28,7 +29,7 @@ type ParentInfo = {
 export default async function ChildDetailPage({ params }: Props) {
   const { id } = await params;
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") redirect("/");
+  if (!isAdminOrTeacher(user.role)) redirect("/");
 
   const supabase = await createClient();
 

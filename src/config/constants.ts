@@ -22,3 +22,16 @@ export const ERROR_MESSAGES = {
   ADMIN_ONLY: "管理者権限が必要です",
   NOT_FOUND: "見つかりません",
 } as const;
+
+export const STORAGE = {
+  SIGNED_URL_EXPIRY_SECONDS: 3600,
+} as const;
+
+export const CACHE = {
+  PUBLIC_PAGE_REVALIDATE: 3600,
+} as const;
+
+export const TEXT_LIMITS = {
+  NOTIFICATION_BODY_LENGTH: 100,
+  PREVIEW_EXCERPT_LENGTH: 100,
+} as const;

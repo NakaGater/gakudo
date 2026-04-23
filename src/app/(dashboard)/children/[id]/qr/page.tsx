@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isAdminOrTeacher } from "@/lib/auth/roles";
 import { Button } from "@/components/ui";
 import { QRPrint } from "@/components/qr/qr-print";
 import { QRRegenerateButton } from "./qr-regenerate-button";
@@ -21,7 +22,7 @@ type ChildQR = {
 export default async function ChildQRPage({ params }: Props) {
   const { id } = await params;
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") redirect("/");
+  if (!isAdminOrTeacher(user.role)) redirect("/");
 
   const supabase = await createClient();
   const { data: child, error } = await supabase

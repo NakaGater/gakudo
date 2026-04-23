@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/api/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const VALID_ROLES = ['parent', 'teacher', 'admin'] as const
@@ -10,15 +10,9 @@ function isValidRole(value: unknown): value is Role {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireAuth()
+  if (auth.error) return auth.error
+  const { user, supabase } = auth
 
   const { data: profile } = await supabase.from('profiles')
     .select('role')
@@ -32,7 +26,8 @@ export async function POST(request: Request) {
   let body: unknown
   try {
     body = await request.json()
-  } catch {
+  } catch (error) {
+    console.error('[auth/invite] Failed to parse request body:', error)
     return NextResponse.json(
       { error: 'リクエストボディが不正です' },
       { status: 400 },

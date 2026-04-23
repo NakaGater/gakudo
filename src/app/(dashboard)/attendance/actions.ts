@@ -228,6 +228,7 @@ async function createAttendanceRecord(
 
   for (const p of revalidatePaths) revalidatePath(p);
 
+  // Non-blocking: notification is best-effort, don't block the response
   sendAttendanceNotification(
     childId, actionType, record.recorded_at ?? new Date().toISOString(),
   ).catch((err) => {

@@ -25,7 +25,8 @@ export function PushPrompt() {
       if (Notification.permission === 'denied') return false
       if (localStorage.getItem(DISMISSED_KEY)) return false
       return true
-    } catch {
+    } catch (error) {
+      console.error("[push-prompt] Failed to check notification state:", error);
       return false
     }
   })
@@ -73,7 +74,8 @@ export function PushPrompt() {
   const handleDismiss = useCallback(() => {
     try {
       localStorage.setItem(DISMISSED_KEY, '1')
-    } catch {
+    } catch (error) {
+      console.error("[push-prompt] Failed to save dismissed state:", error);
       // localStorage may be unavailable
     }
     setVisible(false)

@@ -3,10 +3,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
+import { validateFile, validateFileType } from "@/lib/files/validation";
+import { FILE_LIMITS, ERROR_MESSAGES, STORAGE } from "@/config/constants";
 
 const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
-const MAX_FILE_SIZE = FILE_LIMITS.MAX_SIZE_BYTES;
 
 export type AttachmentRow = {
   id: string;
@@ -29,14 +29,13 @@ export async function uploadAttachment(
   }
 
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { success: false, message: "ファイルを選択してください" };
+  const fileValidation = validateFile(file);
+  if (!fileValidation.valid) {
+    return { success: false, message: fileValidation.message };
   }
-  if (file.size > MAX_FILE_SIZE) {
-    return { success: false, message: "ファイルサイズは10MB以下にしてください" };
-  }
-  if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
-    return { success: false, message: "PDF または画像ファイルを選択してください" };
+  const typeValidation = validateFileType(file as File, ALLOWED_TYPES, "PDF または画像ファイルを選択してください");
+  if (!typeValidation.valid) {
+    return { success: false, message: typeValidation.message };
   }
 
   const timestamp = Date.now();
@@ -122,7 +121,7 @@ export async function getAttachmentUrl(filePath: string): Promise<string | null>
   const supabase = await createClient();
   const { data } = await supabase.storage
     .from("attachments")
-    .createSignedUrl(filePath, 3600); // 1時間有効
+    .createSignedUrl(filePath, STORAGE.SIGNED_URL_EXPIRY_SECONDS);
 
   return data?.signedUrl ?? null;
 }

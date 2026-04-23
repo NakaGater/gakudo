@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { GalleryGrid, type GalleryPhoto } from "./gallery-grid";
 import { InstagramEmbeds } from "./instagram-embeds";
+import { CACHE } from "@/config/constants";
 
-export const revalidate = 3600;
+export const revalidate = CACHE.PUBLIC_PAGE_REVALIDATE;
 
 export const metadata: Metadata = {
   title: "フォトギャラリー | 星ヶ丘こどもクラブ",

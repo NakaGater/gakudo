@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { isAdminOrTeacher } from "@/lib/auth/roles";
 import { Button } from "@/components/ui";
 
 type ChildRow = {
@@ -14,7 +15,7 @@ type ChildRow = {
 
 export default async function ChildrenPage() {
   const user = await getUser();
-  if (user.role !== "admin" && user.role !== "teacher") redirect("/");
+  if (!isAdminOrTeacher(user.role)) redirect("/");
 
   const supabase = await createClient();
 

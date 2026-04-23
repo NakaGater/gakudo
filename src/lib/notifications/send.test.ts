@@ -283,6 +283,7 @@ describe("sendAnnouncementNotification", () => {
     expect(mockSendNotification).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining("VAPID keys not configured"),
+      expect.any(Error),
     );
     consoleSpy.mockRestore();
   });

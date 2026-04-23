@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { TEXT_LIMITS } from "@/config/constants";
 import { HeroSlideshow } from "./components/hero-slideshow";
 import { getFeatureIcon } from "@/config/feature-icons";
 import { MapPin, Clock, Send } from "lucide-react";
@@ -301,7 +302,7 @@ export default async function HomePage() {
                 </p>
                 <h3 className="news-card__title">{item.title}</h3>
                 <p className="news-card__body">
-                  {item.body.length > 100 ? `${item.body.slice(0, 100)}…` : item.body}
+                  {item.body.length > TEXT_LIMITS.PREVIEW_EXCERPT_LENGTH ? `${item.body.slice(0, TEXT_LIMITS.PREVIEW_EXCERPT_LENGTH)}…` : item.body}
                 </p>
               </Link>
             ))}
