@@ -22,7 +22,7 @@ export function CalculateAllButton({ yearMonth }: Props) {
 
   return (
     <div className="flex items-center gap-4 flex-wrap">
-      <Button onClick={handleClick} loading={isPending} size="sm">
+      <Button onClick={handleClick} loading={isPending} size="sm" className="h-10">
         一括計算
       </Button>
       {result && (

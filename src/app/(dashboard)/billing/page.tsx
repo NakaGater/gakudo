@@ -141,7 +141,7 @@ export default async function BillingListPage({ searchParams }: Props) {
       </div>
 
       {/* Month filter + Calculate button */}
-      <div className="flex items-center gap-4 flex-wrap">
+      <div className="flex items-end gap-4 flex-wrap">
         <MonthSelector options={monthOptions} current={yearMonth} />
         {staff && <CalculateAllButton yearMonth={yearMonth} />}
       </div>
