@@ -139,12 +139,36 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
     childName = (data as { name: string } | null)?.name ?? "不明";
   }
 
-  // Fetch monthly bill
-  const { data: bill } = await supabase.from("monthly_bills")
-    .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
-    .eq("child_id", targetChildId)
-    .eq("year_month", yearMonth)
-    .single();
+  // 請求データ・ルール・出退勤を並列取得
+  const [year, month] = yearMonth.split("-").map(Number);
+  const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
+  const monthStartUTC = `${yearMonth}-01T00:00:00+09:00`;
+  const nextMonth =
+    month === 12
+      ? `${year + 1}-01`
+      : `${year}-${String(month + 1).padStart(2, "0")}`;
+  const monthEndUTC = `${nextMonth}-01T00:00:00+09:00`;
+
+  const [{ data: bill }, { data: ruleData }, { data: attendances }] = await Promise.all([
+    supabase.from("monthly_bills")
+      .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
+      .eq("child_id", targetChildId)
+      .eq("year_month", yearMonth)
+      .single(),
+    supabase.from("billing_rules")
+      .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
+      .lte("effective_from", lastDayOfMonth)
+      .order("effective_from", { ascending: false })
+      .limit(1)
+      .single(),
+    supabase.from("attendances")
+      .select("type, recorded_at")
+      .eq("child_id", targetChildId)
+      .eq("type", "exit")
+      .gte("recorded_at", monthStartUTC)
+      .lt("recorded_at", monthEndUTC)
+      .order("recorded_at", { ascending: true }),
+  ]);
 
   const monthlyBill = bill as {
     id: string;
@@ -155,35 +179,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
     status: "draft" | "confirmed";
   } | null;
 
-  // Fetch billing rule for breakdown calculation
-  const [year, month] = yearMonth.split("-").map(Number);
-  const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
-
-  const { data: ruleData } = await supabase.from("billing_rules")
-    .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
-    .lte("effective_from", lastDayOfMonth)
-    .order("effective_from", { ascending: false })
-    .limit(1)
-    .single();
-
   const billingRule = ruleData as BillingRule | null;
-
-  // Fetch exit records for daily breakdown
-  const monthStartUTC = `${yearMonth}-01T00:00:00+09:00`;
-  const nextMonth =
-    month === 12
-      ? `${year + 1}-01`
-      : `${year}-${String(month + 1).padStart(2, "0")}`;
-  const monthEndUTC = `${nextMonth}-01T00:00:00+09:00`;
-
-  const { data: attendances } = await supabase.from("attendances")
-    .select("type, recorded_at")
-    .eq("child_id", targetChildId)
-    .eq("type", "exit")
-    .gte("recorded_at", monthStartUTC)
-    .lt("recorded_at", monthEndUTC)
-    .order("recorded_at", { ascending: true });
-
   const exitRecords = (attendances ?? []) as AttendanceRow[];
 
   const dailyBreakdown =
