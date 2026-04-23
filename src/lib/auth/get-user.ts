@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 export type AuthUser = {
@@ -9,21 +8,6 @@ export type AuthUser = {
   name: string
   role: 'parent' | 'teacher' | 'admin' | 'entrance'
 }
-
-const getCachedProfile = unstable_cache(
-  async (userId: string) => {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, email, name, role')
-      .eq('id', userId)
-      .single<Pick<AuthUser, 'id' | 'email' | 'name' | 'role'>>()
-    if (error || !data) return null
-    return data
-  },
-  ['user-profile'],
-  { revalidate: 300, tags: ['user-profile'] }
-)
 
 export const getUser = cache(async (): Promise<AuthUser> => {
   const supabase = await createClient()
@@ -37,9 +21,13 @@ export const getUser = cache(async (): Promise<AuthUser> => {
     redirect('/login')
   }
 
-  const profile = await getCachedProfile(user.id)
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, email, name, role')
+    .eq('id', user.id)
+    .single<Pick<AuthUser, 'id' | 'email' | 'name' | 'role'>>()
 
-  if (!profile) {
+  if (profileError || !profile) {
     redirect('/login')
   }
 
