@@ -15,8 +15,8 @@ export function CallbackClient() {
       const code = searchParams.get("code");
       if (code) {
         const result = await exchangeCodeForSession(code);
-        if (result.error) {
-          setError(result.error);
+        if (!result.success) {
+          setError(result.message);
           return;
         }
         window.location.href = "/reset-password";
@@ -50,8 +50,8 @@ export function CallbackClient() {
       }
 
       const result = await setSessionFromTokens(accessToken, refreshToken);
-      if (result.error) {
-        setError(result.error);
+      if (!result.success) {
+        setError(result.message);
         return;
       }
 

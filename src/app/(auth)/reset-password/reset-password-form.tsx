@@ -8,12 +8,13 @@ import {
   CardHeader,
   CardContent,
 } from "@/components/ui";
-import { resetPassword, type ResetPasswordState } from "./actions";
+import { resetPassword } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
 
 export function ResetPasswordForm() {
-  const [state, action, pending] = useActionState<ResetPasswordState, FormData>(
+  const [state, action, pending] = useActionState<ActionState, FormData>(
     resetPassword,
-    {},
+    null,
   );
 
   return (
@@ -41,9 +42,9 @@ export function ResetPasswordForm() {
             minLength={8}
             required
           />
-          {state.error && (
+          {!state?.success && state?.message && (
             <p role="alert" className="text-sm text-danger text-center">
-              {state.error}
+              {state.message}
             </p>
           )}
           <Button

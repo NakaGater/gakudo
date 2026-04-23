@@ -36,10 +36,11 @@ describe("resetPassword", () => {
     formData.append("password", "");
     formData.append("confirmPassword", "");
 
-    const result = await resetPassword({}, formData);
+    const result = await resetPassword(null, formData);
 
     expect(result).toEqual({
-      error: "パスワードは8文字以上で入力してください",
+      success: false,
+      message: "パスワードは8文字以上で入力してください",
     });
   });
 
@@ -48,10 +49,11 @@ describe("resetPassword", () => {
     formData.append("password", "short");
     formData.append("confirmPassword", "short");
 
-    const result = await resetPassword({}, formData);
+    const result = await resetPassword(null, formData);
 
     expect(result).toEqual({
-      error: "パスワードは8文字以上で入力してください",
+      success: false,
+      message: "パスワードは8文字以上で入力してください",
     });
   });
 
@@ -60,9 +62,9 @@ describe("resetPassword", () => {
     formData.append("password", "validpassword123");
     formData.append("confirmPassword", "differentpassword123");
 
-    const result = await resetPassword({}, formData);
+    const result = await resetPassword(null, formData);
 
-    expect(result).toEqual({ error: "パスワードが一致しません" });
+    expect(result).toEqual({ success: false, message: "パスワードが一致しません" });
   });
 
   it("returns error when updateUser fails", async () => {
@@ -75,10 +77,11 @@ describe("resetPassword", () => {
     formData.append("password", "validpassword123");
     formData.append("confirmPassword", "validpassword123");
 
-    const result = await resetPassword({}, formData);
+    const result = await resetPassword(null, formData);
 
     expect(result).toEqual({
-      error: "パスワードの更新に失敗しました。もう一度お試しください。",
+      success: false,
+      message: "パスワードの更新に失敗しました。もう一度お試しください。",
     });
   });
 
@@ -93,7 +96,7 @@ describe("resetPassword", () => {
     formData.append("confirmPassword", "validpassword123");
 
     try {
-      await resetPassword({}, formData);
+      await resetPassword(null, formData);
     } catch {
       // Expected to throw due to redirect
     }

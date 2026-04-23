@@ -10,15 +10,16 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui";
-import { forgotPassword, type ForgotPasswordState } from "./actions";
+import { forgotPassword } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
 
 export function ForgotPasswordForm() {
-  const [state, action, pending] = useActionState<ForgotPasswordState, FormData>(
+  const [state, action, pending] = useActionState<ActionState, FormData>(
     forgotPassword,
-    {},
+    null,
   );
 
-  if (state.success) {
+  if (state?.success) {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
@@ -60,9 +61,9 @@ export function ForgotPasswordForm() {
             autoComplete="email"
             required
           />
-          {state.error && (
+          {!state?.success && state?.message && (
             <p role="alert" className="text-sm text-danger text-center">
-              {state.error}
+              {state.message}
             </p>
           )}
           <Button

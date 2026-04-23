@@ -34,9 +34,9 @@ describe("forgotPassword", () => {
   it("returns error when email is empty", async () => {
     const formData = new FormData();
 
-    const result = await forgotPassword({}, formData);
+    const result = await forgotPassword(null, formData);
 
-    expect(result).toEqual({ error: "メールアドレスを入力してください" });
+    expect(result).toEqual({ success: false, message: "メールアドレスを入力してください" });
   });
 
   it("returns error when Supabase resetPasswordForEmail fails", async () => {
@@ -48,10 +48,11 @@ describe("forgotPassword", () => {
     const formData = new FormData();
     formData.append("email", "nonexistent@example.com");
 
-    const result = await forgotPassword({}, formData);
+    const result = await forgotPassword(null, formData);
 
     expect(result).toEqual({
-      error: "リセットメールの送信に失敗しました。もう一度お試しください。",
+      success: false,
+      message: "リセットメールの送信に失敗しました。もう一度お試しください。",
     });
   });
 
@@ -64,9 +65,9 @@ describe("forgotPassword", () => {
     const formData = new FormData();
     formData.append("email", "user@example.com");
 
-    const result = await forgotPassword({}, formData);
+    const result = await forgotPassword(null, formData);
 
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, message: "リセットメールを送信しました" });
     expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
       "user@example.com",
       expect.objectContaining({

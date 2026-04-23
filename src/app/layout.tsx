@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Zen_Maru_Gothic, Yusei_Magic } from "next/font/google";
+import { validateEnv } from "@/lib/env";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -29,6 +30,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  validateEnv();
+
   return (
     <html
       lang="ja"

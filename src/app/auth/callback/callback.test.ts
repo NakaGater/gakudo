@@ -24,14 +24,14 @@ describe("exchangeCodeForSession", () => {
   it("returns success when code exchange succeeds", async () => {
     mockExchangeCodeForSession.mockResolvedValue({ error: null });
     const result = await exchangeCodeForSession("valid-code");
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, message: "" });
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith("valid-code");
   });
 
   it("returns error when code exchange fails", async () => {
     mockExchangeCodeForSession.mockResolvedValue({ error: { message: "Invalid code" } });
     const result = await exchangeCodeForSession("bad-code");
-    expect(result).toEqual({ error: "Invalid code" });
+    expect(result).toEqual({ success: false, message: "Invalid code" });
   });
 });
 
@@ -41,7 +41,7 @@ describe("setSessionFromTokens", () => {
   it("returns success when session is set", async () => {
     mockSetSession.mockResolvedValue({ error: null });
     const result = await setSessionFromTokens("access-token", "refresh-token");
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, message: "" });
     expect(mockSetSession).toHaveBeenCalledWith({
       access_token: "access-token",
       refresh_token: "refresh-token",
@@ -52,7 +52,7 @@ describe("setSessionFromTokens", () => {
   it("returns error when setSession fails", async () => {
     mockSetSession.mockResolvedValue({ error: { message: "Invalid token" } });
     const result = await setSessionFromTokens("bad", "bad");
-    expect(result).toEqual({ error: "Invalid token" });
+    expect(result).toEqual({ success: false, message: "Invalid token" });
     expect(mockGetUser).not.toHaveBeenCalled();
   });
 });
