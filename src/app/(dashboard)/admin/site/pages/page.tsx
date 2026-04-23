@@ -9,6 +9,7 @@ const PAGE_ORDER: Record<string, { order: number; icon: string; description: str
   "daily-life": { order: 3, icon: "🌈", description: "活動内容・季節行事" },
   enrollment: { order: 4, icon: "📋", description: "料金・入所手続き" },
   faq: { order: 5, icon: "❓", description: "よくある質問" },
+  access: { order: 6, icon: "📍", description: "所在地・開所時間・地図" },
 };
 
 export default async function SitePagesPage() {
