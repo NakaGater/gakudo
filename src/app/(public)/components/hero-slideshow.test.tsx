@@ -79,8 +79,9 @@ describe("HeroSlideshow", () => {
     it("写真のsrc属性が正しい", () => {
       render(<HeroSlideshow photoUrls={photoUrls}>{ILLUSTRATION}</HeroSlideshow>);
       const images = screen.getAllByRole("img");
-      expect(images[0]).toHaveAttribute("src", photoUrls[0]);
-      expect(images[1]).toHaveAttribute("src", photoUrls[1]);
+      // next/image may encode the src, so check it contains the original URL
+      expect(images[0].getAttribute("src")).toContain("photo1.jpg");
+      expect(images[1].getAttribute("src")).toContain("photo2.jpg");
     });
   });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
+import Image from "next/image";
 
 const INTERVAL_MS = 5000;
 
@@ -44,11 +45,13 @@ export function HeroSlideshow({ photoUrls, children }: Props) {
           className="hero-slideshow__slide"
           style={{ opacity: activeIndex === i + 1 ? 1 : 0 }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={url}
             alt={`写真 ${i + 1}`}
-            className="hero-slideshow__img"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="hero-slideshow__img object-cover"
+            loading={i === 0 ? "eager" : "lazy"}
           />
         </div>
       ))}

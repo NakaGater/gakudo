@@ -7,18 +7,21 @@ import "./globals.css";
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const zenMaruGothic = Zen_Maru_Gothic({
   variable: "--font-zen-maru-gothic",
   weight: ["400", "500", "700", "900"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 const yuseiMagic = Yusei_Magic({
   variable: "--font-yusei-magic",
   weight: "400",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
