@@ -39,22 +39,24 @@ export function MobileTabs({ user, pendingInquiries = 0, unreadAnnouncements = 0
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs font-story font-bold transition-colors relative",
+                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-xs font-story font-bold transition-colors",
                 active ? "text-accent" : "text-ink-light",
               )}
             >
-              <Icon size={20} strokeWidth={1.75} />
+              <span className="relative">
+                <Icon size={20} strokeWidth={1.75} />
+                {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
+                    {pendingInquiries}
+                  </span>
+                )}
+                {item.href === "/announcements" && unreadAnnouncements > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
+                    {unreadAnnouncements}
+                  </span>
+                )}
+              </span>
               <span className="truncate">{item.label}</span>
-              {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
-                  {pendingInquiries}
-                </span>
-              )}
-              {item.href === "/announcements" && unreadAnnouncements > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
-                  {unreadAnnouncements}
-                </span>
-              )}
             </Link>
           );
         })}
