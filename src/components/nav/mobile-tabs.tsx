@@ -93,8 +93,8 @@ export function MobileTabs({ user, pendingInquiries = 0, unreadAnnouncements = 0
       )}
 
       {/* Bottom tab bar */}
-      <nav className="fixed bottom-0 inset-x-0 md:hidden bg-page border-t-2 border-dashed border-page-edge z-40">
-        <div className="flex items-center justify-around h-14">
+      <nav className="fixed bottom-0 inset-x-0 md:hidden bg-page border-t-2 border-dashed border-page-edge z-40 pb-[env(safe-area-inset-bottom)]">
+        <div className="flex items-center justify-around h-14 px-2">
           {visibleItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
