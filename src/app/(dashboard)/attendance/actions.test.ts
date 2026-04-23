@@ -73,15 +73,29 @@ describe("recordManualAttendance", () => {
     callQueues.clear();
   });
 
-  it("rejects non-staff users", async () => {
+  it("rejects non-entrance users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
     const result = await recordManualAttendance("c1");
     expect(result.success).toBe(false);
     expect(result.message).toContain("権限");
   });
 
-  it("returns error when child not found", async () => {
+  it("rejects admin from recording", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const result = await recordManualAttendance("c1");
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("権限");
+  });
+
+  it("rejects teacher from recording", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    const result = await recordManualAttendance("c1");
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("権限");
+  });
+
+  it("returns error when child not found", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: null, error: null });
 
     const result = await recordManualAttendance("c1");
@@ -90,7 +104,7 @@ describe("recordManualAttendance", () => {
   });
 
   it("records enter when no previous attendance today", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     // 1st children call: find child
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
     // 1st attendances call: no previous → null
@@ -106,7 +120,7 @@ describe("recordManualAttendance", () => {
   });
 
   it("records exit when last record is enter", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "花子" }, error: null });
     // Previous record was enter
     enqueue("attendances", { data: { id: "a0", type: "enter", recorded_at: "2025-01-01T08:00:00Z" }, error: null });
@@ -120,7 +134,7 @@ describe("recordManualAttendance", () => {
   });
 
   it("returns error on insert failure", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
     enqueue("attendances", { data: null, error: null }); // no previous
     enqueue("attendances", { data: null, error: { message: "insert failed" } }); // insert error
@@ -131,7 +145,7 @@ describe("recordManualAttendance", () => {
   });
 
   it("sends notification after recording", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
     enqueue("attendances", { data: null, error: null });
     enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });
@@ -147,15 +161,22 @@ describe("recordAttendance (QR)", () => {
     callQueues.clear();
   });
 
-  it("rejects non-staff users", async () => {
+  it("rejects non-entrance users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
     const result = await recordAttendance("GK-ABC");
     expect(result.success).toBe(false);
     expect(result.message).toContain("権限");
   });
 
-  it("returns error when child not found by QR", async () => {
+  it("rejects admin from QR recording", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const result = await recordAttendance("GK-ABC");
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("権限");
+  });
+
+  it("returns error when child not found by QR", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: null, error: null });
 
     const result = await recordAttendance("GK-INVALID");
@@ -164,7 +185,7 @@ describe("recordAttendance (QR)", () => {
   });
 
   it("returns error when QR is inactive", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: false }, error: null });
 
     const result = await recordAttendance("GK-ABC");
@@ -173,7 +194,7 @@ describe("recordAttendance (QR)", () => {
   });
 
   it("records enter with active QR and no previous record", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: null, error: null }); // no previous
     enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });
@@ -185,7 +206,7 @@ describe("recordAttendance (QR)", () => {
   });
 
   it("records exit when previous is enter", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: { id: "a0", type: "enter" }, error: null }); // previous enter
     enqueue("attendances", { data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" }, error: null });
@@ -196,7 +217,7 @@ describe("recordAttendance (QR)", () => {
   });
 
   it("returns error on insert failure", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: null, error: null });
     enqueue("attendances", { data: null, error: { message: "DB error" } });
@@ -207,7 +228,7 @@ describe("recordAttendance (QR)", () => {
   });
 
   it("sends notification after QR recording", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: null, error: null });
     enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });

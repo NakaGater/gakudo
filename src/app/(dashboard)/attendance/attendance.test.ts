@@ -81,7 +81,7 @@ describe("recordAttendance", () => {
     vi.useRealTimers();
   });
 
-  it("rejects non-staff users (parent role)", async () => {
+  it("rejects non-entrance users (parent role)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
 
     const result = await recordAttendance("GK-TESTCODE");
@@ -91,8 +91,28 @@ describe("recordAttendance", () => {
     });
   });
 
-  it("returns error for unknown QR code", async () => {
+  it("rejects non-entrance users (teacher role)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+
+    const result = await recordAttendance("GK-TESTCODE");
+    expect(result).toMatchObject({
+      success: false,
+      message: expect.stringContaining("権限"),
+    });
+  });
+
+  it("rejects non-entrance users (admin role)", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+
+    const result = await recordAttendance("GK-TESTCODE");
+    expect(result).toMatchObject({
+      success: false,
+      message: expect.stringContaining("権限"),
+    });
+  });
+
+  it("returns error for unknown QR code", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     setupChain();
 
     // Child lookup returns null
@@ -106,7 +126,7 @@ describe("recordAttendance", () => {
   });
 
   it("returns error for inactive QR code", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     setupChain();
 
     // Child lookup returns inactive child
@@ -123,7 +143,7 @@ describe("recordAttendance", () => {
   });
 
   it("records 'enter' on first scan of the day", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     setupChain();
 
     // Child lookup
@@ -163,7 +183,7 @@ describe("recordAttendance", () => {
   });
 
   it("records 'exit' when last record is 'enter'", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     setupChain();
 
     // Child lookup
@@ -201,7 +221,7 @@ describe("recordAttendance", () => {
   });
 
   it("records 'enter' again when last record is 'exit'", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     setupChain();
 
     // Child lookup
@@ -237,8 +257,8 @@ describe("recordAttendance", () => {
     );
   });
 
-  it("allows admin role", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+  it("allows entrance role", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     setupChain();
 
     mockSingle.mockResolvedValueOnce({
