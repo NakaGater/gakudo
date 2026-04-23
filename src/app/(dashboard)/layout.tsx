@@ -52,6 +52,7 @@ export default async function DashboardLayout({
               <span>{mood.icon}</span>
               <span>{mood.text}</span>
             </div>
+            <PushPrompt />
             <div className="main__content">
               {children}
             </div>
@@ -60,7 +61,6 @@ export default async function DashboardLayout({
       </div>
       <MobileTabs user={user} pendingInquiries={pendingInquiries} />
       <ServiceWorkerRegister />
-      <PushPrompt />
     </div>
   );
 }
