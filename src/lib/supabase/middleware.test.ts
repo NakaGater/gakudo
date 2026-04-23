@@ -1,39 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock NextResponse
-const mockRedirect = vi.fn().mockImplementation((url) => ({ type: 'redirect', url: url.toString() }))
+const mockHeaders = new Map<string, string>()
 const mockNext = vi.fn().mockImplementation(() => ({
   cookies: { set: vi.fn() },
+  headers: {
+    set: (key: string, value: string) => mockHeaders.set(key, value),
+    get: (key: string) => mockHeaders.get(key),
+  },
 }))
 
 vi.mock('next/server', () => ({
   NextResponse: {
     next: (...args: unknown[]) => mockNext(...args),
-    redirect: (...args: unknown[]) => mockRedirect(...args),
   },
 }))
 
 // Mock supabase auth
 const mockSupabaseGetUser = vi.fn()
-const mockSupabaseProfileSelect = vi.fn()
 
 vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
     auth: { getUser: () => mockSupabaseGetUser() },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: () => mockSupabaseProfileSelect(),
-        }),
-      }),
-    }),
   }),
 }))
 
 import { updateSession } from './middleware'
 
 function makeNextRequest(pathname: string) {
-  const url = new URL(`http://localhost${pathname}`)
   return {
     cookies: {
       getAll: () => [],
@@ -41,7 +35,6 @@ function makeNextRequest(pathname: string) {
     },
     nextUrl: {
       pathname,
-      clone: () => new URL(url),
     },
   } as unknown as import('next/server').NextRequest
 }
@@ -49,153 +42,45 @@ function makeNextRequest(pathname: string) {
 describe('updateSession middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-  })
-
-  it('returns next response for unauthenticated user', async () => {
+    mockHeaders.clear()
     mockSupabaseGetUser.mockResolvedValue({
       data: { user: null },
       error: null,
     })
+  })
 
+  it('calls getUser to refresh session cookie', async () => {
     const req = makeNextRequest('/attendance')
-    const res = await updateSession(req)
+    await updateSession(req)
 
-    expect(mockNext).toHaveBeenCalled()
+    expect(mockSupabaseGetUser).toHaveBeenCalledOnce()
   })
 
-  it('returns next response for non-entrance role accessing any path', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
-
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'parent' },
-      error: null,
-    })
-
+  it('returns next response for any path', async () => {
     const req = makeNextRequest('/children')
-    const res = await updateSession(req)
+    await updateSession(req)
 
     expect(mockNext).toHaveBeenCalled()
   })
 
-  it('allows entrance role to access /attendance', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
+  it('sets x-pathname header on response', async () => {
+    const req = makeNextRequest('/attendance/dashboard')
+    await updateSession(req)
 
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req = makeNextRequest('/attendance')
-    const res = await updateSession(req)
-
-    expect(mockNext).toHaveBeenCalled()
+    expect(mockHeaders.get('x-pathname')).toBe('/attendance/dashboard')
   })
 
-  it('allows entrance role to access /attendance/manual', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
+  it('sets x-pathname for nested paths', async () => {
+    const req = makeNextRequest('/admin/users')
+    await updateSession(req)
 
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req = makeNextRequest('/attendance/manual')
-    const res = await updateSession(req)
-
-    expect(mockNext).toHaveBeenCalled()
+    expect(mockHeaders.get('x-pathname')).toBe('/admin/users')
   })
 
-  it('allows entrance role to access /api/ paths', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
+  it('sets x-pathname for root path', async () => {
+    const req = makeNextRequest('/')
+    await updateSession(req)
 
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req = makeNextRequest('/api/some/endpoint')
-    const res = await updateSession(req)
-
-    expect(mockNext).toHaveBeenCalled()
-  })
-
-  it('redirects entrance role from /children to /attendance/dashboard', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
-
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req = makeNextRequest('/children')
-    const res = await updateSession(req)
-
-    expect(mockRedirect).toHaveBeenCalled()
-    const callArgs = mockRedirect.mock.calls[0][0]
-    expect(callArgs.toString()).toContain('/attendance/dashboard')
-  })
-
-  it('redirects entrance role from /announcements to /attendance/dashboard', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
-
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req = makeNextRequest('/announcements')
-    const res = await updateSession(req)
-
-    expect(mockRedirect).toHaveBeenCalled()
-    const callArgs = mockRedirect.mock.calls[0][0]
-    expect(callArgs.toString()).toContain('/attendance/dashboard')
-  })
-
-  it('does NOT redirect entrance role on public paths (/, /login)', async () => {
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
-
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req1 = makeNextRequest('/')
-    const res1 = await updateSession(req1)
-    expect(mockNext).toHaveBeenCalled()
-
-    vi.clearAllMocks()
-    mockSupabaseGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    })
-    mockSupabaseProfileSelect.mockResolvedValue({
-      data: { role: 'entrance' },
-      error: null,
-    })
-
-    const req2 = makeNextRequest('/login')
-    const res2 = await updateSession(req2)
-    expect(mockNext).toHaveBeenCalled()
+    expect(mockHeaders.get('x-pathname')).toBe('/')
   })
 })
