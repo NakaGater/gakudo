@@ -835,7 +835,16 @@
   .dash{min-height:100vh}
   .main{border-radius:0}
   .main__mood{border-radius:0}
-  .main__content{padding:16px}
+  .main__content{padding:16px 16px 80px 16px;max-width:100%;overflow-x:hidden}
+  .clipboard{padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-table{min-width:560px}
+  .ledger-wrap{padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .control-board{padding:12px}
+  .sticky-note{transform:rotate(0deg)!important}
+  .summary-strip{flex-direction:column}
+  .summary-strip__hoshi{min-width:auto}
+  .summary-strip__stats{flex-wrap:wrap}
+  .summary-strip__stat{min-width:33%;border-right:none;border-bottom:1px solid var(--page-edge)}
 }
 
 /* ═══ Season Strip ═══ */
