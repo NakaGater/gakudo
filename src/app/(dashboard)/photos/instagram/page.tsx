@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
@@ -25,7 +26,19 @@ export default async function InstagramManagePage() {
   return (
     <>
       <div className="main__hdr">
-        <h1 className="main__title font-story">📸 Instagram連携</h1>
+        <h1 className="main__title font-story">📷 写真管理</h1>
+      </div>
+
+      <div className="flex gap-4 border-b border-border mb-6">
+        <Link
+          href="/photos"
+          className="pb-2 border-b-2 border-transparent text-ink-mid hover:text-ink text-sm transition-colors"
+        >
+          写真管理
+        </Link>
+        <span className="pb-2 border-b-2 border-cr-orange text-cr-orange font-medium text-sm">
+          Instagram連携
+        </span>
       </div>
 
       <p className="text-sm text-ink-mid mb-4">

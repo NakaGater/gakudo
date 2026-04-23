@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getUser } from "@/lib/auth/get-user";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui";
@@ -30,6 +31,20 @@ export default async function PhotosPage() {
       <div className="main__hdr">
         <h1 className="main__title font-story">📷 写真管理</h1>
       </div>
+
+      {isStaff && (
+        <div className="flex gap-4 border-b border-border mb-6">
+          <span className="pb-2 border-b-2 border-cr-orange text-cr-orange font-medium text-sm">
+            写真管理
+          </span>
+          <Link
+            href="/photos/instagram"
+            className="pb-2 border-b-2 border-transparent text-ink-mid hover:text-ink text-sm transition-colors"
+          >
+            Instagram連携
+          </Link>
+        </div>
+      )}
 
       {isStaff && (
         <details className="gallery-upload">

@@ -7,17 +7,17 @@ test.describe("Flow 20: Instagram管理", () => {
   });
 
   test("Instagram page renders with heading", async ({ page }) => {
-    await page.goto("/admin/instagram");
+    await page.goto("/photos/instagram");
     await expect(page.getByRole("heading", { name: /Instagram/i })).toBeVisible();
   });
 
   test("shows add form for staff", async ({ page }) => {
-    await page.goto("/admin/instagram");
+    await page.goto("/photos/instagram");
     await expect(page.getByPlaceholder(/instagram\.com/i)).toBeVisible();
   });
 
   test("can add an Instagram post", async ({ page }) => {
-    await page.goto("/admin/instagram");
+    await page.goto("/photos/instagram");
 
     const testUrl = "https://www.instagram.com/p/TEST123/";
     await page.getByPlaceholder(/instagram\.com/i).fill(testUrl);
@@ -34,7 +34,7 @@ test.describe("Flow 20: Instagram管理", () => {
   });
 
   test("can toggle post visibility", async ({ page }) => {
-    await page.goto("/admin/instagram");
+    await page.goto("/photos/instagram");
 
     // Look for a visibility toggle button
     const toggleButton = page.getByRole("button", { name: /公開|非公開/i }).first();
@@ -47,7 +47,7 @@ test.describe("Flow 20: Instagram管理", () => {
   });
 
   test("can delete an Instagram post", async ({ page }) => {
-    await page.goto("/admin/instagram");
+    await page.goto("/photos/instagram");
 
     const deleteButton = page.getByRole("button", { name: /削除/i }).first();
     if (await deleteButton.isVisible()) {
@@ -59,7 +59,7 @@ test.describe("Flow 20: Instagram管理", () => {
   });
 
   test("sidebar has Instagram link", async ({ page }) => {
-    await page.goto("/admin/instagram");
+    await page.goto("/photos/instagram");
     const nav = page.locator("nav").first();
     await expect(nav.getByText(/Instagram/i)).toBeVisible();
   });

@@ -52,7 +52,7 @@ export async function addInstagramPost(
     return { success: false, message: "登録に失敗しました" };
   }
 
-  revalidatePath("/admin/instagram");
+  revalidatePath("/photos/instagram");
   revalidatePath("/gallery");
   return { success: true, message: "" };
 }
@@ -70,7 +70,7 @@ export async function deleteInstagramPost(id: string): Promise<ActionState> {
     return { success: false, message: "削除に失敗しました" };
   }
 
-  revalidatePath("/admin/instagram");
+  revalidatePath("/photos/instagram");
   revalidatePath("/gallery");
   return { success: true, message: "" };
 }
@@ -94,7 +94,7 @@ export async function toggleInstagramPostVisibility(
     return { success: false, message: "更新に失敗しました" };
   }
 
-  revalidatePath("/admin/instagram");
+  revalidatePath("/photos/instagram");
   revalidatePath("/gallery");
   return { success: true, message: "" };
 }

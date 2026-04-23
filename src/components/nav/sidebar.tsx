@@ -23,6 +23,9 @@ export function Sidebar({ user, pendingInquiries = 0 }: SidebarProps) {
     if (href === "/attendance") {
       return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard" && pathname !== "/attendance/status";
     }
+    if (href === "/photos") {
+      return pathname.startsWith("/photos") || pathname.startsWith("/photos/instagram");
+    }
     return pathname.startsWith(href + "/");
   };
 
