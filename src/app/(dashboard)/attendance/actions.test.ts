@@ -281,8 +281,8 @@ describe("getTodayAttendanceStatus", () => {
     ], error: null });
     enqueue("attendances", { data: [
       { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
-      { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
       { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+      { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
     ], error: null });
 
     const result = await getTodayAttendanceStatus();

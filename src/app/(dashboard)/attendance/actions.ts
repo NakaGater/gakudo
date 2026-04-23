@@ -24,13 +24,73 @@ export type ChildAttendanceStatus = {
   lastRecordedAt: string | null;
 };
 
-export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[]> {
-  const user = await getUser();
-  if (!isStaff(user.role)) {
-    return [];
+export type DashboardChildStatus = {
+  childId: string;
+  name: string;
+  grade: number;
+  status: "none" | "entered" | "exited";
+  enterTime: string | null;
+  exitTime: string | null;
+};
+
+export type ParentAttendanceData = {
+  myChildren: DashboardChildStatus[];
+  summary: { entered: number; exited: number; none: number; total: number };
+};
+
+type AttendanceRecord = { child_id: string; type: string; recorded_at: string };
+
+/** Build enterMap (first enter time) and latestMap (latest record) from attendance records */
+function buildAttendanceMaps(attendances: AttendanceRecord[]) {
+  const enterMap = new Map<string, string>();
+  const latestMap = new Map<string, { type: string; recorded_at: string }>();
+
+  for (const a of attendances) {
+    if (a.type === "enter" && !enterMap.has(a.child_id)) {
+      enterMap.set(a.child_id, a.recorded_at);
+    }
+    latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
   }
 
-  const supabase = await createClient();
+  return { enterMap, latestMap };
+}
+
+/** Map children + attendance maps → DashboardChildStatus[] */
+function toDashboardStatuses(
+  children: { id: string; name: string; grade: number }[],
+  enterMap: Map<string, string>,
+  latestMap: Map<string, { type: string; recorded_at: string }>,
+): DashboardChildStatus[] {
+  return children.map((c) => {
+    const latest = latestMap.get(c.id);
+    let status: "none" | "entered" | "exited" = "none";
+    let exitTime: string | null = null;
+
+    if (latest) {
+      if (latest.type === "enter") {
+        status = "entered";
+      } else {
+        status = "exited";
+        exitTime = latest.recorded_at;
+      }
+    }
+
+    return {
+      childId: c.id,
+      name: c.name,
+      grade: c.grade,
+      status,
+      enterTime: enterMap.get(c.id) ?? null,
+      exitTime,
+    };
+  });
+}
+
+/** Shared logic: fetch today's children + attendance, return children list and maps */
+async function fetchTodayChildrenAndAttendance(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ascending: boolean,
+) {
   const { start, end } = todayRangeJST();
 
   const { data: children } = await supabase.from("children")
@@ -38,23 +98,31 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
 
-  if (!children || children.length === 0) return [];
+  if (!children || children.length === 0) return null;
 
   const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
     .lt("recorded_at", end)
-    .order("recorded_at", { ascending: false });
+    .order("recorded_at", { ascending });
 
-  // Build a map of child_id → latest attendance record
-  const latestMap = new Map<string, { type: string; recorded_at: string | null }>();
-  for (const a of attendances ?? []) {
-    if (!latestMap.has(a.child_id)) {
-      latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
-    }
-  }
+  return {
+    children: children as { id: string; name: string; grade: number }[],
+    attendances: (attendances ?? []) as AttendanceRecord[],
+  };
+}
 
-  return (children as { id: string; name: string; grade: number }[]).map((c) => {
+export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[]> {
+  const user = await getUser();
+  if (!isStaff(user.role)) return [];
+
+  const supabase = await createClient();
+  const result = await fetchTodayChildrenAndAttendance(supabase, true);
+  if (!result) return [];
+
+  const { latestMap } = buildAttendanceMaps(result.attendances);
+
+  return result.children.map((c) => {
     const latest = latestMap.get(c.id);
     let status: "none" | "entered" | "exited" = "none";
     if (latest) {
@@ -70,96 +138,28 @@ export async function getTodayAttendanceStatus(): Promise<ChildAttendanceStatus[
   });
 }
 
-export type DashboardChildStatus = {
-  childId: string;
-  name: string;
-  grade: number;
-  status: "none" | "entered" | "exited";
-  enterTime: string | null;
-  exitTime: string | null;
-};
-
-export async function getDashboardAttendanceStatus(): Promise<
-  DashboardChildStatus[]
-> {
+export async function getDashboardAttendanceStatus(): Promise<DashboardChildStatus[]> {
   const user = await getUser();
   if (!isStaff(user.role)) return [];
 
   const supabase = await createClient();
-  const { start, end } = todayRangeJST();
+  const result = await fetchTodayChildrenAndAttendance(supabase, true);
+  if (!result) return [];
 
-  const { data: children } = await supabase.from("children")
-    .select("id, name, grade")
-    .order("grade", { ascending: true })
-    .order("name", { ascending: true });
-
-  if (!children || children.length === 0) return [];
-
-  // Fetch today's records sorted ascending so we can find first enter & latest record
-  const { data: attendances } = await supabase.from("attendances")
-    .select("child_id, type, recorded_at")
-    .gte("recorded_at", start)
-    .lt("recorded_at", end)
-    .order("recorded_at", { ascending: true });
-
-  const enterMap = new Map<string, string>();
-  const latestMap = new Map<string, { type: string; recorded_at: string }>();
-
-  for (const a of (attendances ?? []) as {
-    child_id: string;
-    type: string;
-    recorded_at: string;
-  }[]) {
-    if (a.type === "enter" && !enterMap.has(a.child_id)) {
-      enterMap.set(a.child_id, a.recorded_at);
-    }
-    latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
-  }
-
-  return (children as { id: string; name: string; grade: number }[]).map(
-    (c) => {
-      const latest = latestMap.get(c.id);
-      let status: "none" | "entered" | "exited" = "none";
-      let exitTime: string | null = null;
-
-      if (latest) {
-        if (latest.type === "enter") {
-          status = "entered";
-        } else {
-          status = "exited";
-          exitTime = latest.recorded_at;
-        }
-      }
-
-      return {
-        childId: c.id,
-        name: c.name,
-        grade: c.grade,
-        status,
-        enterTime: enterMap.get(c.id) ?? null,
-        exitTime,
-      };
-    },
-  );
+  const { enterMap, latestMap } = buildAttendanceMaps(result.attendances);
+  return toDashboardStatuses(result.children, enterMap, latestMap);
 }
-
-export type ParentAttendanceData = {
-  myChildren: DashboardChildStatus[];
-  summary: { entered: number; exited: number; none: number; total: number };
-};
 
 export async function getParentAttendanceStatus(): Promise<ParentAttendanceData> {
   const user = await getUser();
   const supabase = await createClient();
   const { start, end } = todayRangeJST();
 
-  // Get summary via RPC (SECURITY DEFINER, bypasses RLS)
   const { data: summaryData } = await supabase.rpc("get_attendance_summary");
   const summary = (summaryData as { entered: number; exited: number; none: number; total: number } | null) ?? {
     entered: 0, exited: 0, none: 0, total: 0,
   };
 
-  // Get parent's children (RLS allows parent to see own children)
   const { data: myChildren } = await supabase.from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
@@ -169,37 +169,78 @@ export async function getParentAttendanceStatus(): Promise<ParentAttendanceData>
     return { myChildren: [], summary };
   }
 
-  // Get attendance for parent's children (RLS filters automatically)
   const { data: attendances } = await supabase.from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
     .lt("recorded_at", end)
     .order("recorded_at", { ascending: true });
 
-  const enterMap = new Map<string, string>();
-  const latestMap = new Map<string, { type: string; recorded_at: string }>();
-  for (const a of (attendances ?? []) as { child_id: string; type: string; recorded_at: string }[]) {
-    if (a.type === "enter" && !enterMap.has(a.child_id)) {
-      enterMap.set(a.child_id, a.recorded_at);
-    }
-    latestMap.set(a.child_id, { type: a.type, recorded_at: a.recorded_at });
+  const { enterMap, latestMap } = buildAttendanceMaps(
+    (attendances ?? []) as AttendanceRecord[],
+  );
+
+  return {
+    myChildren: toDashboardStatuses(
+      myChildren as { id: string; name: string; grade: number }[],
+      enterMap,
+      latestMap,
+    ),
+    summary,
+  };
+}
+
+/** Shared core: determine enter/exit, insert record, notify, return result */
+async function createAttendanceRecord(
+  childId: string,
+  childName: string,
+  method: "qr" | "manual",
+  userId: string,
+  revalidatePaths: string[],
+): Promise<AttendanceResult> {
+  const supabase = await createClient();
+  const { start, end } = todayRangeJST();
+
+  const { data: latest } = await supabase.from("attendances")
+    .select("id, type, recorded_at")
+    .eq("child_id", childId)
+    .gte("recorded_at", start)
+    .lt("recorded_at", end)
+    .order("recorded_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  const actionType: "enter" | "exit" =
+    !latest || latest.type === "exit" ? "enter" : "exit";
+
+  const { data: record, error: insertError } = await supabase.from("attendances")
+    .insert({
+      child_id: childId,
+      type: actionType,
+      method,
+      recorded_by: userId,
+    })
+    .select("id, type, recorded_at")
+    .single();
+
+  if (insertError) {
+    return { success: false, message: `記録に失敗しました: ${insertError.message}` };
   }
 
-  const myChildrenStatus: DashboardChildStatus[] = myChildren.map((c) => {
-    const latest = latestMap.get(c.id);
-    let status: "none" | "entered" | "exited" = "none";
-    let exitTime: string | null = null;
-    if (latest) {
-      status = latest.type === "enter" ? "entered" : "exited";
-      if (status === "exited") exitTime = latest.recorded_at;
-    }
-    return {
-      childId: c.id, name: c.name, grade: c.grade, status,
-      enterTime: enterMap.get(c.id) ?? null, exitTime,
-    };
+  for (const p of revalidatePaths) revalidatePath(p);
+
+  sendAttendanceNotification(
+    childId, actionType, record.recorded_at ?? new Date().toISOString(),
+  ).catch((err) => {
+    console.error("[attendance] notification error:", err);
   });
 
-  return { myChildren: myChildrenStatus, summary };
+  return {
+    success: true,
+    message: actionType === "enter" ? "入室しました" : "退室しました",
+    childName,
+    type: record.type as "enter" | "exit",
+    recordedAt: record.recorded_at ?? undefined,
+  };
 }
 
 export async function recordManualAttendance(
@@ -211,8 +252,6 @@ export async function recordManualAttendance(
   }
 
   const supabase = await createClient();
-
-  // 1. Verify child exists
   const { data: child } = await supabase.from("children")
     .select("id, name")
     .eq("id", childId)
@@ -222,52 +261,10 @@ export async function recordManualAttendance(
     return { success: false, message: "児童が見つかりません" };
   }
 
-  // 2. Get latest attendance for this child today (JST)
-  const { start, end } = todayRangeJST();
-
-  const { data: latest } = await supabase.from("attendances")
-    .select("id, type, recorded_at")
-    .eq("child_id", child.id)
-    .gte("recorded_at", start)
-    .lt("recorded_at", end)
-    .order("recorded_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  // 3. Determine enter/exit
-  const actionType: "enter" | "exit" =
-    !latest || latest.type === "exit" ? "enter" : "exit";
-
-  // 4. Insert attendance record
-  const { data: record, error: insertError } = await supabase.from("attendances")
-    .insert({
-      child_id: child.id,
-      type: actionType,
-      method: "manual",
-      recorded_by: user.id,
-    })
-    .select("id, type, recorded_at")
-    .single();
-
-  if (insertError) {
-    return { success: false, message: `記録に失敗しました: ${insertError.message}` };
-  }
-
-  revalidatePath("/attendance");
-  revalidatePath("/attendance/manual");
-
-  // Non-blocking: fire and forget
-  sendAttendanceNotification(child.id, actionType, record.recorded_at ?? new Date().toISOString()).catch((err) => {
-    console.error("[attendance] notification error:", err);
-  });
-
-  return {
-    success: true,
-    message: actionType === "enter" ? "入室しました" : "退室しました",
-    childName: child.name,
-    type: record.type as "enter" | "exit",
-    recordedAt: record.recorded_at ?? undefined,
-  };
+  return createAttendanceRecord(
+    child.id, child.name, "manual", user.id,
+    ["/attendance", "/attendance/manual"],
+  );
 }
 
 export async function recordAttendance(
@@ -279,8 +276,6 @@ export async function recordAttendance(
   }
 
   const supabase = await createClient();
-
-  // 1. Look up child by qr_code
   const { data: child } = await supabase.from("children")
     .select("id, name, qr_active")
     .eq("qr_code", qrCode)
@@ -294,49 +289,8 @@ export async function recordAttendance(
     return { success: false, message: "このQRコードは無効です" };
   }
 
-  // 2. Get latest attendance for this child today (JST)
-  const { start, end } = todayRangeJST();
-
-  const { data: latest } = await supabase.from("attendances")
-    .select("id, type, recorded_at")
-    .eq("child_id", child.id)
-    .gte("recorded_at", start)
-    .lt("recorded_at", end)
-    .order("recorded_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  // 3. Determine enter/exit
-  const actionType: "enter" | "exit" =
-    !latest || latest.type === "exit" ? "enter" : "exit";
-
-  // 4. Insert attendance record
-  const { data: record, error: insertError } = await supabase.from("attendances")
-    .insert({
-      child_id: child.id,
-      type: actionType,
-      method: "qr",
-      recorded_by: user.id,
-    })
-    .select("id, type, recorded_at")
-    .single();
-
-  if (insertError) {
-    return { success: false, message: `記録に失敗しました: ${insertError.message}` };
-  }
-
-  revalidatePath("/attendance");
-
-  // Non-blocking: fire and forget
-  sendAttendanceNotification(child.id, actionType, record.recorded_at ?? new Date().toISOString()).catch((err) => {
-    console.error("[attendance] notification error:", err);
-  });
-
-  return {
-    success: true,
-    message: actionType === "enter" ? "入室しました" : "退室しました",
-    childName: child.name,
-    type: record.type as "enter" | "exit",
-    recordedAt: record.recorded_at ?? undefined,
-  };
+  return createAttendanceRecord(
+    child.id, child.name, "qr", user.id,
+    ["/attendance"],
+  );
 }
