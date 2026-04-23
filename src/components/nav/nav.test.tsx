@@ -129,20 +129,23 @@ describe("MobileTabs", () => {
     MobileTabs = mod.MobileTabs;
   });
 
-  it("renders max 5 tab items for parent", () => {
+  it("renders all 5 tab items for parent (no overflow)", () => {
     render(
       <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const links = screen.getAllByRole("link");
     expect(links).toHaveLength(5);
+    // No "その他" button needed for 5 items
+    expect(screen.queryByText("その他")).not.toBeInTheDocument();
   });
 
-  it("renders max 5 tab items for admin (subset)", () => {
+  it("renders 4 visible tabs + 'その他' button for admin", () => {
     render(
       <MobileTabs user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} />,
     );
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(5);
+    expect(links).toHaveLength(4);
+    expect(screen.getByText("その他")).toBeInTheDocument();
   });
 
   it("applies active styling to current tab", () => {
