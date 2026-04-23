@@ -3,6 +3,8 @@ import { isStaff } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/nav/sidebar";
 import { MobileTabs } from "@/components/nav/mobile-tabs";
+import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
+import { PushPrompt } from "@/components/push/push-prompt";
 
 function getSeasonClass(): string {
   const h = new Date().getHours();
@@ -57,6 +59,8 @@ export default async function DashboardLayout({
         </div>
       </div>
       <MobileTabs user={user} pendingInquiries={pendingInquiries} />
+      <ServiceWorkerRegister />
+      <PushPrompt />
     </div>
   );
 }
