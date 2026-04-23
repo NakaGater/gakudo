@@ -6,19 +6,14 @@ test.describe("Flow 6: Attendance (US-6)", () => {
     await loginViaForm(page, "admin@example.com", "password123");
   });
 
-  test("attendance page renders with scanner", async ({ page }) => {
+  test("attendance page redirects non-entrance users", async ({ page }) => {
+    // /attendance requires entrance role — admin should be redirected
     await page.goto("/attendance");
-    await expect(page.getByText("入退室管理")).toBeVisible({ timeout: 10000 });
-    // Check for QR scanner area or manual input
-    const hasQR = await page
-      .getByText("QRコードを読み取ってください")
-      .isVisible()
-      .catch(() => false);
-    const hasManualInput = await page
-      .locator('input[name="qrCode"]')
-      .isVisible()
-      .catch(() => false);
-    expect(hasQR || hasManualInput).toBe(true);
+    await page.waitForURL((url) => !url.pathname.startsWith("/attendance"), {
+      timeout: 10000,
+    });
+    // Admin is redirected to home
+    expect(page.url()).not.toContain("/attendance");
   });
 
   test("attendance history page renders", async ({ page }) => {
@@ -35,10 +30,12 @@ test.describe("Flow 6: Attendance (US-6)", () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test("manual attendance page renders", async ({ page }) => {
+  test("manual attendance page redirects non-entrance users", async ({ page }) => {
+    // /attendance/manual requires entrance role — admin should be redirected
     await page.goto("/attendance/manual");
-    await expect(
-      page.getByRole("heading", { name: "手動入力" }),
-    ).toBeVisible({ timeout: 10000 });
+    await page.waitForURL((url) => !url.pathname.startsWith("/attendance/manual"), {
+      timeout: 10000,
+    });
+    expect(page.url()).not.toContain("/attendance/manual");
   });
 });

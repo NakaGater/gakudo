@@ -8,7 +8,8 @@ test.describe("Flow 20: Instagram管理", () => {
 
   test("Instagram page renders with heading", async ({ page }) => {
     await page.goto("/photos/instagram");
-    await expect(page.getByRole("heading", { name: /Instagram/i })).toBeVisible();
+    // Page heading is "写真管理", with "Instagram連携" as a tab label
+    await expect(page.getByText("Instagram連携")).toBeVisible();
   });
 
   test("shows add form for staff", async ({ page }) => {
@@ -58,9 +59,10 @@ test.describe("Flow 20: Instagram管理", () => {
     }
   });
 
-  test("sidebar has Instagram link", async ({ page }) => {
+  test("sidebar has photos link", async ({ page }) => {
     await page.goto("/photos/instagram");
     const nav = page.locator("nav").first();
-    await expect(nav.getByText(/Instagram/i)).toBeVisible();
+    // Instagram is a sub-page of photos — sidebar shows "写真"
+    await expect(nav.getByText("写真")).toBeVisible();
   });
 });

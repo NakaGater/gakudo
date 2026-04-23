@@ -11,24 +11,25 @@ test.describe("Flow 4: Dashboard navigation (admin)", () => {
     await page.goto("/children");
     await page.waitForLoadState("networkidle");
 
-    // Admin should see all nav items
+    // Admin should see these nav items (入退場 is entrance-role only)
     const sidebar = page.locator("nav").first();
     await expect(sidebar.getByText("ホーム")).toBeVisible();
-    await expect(sidebar.getByText("入退場")).toBeVisible();
     await expect(sidebar.getByText("連絡")).toBeVisible();
     await expect(sidebar.getByText("写真")).toBeVisible();
     await expect(sidebar.getByText("請求")).toBeVisible();
     await expect(sidebar.getByText("児童管理")).toBeVisible();
     await expect(sidebar.getByText("ユーザー")).toBeVisible();
+    await expect(sidebar.getByText("お問い合わせ")).toBeVisible();
     await expect(sidebar.getByText("HP管理")).toBeVisible();
   });
 
   test("main nav pages render without error", async ({ page }) => {
     // Each dashboard route renders a page under the (dashboard) route group.
     // Routes are at root level (e.g. /children, /attendance) since (dashboard) is a route group.
+    // /attendance is entrance-role only (admin gets redirected)
     const routes = [
       { path: "/children", marker: "児童一覧" },
-      { path: "/attendance", marker: "入退室管理" },
+      { path: "/attendance/dashboard", marker: "きょうの" },
       { path: "/announcements", marker: "お知らせ" },
       { path: "/billing", marker: "月次請求一覧" },
       { path: "/photos", marker: "写真管理" },
