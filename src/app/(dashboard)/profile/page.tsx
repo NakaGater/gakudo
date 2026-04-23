@@ -1,5 +1,6 @@
 import { getUser } from "@/lib/auth/get-user";
 import { ProfileForm } from "./profile-form";
+import { NotificationSettings } from "./notification-settings";
 
 export default async function ProfilePage({
   searchParams,
@@ -14,7 +15,10 @@ export default async function ProfilePage({
       <div className="main__hdr">
         <h1 className="main__title font-story">👤 プロフィール</h1>
       </div>
-      <ProfileForm user={user} success={params.success === "1"} />
+      <div className="flex flex-col gap-6">
+        <ProfileForm user={user} success={params.success === "1"} />
+        <NotificationSettings />
+      </div>
     </>
   );
 }
