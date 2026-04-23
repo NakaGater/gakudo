@@ -5,3 +5,7 @@ export function isStaff(role: string): boolean {
 export function isAdmin(role: string): boolean {
   return role === "admin";
 }
+
+export function isEntrance(role: string): boolean {
+  return role === "entrance";
+}

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import { isStaff } from "@/lib/auth/roles";
+import { isStaff, isEntrance } from "@/lib/auth/roles";
 import { sendAttendanceNotification } from "@/lib/notifications/send";
 import { ERROR_MESSAGES } from "@/config/constants";
 import { todayRangeJST } from "@/lib/time/jst";
@@ -206,7 +206,7 @@ export async function recordManualAttendance(
   childId: string,
 ): Promise<AttendanceResult> {
   const user = await getUser();
-  if (!isStaff(user.role)) {
+  if (!isEntrance(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
@@ -274,7 +274,7 @@ export async function recordAttendance(
   qrCode: string,
 ): Promise<AttendanceResult> {
   const user = await getUser();
-  if (!isStaff(user.role)) {
+  if (!isEntrance(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
