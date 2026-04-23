@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 
 export type AuthUser = {
@@ -8,7 +9,7 @@ export type AuthUser = {
   role: 'parent' | 'teacher' | 'admin' | 'entrance'
 }
 
-export async function getUser(): Promise<AuthUser> {
+export const getUser = cache(async (): Promise<AuthUser> => {
   const supabase = await createClient()
 
   const {
@@ -36,4 +37,4 @@ export async function getUser(): Promise<AuthUser> {
     name: profile.name,
     role: profile.role,
   }
-}
+})

@@ -1,7 +1,11 @@
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { getUser } from "@/lib/auth/get-user";
 import { Sidebar } from "@/components/nav/sidebar";
 import { MobileTabs } from "@/components/nav/mobile-tabs";
 import { PushPrompt } from "@/components/push/push-prompt";
+
+const ENTRANCE_ALLOWED_PATHS = ['/attendance', '/api/'];
 
 function getSeasonClass(): string {
   const h = new Date().getHours();
@@ -26,6 +30,16 @@ export default async function DashboardLayout({
 }>) {
   const user = await getUser();
   const mood = getMoodMessage();
+
+  // Entrance role restriction (moved from middleware to avoid extra DB query)
+  if (user.role === "entrance") {
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname") || "";
+    const allowed = ENTRANCE_ALLOWED_PATHS.some(p => pathname.startsWith(p));
+    if (!allowed) {
+      redirect("/attendance/dashboard");
+    }
+  }
 
   return (
     <div data-user-role={user.role} className="desk-bg min-h-screen">
