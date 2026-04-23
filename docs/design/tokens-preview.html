@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gakudo — Design Tokens Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-bg:          #FAFAF7;
+    --color-bg-elev:     #FFFFFF;
+    --color-fg:          #1C1917;
+    --color-fg-muted:    #78716C;
+    --color-accent:      #0F766E;
+    --color-accent-hv:   #0D5D56;
+    --color-accent-light:#CCFBF1;
+    --color-success:     #15803D;
+    --color-warning:     #B45309;
+    --color-danger:      #B91C1C;
+    --color-border:      #E7E5E4;
+    --color-enter:       #15803D;
+    --color-exit:        #B91C1C;
+
+    --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-fg);
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.25rem; font-weight: 700; margin: 2rem 0 1rem; color: var(--color-fg); border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; }
+  h3 { font-size: 1rem; font-weight: 500; margin: 1rem 0 0.5rem; color: var(--color-fg-muted); }
+  p.subtitle { color: var(--color-fg-muted); font-size: 0.875rem; margin-bottom: 2rem; }
+
+  /* Color Palette */
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .swatch {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    background: var(--color-bg-elev);
+  }
+  .swatch-color { height: 64px; }
+  .swatch-info { padding: 8px 10px; }
+  .swatch-name { font-size: 0.75rem; font-weight: 500; }
+  .swatch-hex { font-size: 0.75rem; color: var(--color-fg-muted); }
+
+  /* Type Scale */
+  .type-scale { display: flex; flex-direction: column; gap: 8px; }
+  .type-row { display: flex; align-items: baseline; gap: 1rem; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+  .type-label { width: 80px; font-size: 0.75rem; color: var(--color-fg-muted); flex-shrink: 0; }
+  .type-xs { font-size: 0.75rem; line-height: 1rem; }
+  .type-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  .type-base { font-size: 1rem; line-height: 1.5rem; }
+  .type-lg { font-size: 1.25rem; line-height: 1.75rem; }
+  .type-xl { font-size: 1.5rem; line-height: 2rem; }
+  .type-2xl { font-size: 1.875rem; line-height: 2.25rem; }
+  .type-3xl { font-size: 2.25rem; line-height: 2.5rem; }
+
+  /* Buttons */
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  button {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0 1rem;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: background 150ms ease-out;
+  }
+  .btn-primary { background: var(--color-accent); color: #fff; }
+  .btn-primary:hover { background: var(--color-accent-hv); }
+  .btn-secondary { background: var(--color-bg-elev); color: var(--color-fg); border: 1px solid var(--color-border); }
+  .btn-ghost { background: transparent; color: var(--color-accent); }
+  .btn-destructive { background: var(--color-danger); color: #fff; }
+  .btn-enter { background: var(--color-enter); color: #fff; }
+  .btn-exit { background: var(--color-exit); color: #fff; }
+
+  /* Card */
+  .card-preview {
+    background: var(--color-bg-elev);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    max-width: 400px;
+  }
+  .card-preview h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .card-preview p { font-size: 0.875rem; color: var(--color-fg-muted); margin-bottom: 1rem; }
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .badge-enter { background: #DCFCE7; color: var(--color-success); }
+  .badge-exit { background: #FEE2E2; color: var(--color-danger); }
+
+  /* Input */
+  .input-preview { max-width: 320px; }
+  .input-label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 4px; }
+  .input-field {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-elev);
+    color: var(--color-fg);
+    outline: none;
+    transition: border 150ms ease-out;
+  }
+  .input-field:focus { border-color: var(--color-accent); box-shadow: 0 0 0 2px var(--color-accent-light); }
+
+  /* Attendance Result */
+  .attendance-result {
+    text-align: center;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    max-width: 320px;
+  }
+  .attendance-enter { background: #DCFCE7; border: 2px solid var(--color-enter); }
+  .attendance-exit { background: #FEE2E2; border: 2px solid var(--color-exit); }
+  .attendance-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+  .attendance-name { font-size: 1.5rem; font-weight: 700; }
+  .attendance-status { font-size: 1rem; font-weight: 500; margin-top: 0.25rem; }
+  .attendance-enter .attendance-status { color: var(--color-enter); }
+  .attendance-exit .attendance-status { color: var(--color-exit); }
+  .attendance-time { font-size: 0.875rem; color: var(--color-fg-muted); margin-top: 0.5rem; }
+
+  /* Spacing */
+  .spacing-demo { display: flex; gap: 8px; align-items: flex-end; }
+  .space-block { background: var(--color-accent-light); border: 1px solid var(--color-accent); border-radius: 2px; }
+  .space-label { font-size: 0.625rem; color: var(--color-fg-muted); text-align: center; margin-top: 2px; }
+
+  /* Nav Preview */
+  .nav-preview {
+    display: flex;
+    background: var(--color-bg-elev);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-width: 480px;
+  }
+  .nav-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-fg-muted);
+    text-decoration: none;
+    transition: all 150ms ease-out;
+  }
+  .nav-item.active { color: var(--color-accent); background: var(--color-accent-light); }
+  .nav-icon { font-size: 1.25rem; display: block; margin-bottom: 2px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>gakudo</h1>
+<p class="subtitle">Design Tokens Preview — 学童保育管理アプリ</p>
+
+<!-- COLOR PALETTE -->
+<h2>Color Palette</h2>
+<div class="palette">
+  <div class="swatch"><div class="swatch-color" style="background:#FAFAF7;border:1px solid #E7E5E4"></div><div class="swatch-info"><div class="swatch-name">bg</div><div class="swatch-hex">#FAFAF7</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#FFFFFF;border:1px solid #E7E5E4"></div><div class="swatch-info"><div class="swatch-name">bg-elev</div><div class="swatch-hex">#FFFFFF</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#1C1917"></div><div class="swatch-info"><div class="swatch-name">fg</div><div class="swatch-hex">#1C1917</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#78716C"></div><div class="swatch-info"><div class="swatch-name">fg-muted</div><div class="swatch-hex">#78716C</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#0F766E"></div><div class="swatch-info"><div class="swatch-name">accent</div><div class="swatch-hex">#0F766E</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#0D5D56"></div><div class="swatch-info"><div class="swatch-name">accent-hv</div><div class="swatch-hex">#0D5D56</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#CCFBF1"></div><div class="swatch-info"><div class="swatch-name">accent-light</div><div class="swatch-hex">#CCFBF1</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#15803D"></div><div class="swatch-info"><div class="swatch-name">success/enter</div><div class="swatch-hex">#15803D</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#B45309"></div><div class="swatch-info"><div class="swatch-name">warning</div><div class="swatch-hex">#B45309</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#B91C1C"></div><div class="swatch-info"><div class="swatch-name">danger/exit</div><div class="swatch-hex">#B91C1C</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background:#E7E5E4"></div><div class="swatch-info"><div class="swatch-name">border</div><div class="swatch-hex">#E7E5E4</div></div></div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<h2>Typography — Noto Sans JP</h2>
+<div class="type-scale">
+  <div class="type-row"><span class="type-label">3xl / 36px</span><span class="type-3xl" style="font-weight:700">学童保育管理</span></div>
+  <div class="type-row"><span class="type-label">2xl / 30px</span><span class="type-2xl" style="font-weight:700">入退場記録</span></div>
+  <div class="type-row"><span class="type-label">xl / 24px</span><span class="type-xl" style="font-weight:700">本日の出席状況</span></div>
+  <div class="type-row"><span class="type-label">lg / 20px</span><span class="type-lg" style="font-weight:700">お知らせ一覧</span></div>
+  <div class="type-row"><span class="type-label">base / 16px</span><span class="type-base">田中太郎くんが入室しました。</span></div>
+  <div class="type-row"><span class="type-label">sm / 14px</span><span class="type-sm" style="color:var(--color-fg-muted)">2026年4月20日 15:30</span></div>
+  <div class="type-row"><span class="type-label">xs / 12px</span><span class="type-xs" style="color:var(--color-fg-muted)">最終更新: 3分前</span></div>
+</div>
+
+<!-- BUTTONS -->
+<h2>Buttons</h2>
+<div class="btn-row" style="margin-bottom:12px">
+  <button class="btn-primary">保存する</button>
+  <button class="btn-secondary">キャンセル</button>
+  <button class="btn-ghost">詳細を見る</button>
+  <button class="btn-destructive">削除する</button>
+</div>
+<div class="btn-row">
+  <button class="btn-enter">🟢 入室</button>
+  <button class="btn-exit">🔴 退室</button>
+</div>
+
+<!-- COMPONENTS -->
+<h2>Components</h2>
+<div class="two-col">
+  <div>
+    <h3>Card</h3>
+    <div class="card-preview">
+      <h4>田中 太郎</h4>
+      <p>3年生 ・ QR: GK-0023</p>
+      <span class="badge badge-enter">入室 15:32</span>
+    </div>
+  </div>
+  <div>
+    <h3>Input</h3>
+    <div class="input-preview">
+      <label class="input-label">児童名</label>
+      <input class="input-field" type="text" placeholder="例: 田中 太郎">
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDANCE RESULT -->
+<h2>Attendance Result（入退場表示）</h2>
+<div class="two-col">
+  <div class="attendance-result attendance-enter">
+    <div class="attendance-icon">✅</div>
+    <div class="attendance-name">田中 太郎</div>
+    <div class="attendance-status">入室しました</div>
+    <div class="attendance-time">15:32 — QR読取</div>
+  </div>
+  <div class="attendance-result attendance-exit">
+    <div class="attendance-icon">👋</div>
+    <div class="attendance-name">田中 太郎</div>
+    <div class="attendance-status">退室しました</div>
+    <div class="attendance-time">17:45 — QR読取</div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<h2>Mobile Tab Bar</h2>
+<div class="nav-preview">
+  <a class="nav-item" href="#"><span class="nav-icon">🏠</span>ホーム</a>
+  <a class="nav-item active" href="#"><span class="nav-icon">📋</span>入退場</a>
+  <a class="nav-item" href="#"><span class="nav-icon">📢</span>連絡</a>
+  <a class="nav-item" href="#"><span class="nav-icon">📷</span>写真</a>
+  <a class="nav-item" href="#"><span class="nav-icon">💰</span>請求</a>
+</div>
+
+<!-- SPACING -->
+<h2>Spacing Scale</h2>
+<div class="spacing-demo">
+  <div><div class="space-block" style="width:16px;height:4px"></div><div class="space-label">4</div></div>
+  <div><div class="space-block" style="width:16px;height:8px"></div><div class="space-label">8</div></div>
+  <div><div class="space-block" style="width:16px;height:12px"></div><div class="space-label">12</div></div>
+  <div><div class="space-block" style="width:16px;height:16px"></div><div class="space-label">16</div></div>
+  <div><div class="space-block" style="width:16px;height:24px"></div><div class="space-label">24</div></div>
+  <div><div class="space-block" style="width:16px;height:32px"></div><div class="space-label">32</div></div>
+  <div><div class="space-block" style="width:16px;height:48px"></div><div class="space-label">48</div></div>
+  <div><div class="space-block" style="width:16px;height:64px"></div><div class="space-label">64</div></div>
+</div>
+
+</body>
+</html>

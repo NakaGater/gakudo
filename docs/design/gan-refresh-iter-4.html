@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星ヶ丘こどもクラブ — Iteration 4: 星の丘に入る体験</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   ITERATION 4: "星の丘に入る — An Immersive Living Place"
+   
+   Breaking conventions:
+   ✦ Time-aware sky gradient — UI atmosphere shifts with time of day
+   ✦ Attendance as visual village — children are stars on a hill
+   ✦ Handcraft aesthetic — paper texture, washi-tape dividers, organic shapes
+   ✦ Living micro-animations — stars twinkle, hill breathes, cards float
+   ✦ Check-in celebration — star confetti burst
+   ✦ Every screen feels like entering a warm, magical place
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg:         #FFFAF5;
+  --bg-elev:    #FFFFFF;
+  --bg-warm:    #FFF5EC;
+  --fg:         #2E1F10;
+  --fg-mid:     #6B5B4A;
+  --fg-muted:   #9C8B78;
+  --fg-faint:   #C4B5A3;
+
+  --primary:    #F2784B;
+  --primary-hv: #D9633A;
+  --primary-soft:#FEF0EA;
+  --primary-glow:rgba(242,120,75,0.12);
+
+  --green:      #3D9B6E;
+  --green-soft: #EDF8F2;
+  --danger:     #E25D5D;
+  --danger-soft: rgba(226,93,93,0.07);
+  --star:       #F5C542;
+  --star-soft:  #FFF9E6;
+  --sky-top:    #FFF9E6;
+  --sky-bottom: #FEF0EA;
+  --border:     #EFE8DF;
+
+  --font-display:'Zen Maru Gothic','Noto Sans JP',sans-serif;
+  --font-body:'Noto Sans JP',sans-serif;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-full:9999px;
+  --sh-sm:0 1px 3px rgba(46,31,16,0.04);
+  --sh-md:0 4px 12px rgba(46,31,16,0.06);
+  --sh-lg:0 8px 24px rgba(46,31,16,0.08);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--fg);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ══ Star mask ══ */
+.star{display:inline-block;width:1em;height:1em;background:currentColor;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z'/%3E%3C/svg%3E");-webkit-mask-size:contain;mask-size:contain}
+
+/* ══ Page Switcher ══ */
+.sw{position:fixed;top:0;left:0;right:0;z-index:9999;background:#2E1F10;padding:7px 16px;display:flex;align-items:center;gap:6px;overflow-x:auto}
+.sw__l{color:rgba(255,255,255,0.35);font-size:10px;font-weight:700;letter-spacing:.1em;white-space:nowrap;margin-right:4px}
+.sw button{padding:5px 13px;border-radius:var(--r-full);border:none;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:var(--font-body)}
+.sw button.active{background:var(--primary);color:white}
+.sw button:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.55)}
+.sw button:not(.active):hover{background:rgba(255,255,255,.1);color:white}
+.page{display:none;padding-top:40px}.page.active{display:block}
+
+/* ══ Common ══ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--r-md);font-family:var(--font-body);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--primary);color:white;box-shadow:0 2px 8px rgba(242,120,75,.2)}
+.btn-primary:hover{background:var(--primary-hv);transform:translateY(-1px)}
+.btn-secondary{background:var(--bg-elev);color:var(--fg);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.card{background:var(--bg-elev);border-radius:var(--r-lg);box-shadow:var(--sh-sm);border:1px solid var(--border);transition:all .2s}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:var(--r-full);font-size:12px;font-weight:600}
+.badge svg{width:12px;height:12px;stroke-width:2.5}
+.badge-enter{background:var(--green-soft);color:var(--green)}
+.badge-exit{background:var(--danger-soft);color:var(--danger)}
+.badge-none{background:var(--bg-warm);color:var(--fg-muted)}
+.badge-ok{background:var(--green-soft);color:var(--green)}
+.badge-warn{background:var(--danger-soft);color:var(--danger)}
+
+/* ═══════════════════════════════════════
+   ✦ HANDCRAFT TEXTURES
+   Paper texture overlay, washi-tape dividers
+   ═══════════════════════════════════════ */
+.paper-texture{position:relative}
+.paper-texture::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");pointer-events:none;border-radius:inherit}
+
+/* Washi-tape style section divider */
+.washi{display:flex;align-items:center;gap:10px;margin:28px 0 18px;position:relative}
+.washi__tape{height:24px;padding:0 14px;border-radius:2px;font-family:var(--font-display);font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;transform:rotate(-0.5deg);position:relative}
+.washi__tape::before{content:'';position:absolute;inset:0;border-radius:2px;opacity:0.85;background:inherit;z-index:-1}
+.washi__tape--gold{background:var(--star);color:#7A5F00}
+.washi__tape--green{background:#A8E6C3;color:#1A5C38}
+.washi__tape--pink{background:#FFD1DC;color:#8B3A4A}
+.washi__tape--orange{background:#FFD0B5;color:#7A3A15}
+.washi__line{flex:1;height:1px;background:var(--border);opacity:0.6}
+.washi .star{font-size:10px}
+
+/* ═══════════════════════════════════════
+   ✦ LIVING SKY BACKGROUND
+   Gradient that shifts: morning→afternoon→evening
+   ═══════════════════════════════════════ */
+.sky{position:relative;overflow:hidden}
+.sky__gradient{position:absolute;inset:0;transition:background 1s ease}
+.sky--morning .sky__gradient{background:linear-gradient(180deg,#FFF9E6 0%,#FFF5EC 50%,#FFFAF5 100%)}
+.sky--afternoon .sky__gradient{background:linear-gradient(180deg,#FDEBD0 0%,#FEE8D0 50%,#FFFAF5 100%)}
+.sky--evening .sky__gradient{background:linear-gradient(180deg,#E8D5F5 0%,#F5DDE8 50%,#FFFAF5 100%)}
+
+/* Twinkling stars in sky */
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.8}}
+@keyframes twinkle2{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes twinkle3{0%,100%{opacity:.3}50%{opacity:.7}}
+.sky__stars{position:absolute;inset:0;pointer-events:none}
+.sky__star{position:absolute;color:var(--star)}
+.sky__star--1{top:8%;left:12%;font-size:10px;animation:twinkle 3s ease-in-out infinite}
+.sky__star--2{top:5%;right:18%;font-size:8px;animation:twinkle2 4s ease-in-out infinite .5s}
+.sky__star--3{top:15%;left:40%;font-size:6px;animation:twinkle3 3.5s ease-in-out infinite 1s}
+.sky__star--4{top:10%;right:35%;font-size:9px;animation:twinkle 5s ease-in-out infinite 1.5s}
+.sky__star--5{top:3%;left:65%;font-size:7px;animation:twinkle2 4.5s ease-in-out infinite 2s}
+.sky__star--6{top:18%;right:8%;font-size:5px;animation:twinkle3 3s ease-in-out infinite .8s}
+
+/* ═══════════════════════════════════════
+   ✦ VISUAL VILLAGE — Attendance as landscape
+   ═══════════════════════════════════════ */
+.village{position:relative;width:100%;padding:20px 0;margin-bottom:20px}
+.village__scene{width:100%;height:200px;position:relative;overflow:hidden;border-radius:var(--r-xl);background:linear-gradient(180deg,#E6F0FF 0%,#D4EDDA 60%,#3D9B6E 100%);box-shadow:var(--sh-md) inset}
+/* Hill shape */
+.village__hill{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:140%;height:65%}
+.village__hill-shape{fill:#4AAF7D;opacity:0.35}
+.village__hill-shape2{fill:#3D9B6E;opacity:0.2}
+/* Building */
+.village__building{position:absolute;bottom:28%;left:50%;transform:translateX(-50%);text-align:center}
+/* Children as stars on the hill */
+.village__child{position:absolute;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all 0.5s ease;cursor:default}
+.village__child-star{font-size:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.15));transition:transform 0.3s}
+.village__child:hover .village__child-star{transform:scale(1.3)}
+.village__child-name{font-family:var(--font-display);font-size:9px;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.3);white-space:nowrap}
+/* Stars in village sky */
+.village__sky-star{position:absolute;color:rgba(255,255,255,0.5)}
+
+/* Stats overlay on village */
+.village__stats{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.village__stat{background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);border-radius:var(--r-md);padding:6px 10px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.village__stat-val{font-family:var(--font-display);font-size:18px;font-weight:900}
+.village__stat--in .village__stat-val{color:var(--green)}
+.village__stat--out .village__stat-val{color:var(--danger)}
+.village__stat--no .village__stat-val{color:var(--fg-muted)}
+
+/* ═══════════════════════════════════════
+   ✦ FLOATING CARD EFFECT
+   Cards gently breathe
+   ═══════════════════════════════════════ */
+@keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.card-float{animation:breathe 6s ease-in-out infinite}
+.card-float:nth-child(2){animation-delay:1s}
+.card-float:nth-child(3){animation-delay:2s}
+.card-float:nth-child(4){animation-delay:0.5s}
+
+/* ═══════════════════════════════════════
+   ✦ CONFETTI STARS (for check-in celebration)
+   ═══════════════════════════════════════ */
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg) scale(0);opacity:1}60%{opacity:1}100%{transform:translateY(120px) rotate(360deg) scale(1);opacity:0}}
+.confetti{position:absolute;pointer-events:none;z-index:10}
+.confetti .star{position:absolute;animation:confetti-fall 1.2s ease-out forwards}
+
+/* ═══════════════════════════════════════
+   1. PUBLIC HOME
+   ═══════════════════════════════════════ */
+.ph{position:sticky;top:40px;z-index:100;background:rgba(255,250,245,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(239,232,223,.6)}
+.ph__in{max-width:1080px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.ph__logo{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--fg);text-decoration:none}
+.ph__mark{width:32px;height:32px;background:linear-gradient(145deg,var(--star) 0%,var(--primary) 100%);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(242,120,75,.18)}
+.ph__mark .star{font-size:16px;color:white}
+.ph__nav{display:flex;align-items:center;gap:2px}
+.ph__nav a{padding:6px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--fg-mid);text-decoration:none;transition:all .15s}
+.ph__nav a:hover{color:var(--primary);background:var(--primary-soft)}
+
+/* Hero — immersive sky */
+.hero{padding:56px 24px 0;position:relative;min-height:520px}
+.hero__in{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;position:relative;z-index:2}
+.hero__tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);color:var(--primary);font-size:12px;font-weight:700;border-radius:var(--r-full);margin-bottom:20px;border:1px solid rgba(242,120,75,.15)}
+.hero__title{font-family:var(--font-display);font-size:38px;font-weight:900;line-height:1.35;color:var(--fg)}
+.hero__hl{position:relative;display:inline}
+.hero__hl::after{content:'';position:absolute;bottom:2px;left:-2px;right:-2px;height:10px;background:var(--star);opacity:.3;border-radius:5px;z-index:-1}
+.hero__desc{margin-top:20px;font-size:15px;line-height:1.85;color:var(--fg-mid);max-width:440px}
+.hero__acts{margin-top:32px;display:flex;gap:10px;flex-wrap:wrap}
+
+/* Hero scene — living landscape */
+.hero__scene{position:relative;height:380px}
+.hero__scene-sky{position:absolute;inset:0;border-radius:var(--r-xl);overflow:hidden;background:linear-gradient(180deg,#FFF9E6 0%,#FDEBD0 30%,#D4EDDA 80%,#4AAF7D 100%);box-shadow:var(--sh-lg)}
+.hero__scene-building{position:absolute;bottom:22%;left:50%;transform:translateX(-50%)}
+.hero__scene-children{position:absolute;bottom:10%;left:0;right:0;display:flex;justify-content:center;gap:16px}
+.hero__scene-child{display:flex;flex-direction:column;align-items:center;gap:3px}
+@keyframes childBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.hero__scene-child:nth-child(1){animation:childBounce 3s ease-in-out infinite}
+.hero__scene-child:nth-child(2){animation:childBounce 3s ease-in-out infinite .5s}
+.hero__scene-child:nth-child(3){animation:childBounce 3s ease-in-out infinite 1s}
+.hero__scene-child:nth-child(4){animation:childBounce 3s ease-in-out infinite 1.5s}
+.hero__scene-child-body{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.hero__scene-child-body--1{background:var(--primary)}
+.hero__scene-child-body--2{background:var(--green)}
+.hero__scene-child-body--3{background:var(--star)}
+.hero__scene-child-body--4{background:#E25D5D}
+.hero__scene-child-label{font-family:var(--font-display);font-size:10px;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,.2)}
+.hero__scene-star{position:absolute;color:rgba(245,197,66,.6)}
+.hero__scene-star--1{top:8%;left:15%;font-size:12px;animation:twinkle 3s ease-in-out infinite}
+.hero__scene-star--2{top:5%;right:20%;font-size:9px;animation:twinkle2 4s ease-in-out infinite .5s}
+.hero__scene-star--3{top:15%;left:45%;font-size:7px;animation:twinkle3 3.5s ease-in-out infinite 1s}
+.hero__scene-star--4{top:10%;right:35%;font-size:10px;animation:twinkle 5s ease-in-out infinite 1.5s}
+
+/* Organic hill divider */
+.hill-div{display:block;width:100%;overflow:hidden;line-height:0;margin-top:-40px;position:relative;z-index:3}
+.hill-div svg{display:block;width:100%;height:48px}
+
+/* Features with handcraft feel */
+.features{padding:56px 24px}
+.features__in{max-width:1080px;margin:0 auto}
+.sec-hd{text-align:center;margin-bottom:40px}
+.sec-hd__title{font-family:var(--font-display);font-size:24px;font-weight:900;color:var(--fg)}
+.sec-hd__sub{margin-top:8px;font-size:14px;color:var(--fg-muted)}
+/* Handwritten-style underline */
+.hand-underline{position:relative;display:inline-block}
+.hand-underline::after{content:'';position:absolute;bottom:-4px;left:-4px;right:-4px;height:8px;background:url("data:image/svg+xml,%3Csvg width='200' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 5 Q25 1 50 4 T100 4 T150 3 T200 5' stroke='%23F5C542' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;background-size:200px 8px;opacity:.5}
+
+.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.feat{padding:24px;border-left:3px solid var(--border);position:relative}
+.feat--1{border-left-color:var(--primary)}.feat--2{border-left-color:var(--green)}
+.feat--3{border-left-color:var(--star)}.feat--4{border-left-color:var(--danger)}
+.feat__icon{width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.feat--1 .feat__icon{background:var(--primary-soft);color:var(--primary)}
+.feat--2 .feat__icon{background:var(--green-soft);color:var(--green)}
+.feat--3 .feat__icon{background:var(--star-soft);color:#C69A1A}
+.feat--4 .feat__icon{background:var(--danger-soft);color:var(--danger)}
+.feat__icon svg{width:20px;height:20px;stroke-width:1.75}
+.feat__t{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--fg);margin-bottom:4px}
+.feat__d{font-size:13px;line-height:1.75;color:var(--fg-mid)}
+
+/* CTA */
+.cta{padding:56px 24px;background:linear-gradient(135deg,var(--primary-soft) 0%,var(--star-soft) 100%);text-align:center}
+.cta__in{max-width:500px;margin:0 auto}
+.cta__star-ring{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;background:var(--star);border-radius:50%;margin-bottom:20px;box-shadow:0 3px 12px rgba(245,197,66,.25)}
+.cta__star-ring .star{font-size:26px;color:white}
+.cta__title{font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--fg)}
+.cta__desc{margin-top:12px;font-size:14px;line-height:1.8;color:var(--fg-mid)}
+.cta__acts{margin-top:24px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;align-items:center}
+.cta__tel{font-size:13px;color:var(--fg-muted)}
+
+/* Footer */
+.ft{background:var(--fg);color:rgba(255,255,255,.55);padding:36px 24px}
+.ft__in{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:28px}
+.ft h3{color:white;font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:8px}
+.ft p,.ft address{font-size:12px;line-height:1.8;font-style:normal}
+.ft a{color:rgba(255,255,255,.55);text-decoration:none;font-size:12px}.ft a:hover{color:var(--star)}
+.ft__links{list-style:none}.ft__links li+li{margin-top:4px}
+.ft__copy{grid-column:1/-1;text-align:center;font-size:11px;color:rgba(255,255,255,.2);border-top:1px solid rgba(255,255,255,.06);padding-top:16px;margin-top:8px}
+
+/* ═══════════════════════════════════════
+   2. LOGIN — Immersive starry entrance
+   ═══════════════════════════════════════ */
+.login-pg{min-height:calc(100vh - 40px);display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden}
+.login-pg .sky__gradient{background:linear-gradient(180deg,#E8D5F5 0%,#F5DDE8 30%,#FDEBD0 60%,#FFF5EC 100%)}
+.login-pg .sky__stars .sky__star{color:rgba(245,197,66,.5)}
+.login-c{width:100%;max-width:370px;padding:32px 28px;position:relative;z-index:2}
+.login-c__hd{text-align:center;margin-bottom:32px}
+.login-c__mark{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;background:linear-gradient(145deg,var(--star) 0%,var(--primary) 100%);border-radius:14px;box-shadow:0 4px 20px rgba(242,120,75,.22);margin-bottom:12px}
+.login-c__mark .star{font-size:26px;color:white}
+.login-c__name{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--fg)}
+.login-c__sub{font-size:12px;color:var(--fg-muted);margin-top:2px}
+.login-c__welcome{font-family:var(--font-display);font-size:13px;color:var(--fg-mid);margin-top:8px;padding:8px 14px;background:var(--star-soft);border-radius:var(--r-md);border:1px dashed rgba(245,197,66,.3)}
+.fld{margin-bottom:16px}
+.fld__label{display:block;font-size:13px;font-weight:600;color:var(--fg);margin-bottom:4px}
+.fld__input{width:100%;height:42px;border:1.5px solid var(--border);border-radius:var(--r-md);padding:0 12px;font-size:14px;font-family:var(--font-body);background:rgba(255,255,255,.8);color:var(--fg);transition:all .15s}
+.fld__input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);background:var(--bg-elev)}
+.login-c .btn-primary{width:100%;height:44px;margin-top:8px}
+.login-c__forgot{text-align:center;margin-top:16px}
+.login-c__forgot a{font-size:13px;color:var(--primary);text-decoration:none}
+
+/* ═══════════════════════════════════════
+   3. DASHBOARD — Village + List hybrid
+   ═══════════════════════════════════════ */
+.dash{display:flex;min-height:calc(100vh - 40px)}
+.sb{width:236px;background:var(--bg-elev);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sb__hd{height:56px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--border);gap:8px}
+.sb__mark{width:28px;height:28px;background:linear-gradient(145deg,var(--star) 0%,var(--primary) 100%);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.sb__mark .star{font-size:14px;color:white}
+.sb__name{font-family:var(--font-display);font-weight:900;font-size:13px;color:var(--fg)}
+.sb__nav{flex:1;padding:8px;display:flex;flex-direction:column;gap:1px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--fg-mid);text-decoration:none;cursor:pointer;transition:all .12s}
+.ni:hover{background:var(--bg-warm);color:var(--fg)}
+.ni.active{background:var(--primary-soft);color:var(--primary);font-weight:600}
+.ni__ic{width:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ni__ic svg{width:18px;height:18px;stroke-width:1.75}
+.ni__badge{margin-left:auto;background:var(--primary);color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:var(--r-full)}
+.sb__ft{border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px}
+.sb__av{width:30px;height:30px;border-radius:var(--r-full);background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green)}
+.sb__uname{font-size:12px;font-weight:600;color:var(--fg)}
+.sb__urole{font-size:10px;color:var(--fg-muted)}
+
+.dm{flex:1;padding:24px 32px;overflow-y:auto}
+.dm__hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.dm__title{font-family:var(--font-display);font-size:20px;font-weight:900;color:var(--fg)}
+.dm__date{font-size:12px;color:var(--fg-muted);margin-top:2px}
+
+/* Attendance rows */
+.at{padding:4px 0}
+.at__row{display:flex;align-items:center;padding:9px 12px;border-radius:var(--r-sm);gap:12px;transition:background .12s}
+.at__row:hover{background:var(--bg-warm)}
+.at__av{width:34px;height:34px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.at__av--in{background:var(--green-soft);color:var(--green)}
+.at__av--out{background:var(--danger-soft);color:var(--danger)}
+.at__av--no{background:var(--bg-warm);color:var(--fg-faint)}
+.at__name{font-weight:600;font-size:13px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at__grade{font-size:11px;color:var(--fg-muted);flex-shrink:0}
+.at__st{margin-left:auto;flex-shrink:0}
+.at__time{font-size:12px;color:var(--fg-muted);font-variant-numeric:tabular-nums;margin-left:12px;min-width:90px;text-align:right;flex-shrink:0}
+
+/* ═══════════════════════════════════════
+   4. CHILDREN — Handcraft grid
+   ═══════════════════════════════════════ */
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.cc{padding:20px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.cc:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--sh-md)}
+.cc__av{width:42px;height:42px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:17px;font-weight:900;flex-shrink:0}
+.cc__av--a{background:var(--primary-soft);color:var(--primary)}
+.cc__av--b{background:var(--green-soft);color:var(--green)}
+.cc__av--c{background:var(--star-soft);color:#C69A1A}
+.cc__info{flex:1;min-width:0}
+.cc__name{font-weight:700;font-size:14px;color:var(--fg)}
+.cc__meta{font-size:12px;color:var(--fg-muted);margin-top:1px}
+.cc__tags{display:flex;gap:4px;margin-top:4px}
+
+/* ═══════════════════════════════════════
+   5. QR SCANNER
+   ═══════════════════════════════════════ */
+.qr-pg{display:flex;flex-direction:column;align-items:center;padding:40px 24px;max-width:500px;margin:0 auto}
+.qr-pg__title{font-family:var(--font-display);font-size:20px;font-weight:900;color:var(--fg)}
+.qr-pg__sub{font-size:13px;color:var(--fg-muted);margin-top:2px;margin-bottom:24px}
+.qr-box{width:100%;max-width:340px;aspect-ratio:1;background:#1a1a1a;border-radius:var(--r-xl);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.qr-box__frame{position:absolute;inset:24px;border:2px solid rgba(255,255,255,.2);border-radius:var(--r-md)}
+.qr-box__line{position:absolute;left:24px;right:24px;height:2px;background:var(--primary);box-shadow:0 0 10px var(--primary);animation:qrscan 2.5s ease-in-out infinite}
+@keyframes qrscan{0%{top:24px}50%{top:calc(100% - 26px)}100%{top:24px}}
+.qr-box__hint{color:rgba(255,255,255,.4);font-size:13px;text-align:center}
+.qr-form{width:100%;max-width:340px;display:flex;gap:8px}
+.qr-form input{flex:1;height:42px;border:1.5px solid var(--border);border-radius:var(--r-md);padding:0 12px;font-size:14px;font-family:var(--font-body);background:var(--bg-elev)}
+.qr-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow)}
+
+/* Result overlay with confetti */
+.res-ov{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);backdrop-filter:blur(3px)}
+.res-ov.show{display:flex}
+.res-card{background:var(--bg-elev);border-radius:var(--r-xl);padding:40px 32px;text-align:center;box-shadow:var(--sh-lg);min-width:280px;animation:resPop .3s ease-out;position:relative;overflow:hidden}
+@keyframes resPop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes starPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.res-card__ring{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;margin-bottom:16px;animation:starPulse 1.5s ease-in-out infinite}
+.res-card__ring--in{background:var(--green-soft)}
+.res-card__ring--out{background:var(--danger-soft)}
+.res-card__ring .star{font-size:32px}
+.res-card__ring--in .star{color:var(--green)}
+.res-card__ring--out .star{color:var(--danger)}
+.res-card__name{font-family:var(--font-display);font-size:24px;font-weight:900;color:var(--fg)}
+.res-card__status{font-size:18px;font-weight:700;margin-top:4px}
+.res-card__status--in{color:var(--green)}
+.res-card__status--out{color:var(--danger)}
+.res-card__time{font-size:12px;color:var(--fg-muted);margin-top:4px}
+.res-card__msg{font-family:var(--font-display);font-size:13px;color:var(--fg-mid);margin-top:12px}
+
+/* Confetti stars burst */
+.res-card__confetti{position:absolute;top:50%;left:50%;pointer-events:none}
+.res-card__confetti .star{position:absolute;opacity:0}
+.res-card__confetti.burst .star{animation:confetti-burst .8s ease-out forwards}
+@keyframes confetti-burst{0%{transform:translate(0,0) rotate(0) scale(.5);opacity:1}100%{opacity:0}}
+
+@media(max-width:768px){
+  .hero__in{grid-template-columns:1fr}.hero__scene{display:block;margin-top:24px;height:200px}
+  .feat-grid{grid-template-columns:1fr}.ft__in{grid-template-columns:1fr}
+  .ph__nav{display:none}.sb{display:none}.dm{padding:16px}
+  .cg{grid-template-columns:1fr}
+  .village__scene{height:160px}
+}
+</style>
+</head>
+<body>
+
+<!-- Switcher -->
+<div class="sw">
+  <span class="sw__l">画面</span>
+  <button class="active" onclick="sp('home',this)">ホーム</button>
+  <button onclick="sp('login',this)">ログイン</button>
+  <button onclick="sp('dash',this)">出席状況</button>
+  <button onclick="sp('kids',this)">児童一覧</button>
+  <button onclick="sp('qr',this)">QR入退室</button>
+</div>
+
+<!-- ═══════ HOME ═══════ -->
+<div id="page-home" class="page active">
+  <header class="ph"><div class="ph__in">
+    <a href="#" class="ph__logo"><span class="ph__mark"><span class="star"></span></span>星ヶ丘こどもクラブ</a>
+    <nav class="ph__nav"><a href="#">ホーム</a><a href="#">施設紹介</a><a href="#">アクセス</a><a href="#">お知らせ</a><a href="#">ギャラリー</a><a href="#" class="btn btn-primary btn-sm" style="margin-left:6px">ログイン</a></nav>
+  </div></header>
+
+  <section class="hero sky sky--morning">
+    <div class="sky__gradient"></div>
+    <div class="sky__stars">
+      <span class="sky__star sky__star--1 star" style="font-size:10px"></span>
+      <span class="sky__star sky__star--2 star" style="font-size:8px"></span>
+      <span class="sky__star sky__star--3 star" style="font-size:6px"></span>
+      <span class="sky__star sky__star--4 star" style="font-size:9px"></span>
+      <span class="sky__star sky__star--5 star" style="font-size:7px"></span>
+    </div>
+    <div class="hero__in">
+      <div>
+        <div class="hero__tag"><span class="star" style="font-size:13px;color:var(--primary)"></span> 父母運営型 学童保育</div>
+        <h1 class="hero__title">子どもたちの<br><span class="hero__hl">笑顔あふれる</span><br>放課後を</h1>
+        <p class="hero__desc">星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。</p>
+        <div class="hero__acts">
+          <a href="#" class="btn btn-primary">施設について詳しく →</a>
+          <a href="#" class="btn btn-secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg> 見学のお申し込み</a>
+        </div>
+      </div>
+      <!-- Living landscape scene -->
+      <div class="hero__scene">
+        <div class="hero__scene-sky">
+          <span class="hero__scene-star star sky__star--1" style="font-size:12px"></span>
+          <span class="hero__scene-star star sky__star--2" style="font-size:9px"></span>
+          <span class="hero__scene-star star sky__star--3" style="font-size:7px"></span>
+          <span class="hero__scene-star star sky__star--4" style="font-size:10px"></span>
+          <!-- Hill -->
+          <svg style="position:absolute;bottom:0;width:100%" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0 80Q100 20 200 50T400 30V120H0Z" fill="#3D9B6E" opacity=".25"/><path d="M0 90Q150 40 250 65T400 50V120H0Z" fill="#3D9B6E" opacity=".2"/></svg>
+          <!-- Building -->
+          <svg style="position:absolute;bottom:24%;left:50%;transform:translateX(-50%);width:100px" viewBox="0 0 100 85">
+            <rect x="5" y="20" width="90" height="65" rx="3" fill="#F2784B" opacity=".22"/>
+            <rect x="15" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+            <rect x="42" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+            <rect x="69" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+            <rect x="38" y="60" width="24" height="25" rx="2" fill="#F2784B" opacity=".3"/>
+            <polygon points="50,0 0,20 100,20" fill="#F2784B" opacity=".2"/>
+            <path d="M50 4l2.5 7.5h8l-6 4.5 2 7-6.5-5-6.5 5 2-7-6-4.5h8z" fill="#F5C542" opacity=".8"/>
+          </svg>
+          <!-- Bouncing children -->
+          <div class="hero__scene-children">
+            <div class="hero__scene-child"><div class="hero__scene-child-body hero__scene-child-body--1">🧒</div><span class="hero__scene-child-label">ゆうと</span></div>
+            <div class="hero__scene-child"><div class="hero__scene-child-body hero__scene-child-body--2">👧</div><span class="hero__scene-child-label">さくら</span></div>
+            <div class="hero__scene-child"><div class="hero__scene-child-body hero__scene-child-body--3">🧒</div><span class="hero__scene-child-label">けんた</span></div>
+            <div class="hero__scene-child"><div class="hero__scene-child-body hero__scene-child-body--4">👧</div><span class="hero__scene-child-label">みゆ</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hill-div"><svg viewBox="0 0 1200 48" preserveAspectRatio="none"><path d="M0 48 C300 0 500 20 600 8 C700 -4 900 12 1200 48 Z" fill="#FFFAF5"/></svg></div>
+
+  <section class="features"><div class="features__in">
+    <div class="sec-hd">
+      <h2 class="sec-hd__title"><span class="hand-underline">施設の特徴</span></h2>
+      <p class="sec-hd__sub">デジタルの力で、保護者の安心と運営の効率化を両立します</p>
+    </div>
+    <div class="feat-grid">
+      <div class="card feat feat--1 card-float"><div class="feat__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><h3 class="feat__t">安全管理（QR入退場）</h3><p class="feat__d">専用QRコードで入室・退室をワンタッチ記録。保護者のスマホにリアルタイムで通知が届きます。</p></div>
+      <div class="card feat feat--2 card-float"><div class="feat__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0"/></svg></div><h3 class="feat__t">連絡配信</h3><p class="feat__d">行事予定やお知らせをアプリから配信。紙のプリントをなくし、既読確認も可能です。</p></div>
+      <div class="card feat feat--3 card-float"><div class="feat__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><h3 class="feat__t">写真共有</h3><p class="feat__d">施設での活動写真を保護者限定で安全に共有。行事の様子をいつでも振り返れます。</p></div>
+      <div class="card feat feat--4 card-float"><div class="feat__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3 class="feat__t">請求管理</h3><p class="feat__d">延長保育の料金を退室時間から自動計算。月次の請求書をオンラインで確認できます。</p></div>
+    </div>
+  </div></section>
+
+  <section class="cta"><div class="cta__in">
+    <div class="cta__star-ring"><span class="star"></span></div>
+    <h2 class="cta__title">見学・お問い合わせ</h2>
+    <p class="cta__desc">入所をご検討の方は、お気軽にお電話またはお問い合わせください。<br>施設の見学も随時受け付けております。</p>
+    <div class="cta__acts"><a href="#" class="btn btn-primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg> アクセス・お問い合わせ</a><span class="cta__tel">TEL: 03-1234-5678（平日 9:00〜18:00）</span></div>
+  </div></section>
+
+  <footer class="ft"><div class="ft__in">
+    <div><h3>星ヶ丘こどもクラブ</h3><p>保護者の手で運営する、地域に根ざした学童保育施設です。<br>子どもたちの「ただいま」が聞こえる、あたたかい居場所をこれからも守り続けます。</p></div>
+    <div><h3>リンク</h3><ul class="ft__links"><li><a href="#">ホーム</a></li><li><a href="#">施設紹介</a></li><li><a href="#">お知らせ</a></li><li><a href="#">アクセス</a></li><li><a href="#">保護者ログイン</a></li></ul></div>
+    <div><h3>お問い合わせ</h3><address><p>〒123-4567</p><p>東京都世田谷区桜丘3-12-8</p><p>TEL: 03-1234-5678</p><p>受付: 平日 9:00〜18:00</p></address></div>
+    <div class="ft__copy">© 2025 星ヶ丘こどもクラブ. All rights reserved.</div>
+  </div></footer>
+</div>
+
+<!-- ═══════ LOGIN ═══════ -->
+<div id="page-login" class="page">
+  <div class="login-pg sky">
+    <div class="sky__gradient" style="background:linear-gradient(180deg,#E8D5F5 0%,#F5DDE8 30%,#FDEBD0 60%,#FFF5EC 100%)"></div>
+    <div class="sky__stars">
+      <span class="sky__star sky__star--1 star" style="font-size:12px;color:rgba(245,197,66,.5)"></span>
+      <span class="sky__star sky__star--2 star" style="font-size:9px;color:rgba(245,197,66,.4)"></span>
+      <span class="sky__star sky__star--3 star" style="font-size:7px;color:rgba(245,197,66,.3)"></span>
+      <span class="sky__star sky__star--4 star" style="font-size:10px;color:rgba(245,197,66,.45)"></span>
+      <span class="sky__star sky__star--5 star" style="font-size:8px;color:rgba(245,197,66,.35)"></span>
+      <span class="sky__star sky__star--6 star" style="font-size:6px;color:rgba(245,197,66,.25)"></span>
+    </div>
+    <div class="card login-c paper-texture">
+      <div class="login-c__hd">
+        <div class="login-c__mark"><span class="star"></span></div>
+        <div class="login-c__name">星ヶ丘こどもクラブ</div>
+        <div class="login-c__sub">保護者・先生ポータル</div>
+        <div class="login-c__welcome">⭐ おかえりなさい！星の丘へようこそ</div>
+      </div>
+      <div class="fld"><label class="fld__label">メールアドレス</label><input class="fld__input" type="email" placeholder="example@mail.com"></div>
+      <div class="fld"><label class="fld__label">パスワード</label><input class="fld__input" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary">星の丘に入る ⭐</button>
+      <div class="login-c__forgot"><a href="#">パスワードをお忘れですか？</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DASHBOARD ═══════ -->
+<div id="page-dash" class="page">
+  <div class="dash">
+    <aside class="sb">
+      <div class="sb__hd"><div class="sb__mark"><span class="star"></span></div><div class="sb__name">星ヶ丘こどもクラブ</div></div>
+      <nav class="sb__nav">
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> QR入退室</a>
+        <a class="ni active" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> 出席状況</a>
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> 児童管理</a>
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0"/></svg></span> お知らせ<span class="ni__badge">3</span></a>
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> 写真</a>
+      </nav>
+      <div class="sb__ft"><div class="sb__av">田</div><div><div class="sb__uname">田中 花子</div><div class="sb__urole">先生</div></div></div>
+    </aside>
+
+    <div class="dm" style="max-width:900px">
+      <div class="dm__hdr">
+        <div><h1 class="dm__title">本日の入退室状況</h1><p class="dm__date">2026年4月21日（火）</p></div>
+        <button class="btn btn-secondary btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> 更新</button>
+      </div>
+
+      <!-- ★ VISUAL VILLAGE — Attendance as landscape ★ -->
+      <div class="village">
+        <div class="village__scene">
+          <!-- Sky stars -->
+          <span class="village__sky-star star" style="top:8%;left:10%;font-size:8px;animation:twinkle 3s ease-in-out infinite"></span>
+          <span class="village__sky-star star" style="top:5%;right:15%;font-size:6px;animation:twinkle2 4s ease-in-out infinite .5s"></span>
+          <span class="village__sky-star star" style="top:12%;left:35%;font-size:5px;animation:twinkle3 3.5s ease-in-out infinite 1s"></span>
+          <!-- Hill -->
+          <svg style="position:absolute;bottom:0;width:100%" viewBox="0 0 600 100" preserveAspectRatio="none"><path d="M0 60Q150 10 300 40T600 20V100H0Z" fill="#3D9B6E" opacity=".3"/><path d="M0 70Q200 30 350 55T600 40V100H0Z" fill="#3D9B6E" opacity=".2"/></svg>
+          <!-- Building -->
+          <svg style="position:absolute;bottom:32%;left:50%;transform:translateX(-50%);width:70px" viewBox="0 0 100 85">
+            <rect x="5" y="20" width="90" height="65" rx="3" fill="white" opacity=".3"/>
+            <rect x="15" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+            <rect x="42" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+            <rect x="69" y="36" width="16" height="16" rx="2" fill="white" opacity=".5"/>
+            <polygon points="50,0 0,20 100,20" fill="white" opacity=".25"/>
+            <path d="M50 4l2.5 7.5h8l-6 4.5 2 7-6.5-5-6.5 5 2-7-6-4.5h8z" fill="#F5C542" opacity=".9"/>
+          </svg>
+          <!-- Children as stars on the hill -->
+          <div class="village__child" style="bottom:20%;left:12%"><span class="village__child-star" style="color:#F2784B">⭐</span><span class="village__child-name">ゆうと</span></div>
+          <div class="village__child" style="bottom:25%;left:22%"><span class="village__child-star" style="color:#3D9B6E">⭐</span><span class="village__child-name">さくら</span></div>
+          <div class="village__child" style="bottom:22%;left:33%"><span class="village__child-star" style="color:#F5C542">⭐</span><span class="village__child-name">けんた</span></div>
+          <div class="village__child" style="bottom:28%;left:44%"><span class="village__child-star" style="color:#E25D5D">⭐</span><span class="village__child-name">はな</span></div>
+          <div class="village__child" style="bottom:24%;left:56%"><span class="village__child-star" style="color:#F2784B">⭐</span><span class="village__child-name">そうた</span></div>
+          <div class="village__child" style="bottom:18%;left:67%"><span class="village__child-star" style="color:#3D9B6E">⭐</span><span class="village__child-name">りこ</span></div>
+          <div class="village__child" style="bottom:26%;left:78%"><span class="village__child-star" style="color:#F5C542">⭐</span><span class="village__child-name">たける</span></div>
+          <div class="village__child" style="bottom:20%;left:88%"><span class="village__child-star" style="color:#E25D5D">⭐</span><span class="village__child-name">あかり</span></div>
+          <!-- Stats -->
+          <div class="village__stats">
+            <div class="village__stat village__stat--in"><div class="village__stat-val">18</div><div style="font-size:10px;color:var(--green)">入室中</div></div>
+            <div class="village__stat village__stat--out"><div class="village__stat-val">6</div><div style="font-size:10px;color:var(--danger)">退室済</div></div>
+            <div class="village__stat village__stat--no"><div class="village__stat-val">4</div><div style="font-size:10px;color:var(--fg-muted)">未入室</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Washi-tape dividers for attendance groups -->
+      <div class="washi"><div class="washi__tape washi__tape--green"><span class="star" style="font-size:10px;color:#1A5C38"></span> 入室中（18名）</div><div class="washi__line"></div></div>
+      <div class="card at">
+        <div class="at__row"><div class="at__av at__av--in">佐</div><span class="at__name">佐藤 ゆうと</span><span class="at__grade">2年</span><span class="at__st"><span class="badge badge-enter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 17 15 12 10 7"/></svg> 入室中</span></span><span class="at__time">14:32</span></div>
+        <div class="at__row"><div class="at__av at__av--in">鈴</div><span class="at__name">鈴木 さくら</span><span class="at__grade">1年</span><span class="at__st"><span class="badge badge-enter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 17 15 12 10 7"/></svg> 入室中</span></span><span class="at__time">14:28</span></div>
+        <div class="at__row"><div class="at__av at__av--in">高</div><span class="at__name">高橋 けんた</span><span class="at__grade">3年</span><span class="at__st"><span class="badge badge-enter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 17 15 12 10 7"/></svg> 入室中</span></span><span class="at__time">14:15</span></div>
+        <div class="at__row"><div class="at__av at__av--in">小</div><span class="at__name">小林 はな</span><span class="at__grade">1年</span><span class="at__st"><span class="badge badge-enter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 17 15 12 10 7"/></svg> 入室中</span></span><span class="at__time">14:10</span></div>
+      </div>
+
+      <div class="washi"><div class="washi__tape washi__tape--pink"><span class="star" style="font-size:10px;color:#8B3A4A"></span> 退室済（6名）</div><div class="washi__line"></div></div>
+      <div class="card at">
+        <div class="at__row"><div class="at__av at__av--out">田</div><span class="at__name">田中 みゆ</span><span class="at__grade">4年</span><span class="at__st"><span class="badge badge-exit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="14 17 9 12 14 7"/></svg> 退室済</span></span><span class="at__time">14:10 → 16:45</span></div>
+        <div class="at__row"><div class="at__av at__av--out">渡</div><span class="at__name">渡辺 はるき</span><span class="at__grade">2年</span><span class="at__st"><span class="badge badge-exit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="14 17 9 12 14 7"/></svg> 退室済</span></span><span class="at__time">14:05 → 17:00</span></div>
+      </div>
+
+      <div class="washi"><div class="washi__tape washi__tape--orange"><span class="star" style="font-size:10px;color:#7A3A15"></span> 未入室（4名）</div><div class="washi__line"></div></div>
+      <div class="card at">
+        <div class="at__row"><div class="at__av at__av--no">伊</div><span class="at__name">伊藤 あおい</span><span class="at__grade">1年</span><span class="at__st"><span class="badge badge-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg> 未入室</span></span><span class="at__time">—</span></div>
+        <div class="at__row"><div class="at__av at__av--no">山</div><span class="at__name">山本 りく</span><span class="at__grade">3年</span><span class="at__st"><span class="badge badge-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg> 未入室</span></span><span class="at__time">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CHILDREN ═══════ -->
+<div id="page-kids" class="page">
+  <div class="dash">
+    <aside class="sb">
+      <div class="sb__hd"><div class="sb__mark"><span class="star"></span></div><div class="sb__name">星ヶ丘こどもクラブ</div></div>
+      <nav class="sb__nav">
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> QR入退室</a>
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> 出席状況</a>
+        <a class="ni active" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span> 児童管理</a>
+      </nav>
+      <div class="sb__ft"><div class="sb__av">田</div><div><div class="sb__uname">田中 花子</div><div class="sb__urole">先生</div></div></div>
+    </aside>
+    <div class="dm">
+      <div class="dm__hdr"><h1 class="dm__title">児童一覧</h1><button class="btn btn-primary btn-sm">＋ 新規登録</button></div>
+      <div class="washi"><div class="washi__tape washi__tape--gold"><span class="star" style="font-size:10px;color:#7A5F00"></span> 1年生</div><div class="washi__line"></div></div>
+      <div class="cg">
+        <div class="card cc"><div class="cc__av cc__av--a">さ</div><div class="cc__info"><div class="cc__name">鈴木 さくら</div><div class="cc__meta">1年 ・ 保護者2人</div><div class="cc__tags"><span class="badge badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> QR有効</span></div></div></div>
+        <div class="card cc"><div class="cc__av cc__av--b">あ</div><div class="cc__info"><div class="cc__name">伊藤 あおい</div><div class="cc__meta">1年 ・ 保護者1人</div><div class="cc__tags"><span class="badge badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> QR有効</span></div></div></div>
+        <div class="card cc"><div class="cc__av cc__av--c">は</div><div class="cc__info"><div class="cc__name">小林 はな</div><div class="cc__meta">1年 ・ 保護者2人</div><div class="cc__tags"><span class="badge badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> QR有効</span></div></div></div>
+      </div>
+      <div class="washi"><div class="washi__tape washi__tape--green"><span class="star" style="font-size:10px;color:#1A5C38"></span> 2年生</div><div class="washi__line"></div></div>
+      <div class="cg">
+        <div class="card cc"><div class="cc__av cc__av--a">ゆ</div><div class="cc__info"><div class="cc__name">佐藤 ゆうと</div><div class="cc__meta">2年 ・ 保護者2人</div><div class="cc__tags"><span class="badge badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> QR有効</span></div></div></div>
+        <div class="card cc"><div class="cc__av cc__av--b">は</div><div class="cc__info"><div class="cc__name">渡辺 はるき</div><div class="cc__meta">2年 ・ 保護者2人</div><div class="cc__tags"><span class="badge badge-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> QR無効</span></div></div></div>
+      </div>
+      <div class="washi"><div class="washi__tape washi__tape--pink"><span class="star" style="font-size:10px;color:#8B3A4A"></span> 3年生</div><div class="washi__line"></div></div>
+      <div class="cg">
+        <div class="card cc"><div class="cc__av cc__av--a">け</div><div class="cc__info"><div class="cc__name">高橋 けんた</div><div class="cc__meta">3年 ・ 保護者1人</div><div class="cc__tags"><span class="badge badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> QR有効</span></div></div></div>
+        <div class="card cc"><div class="cc__av cc__av--b">り</div><div class="cc__info"><div class="cc__name">山本 りく</div><div class="cc__meta">3年 ・ 保護者2人</div><div class="cc__tags"><span class="badge badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> QR有効</span></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ QR ═══════ -->
+<div id="page-qr" class="page">
+  <div class="dash">
+    <aside class="sb">
+      <div class="sb__hd"><div class="sb__mark"><span class="star"></span></div><div class="sb__name">星ヶ丘こどもクラブ</div></div>
+      <nav class="sb__nav">
+        <a class="ni active" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> QR入退室</a>
+        <a class="ni" href="#"><span class="ni__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> 出席状況</a>
+      </nav>
+      <div class="sb__ft"><div class="sb__av">田</div><div><div class="sb__uname">田中 花子</div><div class="sb__urole">先生</div></div></div>
+    </aside>
+    <div class="dm">
+      <div class="qr-pg">
+        <h1 class="qr-pg__title">入退室管理</h1>
+        <p class="qr-pg__sub">QRコードをかざして入室・退室を記録します</p>
+        <div class="qr-box"><div class="qr-box__frame"></div><div class="qr-box__line"></div><div class="qr-box__hint">カメラに QR コードを<br>かざしてください</div></div>
+        <div class="qr-form"><input type="text" placeholder="QRコードを手動入力"><button class="btn btn-primary">送信</button></div>
+        <a href="#" style="margin-top:16px;font-size:13px;color:var(--primary);text-decoration:none">手動入力ページへ →</a>
+        <div style="margin-top:28px;text-align:center">
+          <p style="font-size:11px;color:var(--fg-muted);margin-bottom:6px">デモ</p>
+          <button class="btn btn-sm" style="background:var(--green);color:white" onclick="showRes('in')">入室</button>
+          <button class="btn btn-sm" style="background:var(--danger);color:white" onclick="showRes('out')">退室</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result with confetti stars -->
+  <div id="res-ov" class="res-ov" onclick="hideRes()">
+    <div class="res-card" onclick="event.stopPropagation()">
+      <div id="res-confetti" class="res-card__confetti">
+        <span class="star" style="font-size:14px;color:#F5C542"></span>
+        <span class="star" style="font-size:10px;color:#F2784B"></span>
+        <span class="star" style="font-size:12px;color:#3D9B6E"></span>
+        <span class="star" style="font-size:8px;color:#E25D5D"></span>
+        <span class="star" style="font-size:11px;color:#F5C542"></span>
+        <span class="star" style="font-size:9px;color:#F2784B"></span>
+      </div>
+      <div id="res-ring" class="res-card__ring res-card__ring--in"><span class="star"></span></div>
+      <div class="res-card__name">佐藤 ゆうと</div>
+      <div id="res-st" class="res-card__status res-card__status--in">入室しました</div>
+      <div id="res-tm" class="res-card__time"></div>
+      <div id="res-msg" class="res-card__msg">おかえりなさい！今日もたのしくすごそうね ⭐</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function sp(id,b){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.sw button').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');b.classList.add('active')}
+
+// Set sky based on current time
+function updateSky(){
+  const h=new Date().getHours();
+  const heros=document.querySelectorAll('.sky');
+  let mode='morning';
+  if(h>=14&&h<17)mode='afternoon';
+  else if(h>=17||h<6)mode='evening';
+  heros.forEach(el=>{el.classList.remove('sky--morning','sky--afternoon','sky--evening');el.classList.add('sky--'+mode)});
+}
+updateSky();
+
+function showRes(t){
+  const o=document.getElementById('res-ov'),r=document.getElementById('res-ring'),s=document.getElementById('res-st'),m=document.getElementById('res-msg'),cf=document.getElementById('res-confetti');
+  if(t==='in'){r.className='res-card__ring res-card__ring--in';s.textContent='入室しました';s.className='res-card__status res-card__status--in';m.textContent='おかえりなさい！今日もたのしくすごそうね ⭐'}
+  else{r.className='res-card__ring res-card__ring--out';s.textContent='退室しました';s.className='res-card__status res-card__status--out';m.textContent='さようなら！気をつけてかえってね ⭐'}
+  document.getElementById('res-tm').textContent=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  
+  // Confetti burst
+  cf.classList.remove('burst');
+  const stars=cf.querySelectorAll('.star');
+  stars.forEach((s,i)=>{
+    const angle=(i/stars.length)*360;
+    const dist=60+Math.random()*40;
+    const x=Math.cos(angle*Math.PI/180)*dist;
+    const y=Math.sin(angle*Math.PI/180)*dist;
+    s.style.setProperty('--tx',x+'px');s.style.setProperty('--ty',y+'px');
+    s.style.animation='none';s.offsetHeight;
+    s.style.animation=`confetti-burst 0.8s ease-out ${i*0.05}s forwards`;
+  });
+  // Override animation to use custom positions
+  const style=document.createElement('style');
+  style.textContent=`@keyframes confetti-burst{0%{transform:translate(0,0) rotate(0) scale(.5);opacity:1}100%{transform:translate(var(--tx),var(--ty)) rotate(360deg) scale(1);opacity:0}}`;
+  document.head.appendChild(style);
+  
+  o.classList.add('show');
+  setTimeout(()=>hideRes(),3000);
+}
+function hideRes(){document.getElementById('res-ov').classList.remove('show')}
+</script>
+</body>
+</html>

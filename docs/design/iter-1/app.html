@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ホーム — gakudo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Sidebar (desktop) -->
+  <nav class="sidebar" aria-label="サイドバーナビゲーション">
+    <div class="sidebar-logo">
+      <span class="site-logo-icon" aria-hidden="true">🌻</span>
+      gakudo
+    </div>
+    <div class="sidebar-nav">
+      <a href="app.html" class="sidebar-item active">
+        <span class="icon" aria-hidden="true">🏠</span>
+        ホーム
+      </a>
+      <a href="attendance.html" class="sidebar-item">
+        <span class="icon" aria-hidden="true">📋</span>
+        入退場
+      </a>
+      <a href="announcements.html" class="sidebar-item">
+        <span class="icon" aria-hidden="true">📢</span>
+        連絡
+      </a>
+      <a href="#" class="sidebar-item">
+        <span class="icon" aria-hidden="true">📷</span>
+        写真
+      </a>
+      <a href="#" class="sidebar-item">
+        <span class="icon" aria-hidden="true">💰</span>
+        請求
+      </a>
+      <a href="#" class="sidebar-item">
+        <span class="icon" aria-hidden="true">👶</span>
+        児童管理
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" aria-hidden="true">山</div>
+      <div>
+        <div style="font-size:0.875rem; font-weight:500;">山田 花子</div>
+        <div style="font-size:0.75rem; color:var(--color-fg-muted);">先生</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="app-main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">本日の出席状況</h1>
+        <p class="page-desc">2026年4月20日（月）</p>
+      </div>
+      <a href="attendance.html" class="btn btn-primary">QR読取を開始</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">登録児童</div>
+        <div class="stat-value">28</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">入室中</div>
+        <div class="stat-value stat-value-enter">18</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">退室済</div>
+        <div class="stat-value stat-value-exit">6</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">未入室</div>
+        <div class="stat-value stat-value-warning">4</div>
+      </div>
+    </div>
+
+    <!-- Children attendance list -->
+    <div class="card" style="margin-bottom:var(--space-6);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-4);">
+        <h2 class="text-lg font-bold">児童一覧</h2>
+        <div style="display:flex; gap:var(--space-2);">
+          <button class="btn btn-ghost btn-sm" style="color:var(--color-fg);" aria-pressed="true">全員</button>
+          <button class="btn btn-ghost btn-sm">入室中</button>
+          <button class="btn btn-ghost btn-sm">未入室</button>
+          <button class="btn btn-ghost btn-sm">退室済</button>
+        </div>
+      </div>
+
+      <table class="children-table" role="table">
+        <thead>
+          <tr>
+            <th scope="col">児童名</th>
+            <th scope="col">学年</th>
+            <th scope="col">状態</th>
+            <th scope="col">入室時刻</th>
+            <th scope="col">退室時刻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="child-name">田中 太郎</span></td>
+            <td><span class="child-grade">3年生</span></td>
+            <td><span class="badge badge-enter">入室中</span></td>
+            <td>14:55</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">佐藤 あおい</span></td>
+            <td><span class="child-grade">2年生</span></td>
+            <td><span class="badge badge-enter">入室中</span></td>
+            <td>15:02</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">鈴木 はると</span></td>
+            <td><span class="child-grade">1年生</span></td>
+            <td><span class="badge badge-exit">退室済</span></td>
+            <td>14:48</td>
+            <td>17:45</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">伊藤 さくら</span></td>
+            <td><span class="child-grade">1年生</span></td>
+            <td><span class="badge badge-enter">入室中</span></td>
+            <td>15:10</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">高橋 ゆうき</span></td>
+            <td><span class="child-grade">4年生</span></td>
+            <td><span class="badge badge-exit">退室済</span></td>
+            <td>15:30</td>
+            <td>17:30</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">渡辺 りく</span></td>
+            <td><span class="child-grade">2年生</span></td>
+            <td><span class="badge badge-warning">未入室</span></td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">山本 ひなた</span></td>
+            <td><span class="child-grade">3年生</span></td>
+            <td><span class="badge badge-enter">入室中</span></td>
+            <td>14:50</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">中村 そうた</span></td>
+            <td><span class="child-grade">5年生</span></td>
+            <td><span class="badge badge-enter">入室中</span></td>
+            <td>15:15</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">小林 めい</span></td>
+            <td><span class="child-grade">1年生</span></td>
+            <td><span class="badge badge-warning">未入室</span></td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="child-name">加藤 こうせい</span></td>
+            <td><span class="child-grade">6年生</span></td>
+            <td><span class="badge badge-exit">退室済</span></td>
+            <td>14:45</td>
+            <td>16:30</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recent announcements -->
+    <div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-4);">
+        <h2 class="text-lg font-bold">最近の連絡</h2>
+        <a href="announcements.html" class="btn btn-ghost btn-sm">すべて見る →</a>
+      </div>
+      <div class="announcement-list">
+        <a href="#" class="announcement-card">
+          <div class="announcement-unread-dot" aria-label="未読"></div>
+          <div class="announcement-content">
+            <div class="announcement-title">ゴールデンウィーク期間の開所時間について</div>
+            <div class="announcement-preview">5月3日（土）〜5月6日（火）は休所となります。5月7日（水）より通常通り開所いたします。延長保育の受付は…</div>
+            <div class="announcement-meta">
+              <span>山田 花子</span>
+              <span>2026年4月18日</span>
+            </div>
+          </div>
+        </a>
+        <a href="#" class="announcement-card">
+          <div class="announcement-unread-dot read"></div>
+          <div class="announcement-content">
+            <div class="announcement-title">5月の行事予定</div>
+            <div class="announcement-preview">5月の行事予定をお知らせいたします。12日（月）遠足（雨天時は翌日に延期）、20日（火）保護者会…</div>
+            <div class="announcement-meta">
+              <span>山田 花子</span>
+              <span>2026年4月10日</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile tabs -->
+  <nav class="mobile-tabs" aria-label="モバイルナビゲーション">
+    <div class="mobile-tabs-inner">
+      <a href="app.html" class="mobile-tab active">
+        <span class="icon" aria-hidden="true">🏠</span>
+        ホーム
+      </a>
+      <a href="attendance.html" class="mobile-tab">
+        <span class="icon" aria-hidden="true">📋</span>
+        入退場
+      </a>
+      <a href="announcements.html" class="mobile-tab">
+        <span class="icon" aria-hidden="true">📢</span>
+        連絡
+      </a>
+      <a href="#" class="mobile-tab">
+        <span class="icon" aria-hidden="true">📷</span>
+        写真
+      </a>
+      <a href="#" class="mobile-tab">
+        <span class="icon" aria-hidden="true">💰</span>
+        請求
+      </a>
+    </div>
+  </nav>
+</div>
+
+</body>
+</html>

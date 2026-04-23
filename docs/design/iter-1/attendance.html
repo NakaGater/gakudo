@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入退場管理 — gakudo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Sidebar (desktop) -->
+  <nav class="sidebar" aria-label="サイドバーナビゲーション">
+    <div class="sidebar-logo">
+      <span class="site-logo-icon" aria-hidden="true">🌻</span>
+      gakudo
+    </div>
+    <div class="sidebar-nav">
+      <a href="app.html" class="sidebar-item">
+        <span class="icon" aria-hidden="true">🏠</span>
+        ホーム
+      </a>
+      <a href="attendance.html" class="sidebar-item active">
+        <span class="icon" aria-hidden="true">📋</span>
+        入退場
+      </a>
+      <a href="announcements.html" class="sidebar-item">
+        <span class="icon" aria-hidden="true">📢</span>
+        連絡
+      </a>
+      <a href="#" class="sidebar-item">
+        <span class="icon" aria-hidden="true">📷</span>
+        写真
+      </a>
+      <a href="#" class="sidebar-item">
+        <span class="icon" aria-hidden="true">💰</span>
+        請求
+      </a>
+      <a href="#" class="sidebar-item">
+        <span class="icon" aria-hidden="true">👶</span>
+        児童管理
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" aria-hidden="true">山</div>
+      <div>
+        <div style="font-size:0.875rem; font-weight:500;">山田 花子</div>
+        <div style="font-size:0.75rem; color:var(--color-fg-muted);">先生</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="app-main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">QRコード読取</h1>
+        <p class="page-desc">児童のQRコードをカメラにかざしてください</p>
+      </div>
+      <a href="#manual" class="btn btn-secondary">手動で記録する</a>
+    </div>
+
+    <!-- Scanner -->
+    <div class="scanner-area" role="region" aria-label="QRコードスキャナー">
+      <div class="scanner-overlay"></div>
+      <div class="scanner-hint">QRコードをここに合わせてください</div>
+    </div>
+
+    <div style="text-align:center; margin-top:var(--space-3);">
+      <span class="text-sm text-muted">カメラが起動しない場合は、ブラウザのカメラ許可を確認してください</span>
+    </div>
+
+    <!-- Latest results -->
+    <div style="margin-top:var(--space-8);">
+      <h2 class="text-lg font-bold" style="margin-bottom:var(--space-4);">直近の記録</h2>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); max-width:640px; margin:0 auto;">
+        <div class="attendance-result-overlay attendance-result-enter">
+          <div>
+            <div class="result-icon">✅</div>
+            <div class="result-name">佐藤 あおい</div>
+            <div class="result-action result-action-enter">入室しました</div>
+            <div class="result-time">15:32 — QR読取</div>
+          </div>
+        </div>
+        <div class="attendance-result-overlay attendance-result-exit">
+          <div>
+            <div class="result-icon">👋</div>
+            <div class="result-name">鈴木 はると</div>
+            <div class="result-action result-action-exit">退室しました</div>
+            <div class="result-time">17:45 — QR読取</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual fallback section -->
+    <div id="manual" style="margin-top:var(--space-8);">
+      <h2 class="text-lg font-bold" style="margin-bottom:var(--space-4);">手動入力</h2>
+      <p class="text-sm text-muted" style="margin-bottom:var(--space-4);">QRコードが読み取れない場合は、児童名をタップして記録できます。</p>
+
+      <div class="card">
+        <table class="children-table">
+          <thead>
+            <tr>
+              <th>児童名</th>
+              <th>学年</th>
+              <th>状態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="child-name">田中 太郎</span></td>
+              <td><span class="child-grade">3年生</span></td>
+              <td><span class="badge badge-enter">入室中</span></td>
+              <td><button class="btn btn-exit btn-sm">退室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">佐藤 あおい</span></td>
+              <td><span class="child-grade">2年生</span></td>
+              <td><span class="badge badge-enter">入室中</span></td>
+              <td><button class="btn btn-exit btn-sm">退室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">伊藤 さくら</span></td>
+              <td><span class="child-grade">1年生</span></td>
+              <td><span class="badge badge-warning">未入室</span></td>
+              <td><button class="btn btn-enter btn-sm">入室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">高橋 ゆうき</span></td>
+              <td><span class="child-grade">4年生</span></td>
+              <td><span class="badge badge-exit">退室済</span></td>
+              <td><button class="btn btn-enter btn-sm">入室</button></td>
+            </tr>
+            <tr>
+              <td><span class="child-name">渡辺 りく</span></td>
+              <td><span class="child-grade">2年生</span></td>
+              <td><span class="badge badge-warning">未入室</span></td>
+              <td><button class="btn btn-enter btn-sm">入室</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile tabs -->
+  <nav class="mobile-tabs" aria-label="モバイルナビゲーション">
+    <div class="mobile-tabs-inner">
+      <a href="app.html" class="mobile-tab">
+        <span class="icon" aria-hidden="true">🏠</span>
+        ホーム
+      </a>
+      <a href="attendance.html" class="mobile-tab active">
+        <span class="icon" aria-hidden="true">📋</span>
+        入退場
+      </a>
+      <a href="announcements.html" class="mobile-tab">
+        <span class="icon" aria-hidden="true">📢</span>
+        連絡
+      </a>
+      <a href="#" class="mobile-tab">
+        <span class="icon" aria-hidden="true">📷</span>
+        写真
+      </a>
+      <a href="#" class="mobile-tab">
+        <span class="icon" aria-hidden="true">💰</span>
+        請求
+      </a>
+    </div>
+  </nav>
+</div>
+
+</body>
+</html>
