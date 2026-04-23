@@ -20,10 +20,27 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
   const supabase = await createClient();
   const isStaff = user.role === "teacher" || user.role === "admin";
 
-  // Total count for pagination
-  const { count } = await supabase
+  // Parallel: count + data fetch
+  const countQuery = supabase
     .from("announcements")
     .select("*", { count: "exact", head: true });
+
+  const dataQuery = supabase
+    .from("announcements")
+    .select(
+      `id, title, body, created_at,
+       author:profiles!announcements_posted_by_fkey(name)${
+         isStaff ? "" : `, announcement_reads!left(user_id)`
+       }`,
+    )
+    .order("created_at", { ascending: false })
+    .range(offset, offset + PAGE_SIZE - 1);
+
+  if (!isStaff) {
+    dataQuery.eq("announcement_reads.user_id", user.id);
+  }
+
+  const [{ count }, { data }] = await Promise.all([countQuery, dataQuery]);
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -36,23 +53,6 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
     announcement_reads: { user_id: string }[];
   };
 
-  // Fetch announcements with author profile and (for parents) read status
-  const query = supabase
-    .from("announcements")
-    .select(
-      `id, title, body, created_at,
-       author:profiles!announcements_posted_by_fkey(name)${
-         isStaff ? "" : `, announcement_reads!left(user_id)`
-       }`,
-    )
-    .order("created_at", { ascending: false })
-    .range(offset, offset + PAGE_SIZE - 1);
-
-  if (!isStaff) {
-    query.eq("announcement_reads.user_id", user.id);
-  }
-
-  const { data } = await query;
   const announcements = (data ?? []) as unknown as AnnouncementRow[];
 
   return (
