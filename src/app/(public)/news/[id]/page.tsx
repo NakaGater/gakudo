@@ -5,10 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft } from "lucide-react";
 import { getAttachments, getAttachmentUrl } from "@/lib/attachments/actions";
 import { AttachmentList } from "@/components/attachments/attachment-list";
-import { CACHE } from "@/config/constants";
-
-export const dynamic = "force-dynamic";
-export const revalidate = CACHE.PUBLIC_PAGE_REVALIDATE;
 
 type Props = { params: Promise<{ id: string }> };
 

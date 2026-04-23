@@ -28,12 +28,13 @@ export async function uploadAttachment(
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
-  const file = formData.get("file");
-  const fileValidation = validateFile(file);
+  const rawFile = formData.get("file");
+  const fileValidation = validateFile(rawFile);
   if (!fileValidation.valid) {
     return { success: false, message: fileValidation.message };
   }
-  const typeValidation = validateFileType(file as File, ALLOWED_TYPES, "PDF または画像ファイルを選択してください");
+  const file = rawFile as File;
+  const typeValidation = validateFileType(file, ALLOWED_TYPES, "PDF または画像ファイルを選択してください");
   if (!typeValidation.valid) {
     return { success: false, message: typeValidation.message };
   }
