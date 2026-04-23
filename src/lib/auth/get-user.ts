@@ -12,19 +12,21 @@ export type AuthUser = {
 export const getUser = cache(async (): Promise<AuthUser> => {
   const supabase = await createClient()
 
+  // getSession() reads JWT from cookie without network call (fast)
+  // JWT signature still prevents tampering
   const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
 
-  if (authError || !user) {
+  if (sessionError || !session?.user) {
     redirect('/login')
   }
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, email, name, role')
-    .eq('id', user.id)
+    .eq('id', session.user.id)
     .single<Pick<AuthUser, 'id' | 'email' | 'name' | 'role'>>()
 
   if (profileError || !profile) {

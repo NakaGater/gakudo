@@ -10,12 +10,12 @@ vi.mock('next/navigation', () => ({
 }))
 
 // Mock Supabase server client
-const mockGetUser = vi.fn()
+const mockGetSession = vi.fn()
 const mockFrom = vi.fn()
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      auth: { getUser: mockGetUser },
+      auth: { getSession: mockGetSession },
       from: mockFrom,
     }),
   ),
@@ -30,9 +30,8 @@ describe('getUser', () => {
   })
 
   it('returns user profile when authenticated', async () => {
-    const mockAuthUser = {
-      id: 'user-123',
-      email: 'test@example.com',
+    const mockSession = {
+      user: { id: 'user-123', email: 'test@example.com' },
     }
     const mockProfile = {
       id: 'user-123',
@@ -41,8 +40,8 @@ describe('getUser', () => {
       role: 'parent' as const,
     }
 
-    mockGetUser.mockResolvedValue({
-      data: { user: mockAuthUser },
+    mockGetSession.mockResolvedValue({
+      data: { session: mockSession },
       error: null,
     })
     mockFrom.mockReturnValue({
@@ -67,8 +66,8 @@ describe('getUser', () => {
   })
 
   it('redirects to /login when not authenticated', async () => {
-    mockGetUser.mockResolvedValue({
-      data: { user: null },
+    mockGetSession.mockResolvedValue({
+      data: { session: null },
       error: { message: 'Not authenticated' },
     })
 
@@ -77,9 +76,9 @@ describe('getUser', () => {
   })
 
   it('redirects to /login when profile not found', async () => {
-    mockGetUser.mockResolvedValue({
+    mockGetSession.mockResolvedValue({
       data: {
-        user: { id: 'user-123', email: 'test@example.com' },
+        session: { user: { id: 'user-123', email: 'test@example.com' } },
       },
       error: null,
     })
