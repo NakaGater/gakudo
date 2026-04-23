@@ -26,6 +26,12 @@ export const metadata: Metadata = {
   description: "子どもたちの笑顔あふれる放課後を — 学童保育管理システム",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
