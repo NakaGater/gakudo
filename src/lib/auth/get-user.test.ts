@@ -9,11 +9,6 @@ vi.mock('next/navigation', () => ({
   },
 }))
 
-// Mock next/cache - unstable_cache just passes through the function
-vi.mock('next/cache', () => ({
-  unstable_cache: (fn: Function) => fn,
-}))
-
 // Mock Supabase server client
 const mockGetUser = vi.fn()
 const mockFrom = vi.fn()
