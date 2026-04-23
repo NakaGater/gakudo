@@ -11,9 +11,10 @@ import type { AuthUser } from "@/lib/auth/get-user";
 type SidebarProps = {
   user: AuthUser;
   pendingInquiries?: number;
+  unreadAnnouncements?: number;
 };
 
-export function Sidebar({ user, pendingInquiries = 0 }: SidebarProps) {
+export function Sidebar({ user, pendingInquiries = 0, unreadAnnouncements = 0 }: SidebarProps) {
   const pathname = usePathname();
   const items = getNavItems(user.role);
 
@@ -61,6 +62,11 @@ export function Sidebar({ user, pendingInquiries = 0 }: SidebarProps) {
               {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
                 <span className="ml-auto inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1">
                   {pendingInquiries}
+                </span>
+              )}
+              {item.href === "/announcements" && unreadAnnouncements > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1">
+                  {unreadAnnouncements}
                 </span>
               )}
             </Link>

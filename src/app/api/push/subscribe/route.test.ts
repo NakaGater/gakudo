@@ -86,9 +86,18 @@ describe('POST /api/push/subscribe', () => {
     // Insert — success
     const mockInsert = vi.fn().mockResolvedValue({ error: null })
 
+    // notification_preferences mock
+    const mockPrefSingle = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockPrefEq = vi.fn().mockReturnValue({ single: mockPrefSingle })
+    const mockPrefSelect = vi.fn().mockReturnValue({ eq: mockPrefEq })
+    const mockPrefUpsert = vi.fn().mockResolvedValue({ error: null })
+
     mockFrom.mockImplementation((table: string) => {
       if (table === 'push_subscriptions') {
         return { select: mockSelect, insert: mockInsert }
+      }
+      if (table === 'notification_preferences') {
+        return { select: mockPrefSelect, upsert: mockPrefUpsert }
       }
       return {}
     })

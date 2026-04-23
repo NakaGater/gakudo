@@ -11,9 +11,10 @@ const MAX_TABS = 5;
 type MobileTabsProps = {
   user: AuthUser;
   pendingInquiries?: number;
+  unreadAnnouncements?: number;
 };
 
-export function MobileTabs({ user, pendingInquiries = 0 }: MobileTabsProps) {
+export function MobileTabs({ user, pendingInquiries = 0, unreadAnnouncements = 0 }: MobileTabsProps) {
   const pathname = usePathname();
   const items = getNavItems(user.role).slice(0, MAX_TABS);
 
@@ -47,6 +48,11 @@ export function MobileTabs({ user, pendingInquiries = 0 }: MobileTabsProps) {
               {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
                 <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
                   {pendingInquiries}
+                </span>
+              )}
+              {item.href === "/announcements" && unreadAnnouncements > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1">
+                  {unreadAnnouncements}
                 </span>
               )}
             </Link>
