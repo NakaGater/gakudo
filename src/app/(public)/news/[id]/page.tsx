@@ -49,13 +49,15 @@ export default async function NewsDetailPage({ params }: Props) {
 
   if (!news) notFound();
 
-  // 添付ファイル取得
+  // 添付ファイル取得（URL生成を並列化）
   const attachments = await getAttachments("news", id);
+  const urls = await Promise.all(
+    attachments.map((att) => getAttachmentUrl(att.file_path)),
+  );
   const downloadUrls: Record<string, string> = {};
-  for (const att of attachments) {
-    const url = await getAttachmentUrl(att.file_path);
-    if (url) downloadUrls[att.id] = url;
-  }
+  attachments.forEach((att, i) => {
+    if (urls[i]) downloadUrls[att.id] = urls[i];
+  });
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">

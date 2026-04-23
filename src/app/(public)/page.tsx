@@ -63,12 +63,32 @@ export default async function HomePage() {
   let accessMeta: Record<string, unknown> = {};
   try {
     const supabase = await createClient();
-    const { data: homePage } = await supabase
-      .from("site_pages")
-      .select("title, content, metadata")
-      .eq("slug", "home")
-      .single() as { data: { title: string; content: string; metadata: Record<string, unknown> } | null };
 
+    // 4クエリを並列実行
+    const [homeResult, photosResult, newsResult, accessResult] = await Promise.all([
+      supabase
+        .from("site_pages")
+        .select("title, content, metadata")
+        .eq("slug", "home")
+        .single(),
+      supabase
+        .from("photos")
+        .select("storage_path")
+        .eq("visibility", "public")
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabase
+        .from("site_news")
+        .select("id, title, body, published_at")
+        .order("published_at", { ascending: false }),
+      supabase
+        .from("site_pages")
+        .select("content, metadata")
+        .eq("slug", "access")
+        .single(),
+    ]);
+
+    const homePage = homeResult.data as { title: string; content: string; metadata: Record<string, unknown> } | null;
     if (homePage?.content) {
       heroText = homePage.content;
     }
@@ -83,14 +103,7 @@ export default async function HomePage() {
       }
     }
 
-    // 公開写真を取得（スライドショー用、最大10枚）
-    const { data: photos } = await supabase
-      .from("photos")
-      .select("storage_path")
-      .eq("visibility", "public")
-      .order("created_at", { ascending: false })
-      .limit(10);
-
+    const photos = photosResult.data;
     if (photos && photos.length > 0) {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
       photoUrls = photos.map(
@@ -98,23 +111,12 @@ export default async function HomePage() {
       );
     }
 
-    // 最新お知らせを取得（全件）
-    const { data: news } = await supabase
-      .from("site_news")
-      .select("id, title, body, published_at")
-      .order("published_at", { ascending: false }) as { data: { id: string; title: string; body: string; published_at: string }[] | null };
-
+    const news = newsResult.data as { id: string; title: string; body: string; published_at: string }[] | null;
     if (news && news.length > 0) {
       newsItems = news;
     }
 
-    // アクセスページデータ取得
-    const { data: accessPage } = await supabase
-      .from("site_pages")
-      .select("content, metadata")
-      .eq("slug", "access")
-      .single() as { data: { content: string; metadata: Record<string, unknown> } | null };
-
+    const accessPage = accessResult.data as { content: string; metadata: Record<string, unknown> } | null;
     if (accessPage) {
       accessContent = accessPage.content;
       accessMeta = accessPage.metadata || {};

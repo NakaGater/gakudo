@@ -17,20 +17,28 @@ function buildPublicUrl(storagePath: string): string {
 export default async function GalleryPage() {
   const supabase = await createClient();
 
-  const { data: rows } = await supabase
-    .from("photos")
-    .select("id, storage_path, caption, event_name")
-    .eq("visibility", "public")
-    .order("event_name", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: false })
-    .returns<
-      {
-        id: string;
-        storage_path: string;
-        caption: string | null;
-        event_name: string | null;
-      }[]
-    >();
+  // 写真とInstagram投稿を並列取得
+  const [{ data: rows }, { data: igRows }] = await Promise.all([
+    supabase
+      .from("photos")
+      .select("id, storage_path, caption, event_name")
+      .eq("visibility", "public")
+      .order("event_name", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .returns<
+        {
+          id: string;
+          storage_path: string;
+          caption: string | null;
+          event_name: string | null;
+        }[]
+      >(),
+    supabase
+      .from("instagram_posts")
+      .select("id, post_url, caption")
+      .eq("is_visible", true)
+      .order("display_order", { ascending: true }),
+  ]);
 
   const photos: GalleryPhoto[] = (rows ?? []).map((row) => ({
     id: row.id,
@@ -38,13 +46,6 @@ export default async function GalleryPage() {
     caption: row.caption,
     event_name: row.event_name,
   }));
-
-  // Instagram投稿を取得
-  const { data: igRows } = await supabase
-    .from("instagram_posts")
-    .select("id, post_url, caption")
-    .eq("is_visible", true)
-    .order("display_order", { ascending: true });
 
   const igPosts = (igRows ?? []).map((r) => ({
     id: r.id,
