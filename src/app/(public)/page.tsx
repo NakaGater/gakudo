@@ -127,17 +127,17 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative" style={{ padding: "40px 40px 0" }}>
+      <section className="relative px-5 pt-6 md:px-10 md:pt-10">
         {/* Ambient stars */}
-        <span className="absolute top-[8%] right-[12%] text-[10px] opacity-30 animate-float pointer-events-none" style={{ color: "var(--cr-yellow)" }} aria-hidden="true">⭐</span>
-        <span className="absolute top-[5%] left-[8%] text-[7px] opacity-30 animate-float pointer-events-none" style={{ color: "var(--cr-yellow)", animationDelay: "2s" }} aria-hidden="true">⭐</span>
+        <span className="absolute top-[8%] right-[12%] text-[10px] opacity-30 animate-float pointer-events-none hidden md:inline" style={{ color: "var(--cr-yellow)" }} aria-hidden="true">⭐</span>
+        <span className="absolute top-[5%] left-[8%] text-[7px] opacity-30 animate-float pointer-events-none hidden md:inline" style={{ color: "var(--cr-yellow)", animationDelay: "2s" }} aria-hidden="true">⭐</span>
 
-        <div className="grid items-center gap-8" style={{ gridTemplateColumns: "1.1fr 0.9fr" }}>
+        <div className="grid items-center gap-6 md:gap-8 grid-cols-1 md:grid-cols-[1.1fr_0.9fr]">
           {/* Text side */}
           <div>
             <div className="mb-3 font-hand text-xs text-cr-orange">📖 だい１しょう</div>
             <h1 className="font-story font-black text-ink ink-bleed" style={{
-              fontSize: "clamp(38px, 4.2vw, 46px)",
+              fontSize: "clamp(28px, 6vw, 46px)",
               lineHeight: "1.18",
               letterSpacing: "-.025em",
               textWrap: "balance",
@@ -236,14 +236,14 @@ export default async function HomePage() {
       </section>
 
       {/* Features — sticky note grid */}
-      <section style={{ padding: "40px 40px", background: "linear-gradient(180deg, transparent 0%, rgba(255,217,61,.03) 50%, transparent 100%)" }}>
+      <section className="px-5 py-8 md:px-10 md:py-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(255,217,61,.03) 50%, transparent 100%)" }}>
         <div className="text-center mb-5">
           <h2 className="font-story font-black text-ink inline-block" style={{ fontSize: "22px" }}>
             <span className="crayon-underline">{featuresHeading}</span>
           </h2>
           <p className="text-[13px] text-ink-mid mt-1.5">{featuresSubtitle}</p>
         </div>
-        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           {featureItems.map((feature, i) => {
             const IconComponent = getFeatureIcon(feature.icon);
             const stickyColors = [
@@ -281,10 +281,8 @@ export default async function HomePage() {
 
       {/* News — お知らせ一覧 */}
       <section
-        className="relative rounded-xl border border-page-edge/60"
+        className="relative rounded-xl border border-page-edge/60 px-5 py-6 mx-5 md:px-9 md:py-7 md:mx-10"
         style={{
-          padding: "28px 36px",
-          margin: "8px 40px 40px",
           background: "var(--page-deep)",
         }}
       >
@@ -315,7 +313,7 @@ export default async function HomePage() {
       </section>
 
       {/* Access — アクセス・お問い合わせ */}
-      <section id="access" style={{ padding: "40px 40px 0" }}>
+      <section id="access" className="px-5 pt-8 md:px-10 md:pt-10">
         <div className="text-center mb-5">
           <h2 className="font-story font-black text-ink inline-block" style={{ fontSize: "22px" }}>
             <span className="crayon-underline">アクセス</span>
@@ -370,14 +368,13 @@ export default async function HomePage() {
       </section>
 
       {/* Inquiry — 見学申し込み・お問い合わせフォーム（折りたたみ） */}
-      <details id="inquiry" className="group" style={{
-        margin: "32px 40px 40px",
+      <details id="inquiry" className="group mx-5 mt-6 mb-8 md:mx-10 md:mt-8 md:mb-10" style={{
         background: "var(--page-deep)",
         border: "1px solid var(--page-edge)",
         borderRadius: "12px",
         overflow: "hidden",
       }}>
-        <summary className="cursor-pointer list-none text-center" style={{ padding: "28px 36px" }}>
+        <summary className="cursor-pointer list-none text-center px-5 py-6 md:px-9 md:py-7">
           <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
           <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>
             {(accessMeta?.visit_heading as string) || "見学申し込み・お問い合わせ"}
@@ -389,7 +386,7 @@ export default async function HomePage() {
             ▼ フォームを開く
           </span>
         </summary>
-        <div style={{ padding: "0 36px 28px" }}>
+        <div className="px-5 pb-6 md:px-9 md:pb-7">
           <div className="mx-auto max-w-lg">
             <InquiryForm />
           </div>

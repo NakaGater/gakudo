@@ -1145,6 +1145,7 @@
 /* ═══ Responsive breakpoints ═══ */
 @media(max-width:768px){
   .book-page{margin:8px}
+  .hero-slideshow{height:200px}
   .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
   .gal-lb__nav--prev{left:4px}
   .gal-lb__nav--next{right:4px}
