@@ -8,6 +8,7 @@ import {
   UserPlus,
   Globe,
   MessageSquare,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -29,6 +30,7 @@ export const navItems: NavItem[] = [
   { label: "ユーザー", icon: UserPlus, href: "/admin/users", roles: ["admin"] },
   { label: "お問い合わせ", icon: MessageSquare, href: "/admin/inquiries", roles: ["admin", "teacher"] },
   { label: "HP管理", icon: Globe, href: "/admin/site/pages", roles: ["admin"] },
+  { label: "設定", icon: Settings, href: "/profile", roles: ["parent", "teacher", "admin", "entrance"] },
 ];
 
 export function getNavItems(role: string): NavItem[] {

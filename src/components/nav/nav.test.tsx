@@ -23,30 +23,33 @@ afterEach(() => {
 
 // ----- getNavItems unit tests -----
 describe("getNavItems", () => {
-  it("returns 4 items for parent role", () => {
+  it("returns 5 items for parent role", () => {
     const items = getNavItems("parent");
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(5);
     expect(items.map((i) => i.label)).toEqual([
       "入室状況",
       "連絡",
       "写真",
       "請求",
+      "設定",
     ]);
   });
 
-  it("returns 6 items for teacher role", () => {
+  it("returns 7 items for teacher role", () => {
     const items = getNavItems("teacher");
-    expect(items).toHaveLength(6);
+    expect(items).toHaveLength(7);
     expect(items.map((i) => i.label)).toContain("児童管理");
     expect(items.map((i) => i.label)).toContain("お問い合わせ");
+    expect(items.map((i) => i.label)).toContain("設定");
   });
 
-  it("returns 8 items for admin role", () => {
+  it("returns 9 items for admin role", () => {
     const items = getNavItems("admin");
-    expect(items).toHaveLength(8);
+    expect(items).toHaveLength(9);
     expect(items.map((i) => i.label)).toContain("ユーザー");
     expect(items.map((i) => i.label)).toContain("お問い合わせ");
     expect(items.map((i) => i.label)).toContain("HP管理");
+    expect(items.map((i) => i.label)).toContain("設定");
   });
 });
 
@@ -59,13 +62,13 @@ describe("Sidebar", () => {
     Sidebar = mod.Sidebar;
   });
 
-  it("renders parent nav items (4 links)", () => {
+  it("renders parent nav items (5 links)", () => {
     render(
       <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const links = screen.getAllByRole("link");
-    // 4 nav items + 1 logo link = 5 links starting with "/"
-    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(5);
+    // 5 nav items + 1 logo link + 1 profile link = 7 links starting with "/"
+    expect(links.filter((l) => l.getAttribute("href")?.startsWith("/"))).toHaveLength(7);
   });
 
   it("renders teacher nav items (6 links)", () => {
@@ -126,12 +129,12 @@ describe("MobileTabs", () => {
     MobileTabs = mod.MobileTabs;
   });
 
-  it("renders max 4 tab items for parent", () => {
+  it("renders max 5 tab items for parent", () => {
     render(
       <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
     );
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(4);
+    expect(links).toHaveLength(5);
   });
 
   it("renders max 5 tab items for admin (subset)", () => {

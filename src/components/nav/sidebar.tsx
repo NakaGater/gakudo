@@ -75,11 +75,13 @@ export function Sidebar({ user, pendingInquiries = 0, unreadAnnouncements = 0 }:
       </nav>
 
       <div className="sb__ft">
-        <div className="sb__av">{user.name.charAt(0)}</div>
-        <div className="min-w-0 flex-1">
-          <div className="sb__uname truncate">{user.name}</div>
-          <div className="sb__urole">{roleLabel}</div>
-        </div>
+        <Link href="/profile" className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity">
+          <div className="sb__av">{user.name.charAt(0)}</div>
+          <div className="min-w-0 flex-1">
+            <div className="sb__uname truncate">{user.name}</div>
+            <div className="sb__urole">{roleLabel}</div>
+          </div>
+        </Link>
         <button
           onClick={handleLogout}
           className="ml-auto p-1 text-ink-light hover:text-cr-red transition-colors flex-shrink-0"
