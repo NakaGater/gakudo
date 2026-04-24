@@ -21,9 +21,9 @@ export default async function SitePagesPage() {
     .select("slug, title, updated_at")
     .returns<{ slug: string; title: string; updated_at: string }[]>();
 
-  const sorted = (pages ?? []).sort(
-    (a, b) => (PAGE_ORDER[a.slug]?.order ?? 99) - (PAGE_ORDER[b.slug]?.order ?? 99),
-  );
+  const sorted = (pages ?? [])
+    .filter((p) => p.slug in PAGE_ORDER)
+    .sort((a, b) => PAGE_ORDER[a.slug].order - PAGE_ORDER[b.slug].order);
 
   return (
     <>
