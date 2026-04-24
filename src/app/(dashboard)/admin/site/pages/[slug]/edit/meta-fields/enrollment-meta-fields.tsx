@@ -74,30 +74,29 @@ export function EnrollmentMetaFields({
       <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">料金（学年別）</legend>
         {fees.map((f, i) => (
-          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
-            <div className="flex gap-2 items-center min-w-0">
-              <input
-                value={f.label}
-                onChange={(e) => { const u = [...fees]; u[i] = { ...f, label: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
-                placeholder="低学年"
-                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-              <input
-                value={f.amount}
-                onChange={(e) => { const u = [...fees]; u[i] = { ...f, amount: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
-                placeholder="15,000円/月"
-                className="w-28 shrink-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-            </div>
-            <div className="flex gap-2 items-center flex-1 min-w-0">
-              <input
-                value={f.note}
-                onChange={(e) => { const u = [...fees]; u[i] = { ...f, note: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
-                placeholder="備考"
-                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
+          <div key={i} className="flex flex-col gap-1.5 rounded-md border border-border/50 p-2 bg-bg-elev/30">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-ink-light">料金 {i + 1}</span>
               <button type="button" onClick={() => setMeta((m) => ({ ...m, fees: fees.filter((_, j) => j !== i) }))} className="text-cr-red text-xs shrink-0">✕</button>
             </div>
+            <input
+              value={f.label}
+              onChange={(e) => { const u = [...fees]; u[i] = { ...f, label: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
+              placeholder="低学年"
+              className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+            <input
+              value={f.amount}
+              onChange={(e) => { const u = [...fees]; u[i] = { ...f, amount: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
+              placeholder="15,000円/月"
+              className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+            <input
+              value={f.note}
+              onChange={(e) => { const u = [...fees]; u[i] = { ...f, note: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
+              placeholder="備考"
+              className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
           </div>
         ))}
         <button type="button" onClick={() => setMeta((m) => ({ ...m, fees: [...fees, { label: "", amount: "", note: "" }] }))} className="text-xs text-cr-blue">＋ 料金を追加</button>
@@ -107,30 +106,29 @@ export function EnrollmentMetaFields({
       <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">兄弟割引料金</legend>
         {siblingFees.map((f, i) => (
-          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
-            <div className="flex gap-2 items-center min-w-0">
-              <input
-                value={f.label}
-                onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, label: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
-                placeholder="2人目（低学年）"
-                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-              <input
-                value={f.amount}
-                onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, amount: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
-                placeholder="12,000円/月"
-                className="w-28 shrink-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-            </div>
-            <div className="flex gap-2 items-center flex-1 min-w-0">
-              <input
-                value={f.note}
-                onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, note: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
-                placeholder="備考"
-                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
+          <div key={i} className="flex flex-col gap-1.5 rounded-md border border-border/50 p-2 bg-bg-elev/30">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-ink-light">割引 {i + 1}</span>
               <button type="button" onClick={() => setMeta((m) => ({ ...m, sibling_fees: siblingFees.filter((_, j) => j !== i) }))} className="text-cr-red text-xs shrink-0">✕</button>
             </div>
+            <input
+              value={f.label}
+              onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, label: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
+              placeholder="2人目（低学年）"
+              className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+            <input
+              value={f.amount}
+              onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, amount: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
+              placeholder="12,000円/月"
+              className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
+            <input
+              value={f.note}
+              onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, note: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
+              placeholder="備考"
+              className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+            />
           </div>
         ))}
         <button type="button" onClick={() => setMeta((m) => ({ ...m, sibling_fees: [...siblingFees, { label: "", amount: "", note: "" }] }))} className="text-xs text-cr-blue">＋ 兄弟割引を追加</button>
