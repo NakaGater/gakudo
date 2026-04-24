@@ -34,7 +34,7 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
   }, []);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form action={formAction} className="flex flex-col gap-6 min-w-0">
       {state?.message && (
         <div
           role="alert"

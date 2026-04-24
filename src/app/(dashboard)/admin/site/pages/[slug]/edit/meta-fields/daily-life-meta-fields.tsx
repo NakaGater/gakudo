@@ -59,7 +59,7 @@ export function DailyLifeMetaFields({
         <legend className="text-sm font-bold text-fg px-2">活動カード</legend>
         <div className="flex flex-col gap-4">
           {activities.map((item, i) => (
-            <div key={i} className="rounded-md border border-border p-3 bg-bg-elev/50">
+            <div key={i} className="rounded-md border border-border p-3 bg-bg-elev/50 min-w-0">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-fg-muted">活動 {i + 1}</span>
                 <button
@@ -71,20 +71,20 @@ export function DailyLifeMetaFields({
                 </button>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="flex gap-2">
+                <div className="flex gap-2 min-w-0">
                   <input
                     type="text"
                     value={item.emoji}
                     onChange={(e) => updateActivity(i, "emoji", e.target.value)}
                     placeholder="絵文字"
-                    className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16"
+                    className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16 shrink-0"
                   />
                   <input
                     type="text"
                     value={item.title}
                     onChange={(e) => updateActivity(i, "title", e.target.value)}
                     placeholder="活動名"
-                    className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1"
+                    className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1 min-w-0"
                   />
                 </div>
                 <textarea
@@ -163,20 +163,20 @@ export function DailyLifeMetaFields({
       <fieldset className="border border-border rounded-md p-4">
         <legend className="text-sm font-bold text-fg px-2">理念セクション</legend>
         <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
+          <div className="flex gap-2 min-w-0">
             <input
               type="text"
               value={(meta.philosophy_emoji as string) ?? "🤝"}
               onChange={(e) => updateMeta("philosophy_emoji", e.target.value)}
               placeholder="絵文字"
-              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16"
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16 shrink-0"
             />
             <input
               type="text"
               value={(meta.philosophy_heading as string) ?? ""}
               onChange={(e) => updateMeta("philosophy_heading", e.target.value)}
               placeholder="見出し"
-              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1"
+              className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1 min-w-0"
             />
           </div>
           <textarea
