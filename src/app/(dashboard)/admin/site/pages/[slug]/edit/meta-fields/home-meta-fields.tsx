@@ -79,7 +79,7 @@ export function HomeMetaFields({
         <div className="flex flex-col gap-4">
           {features.map((item, idx) => (
             <div key={idx} className="flex flex-col gap-2 p-3 border border-border/50 rounded-md bg-bg">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
                   {(() => {
                     const entry = FEATURE_ICONS[item.icon];
@@ -89,7 +89,7 @@ export function HomeMetaFields({
                   <select
                     value={item.icon}
                     onChange={(e) => updateFeatureItem(idx, "icon", e.target.value)}
-                    className="w-32 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                    className="w-28 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
                   >
                     {FEATURE_ICON_KEYS.map((key) => (
                       <option key={key} value={key}>
@@ -98,21 +98,21 @@ export function HomeMetaFields({
                     ))}
                   </select>
                 </div>
-                <input
-                  type="text"
-                  placeholder="タイトル"
-                  value={item.title}
-                  onChange={(e) => updateFeatureItem(idx, "title", e.target.value)}
-                  className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-                />
                 <button
                   type="button"
                   onClick={() => removeFeatureItem(idx)}
-                  className="text-danger hover:text-danger/80 text-sm px-2"
+                  className="text-danger hover:text-danger/80 text-sm px-2 shrink-0"
                 >
                   ✕
                 </button>
               </div>
+              <input
+                type="text"
+                placeholder="タイトル"
+                value={item.title}
+                onChange={(e) => updateFeatureItem(idx, "title", e.target.value)}
+                className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+              />
               <textarea
                 placeholder="説明文"
                 value={item.description}
@@ -153,7 +153,7 @@ export function HomeMetaFields({
               className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-fg-muted">電話番号</label>
               <input
