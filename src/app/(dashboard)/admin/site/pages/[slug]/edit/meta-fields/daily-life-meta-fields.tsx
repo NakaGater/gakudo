@@ -111,39 +111,43 @@ export function DailyLifeMetaFields({
         <legend className="text-sm font-bold text-fg px-2">季節の行事</legend>
         <div className="flex flex-col gap-3">
           {events.map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={item.emoji}
-                onChange={(e) => updateEvent(i, "emoji", e.target.value)}
-                placeholder="絵文字"
-                className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16"
-              />
-              <input
-                type="text"
-                value={item.title}
-                onChange={(e) => updateEvent(i, "title", e.target.value)}
-                placeholder="行事名"
-                className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1"
-              />
-              <select
-                value={item.season}
-                onChange={(e) => updateEvent(i, "season", e.target.value)}
-                className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              >
-                <option value="春">春</option>
-                <option value="夏">夏</option>
-                <option value="秋">秋</option>
-                <option value="冬">冬</option>
-                <option value="通年">通年</option>
-              </select>
-              <button
-                type="button"
-                onClick={() => removeEvent(i)}
-                className="text-xs px-1.5 py-0.5 rounded border border-red-300 text-red-600 hover:bg-red-50 cursor-pointer shrink-0"
-              >
-                削除
-              </button>
+            <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item.emoji}
+                  onChange={(e) => updateEvent(i, "emoji", e.target.value)}
+                  placeholder="絵文字"
+                  className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16"
+                />
+                <select
+                  value={item.season}
+                  onChange={(e) => updateEvent(i, "season", e.target.value)}
+                  className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                >
+                  <option value="春">春</option>
+                  <option value="夏">夏</option>
+                  <option value="秋">秋</option>
+                  <option value="冬">冬</option>
+                  <option value="通年">通年</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  type="text"
+                  value={item.title}
+                  onChange={(e) => updateEvent(i, "title", e.target.value)}
+                  placeholder="行事名"
+                  className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeEvent(i)}
+                  className="text-xs px-1.5 py-0.5 rounded border border-red-300 text-red-600 hover:bg-red-50 cursor-pointer shrink-0"
+                >
+                  削除
+                </button>
+              </div>
             </div>
           ))}
           <button

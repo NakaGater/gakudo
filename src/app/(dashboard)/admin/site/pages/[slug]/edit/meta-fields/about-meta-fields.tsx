@@ -53,7 +53,7 @@ export function AboutMetaFields({
               className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-fg-muted">絵文字</label>
               <input
@@ -81,35 +81,46 @@ export function AboutMetaFields({
         <legend className="text-sm font-bold text-fg px-2">1日の流れ</legend>
         <div className="flex flex-col gap-3">
           {schedule.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="絵文字"
-                value={item.emoji}
-                onChange={(e) => updateScheduleItem(idx, "emoji", e.target.value)}
-                className="w-14 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm text-center"
-              />
-              <input
-                type="text"
-                placeholder="時間"
-                value={item.time}
-                onChange={(e) => updateScheduleItem(idx, "time", e.target.value)}
-                className="w-20 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-              <input
-                type="text"
-                placeholder="内容"
-                value={item.label}
-                onChange={(e) => updateScheduleItem(idx, "label", e.target.value)}
-                className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => removeScheduleItem(idx)}
-                className="text-danger hover:text-danger/80 text-sm px-2"
-              >
-                ✕
-              </button>
+            <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="絵文字"
+                  value={item.emoji}
+                  onChange={(e) => updateScheduleItem(idx, "emoji", e.target.value)}
+                  className="w-14 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm text-center"
+                />
+                <input
+                  type="text"
+                  placeholder="時間"
+                  value={item.time}
+                  onChange={(e) => updateScheduleItem(idx, "time", e.target.value)}
+                  className="w-20 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeScheduleItem(idx)}
+                  className="text-danger hover:text-danger/80 text-sm px-2 sm:hidden shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  type="text"
+                  placeholder="内容"
+                  value={item.label}
+                  onChange={(e) => updateScheduleItem(idx, "label", e.target.value)}
+                  className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeScheduleItem(idx)}
+                  className="text-danger hover:text-danger/80 text-sm px-2 hidden sm:inline shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           ))}
           <button
@@ -127,28 +138,30 @@ export function AboutMetaFields({
         <legend className="text-sm font-bold text-fg px-2">施設概要</legend>
         <div className="flex flex-col gap-3">
           {facilityInfo.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2">
+            <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2">
               <input
                 type="text"
                 placeholder="項目名"
                 value={item.label}
                 onChange={(e) => updateFacilityItem(idx, "label", e.target.value)}
-                className="w-32 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="w-full sm:w-32 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
-              <input
-                type="text"
-                placeholder="値"
-                value={item.value}
-                onChange={(e) => updateFacilityItem(idx, "value", e.target.value)}
-                className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => removeFacilityItem(idx)}
-                className="text-danger hover:text-danger/80 text-sm px-2"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  type="text"
+                  placeholder="値"
+                  value={item.value}
+                  onChange={(e) => updateFacilityItem(idx, "value", e.target.value)}
+                  className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeFacilityItem(idx)}
+                  className="text-danger hover:text-danger/80 text-sm px-2 shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           ))}
           <button
@@ -265,7 +278,7 @@ function StaffMetaFields({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-fg-muted">名前</label>
                 <input
