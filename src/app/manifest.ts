@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "星ヶ丘こどもクラブ",
     short_name: "星ヶ丘学童",
     description: "星ヶ丘こどもクラブの保護者・スタッフ向けアプリ",
-    start_url: "/attendance/status",
+    start_url: "/",
     scope: "/",
     display: "standalone",
     background_color: "#ffffff",

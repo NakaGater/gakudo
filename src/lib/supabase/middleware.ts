@@ -26,7 +26,14 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session cookie — reads JWT from cookie without network call
-  await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // Redirect authenticated users from public homepage to dashboard
+  if (session && request.nextUrl.pathname === '/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/attendance/status'
+    return NextResponse.redirect(url)
+  }
 
   // Set pathname header so layout can use it for entrance role restriction
   supabaseResponse.headers.set('x-pathname', request.nextUrl.pathname)
