@@ -32,7 +32,12 @@ export async function updateSession(request: NextRequest) {
   if (session && request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone()
     url.pathname = '/attendance/status'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    // Preserve refreshed session cookies on the redirect response
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      redirectResponse.cookies.set(cookie.name, cookie.value)
+    })
+    return redirectResponse
   }
 
   // Set pathname header so layout can use it for entrance role restriction
