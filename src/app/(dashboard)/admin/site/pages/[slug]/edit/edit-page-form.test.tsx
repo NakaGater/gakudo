@@ -26,12 +26,15 @@ describe("EditPageForm", () => {
   afterEach(() => cleanup());
   it("renders AccessMetaFields when slug is 'access'", () => {
     render(<EditPageForm slug="access" {...baseProps} />);
+    // access単独ページでもアクセス情報フィールドが表示される
     expect(screen.getByText("アクセス情報")).toBeInTheDocument();
   });
 
-  it("renders HomeMetaFields when slug is 'home'", () => {
+  it("renders HomeMetaFields with access fields when slug is 'home'", () => {
     render(<EditPageForm slug="home" {...baseProps} />);
     expect(screen.getByText("ヒーローセクション")).toBeInTheDocument();
+    // ホームページにアクセス情報が統合されている
+    expect(screen.getByText("アクセス情報")).toBeInTheDocument();
   });
 
   it("renders AboutMetaFields when slug is 'about'", () => {
@@ -39,8 +42,8 @@ describe("EditPageForm", () => {
     expect(screen.getByText("理念セクション")).toBeInTheDocument();
   });
 
-  it("does not render AccessMetaFields for other slugs", () => {
-    render(<EditPageForm slug="home" {...baseProps} />);
+  it("does not render AccessMetaFields for about slug", () => {
+    render(<EditPageForm slug="about" {...baseProps} />);
     expect(screen.queryByText("アクセス情報")).not.toBeInTheDocument();
   });
 

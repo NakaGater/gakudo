@@ -64,8 +64,8 @@ export default async function HomePage() {
   try {
     const supabase = await createClient();
 
-    // 4クエリを並列実行
-    const [homeResult, photosResult, newsResult, accessResult] = await Promise.all([
+    // 3クエリを並列実行（アクセス情報はhomeメタデータに統合）
+    const [homeResult, photosResult, newsResult] = await Promise.all([
       supabase
         .from("site_pages")
         .select("title, content, metadata")
@@ -81,11 +81,6 @@ export default async function HomePage() {
         .from("site_news")
         .select("id, title, body, published_at")
         .order("published_at", { ascending: false }),
-      supabase
-        .from("site_pages")
-        .select("content, metadata")
-        .eq("slug", "access")
-        .single(),
     ]);
 
     const homePage = homeResult.data as { title: string; content: string; metadata: Record<string, unknown> } | null;
@@ -101,6 +96,17 @@ export default async function HomePage() {
       if (Array.isArray(m.features) && m.features.length > 0) {
         featureItems = m.features as FeatureItem[];
       }
+      // アクセス情報をhomeメタデータから取得（access_プレフィックス）
+      if (m.access_address) accessContent = m.access_address as string;
+      accessMeta = {
+        subtitle: m.access_subtitle ?? accessMeta.subtitle,
+        opening_hours: m.access_opening_hours ?? accessMeta.opening_hours,
+        phone: m.access_phone ?? accessMeta.phone,
+        phone_hours: m.access_phone_hours ?? accessMeta.phone_hours,
+        visit_heading: m.access_visit_heading ?? accessMeta.visit_heading,
+        visit_text: m.access_visit_text ?? accessMeta.visit_text,
+        map_embed_url: m.access_map_embed_url ?? accessMeta.map_embed_url,
+      };
     }
 
     const photos = photosResult.data;
@@ -114,12 +120,6 @@ export default async function HomePage() {
     const news = newsResult.data as { id: string; title: string; body: string; published_at: string }[] | null;
     if (news && news.length > 0) {
       newsItems = news;
-    }
-
-    const accessPage = accessResult.data as { content: string; metadata: Record<string, unknown> } | null;
-    if (accessPage) {
-      accessContent = accessPage.content;
-      accessMeta = accessPage.metadata || {};
     }
   } catch {
     // DB接続エラー時はデフォルトテキストを使用
