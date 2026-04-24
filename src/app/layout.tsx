@@ -27,6 +27,11 @@ const yuseiMagic = Yusei_Magic({
 export const metadata: Metadata = {
   title: "星ヶ丘こどもクラブ",
   description: "子どもたちの笑顔あふれる放課後を — 学童保育管理システム",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "星ヶ丘学童",
+  },
 };
 
 export const viewport = {
@@ -47,6 +52,9 @@ export default function RootLayout({
       lang="ja"
       className={`${notoSansJP.variable} ${zenMaruGothic.variable} ${yuseiMagic.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="apple-touch-startup-image" href="/splash.svg" />
+      </head>
       <body className="min-h-full flex flex-col bg-bg text-fg font-sans">
         {children}
         <ServiceWorkerRegister />
