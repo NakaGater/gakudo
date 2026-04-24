@@ -55,7 +55,7 @@ export function DailyLifeMetaFields({
 
   return (
     <>
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">活動カード</legend>
         <div className="flex flex-col gap-4">
           {activities.map((item, i) => (
@@ -107,7 +107,7 @@ export function DailyLifeMetaFields({
         </div>
       </fieldset>
 
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">季節の行事</legend>
         <div className="flex flex-col gap-3">
           {events.map((item, i) => (
@@ -160,7 +160,7 @@ export function DailyLifeMetaFields({
         </div>
       </fieldset>
 
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">理念セクション</legend>
         <div className="flex flex-col gap-3">
           <div className="flex gap-2 min-w-0">

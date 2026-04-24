@@ -41,7 +41,7 @@ export function AboutMetaFields({
   return (
     <>
       {/* 理念セクション */}
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">理念セクション</legend>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -77,7 +77,7 @@ export function AboutMetaFields({
       </fieldset>
 
       {/* 1日の流れ */}
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">1日の流れ</legend>
         <div className="flex flex-col gap-3">
           {schedule.map((item, idx) => (
@@ -134,7 +134,7 @@ export function AboutMetaFields({
       </fieldset>
 
       {/* 施設概要 */}
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">施設概要</legend>
         <div className="flex flex-col gap-3">
           {facilityInfo.map((item, idx) => (
@@ -239,7 +239,7 @@ function StaffMetaFields({
   };
 
   return (
-    <fieldset className="border border-border rounded-md p-4">
+    <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
       <legend className="text-sm font-bold text-fg px-2">職員紹介</legend>
       <div className="flex flex-col gap-4">
         {staff.map((member, idx) => (

@@ -26,7 +26,7 @@ export function HomeMetaFields({
 
   return (
     <>
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">ヒーローセクション</legend>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -50,7 +50,7 @@ export function HomeMetaFields({
         </div>
       </fieldset>
 
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">特徴セクション</legend>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -74,7 +74,7 @@ export function HomeMetaFields({
         </div>
       </fieldset>
 
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">特徴カード</legend>
         <div className="flex flex-col gap-4">
           {features.map((item, idx) => (
@@ -132,7 +132,7 @@ export function HomeMetaFields({
         </div>
       </fieldset>
 
-      <fieldset className="border border-border rounded-md p-4">
+      <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
         <legend className="text-sm font-bold text-fg px-2">アクセス情報</legend>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">

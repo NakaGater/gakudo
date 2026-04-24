@@ -25,7 +25,7 @@ export default async function EditSitePage({
   if (error || !page) notFound();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-3xl px-2 sm:px-4 py-8 overflow-hidden">
       <Link
         href="/admin/site/pages"
         className="text-sm text-accent hover:text-accent-hv transition-colors"
