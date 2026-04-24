@@ -74,27 +74,27 @@ export function EnrollmentMetaFields({
       <fieldset className="rounded-md border border-border p-3 space-y-2">
         <legend className="px-1 text-xs font-bold text-ink-mid">料金（学年別）</legend>
         {fees.map((f, i) => (
-          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <div className="flex gap-2 items-center">
+          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
+            <div className="flex gap-2 items-center min-w-0">
               <input
                 value={f.label}
                 onChange={(e) => { const u = [...fees]; u[i] = { ...f, label: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
                 placeholder="低学年"
-                className="flex-1 sm:w-1/3 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
               <input
                 value={f.amount}
                 onChange={(e) => { const u = [...fees]; u[i] = { ...f, amount: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
                 placeholder="15,000円/月"
-                className="w-28 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="w-28 shrink-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
             </div>
-            <div className="flex gap-2 items-center flex-1">
+            <div className="flex gap-2 items-center flex-1 min-w-0">
               <input
                 value={f.note}
                 onChange={(e) => { const u = [...fees]; u[i] = { ...f, note: e.target.value }; setMeta((m) => ({ ...m, fees: u })); }}
                 placeholder="備考"
-                className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
               <button type="button" onClick={() => setMeta((m) => ({ ...m, fees: fees.filter((_, j) => j !== i) }))} className="text-cr-red text-xs shrink-0">✕</button>
             </div>
@@ -107,27 +107,27 @@ export function EnrollmentMetaFields({
       <fieldset className="rounded-md border border-border p-3 space-y-2">
         <legend className="px-1 text-xs font-bold text-ink-mid">兄弟割引料金</legend>
         {siblingFees.map((f, i) => (
-          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <div className="flex gap-2 items-center">
+          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
+            <div className="flex gap-2 items-center min-w-0">
               <input
                 value={f.label}
                 onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, label: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
                 placeholder="2人目（低学年）"
-                className="flex-1 sm:w-1/3 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
               <input
                 value={f.amount}
                 onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, amount: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
                 placeholder="12,000円/月"
-                className="w-28 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="w-28 shrink-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
             </div>
-            <div className="flex gap-2 items-center flex-1">
+            <div className="flex gap-2 items-center flex-1 min-w-0">
               <input
                 value={f.note}
                 onChange={(e) => { const u = [...siblingFees]; u[i] = { ...f, note: e.target.value }; setMeta((m) => ({ ...m, sibling_fees: u })); }}
                 placeholder="備考"
-                className="flex-1 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
+                className="flex-1 min-w-0 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
               <button type="button" onClick={() => setMeta((m) => ({ ...m, sibling_fees: siblingFees.filter((_, j) => j !== i) }))} className="text-cr-red text-xs shrink-0">✕</button>
             </div>
