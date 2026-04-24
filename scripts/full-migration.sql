@@ -914,3 +914,19 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION get_attendance_summary() TO authenticated;
+
+-- ============================================================
+-- アクセスページのシードデータ追加
+-- ============================================================
+INSERT INTO site_pages (slug, title, content, metadata) VALUES
+  ('access', 'アクセス', '名古屋市千種区星が丘1-5 アーバンラフレ集会所内',
+   jsonb_build_object(
+     'subtitle', 'お気軽にお越しください。見学も随時受け付けております。',
+     'opening_hours', E'平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00',
+     'phone', '052-783-1447',
+     'phone_hours', '平日 14:00〜19:00',
+     'visit_heading', '見学申し込み・お問い合わせ',
+     'visit_text', E'入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。',
+     'map_embed_url', ''
+   ))
+ON CONFLICT (slug) DO NOTHING;
