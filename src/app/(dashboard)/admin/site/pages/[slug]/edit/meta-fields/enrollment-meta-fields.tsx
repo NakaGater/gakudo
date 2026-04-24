@@ -17,7 +17,7 @@ export function EnrollmentMetaFields({
   return (
     <>
       {/* 対象・定員 */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">対象・定員</legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
@@ -40,7 +40,7 @@ export function EnrollmentMetaFields({
       </fieldset>
 
       {/* 開所時間 */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">開所時間</legend>
         {hours.map((h, i) => (
           <div key={i} className="flex gap-2 items-center">
@@ -71,7 +71,7 @@ export function EnrollmentMetaFields({
       </fieldset>
 
       {/* 料金（学年別） */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">料金（学年別）</legend>
         {fees.map((f, i) => (
           <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
@@ -104,7 +104,7 @@ export function EnrollmentMetaFields({
       </fieldset>
 
       {/* 兄弟割引料金 */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">兄弟割引料金</legend>
         {siblingFees.map((f, i) => (
           <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center min-w-0">
@@ -137,7 +137,7 @@ export function EnrollmentMetaFields({
       </fieldset>
 
       {/* 入所の流れ */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">入所の流れ（ステップ）</legend>
         {steps.map((s, i) => (
           <div key={i} className="flex gap-2 items-start">
@@ -168,7 +168,7 @@ export function EnrollmentMetaFields({
       </fieldset>
 
       {/* 必要書類 */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">必要書類</legend>
         {documents.map((doc, i) => (
           <div key={i} className="flex gap-2 items-center">
@@ -184,7 +184,7 @@ export function EnrollmentMetaFields({
       </fieldset>
 
       {/* 注意事項 */}
-      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2">
+      <fieldset className="rounded-md border border-border p-2 sm:p-3 space-y-2 w-full box-border">
         <legend className="px-1 text-xs font-bold text-ink-mid">注意事項</legend>
         {notes.map((note, i) => (
           <div key={i} className="flex gap-2 items-center">

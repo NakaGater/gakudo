@@ -7,7 +7,7 @@ export function AccessMetaFields({
   updateMeta,
 }: MetaFieldsProps) {
   return (
-    <fieldset className="border border-border rounded-md p-2 sm:p-4">
+    <fieldset className="border border-border rounded-md p-2 sm:p-4 w-full box-border">
       <legend className="text-sm font-bold text-fg px-2">アクセス情報</legend>
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
