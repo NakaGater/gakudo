@@ -37,7 +37,7 @@ export function FaqMetaFields({
   };
 
   return (
-    <fieldset className="border border-border rounded-md p-2 sm:p-4 overflow-hidden">
+    <fieldset className="border border-border rounded-md p-2 sm:p-4">
       <legend className="text-sm font-bold text-fg px-2">Q&A 項目</legend>
       <div className="flex flex-col gap-4">
         {questions.map((item, i) => (
