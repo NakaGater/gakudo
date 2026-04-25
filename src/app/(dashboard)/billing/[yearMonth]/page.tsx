@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardHeader, Badge } from "@/components/ui";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { Card, CardContent, CardHeader, Badge } from "@/components/ui";
-import { ConfirmButton } from "./confirm-button";
+import { createClient } from "@/lib/supabase/server";
+import { formatTimeJST } from "@/lib/time/jst";
 import { CalculateSingleButton } from "./calculate-single-button";
+import { ConfirmButton } from "./confirm-button";
 import type { BillingRule } from "../types";
 
 type AttendanceRow = {
@@ -36,8 +37,6 @@ function formatMinutes(minutes: number): string {
   return `${h}時間${m}分`;
 }
 
-import { formatTimeJST } from "@/lib/time/jst";
-
 function formatTime(isoString: string): string {
   return formatTimeJST(isoString);
 }
@@ -50,10 +49,7 @@ function formatDate(dateStr: string): string {
 /**
  * Build daily breakdown from exit records + billing rule
  */
-function buildDailyBreakdown(
-  exitRecords: AttendanceRow[],
-  rule: BillingRule,
-): DailyBreakdown[] {
+function buildDailyBreakdown(exitRecords: AttendanceRow[], rule: BillingRule): DailyBreakdown[] {
   const [endH, endM] = rule.regular_end_time.split(":").map(Number);
   const regularEndMinutes = endH * 60 + endM;
 
@@ -102,7 +98,8 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   if (!targetChildId) {
     // For parents, default to first child
     if (!staff) {
-      const { data } = await supabase.from("child_parents")
+      const { data } = await supabase
+        .from("child_parents")
         .select("child_id, children(id, name)")
         .eq("parent_id", user.id)
         .limit(1);
@@ -120,7 +117,8 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   } else {
     // Verify access: parents can only see their children
     if (!staff) {
-      const { data } = await supabase.from("child_parents")
+      const { data } = await supabase
+        .from("child_parents")
         .select("child_id, children(id, name)")
         .eq("parent_id", user.id)
         .eq("child_id", targetChildId)
@@ -132,7 +130,8 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
 
   // Get child name for staff
   if (staff && !childName) {
-    const { data } = await supabase.from("children")
+    const { data } = await supabase
+      .from("children")
       .select("name")
       .eq("id", targetChildId)
       .single();
@@ -144,24 +143,25 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
   const monthStartUTC = `${yearMonth}-01T00:00:00+09:00`;
   const nextMonth =
-    month === 12
-      ? `${year + 1}-01`
-      : `${year}-${String(month + 1).padStart(2, "0")}`;
+    month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padStart(2, "0")}`;
   const monthEndUTC = `${nextMonth}-01T00:00:00+09:00`;
 
   const [{ data: bill }, { data: ruleData }, { data: attendances }] = await Promise.all([
-    supabase.from("monthly_bills")
+    supabase
+      .from("monthly_bills")
       .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
       .eq("child_id", targetChildId)
       .eq("year_month", yearMonth)
       .single(),
-    supabase.from("billing_rules")
+    supabase
+      .from("billing_rules")
       .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
       .lte("effective_from", lastDayOfMonth)
       .order("effective_from", { ascending: false })
       .limit(1)
       .single(),
-    supabase.from("attendances")
+    supabase
+      .from("attendances")
       .select("type, recorded_at")
       .eq("child_id", targetChildId)
       .eq("type", "exit")
@@ -183,9 +183,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   const exitRecords = (attendances ?? []) as AttendanceRow[];
 
   const dailyBreakdown =
-    billingRule && exitRecords.length > 0
-      ? buildDailyBreakdown(exitRecords, billingRule)
-      : [];
+    billingRule && exitRecords.length > 0 ? buildDailyBreakdown(exitRecords, billingRule) : [];
 
   // Summary totals from breakdown
   const totalExtMinutes = dailyBreakdown.reduce((s, d) => s + d.extendedMinutes, 0);
@@ -218,15 +216,8 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
       {!monthlyBill && (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-fg-muted mb-4">
-              この月の請求はまだ計算されていません
-            </p>
-            {staff && (
-              <CalculateSingleButton
-                childId={targetChildId}
-                yearMonth={yearMonth}
-              />
-            )}
+            <p className="text-fg-muted mb-4">この月の請求はまだ計算されていません</p>
+            {staff && <CalculateSingleButton childId={targetChildId} yearMonth={yearMonth} />}
           </CardContent>
         </Card>
       )}
@@ -284,21 +275,14 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
               </thead>
               <tbody>
                 {dailyBreakdown.map((row, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-border last:border-0"
-                  >
+                  <tr key={i} className="border-b border-border last:border-0">
                     <td className="px-4 py-3 text-fg">{formatDate(row.date)}</td>
                     <td className="px-4 py-3 text-fg">{row.exitTime}</td>
                     <td className="px-4 py-3 text-fg">
-                      {row.extendedMinutes > 0
-                        ? formatMinutes(row.extendedMinutes)
-                        : "—"}
+                      {row.extendedMinutes > 0 ? formatMinutes(row.extendedMinutes) : "—"}
                     </td>
                     <td className="px-4 py-3 text-fg text-right">{row.units}</td>
-                    <td className="px-4 py-3 text-fg text-right">
-                      {formatAmount(row.amount)}
-                    </td>
+                    <td className="px-4 py-3 text-fg text-right">{formatAmount(row.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -307,13 +291,9 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
                   <td className="px-4 py-3 text-fg" colSpan={2}>
                     合計
                   </td>
-                  <td className="px-4 py-3 text-fg">
-                    {formatMinutes(totalExtMinutes)}
-                  </td>
+                  <td className="px-4 py-3 text-fg">{formatMinutes(totalExtMinutes)}</td>
                   <td className="px-4 py-3 text-fg text-right">{totalUnits}</td>
-                  <td className="px-4 py-3 text-fg text-right">
-                    {formatAmount(totalAmt)}
-                  </td>
+                  <td className="px-4 py-3 text-fg text-right">{formatAmount(totalAmt)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -325,9 +305,7 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
       {monthlyBill && dailyBreakdown.length === 0 && (
         <Card>
           <CardContent>
-            <p className="text-fg-muted text-center py-4">
-              この月の退室記録がありません
-            </p>
+            <p className="text-fg-muted text-center py-4">この月の退室記録がありません</p>
           </CardContent>
         </Card>
       )}

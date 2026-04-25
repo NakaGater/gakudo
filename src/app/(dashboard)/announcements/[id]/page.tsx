@@ -1,18 +1,15 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/get-user";
-import { Card, CardContent } from "@/components/ui/card";
+import { AttachmentList } from "@/components/attachments/attachment-list";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { summarizeRecipients, type RecipientRow } from "@/lib/announcements/recipients";
+import { getAttachments, getAttachmentUrl } from "@/lib/attachments/actions";
+import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { getReadCount } from "../actions";
 import { MarkRead } from "./mark-read";
-import { getAttachments, getAttachmentUrl } from "@/lib/attachments/actions";
-import { AttachmentList } from "@/components/attachments/attachment-list";
-import {
-  summarizeRecipients,
-  type RecipientRow,
-} from "@/lib/announcements/recipients";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -66,10 +63,7 @@ export default async function AnnouncementDetailPage({ params }: Props) {
       .map((r) => r.recipient_user_id as string);
     const nameByUserId = new Map<string, string>();
     if (userIds.length > 0) {
-      const { data: names } = await supabase
-        .from("profiles")
-        .select("id, name")
-        .in("id", userIds);
+      const { data: names } = await supabase.from("profiles").select("id, name").in("id", userIds);
       for (const n of (names ?? []) as { id: string; name: string }[]) {
         nameByUserId.set(n.id, n.name);
       }
@@ -108,23 +102,14 @@ export default async function AnnouncementDetailPage({ params }: Props) {
             <time dateTime={announcement.created_at}>
               {dateFormatter.format(new Date(announcement.created_at))}
             </time>
-            {isStaff && recipientLabel && (
-              <Badge>対象: {recipientLabel}</Badge>
-            )}
-            {isStaff && readCount !== null && (
-              <Badge>{readCount}人が既読</Badge>
-            )}
+            {isStaff && recipientLabel && <Badge>対象: {recipientLabel}</Badge>}
+            {isStaff && readCount !== null && <Badge>{readCount}人が既読</Badge>}
           </div>
 
-          <div className="whitespace-pre-wrap text-fg/80 leading-relaxed">
-            {announcement.body}
-          </div>
+          <div className="whitespace-pre-wrap text-fg/80 leading-relaxed">{announcement.body}</div>
 
           {attachments.length > 0 && (
-            <AttachmentList
-              attachments={attachments}
-              downloadUrls={downloadUrls}
-            />
+            <AttachmentList attachments={attachments} downloadUrls={downloadUrls} />
           )}
         </CardContent>
       </Card>

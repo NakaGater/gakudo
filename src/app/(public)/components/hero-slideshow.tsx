@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
 import Image from "next/image";
+import { useState, useEffect, type ReactNode } from "react";
 
 const INTERVAL_MS = 5000;
 

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getUser } from "@/lib/auth/get-user";
-import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui";
-import { setPhotoVisibility, deletePhoto } from "./actions";
-import { UploadForm } from "./upload-form";
 import { GalleryGrid, type GalleryPhoto } from "@/app/(public)/gallery/gallery-grid";
 import { InstagramEmbeds } from "@/app/(public)/gallery/instagram-embeds";
+import { Button } from "@/components/ui";
+import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
+import { setPhotoVisibility, deletePhoto } from "./actions";
+import { UploadForm } from "./upload-form";
 import type { Database } from "@/lib/supabase/types";
 
 type Photo = Database["public"]["Tables"]["photos"]["Row"];
@@ -82,7 +82,8 @@ export default async function PhotosPage() {
     );
   }
 
-  const { data: photos } = await supabase.from("photos")
+  const { data: photos } = await supabase
+    .from("photos")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(50);
@@ -108,9 +109,7 @@ export default async function PhotosPage() {
       </div>
 
       <details className="gallery-upload">
-        <summary className="cursor-pointer font-medium text-ink">
-          📁 アップロード
-        </summary>
+        <summary className="cursor-pointer font-medium text-ink">📁 アップロード</summary>
         <div className="mt-4">
           <UploadForm isAdmin={isAdmin} />
         </div>
@@ -125,7 +124,7 @@ export default async function PhotosPage() {
               <div
                 key={photo.id}
                 className="photo-mgmt"
-                style={{ transform: `rotate(${(i % 5 - 2) * 1.5}deg)` }}
+                style={{ transform: `rotate(${((i % 5) - 2) * 1.5}deg)` }}
               >
                 <div className="photo-mgmt__img relative aspect-[4/3] rounded-sm overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -137,16 +136,12 @@ export default async function PhotosPage() {
                   />
                 </div>
                 <div className="photo-mgmt__info">
-                  {photo.event_name && (
-                    <p className="photo-mgmt__title">
-                      {photo.event_name}
-                    </p>
-                  )}
-                  {photo.caption && (
-                    <p className="photo-mgmt__caption">{photo.caption}</p>
-                  )}
+                  {photo.event_name && <p className="photo-mgmt__title">{photo.event_name}</p>}
+                  {photo.caption && <p className="photo-mgmt__caption">{photo.caption}</p>}
                   <div className="photo-mgmt__actions">
-                    <span className={`status-badge ${photo.visibility === "public" ? "status-badge--public" : "status-badge--private"}`}>
+                    <span
+                      className={`status-badge ${photo.visibility === "public" ? "status-badge--public" : "status-badge--private"}`}
+                    >
                       {photo.visibility === "public" ? "公開" : "非公開"}
                     </span>
 
@@ -157,16 +152,12 @@ export default async function PhotosPage() {
                             "use server";
                             await setPhotoVisibility(
                               photo.id,
-                              photo.visibility === "public"
-                                ? "private"
-                                : "public",
+                              photo.visibility === "public" ? "private" : "public",
                             );
                           }}
                         >
                           <Button variant="ghost" size="sm" type="submit">
-                            {photo.visibility === "public"
-                              ? "非公開にする"
-                              : "公開する"}
+                            {photo.visibility === "public" ? "非公開にする" : "公開する"}
                           </Button>
                         </form>
                         <form
@@ -175,11 +166,7 @@ export default async function PhotosPage() {
                             await deletePhoto(photo.id);
                           }}
                         >
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            type="submit"
-                          >
+                          <Button variant="destructive" size="sm" type="submit">
                             削除
                           </Button>
                         </form>

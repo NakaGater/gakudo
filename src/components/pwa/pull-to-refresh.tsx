@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type Phase = "idle" | "pulling" | "refreshing" | "snapback";
 
@@ -30,8 +30,7 @@ function canActivateAtTop(target: EventTarget | null): boolean {
     const style = window.getComputedStyle(el);
     const overflowY = style.overflowY;
     const scrollable =
-      (overflowY === "auto" || overflowY === "scroll") &&
-      el.scrollHeight > el.clientHeight;
+      (overflowY === "auto" || overflowY === "scroll") && el.scrollHeight > el.clientHeight;
     if (scrollable && el.scrollTop > 0) return false;
     el = el.parentElement;
   }
@@ -59,8 +58,7 @@ export function PullToRefresh() {
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches === true ||
       (navigator as unknown as { standalone?: boolean }).standalone === true;
-    const hasTouch =
-      "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     enabled.current = standalone && hasTouch;
 
     if (!enabled.current) return;
@@ -196,9 +194,7 @@ function Indicator({ phase, pull }: { phase: Phase; pull: number }) {
         top: "env(safe-area-inset-top, 0px)",
         transform: `translate3d(0, ${pull}px, 0)`,
         opacity: spinning ? 1 : progress,
-        transition: animated
-          ? "transform 220ms ease-out, opacity 220ms ease-out"
-          : "none",
+        transition: animated ? "transform 220ms ease-out, opacity 220ms ease-out" : "none",
       }}
     >
       <div className="mt-2 grid h-9 w-9 place-items-center rounded-full border border-page-edge bg-paper-warm shadow-[0_4px_12px_rgba(59,47,32,0.12)]">
@@ -207,8 +203,7 @@ function Indicator({ phase, pull }: { phase: Phase; pull: number }) {
           className={`h-5 w-5 ${spinning ? "animate-spin" : ""}`}
           style={{
             transform: spinning ? undefined : `rotate(${progress * 270}deg)`,
-            color:
-              ready || spinning ? "var(--cr-orange)" : "var(--ink-mid)",
+            color: ready || spinning ? "var(--cr-orange)" : "var(--ink-mid)",
             transition: spinning ? undefined : "color 120ms ease-out",
           }}
         >

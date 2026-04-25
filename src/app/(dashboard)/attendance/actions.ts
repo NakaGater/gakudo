@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff, isEntrance } from "@/lib/auth/roles";
 import { sendAttendanceNotification } from "@/lib/notifications/send";
-import { ERROR_MESSAGES } from "@/config/constants";
+import { createClient } from "@/lib/supabase/server";
 import { todayRangeJST } from "@/lib/time/jst";
 import {
   buildAttendanceMaps,
@@ -45,14 +45,16 @@ async function fetchTodayChildrenAndAttendance(
 ) {
   const { start, end } = todayRangeJST();
 
-  const { data: children } = await supabase.from("children")
+  const { data: children } = await supabase
+    .from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
 
   if (!children || children.length === 0) return null;
 
-  const { data: attendances } = await supabase.from("attendances")
+  const { data: attendances } = await supabase
+    .from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
     .lt("recorded_at", end)
@@ -108,11 +110,20 @@ export async function getParentAttendanceStatus(): Promise<ParentAttendanceData>
   const { start, end } = todayRangeJST();
 
   const { data: summaryData } = await supabase.rpc("get_attendance_summary");
-  const summary = (summaryData as { entered: number; exited: number; none: number; total: number } | null) ?? {
-    entered: 0, exited: 0, none: 0, total: 0,
+  const summary = (summaryData as {
+    entered: number;
+    exited: number;
+    none: number;
+    total: number;
+  } | null) ?? {
+    entered: 0,
+    exited: 0,
+    none: 0,
+    total: 0,
   };
 
-  const { data: myChildren } = await supabase.from("children")
+  const { data: myChildren } = await supabase
+    .from("children")
     .select("id, name, grade")
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
@@ -121,15 +132,14 @@ export async function getParentAttendanceStatus(): Promise<ParentAttendanceData>
     return { myChildren: [], summary };
   }
 
-  const { data: attendances } = await supabase.from("attendances")
+  const { data: attendances } = await supabase
+    .from("attendances")
     .select("child_id, type, recorded_at")
     .gte("recorded_at", start)
     .lt("recorded_at", end)
     .order("recorded_at", { ascending: true });
 
-  const { enterMap, latestMap } = buildAttendanceMaps(
-    (attendances ?? []) as AttendanceRecord[],
-  );
+  const { enterMap, latestMap } = buildAttendanceMaps((attendances ?? []) as AttendanceRecord[]);
 
   return {
     myChildren: toDashboardStatuses(
@@ -152,7 +162,8 @@ async function createAttendanceRecord(
   const supabase = await createClient();
   const { start, end } = todayRangeJST();
 
-  const { data: latest } = await supabase.from("attendances")
+  const { data: latest } = await supabase
+    .from("attendances")
     .select("id, type, recorded_at")
     .eq("child_id", childId)
     .gte("recorded_at", start)
@@ -163,7 +174,8 @@ async function createAttendanceRecord(
 
   const actionType = decideNextAttendanceType(latest);
 
-  const { data: record, error: insertError } = await supabase.from("attendances")
+  const { data: record, error: insertError } = await supabase
+    .from("attendances")
     .insert({
       child_id: childId,
       type: actionType,
@@ -181,7 +193,9 @@ async function createAttendanceRecord(
 
   // Non-blocking: notification is best-effort, don't block the response
   sendAttendanceNotification(
-    childId, actionType, record.recorded_at ?? new Date().toISOString(),
+    childId,
+    actionType,
+    record.recorded_at ?? new Date().toISOString(),
   ).catch((err) => {
     console.error("[attendance] notification error:", err);
   });
@@ -195,16 +209,15 @@ async function createAttendanceRecord(
   };
 }
 
-export async function recordManualAttendance(
-  childId: string,
-): Promise<AttendanceResult> {
+export async function recordManualAttendance(childId: string): Promise<AttendanceResult> {
   const user = await getUser();
   if (!isEntrance(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
-  const { data: child } = await supabase.from("children")
+  const { data: child } = await supabase
+    .from("children")
     .select("id, name")
     .eq("id", childId)
     .single();
@@ -213,22 +226,21 @@ export async function recordManualAttendance(
     return { success: false, message: "児童が見つかりません" };
   }
 
-  return createAttendanceRecord(
-    child.id, child.name, "manual", user.id,
-    ["/attendance", "/attendance/manual"],
-  );
+  return createAttendanceRecord(child.id, child.name, "manual", user.id, [
+    "/attendance",
+    "/attendance/manual",
+  ]);
 }
 
-export async function recordAttendance(
-  qrCode: string,
-): Promise<AttendanceResult> {
+export async function recordAttendance(qrCode: string): Promise<AttendanceResult> {
   const user = await getUser();
   if (!isEntrance(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
-  const { data: child } = await supabase.from("children")
+  const { data: child } = await supabase
+    .from("children")
     .select("id, name, qr_active")
     .eq("qr_code", qrCode)
     .single();
@@ -241,8 +253,5 @@ export async function recordAttendance(
     return { success: false, message: "このQRコードは無効です" };
   }
 
-  return createAttendanceRecord(
-    child.id, child.name, "qr", user.id,
-    ["/attendance"],
-  );
+  return createAttendanceRecord(child.id, child.name, "qr", user.id, ["/attendance"]);
 }

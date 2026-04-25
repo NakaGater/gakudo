@@ -6,9 +6,7 @@ test.describe("Flow 2: Login happy path (US-2)", () => {
     const errors = collectConsoleErrors(page);
 
     await page.goto("/login");
-    await expect(
-      page.getByRole("heading", { name: "星ヶ丘こどもクラブ" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "星ヶ丘こどもクラブ" })).toBeVisible();
 
     await page.locator('input[name="email"]').fill("admin@example.com");
     await page.locator('input[name="password"]').fill("password123");
@@ -45,9 +43,7 @@ test.describe("Flow 2: Login happy path (US-2)", () => {
 
     // Filter out known non-critical console errors (e.g. favicon, Next.js dev warnings)
     const criticalErrors = errors.filter(
-      (e) =>
-        !e.includes("favicon") &&
-        !e.includes("the server responded with a status of 404"),
+      (e) => !e.includes("favicon") && !e.includes("the server responded with a status of 404"),
     );
     expect(criticalErrors).toHaveLength(0);
   });

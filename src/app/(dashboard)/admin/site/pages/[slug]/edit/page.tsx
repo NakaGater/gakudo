@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { EditPageForm } from "./edit-page-form";
 
 type Params = { slug: string };
 
-export default async function EditSitePage({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+export default async function EditSitePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
@@ -33,11 +29,14 @@ export default async function EditSitePage({
         ← ページ一覧に戻る
       </Link>
 
-      <h1 className="text-2xl font-bold text-fg mt-4 mb-6">
-        ページ編集: {page.title}
-      </h1>
+      <h1 className="text-2xl font-bold text-fg mt-4 mb-6">ページ編集: {page.title}</h1>
 
-      <EditPageForm slug={page.slug} title={page.title} content={page.content} metadata={page.metadata} />
+      <EditPageForm
+        slug={page.slug}
+        title={page.title}
+        content={page.content}
+        metadata={page.metadata}
+      />
     </div>
   );
 }

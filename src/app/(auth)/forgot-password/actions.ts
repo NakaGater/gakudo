@@ -20,7 +20,10 @@ export async function forgotPassword(
   });
 
   if (error) {
-    return { success: false, message: "リセットメールの送信に失敗しました。もう一度お試しください。" };
+    return {
+      success: false,
+      message: "リセットメールの送信に失敗しました。もう一度お試しください。",
+    };
   }
 
   return { success: true, message: "リセットメールを送信しました" };

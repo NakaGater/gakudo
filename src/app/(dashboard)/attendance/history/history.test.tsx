@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   AttendanceHistoryClient,
   calcDuration,
@@ -94,9 +94,7 @@ describe("AttendanceHistoryClient", () => {
   });
 
   it("shows 記録なし for empty days", () => {
-    const days: DayRecord[] = [
-      { date: "2024-06-11", pairs: [] },
-    ];
+    const days: DayRecord[] = [{ date: "2024-06-11", pairs: [] }];
 
     renderHistory({ days });
 
@@ -106,9 +104,7 @@ describe("AttendanceHistoryClient", () => {
 
   it("renders page title", () => {
     renderHistory();
-    expect(
-      screen.getByRole("heading", { name: "入退室履歴" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "入退室履歴" })).toBeInTheDocument();
   });
 
   it("shows staff column header when isStaff=true", () => {
@@ -148,9 +144,7 @@ describe("AttendanceHistoryClient", () => {
     const startInput = getByLabelText("開始日");
     const { fireEvent } = await import("@testing-library/react");
     fireEvent.change(startInput, { target: { value: "2024-06-12" } });
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      expect.stringContaining("start=2024-06-12"),
-    );
+    expect(mockRouterPush).toHaveBeenCalledWith(expect.stringContaining("start=2024-06-12"));
   });
 
   it("navigates on child filter change", async () => {
@@ -158,9 +152,7 @@ describe("AttendanceHistoryClient", () => {
     const select = getByLabelText("児童");
     const { fireEvent } = await import("@testing-library/react");
     fireEvent.change(select, { target: { value: "c1" } });
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      expect.stringContaining("child=c1"),
-    );
+    expect(mockRouterPush).toHaveBeenCalledWith(expect.stringContaining("child=c1"));
   });
 
   it("deletes param when filter cleared", async () => {
@@ -168,9 +160,7 @@ describe("AttendanceHistoryClient", () => {
     const select = getByLabelText("児童");
     const { fireEvent } = await import("@testing-library/react");
     fireEvent.change(select, { target: { value: "" } });
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      expect.not.stringContaining("child="),
-    );
+    expect(mockRouterPush).toHaveBeenCalledWith(expect.not.stringContaining("child="));
   });
 
   it("shows 該当する履歴がありません when days is empty", () => {
@@ -197,21 +187,15 @@ describe("AttendanceHistoryClient", () => {
 
 describe("calcDuration", () => {
   it("returns formatted duration for valid pair", () => {
-    expect(
-      calcDuration("2024-06-10T05:00:00Z", "2024-06-10T08:25:00Z"),
-    ).toBe("3時間25分");
+    expect(calcDuration("2024-06-10T05:00:00Z", "2024-06-10T08:25:00Z")).toBe("3時間25分");
   });
 
   it("returns hours and 0 minutes correctly", () => {
-    expect(
-      calcDuration("2024-06-10T05:00:00Z", "2024-06-10T07:00:00Z"),
-    ).toBe("2時間0分");
+    expect(calcDuration("2024-06-10T05:00:00Z", "2024-06-10T07:00:00Z")).toBe("2時間0分");
   });
 
   it("returns minutes only when less than 1 hour", () => {
-    expect(
-      calcDuration("2024-06-10T05:00:00Z", "2024-06-10T05:45:00Z"),
-    ).toBe("45分");
+    expect(calcDuration("2024-06-10T05:00:00Z", "2024-06-10T05:45:00Z")).toBe("45分");
   });
 
   it("returns — when enter is null", () => {

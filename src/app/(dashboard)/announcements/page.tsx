@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { Bell } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/get-user";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { AnnouncementCard } from "./announcement-card";
 
 const PAGE_SIZE = 10;
@@ -21,9 +21,7 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
   const isStaff = user.role === "teacher" || user.role === "admin";
 
   // Parallel: count + data fetch
-  const countQuery = supabase
-    .from("announcements")
-    .select("*", { count: "exact", head: true });
+  const countQuery = supabase.from("announcements").select("*", { count: "exact", head: true });
 
   const dataQuery = supabase
     .from("announcements")
@@ -76,9 +74,7 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
       ) : (
         <div className="letter-paper flex flex-col gap-4">
           {announcements.map((a) => {
-            const isRead = isStaff
-              ? true
-              : (a.announcement_reads?.length ?? 0) > 0;
+            const isRead = isStaff ? true : (a.announcement_reads?.length ?? 0) > 0;
             return (
               <AnnouncementCard
                 key={a.id}

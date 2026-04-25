@@ -27,12 +27,7 @@ vi.mock("@/lib/supabase/server", () => ({
   ),
 }));
 
-import {
-  uploadAttachment,
-  deleteAttachment,
-  getAttachments,
-  getAttachmentUrl,
-} from "./actions";
+import { uploadAttachment, deleteAttachment, getAttachments, getAttachmentUrl } from "./actions";
 
 describe("uploadAttachment", () => {
   beforeEach(() => {
@@ -102,7 +97,10 @@ describe("uploadAttachment", () => {
     fd.set("file", new File(["x"], "test.pdf", { type: "application/pdf" }));
 
     const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("Storage full") });
+    expect(result).toMatchObject({
+      success: false,
+      message: expect.stringContaining("Storage full"),
+    });
   });
 
   it("removes the uploaded blob on DB insert failure (cleanup)", async () => {

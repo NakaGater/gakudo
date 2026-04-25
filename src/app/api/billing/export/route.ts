@@ -9,7 +9,8 @@ export async function GET(request: Request) {
   const { user, supabase } = auth;
 
   // 権限チェック (admin/teacher のみ)
-  const { data: profile } = await supabase.from("profiles")
+  const { data: profile } = await supabase
+    .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
@@ -30,7 +31,8 @@ export async function GET(request: Request) {
   }
 
   // monthly_bills を children と結合して取得
-  const { data: bills, error: billsError } = await supabase.from("monthly_bills")
+  const { data: bills, error: billsError } = await supabase
+    .from("monthly_bills")
     .select("total_extended_minutes, total_amount, status, year_month, children(name)")
     .eq("year_month", yearMonth);
 

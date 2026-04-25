@@ -1,12 +1,12 @@
 "use client";
 
+import { Pencil, Trash2, X } from "lucide-react";
 import { useState, useCallback, useActionState, useEffect } from "react";
 import { Button } from "@/components/ui";
+import { cn } from "@/lib/utils";
+import { updateUser, deleteUser } from "./actions";
 import { InviteForm } from "./invite-form";
 import type { ActionState } from "@/lib/actions/types";
-import { updateUser, deleteUser } from "./actions";
-import { Pencil, Trash2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type Profile = {
   id: string;
@@ -31,7 +31,15 @@ function formatDate(dateString: string) {
   });
 }
 
-function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentUserId: string; onClose: () => void }) {
+function EditUserRow({
+  user,
+  currentUserId,
+  onClose,
+}: {
+  user: Profile;
+  currentUserId: string;
+  onClose: () => void;
+}) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(updateUser, null);
   const isSelf = user.id === currentUserId;
 
@@ -68,7 +76,9 @@ function EditUserRow({ user, currentUserId, onClose }: { user: Profile; currentU
               <option value="admin">管理者</option>
             </select>
           </div>
-          <Button type="submit" loading={isPending}>保存</Button>
+          <Button type="submit" loading={isPending}>
+            保存
+          </Button>
           <button type="button" onClick={onClose} className="p-2 text-ink-mid hover:text-ink">
             <X size={16} />
           </button>
@@ -98,7 +108,8 @@ function DeleteConfirm({ user, onClose }: { user: Profile; onClose: () => void }
         <h3 className="text-lg font-bold text-ink mb-2">ユーザー削除</h3>
         <p className="text-sm text-ink-mid mb-4">
           <span className="font-medium text-ink">{user.name}</span>（{user.email}）を削除しますか？
-          <br />この操作は取り消せません。
+          <br />
+          この操作は取り消せません。
         </p>
         {state?.message && (
           <p className={cn("text-sm mb-3", state.success ? "text-success" : "text-danger")}>
@@ -107,8 +118,12 @@ function DeleteConfirm({ user, onClose }: { user: Profile; onClose: () => void }
         )}
         <form action={formAction} className="flex justify-end gap-2">
           <input type="hidden" name="id" value={user.id} />
-          <Button type="button" variant="ghost" onClick={onClose}>キャンセル</Button>
-          <Button type="submit" variant="destructive" loading={isPending}>削除する</Button>
+          <Button type="button" variant="ghost" onClick={onClose}>
+            キャンセル
+          </Button>
+          <Button type="submit" variant="destructive" loading={isPending}>
+            削除する
+          </Button>
         </form>
       </div>
     </div>
@@ -124,9 +139,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
   return (
     <div>
       <div className="flex items-center justify-end mb-6">
-        {!showInvite && (
-          <Button onClick={() => setShowInvite(true)}>ユーザー招待</Button>
-        )}
+        {!showInvite && <Button onClick={() => setShowInvite(true)}>ユーザー招待</Button>}
       </div>
 
       {showInvite && (
@@ -137,9 +150,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
         </div>
       )}
 
-      {deletingUser && (
-        <DeleteConfirm user={deletingUser} onClose={() => setDeletingUser(null)} />
-      )}
+      {deletingUser && <DeleteConfirm user={deletingUser} onClose={() => setDeletingUser(null)} />}
 
       <div className="rounded-md overflow-x-auto">
         <table className="admin-table">

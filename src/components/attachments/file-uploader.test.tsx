@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import { FileUploader } from "./file-uploader";
 
 describe("FileUploader", () => {
@@ -58,9 +58,7 @@ describe("FileUploader", () => {
 
   it("calls onChange when remove button is clicked", () => {
     const onChange = vi.fn();
-    const files = [
-      { file: new File(["x"], "doc.pdf", { type: "application/pdf" }) },
-    ];
+    const files = [{ file: new File(["x"], "doc.pdf", { type: "application/pdf" }) }];
     const { container } = render(<FileUploader files={files} onChange={onChange} />);
 
     const removeBtn = container.querySelector("li button") as HTMLButtonElement;
@@ -88,9 +86,7 @@ describe("FileUploader", () => {
   });
 
   it("hides remove buttons when disabled", () => {
-    const files = [
-      { file: new File(["x"], "doc.pdf", { type: "application/pdf" }) },
-    ];
+    const files = [{ file: new File(["x"], "doc.pdf", { type: "application/pdf" }) }];
     const { container } = render(<FileUploader files={files} onChange={vi.fn()} disabled />);
     expect(container.querySelector("li button")).toBeNull();
   });
@@ -134,7 +130,9 @@ describe("FileUploader", () => {
     const { container } = render(<FileUploader files={[]} onChange={onChange} />);
     const dropZone = container.querySelector('[role="button"]') as HTMLElement;
 
-    const bigFile = new File(["x".repeat(11 * 1024 * 1024)], "huge.pdf", { type: "application/pdf" });
+    const bigFile = new File(["x".repeat(11 * 1024 * 1024)], "huge.pdf", {
+      type: "application/pdf",
+    });
     fireEvent.drop(dropZone, {
       dataTransfer: { files: [bigFile] },
     });

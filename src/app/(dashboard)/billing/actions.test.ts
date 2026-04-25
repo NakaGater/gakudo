@@ -69,7 +69,13 @@ describe("getActiveBillingRule", () => {
 
   it("returns rule for admin", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const rule = { id: "r1", regular_end_time: "17:00", rate_per_unit: 500, unit_minutes: 30, effective_from: "2025-01-01" };
+    const rule = {
+      id: "r1",
+      regular_end_time: "17:00",
+      rate_per_unit: 500,
+      unit_minutes: 30,
+      effective_from: "2025-01-01",
+    };
     mockResult.mockResolvedValue({ data: rule, error: null });
 
     const result = await getActiveBillingRule();

@@ -1,10 +1,7 @@
 import webpush from "web-push";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveTargetUserIds, type RecipientRow } from "@/lib/announcements/recipients";
 import { sendEmail } from "@/lib/email/send";
-import {
-  resolveTargetUserIds,
-  type RecipientRow,
-} from "@/lib/announcements/recipients";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   partitionByMethod,
   buildAnnouncementPayload,
@@ -40,10 +37,7 @@ export async function sendAnnouncementNotification(
     .eq("announcement_id", announcementId);
 
   if (recipientsError) {
-    console.error(
-      "[notifications] Failed to fetch recipients:",
-      recipientsError.message,
-    );
+    console.error("[notifications] Failed to fetch recipients:", recipientsError.message);
     return;
   }
 
@@ -60,10 +54,7 @@ export async function sendAnnouncementNotification(
       .select("id")
       .eq("role", "parent");
     if (parentsError || !parents) {
-      console.error(
-        "[notifications] Failed to fetch parents:",
-        parentsError?.message,
-      );
+      console.error("[notifications] Failed to fetch parents:", parentsError?.message);
       return;
     }
     targetUserIds = resolveTargetUserIds(
@@ -98,12 +89,7 @@ export async function sendAnnouncementNotification(
   }
 
   if (emailIds.length > 0) {
-    await sendEmailNotifications(
-      supabase,
-      emailIds,
-      `【星ヶ丘こどもクラブ】${title}`,
-      body,
-    );
+    await sendEmailNotifications(supabase, emailIds, `【星ヶ丘こどもクラブ】${title}`, body);
   }
 }
 
@@ -232,11 +218,6 @@ export async function sendAttendanceNotification(
   }
 
   if (emailIds.length > 0) {
-    await sendEmailNotifications(
-      supabase,
-      emailIds,
-      messages.emailSubject,
-      messages.emailBody,
-    );
+    await sendEmailNotifications(supabase, emailIds, messages.emailSubject, messages.emailBody);
   }
 }

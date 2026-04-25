@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { ERROR_MESSAGES } from "@/config/constants";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export async function addInstagramPost(
@@ -24,7 +24,10 @@ export async function addInstagramPost(
   // Instagram URL validation
   const igPattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[\w-]+/;
   if (!igPattern.test(postUrl.trim())) {
-    return { success: false, message: "有効なInstagram投稿URLを入力してください（例: https://www.instagram.com/p/xxx/）" };
+    return {
+      success: false,
+      message: "有効なInstagram投稿URLを入力してください（例: https://www.instagram.com/p/xxx/）",
+    };
   }
 
   const caption = (formData.get("caption") as string) || null;

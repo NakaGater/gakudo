@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/auth/get-user";
-import { ProfileForm } from "./profile-form";
-import { NotificationSettings } from "./notification-settings";
 import { LogoutButton } from "./logout-button";
+import { NotificationSettings } from "./notification-settings";
+import { ProfileForm } from "./profile-form";
 
 export default async function ProfilePage({
   searchParams,

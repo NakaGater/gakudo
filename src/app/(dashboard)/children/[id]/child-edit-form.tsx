@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 import { Button, Input } from "@/components/ui";
-import type { ActionState } from "../types";
 import { updateChild } from "../actions";
+import type { ActionState } from "../types";
 
 const grades = [1, 2, 3, 4, 5, 6] as const;
 
@@ -15,10 +15,7 @@ type Props = {
 
 export function ChildEditForm({ id, name, grade }: Props) {
   const updateWithId = updateChild.bind(null, id);
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    updateWithId,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(updateWithId, null);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -43,12 +40,8 @@ export function ChildEditForm({ id, name, grade }: Props) {
         </select>
       </div>
 
-      {state && !state.success && (
-        <p className="text-sm text-danger">{state.message}</p>
-      )}
-      {state?.success && (
-        <p className="text-sm text-success">{state.message}</p>
-      )}
+      {state && !state.success && <p className="text-sm text-danger">{state.message}</p>}
+      {state?.success && <p className="text-sm text-success">{state.message}</p>}
 
       <Button type="submit" loading={isPending}>
         更新する

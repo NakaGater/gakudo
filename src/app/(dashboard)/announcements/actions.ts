@@ -2,18 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/get-user";
-import { isStaff } from "@/lib/auth/roles";
-import { sendAnnouncementNotification } from "@/lib/notifications/send";
-import { uploadAttachment } from "@/lib/attachments/actions";
+import { ERROR_MESSAGES } from "@/config/constants";
 import {
   buildRecipientRows,
   parseRecipientsFromFormData,
   type ParsedRecipients,
 } from "@/lib/announcements/recipients";
+import { uploadAttachment } from "@/lib/attachments/actions";
+import { getUser } from "@/lib/auth/get-user";
+import { isStaff } from "@/lib/auth/roles";
+import { sendAnnouncementNotification } from "@/lib/notifications/send";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
-import { ERROR_MESSAGES } from "@/config/constants";
 
 export async function createAnnouncement(
   _prev: ActionState,
@@ -52,7 +52,8 @@ export async function createAnnouncement(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.from("announcements")
+  const { data, error } = await supabase
+    .from("announcements")
     .insert({
       title: (title as string).trim(),
       body: (body as string).trim(),
@@ -109,10 +110,12 @@ export async function markAsRead(announcementId: string): Promise<void> {
   if (user.role !== "parent") return;
 
   const supabase = await createClient();
-  const { error } = await supabase.from("announcement_reads").upsert(
-    { announcement_id: announcementId, user_id: user.id },
-    { onConflict: "announcement_id,user_id", ignoreDuplicates: true },
-  );
+  const { error } = await supabase
+    .from("announcement_reads")
+    .upsert(
+      { announcement_id: announcementId, user_id: user.id },
+      { onConflict: "announcement_id,user_id", ignoreDuplicates: true },
+    );
   if (error) {
     console.error("[announcements] markAsRead failed:", error);
     return;

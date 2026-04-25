@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { ERROR_MESSAGES } from "@/config/constants";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/types";
 
 export type InquiryRow = {
@@ -27,10 +27,7 @@ export async function getInquiries(status?: string): Promise<InquiryRow[]> {
   if (!isStaff(user.role)) return [];
 
   const supabase = await createClient();
-  let query = supabase
-    .from("inquiries")
-    .select("*")
-    .order("created_at", { ascending: false });
+  let query = supabase.from("inquiries").select("*").order("created_at", { ascending: false });
 
   if (status && status !== "all") {
     query = query.eq("status", status);
@@ -45,11 +42,7 @@ export async function getInquiry(id: string): Promise<InquiryRow | null> {
   if (!isStaff(user.role)) return null;
 
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("inquiries")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data } = await supabase.from("inquiries").select("*").eq("id", id).single();
 
   return (data as InquiryRow) ?? null;
 }
@@ -140,12 +133,7 @@ export async function replyToInquiry(
   return { success: true, message: `${actionLabel}メールを送信しました。` };
 }
 
-async function sendReplyEmail(
-  email: string,
-  name: string,
-  action: string,
-  replyText: string,
-) {
+async function sendReplyEmail(email: string, name: string, action: string, replyText: string) {
   const { sendEmail } = await import("@/lib/email/send");
 
   const subjectMap: Record<string, string> = {

@@ -2,10 +2,7 @@
 
 import type { MetaFieldsWithSetterProps } from "./types";
 
-export function FaqMetaFields({
-  meta,
-  setMeta,
-}: MetaFieldsWithSetterProps) {
+export function FaqMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps) {
   const questions = (meta.questions as Array<{ q: string; a: string }>) || [];
 
   const updateQuestion = (index: number, field: "q" | "a", value: string) => {

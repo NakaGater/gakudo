@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui";
 import { getUser } from "@/lib/auth/get-user";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
-import { Button } from "@/components/ui";
+import { createClient } from "@/lib/supabase/server";
 
 type ChildRow = {
   id: string;
@@ -43,7 +43,14 @@ export default async function ChildrenPage() {
     parent_count: Array.isArray(c.child_parents) ? c.child_parents.length : 0,
   }));
 
-  const gradeEmoji: Record<number, string> = { 1: "🌸", 2: "🌿", 3: "🍂", 4: "⭐", 5: "🌊", 6: "🎓" };
+  const gradeEmoji: Record<number, string> = {
+    1: "🌸",
+    2: "🌿",
+    3: "🍂",
+    4: "⭐",
+    5: "🌊",
+    6: "🎓",
+  };
   const colorVariants = ["cc__av--o", "cc__av--g", "cc__av--y", "cc__av--b"] as const;
 
   // Group children by grade
@@ -66,10 +73,23 @@ export default async function ChildrenPage() {
         <div className="empty-state">
           <div className="empty-state__hoshi">
             <svg width="64" height="72" viewBox="0 0 32 38" aria-hidden>
-              <path d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z" fill="#FFD93D" stroke="#E8B830" strokeWidth="1.5"/>
-              <circle cx="11" cy="13" r="1.5" fill="#3B2F20"/><circle cx="21" cy="13" r="1.5" fill="#3B2F20"/>
-              <circle cx="8" cy="16" r="2" fill="#FFB5C5" opacity=".55"/><circle cx="24" cy="16" r="2" fill="#FFB5C5" opacity=".55"/>
-              <path d="M13 19 Q16 17 19 19" fill="none" stroke="#3B2F20" strokeWidth="1" strokeLinecap="round"/>
+              <path
+                d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z"
+                fill="#FFD93D"
+                stroke="#E8B830"
+                strokeWidth="1.5"
+              />
+              <circle cx="11" cy="13" r="1.5" fill="#3B2F20" />
+              <circle cx="21" cy="13" r="1.5" fill="#3B2F20" />
+              <circle cx="8" cy="16" r="2" fill="#FFB5C5" opacity=".55" />
+              <circle cx="24" cy="16" r="2" fill="#FFB5C5" opacity=".55" />
+              <path
+                d="M13 19 Q16 17 19 19"
+                fill="none"
+                stroke="#3B2F20"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
             </svg>
           </div>
           <div className="empty-state__text">まだ だれも いないよ…</div>
@@ -83,7 +103,10 @@ export default async function ChildrenPage() {
             return (
               <div key={grade}>
                 <div className="grade-div">
-                  <div className="grade-div__label">{emoji} {grade}年生 <span className="grade-div__count">（{kids.length}名）</span></div>
+                  <div className="grade-div__label">
+                    {emoji} {grade}年生{" "}
+                    <span className="grade-div__count">（{kids.length}名）</span>
+                  </div>
                   <div className="grade-div__line" />
                 </div>
                 <div className="child-grid">
@@ -95,7 +118,9 @@ export default async function ChildrenPage() {
                           <div className={`cc__av ${avColor}`}>{child.name.charAt(0)}</div>
                           <div className="cc__info">
                             <div className="cc__name">{child.name}</div>
-                            <div className="cc__meta">{child.grade}年 ・ 保護者{child.parent_count}人</div>
+                            <div className="cc__meta">
+                              {child.grade}年 ・ 保護者{child.parent_count}人
+                            </div>
                             <div className="cc__tags">
                               <span className={`tag ${child.qr_active ? "tag-ok" : "tag-warn"}`}>
                                 {child.qr_active ? "✓ QR有効" : "✕ QR無効"}

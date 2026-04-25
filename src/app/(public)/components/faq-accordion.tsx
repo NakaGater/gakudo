@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 type FaqItem = { q: string; a: string };
 
@@ -34,7 +34,9 @@ export function FaqAccordion({ questions }: { questions: FaqItem[] }) {
               <div className="px-5 py-4 border-t border-page-edge bg-page">
                 <div className="flex gap-3">
                   <span className="text-cr-blue font-bold text-lg shrink-0">A</span>
-                  <p className="text-sm text-ink-mid leading-relaxed whitespace-pre-wrap">{item.a}</p>
+                  <p className="text-sm text-ink-mid leading-relaxed whitespace-pre-wrap">
+                    {item.a}
+                  </p>
                 </div>
               </div>
             )}

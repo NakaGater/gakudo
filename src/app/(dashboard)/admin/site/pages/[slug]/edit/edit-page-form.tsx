@@ -2,15 +2,15 @@
 
 import { useActionState, useState, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import type { ActionState } from "@/lib/actions/types";
-import { updateSitePage } from "../../../actions";
 import { cn } from "@/lib/utils";
-import { HomeMetaFields } from "./meta-fields/home-meta-fields";
 import { AboutMetaFields } from "./meta-fields/about-meta-fields";
 import { AccessMetaFields } from "./meta-fields/access-meta-fields";
-import { FaqMetaFields } from "./meta-fields/faq-meta-fields";
 import { DailyLifeMetaFields } from "./meta-fields/daily-life-meta-fields";
 import { EnrollmentMetaFields } from "./meta-fields/enrollment-meta-fields";
+import { FaqMetaFields } from "./meta-fields/faq-meta-fields";
+import { HomeMetaFields } from "./meta-fields/home-meta-fields";
+import { updateSitePage } from "../../../actions";
+import type { ActionState } from "@/lib/actions/types";
 
 type Props = {
   slug: string;
@@ -21,10 +21,7 @@ type Props = {
 
 export function EditPageForm({ slug, title, content, metadata }: Props) {
   const boundAction = updateSitePage.bind(null, slug);
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    boundAction,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(boundAction, null);
 
   // Metadata state
   const [meta, setMeta] = useState<Record<string, unknown>>(metadata ?? {});
@@ -40,9 +37,7 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
           role="alert"
           className={cn(
             "rounded-md px-4 py-3 text-sm",
-            state.success
-              ? "bg-success/10 text-success"
-              : "bg-danger/10 text-danger",
+            state.success ? "bg-success/10 text-success" : "bg-danger/10 text-danger",
           )}
         >
           {state.message}
@@ -52,12 +47,7 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
       {/* hidden field for metadata JSON */}
       <input type="hidden" name="metadata" value={JSON.stringify(meta)} />
 
-      <Input
-        name="title"
-        label="タイトル"
-        defaultValue={title}
-        required
-      />
+      <Input name="title" label="タイトル" defaultValue={title} required />
 
       {/* サブタイトル — 全ページ共通 */}
       <div className="flex flex-col gap-1">
@@ -95,34 +85,22 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
       </div>
 
       {/* Home ページ固有フィールド */}
-      {slug === "home" && (
-        <HomeMetaFields meta={meta} updateMeta={updateMeta} />
-      )}
+      {slug === "home" && <HomeMetaFields meta={meta} updateMeta={updateMeta} />}
 
       {/* About ページ固有フィールド */}
-      {slug === "about" && (
-        <AboutMetaFields meta={meta} updateMeta={updateMeta} />
-      )}
+      {slug === "about" && <AboutMetaFields meta={meta} updateMeta={updateMeta} />}
 
       {/* FAQ ページ固有フィールド */}
-      {slug === "faq" && (
-        <FaqMetaFields meta={meta} setMeta={setMeta} />
-      )}
+      {slug === "faq" && <FaqMetaFields meta={meta} setMeta={setMeta} />}
 
       {/* 日々の生活ページ固有フィールド */}
-      {slug === "daily-life" && (
-        <DailyLifeMetaFields meta={meta} setMeta={setMeta} />
-      )}
+      {slug === "daily-life" && <DailyLifeMetaFields meta={meta} setMeta={setMeta} />}
 
       {/* 入所案内ページ固有フィールド */}
-      {slug === "enrollment" && (
-        <EnrollmentMetaFields meta={meta} setMeta={setMeta} />
-      )}
+      {slug === "enrollment" && <EnrollmentMetaFields meta={meta} setMeta={setMeta} />}
 
       {/* アクセスページ固有フィールド */}
-      {slug === "access" && (
-        <AccessMetaFields meta={meta} updateMeta={updateMeta} />
-      )}
+      {slug === "access" && <AccessMetaFields meta={meta} updateMeta={updateMeta} />}
 
       <div className="flex justify-end">
         <Button type="submit" loading={isPending}>

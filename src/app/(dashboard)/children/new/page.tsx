@@ -1,19 +1,16 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
-import type { ActionState } from "../types";
 import { createChild } from "../actions";
+import type { ActionState } from "../types";
 
 const grades = [1, 2, 3, 4, 5, 6] as const;
 
 export default function NewChildPage() {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    createChild,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(createChild, null);
 
   useEffect(() => {
     if (state?.success && state.childId) {
@@ -57,9 +54,7 @@ export default function NewChildPage() {
               </select>
             </div>
 
-            {state && !state.success && (
-              <p className="text-sm text-danger">{state.message}</p>
-            )}
+            {state && !state.success && <p className="text-sm text-danger">{state.message}</p>}
 
             <Button type="submit" loading={isPending}>
               登録する

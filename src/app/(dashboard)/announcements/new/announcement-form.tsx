@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
-import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
+import { useActionState, useRef, useState } from "react";
 import { FileUploader } from "@/components/attachments/file-uploader";
-import type { ActionResult, ActionState } from "@/lib/actions/types";
-import type { SelectableParent } from "@/lib/announcements/recipients-server";
+import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
 import { createAnnouncement } from "../actions";
 import { RecipientPicker } from "./recipient-picker";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
+import type { SelectableParent } from "@/lib/announcements/recipients-server";
 
 type FileInfo = { file: File };
 
@@ -27,10 +27,7 @@ export function AnnouncementForm({ parents }: Props) {
     return createAnnouncement(_prev, formData);
   };
 
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    wrappedAction,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(wrappedAction, null);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -65,9 +62,7 @@ export function AnnouncementForm({ parents }: Props) {
                 className="w-full min-h-[200px] rounded-sm border border-border bg-bg-elev px-3 py-2 text-fg placeholder:text-fg-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
               {state?.fieldErrors?.body && (
-                <p className="text-sm text-danger">
-                  {state.fieldErrors.body}
-                </p>
+                <p className="text-sm text-danger">{state.fieldErrors.body}</p>
               )}
             </div>
 
@@ -77,11 +72,7 @@ export function AnnouncementForm({ parents }: Props) {
               disabled={isPending}
             />
 
-            <FileUploader
-              files={pendingFiles}
-              onChange={setPendingFiles}
-              disabled={isPending}
-            />
+            <FileUploader files={pendingFiles} onChange={setPendingFiles} disabled={isPending} />
 
             {state && !state.success && !state.fieldErrors && (
               <p className="text-sm text-danger">{state.message}</p>

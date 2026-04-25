@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 
 const PAGE_ORDER: Record<string, { order: number; icon: string; description: string }> = {
   home: { order: 1, icon: "🏠", description: "トップページ（アクセス情報含む）" },
@@ -55,15 +55,11 @@ export default async function SitePagesPage() {
                     <p className="cms-card__title">{page.title}</p>
                     {info && <p className="text-xs text-ink-light mt-0.5">{info.description}</p>}
                     <p className="cms-card__date mt-1">
-                      最終更新:{" "}
-                      {new Date(page.updated_at).toLocaleDateString("ja-JP")}
+                      最終更新: {new Date(page.updated_at).toLocaleDateString("ja-JP")}
                     </p>
                   </div>
                 </div>
-                <Link
-                  href={`/admin/site/pages/${page.slug}/edit`}
-                  className="cms-card__edit"
-                >
+                <Link href={`/admin/site/pages/${page.slug}/edit`} className="cms-card__edit">
                   編集
                 </Link>
               </div>

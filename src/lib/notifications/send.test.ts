@@ -266,8 +266,7 @@ describe("sendAttendanceNotification", () => {
   it("delivers an email when parent prefers email (exit)", async () => {
     mockFrom.mockImplementation((table: string) => {
       if (table === "children") return chain({ data: { name: "花子" }, error: null });
-      if (table === "child_parents")
-        return chain({ data: [{ parent_id: "p2" }], error: null });
+      if (table === "child_parents") return chain({ data: [{ parent_id: "p2" }], error: null });
       if (table === "notification_preferences")
         return chain({ data: [{ user_id: "p2", method: "email" }], error: null });
       if (table === "profiles")
@@ -282,16 +281,13 @@ describe("sendAttendanceNotification", () => {
     await sendAttendanceNotification("c2", "exit", "2024-01-15T09:00:00.000Z");
 
     expect(mockEmailSend).toHaveBeenCalledTimes(1);
-    expect(mockEmailSend).toHaveBeenCalledWith(
-      expect.objectContaining({ to: "p2@example.com" }),
-    );
+    expect(mockEmailSend).toHaveBeenCalledWith(expect.objectContaining({ to: "p2@example.com" }));
   });
 
   it("skips push and email when all preferences are 'off'", async () => {
     mockFrom.mockImplementation((table: string) => {
       if (table === "children") return chain({ data: { name: "次郎" }, error: null });
-      if (table === "child_parents")
-        return chain({ data: [{ parent_id: "p3" }], error: null });
+      if (table === "child_parents") return chain({ data: [{ parent_id: "p3" }], error: null });
       if (table === "notification_preferences")
         return chain({ data: [{ user_id: "p3", method: "off" }], error: null });
       return chain({ data: [], error: null });

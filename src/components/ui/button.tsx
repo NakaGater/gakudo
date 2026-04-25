@@ -11,8 +11,7 @@ const variantStyles = {
     "bg-danger text-white border-2 border-[#A83C32] shadow-[0_3px_0_#A83C32] hover:shadow-[0_4px_0_#A83C32] active:shadow-[0_1px_0_#A83C32]",
   enter:
     "bg-enter text-white border-2 border-[#1F5E3D] shadow-[0_3px_0_#1F5E3D] hover:shadow-[0_4px_0_#1F5E3D] active:shadow-[0_1px_0_#1F5E3D]",
-  exit:
-    "bg-exit text-white border-2 border-[#A83C32] shadow-[0_3px_0_#A83C32] hover:shadow-[0_4px_0_#A83C32] active:shadow-[0_1px_0_#A83C32]",
+  exit: "bg-exit text-white border-2 border-[#A83C32] shadow-[0_3px_0_#A83C32] hover:shadow-[0_4px_0_#A83C32] active:shadow-[0_1px_0_#A83C32]",
 } as const;
 
 const sizeStyles = {
@@ -39,14 +38,7 @@ function Spinner() {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"
@@ -58,15 +50,7 @@ function Spinner() {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      className,
-      variant = "primary",
-      size = "md",
-      loading = false,
-      disabled,
-      children,
-      ...props
-    },
+    { className, variant = "primary", size = "md", loading = false, disabled, children, ...props },
     ref,
   ) => {
     return (

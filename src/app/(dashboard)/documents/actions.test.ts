@@ -95,10 +95,7 @@ describe("uploadDocument", () => {
     const exe = new File([new Uint8Array(8)], "evil.exe", {
       type: "application/x-msdownload",
     });
-    const result = await uploadDocument(
-      null,
-      form({ title: "t", category: "お便り", file: exe }),
-    );
+    const result = await uploadDocument(null, form({ title: "t", category: "お便り", file: exe }));
     expect(result.success).toBe(false);
     expect(result.fieldErrors?.file).toBeTruthy();
   });

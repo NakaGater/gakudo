@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 const navLinks = [
   { href: "/", label: "ホーム" },
@@ -61,7 +61,10 @@ export function Header() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="border-t-2 border-dashed border-page-edge bg-page md:hidden">
-          <nav className="mx-auto max-w-6xl space-y-1 px-4 py-3 sm:px-6" aria-label="モバイルメニュー">
+          <nav
+            className="mx-auto max-w-6xl space-y-1 px-4 py-3 sm:px-6"
+            aria-label="モバイルメニュー"
+          >
             {navLinks.map((link) => (
               <Link
                 key={link.href}

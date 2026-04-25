@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardHeader, Badge, Button } from "@/components/ui";
 import { getUser } from "@/lib/auth/get-user";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
-import { Card, CardContent, CardHeader, Badge, Button } from "@/components/ui";
-import { ChildEditForm } from "./child-edit-form";
+import { createClient } from "@/lib/supabase/server";
 import { ChildDeleteButton } from "./child-delete-button";
+import { ChildEditForm } from "./child-edit-form";
 import { LinkParent } from "./link-parent";
 
 type Props = {
@@ -48,7 +48,9 @@ export default async function ChildDetailPage({ params }: Props) {
     .returns<ParentInfo[]>();
 
   const parents = (parentLinks ?? [])
-    .filter((p): p is ParentInfo & { profiles: { name: string; email: string } } => p.profiles !== null)
+    .filter(
+      (p): p is ParentInfo & { profiles: { name: string; email: string } } => p.profiles !== null,
+    )
     .map((p) => ({
       parent_id: p.parent_id,
       name: p.profiles.name,
@@ -95,9 +97,7 @@ export default async function ChildDetailPage({ params }: Props) {
             </div>
             <div>
               <dt className="text-fg-muted">登録日</dt>
-              <dd className="text-fg">
-                {new Date(child.created_at).toLocaleDateString("ja-JP")}
-              </dd>
+              <dd className="text-fg">{new Date(child.created_at).toLocaleDateString("ja-JP")}</dd>
             </div>
             <div>
               <dt className="text-fg-muted">QR表示</dt>

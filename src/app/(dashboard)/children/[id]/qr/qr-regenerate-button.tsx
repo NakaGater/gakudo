@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui";
 import { regenerateQR } from "../../actions";
 
@@ -30,11 +30,7 @@ export function QRRegenerateButton({ childId }: Props) {
 
   if (!confirming) {
     return (
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={() => setConfirming(true)}
-      >
+      <Button variant="destructive" size="sm" onClick={() => setConfirming(true)}>
         QRコードを再発行
       </Button>
     );
@@ -42,17 +38,10 @@ export function QRRegenerateButton({ childId }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm text-danger">
-        このQRコードを無効にして新しいものを発行します
-      </p>
+      <p className="text-sm text-danger">このQRコードを無効にして新しいものを発行します</p>
       {error && <p className="text-sm text-danger">{error}</p>}
       <div className="flex gap-2">
-        <Button
-          variant="destructive"
-          size="sm"
-          loading={loading}
-          onClick={handleRegenerate}
-        >
+        <Button variant="destructive" size="sm" loading={loading} onClick={handleRegenerate}>
           再発行する
         </Button>
         <Button

@@ -3,8 +3,8 @@
 import { useState, useRef } from "react";
 import { Button, Input } from "@/components/ui";
 import { compressPhoto } from "@/lib/photos/compress";
-import type { ActionState } from "@/lib/actions/types";
 import { uploadPhoto } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
 
 export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
   const [previews, setPreviews] = useState<string[]>([]);
@@ -68,9 +68,7 @@ export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-fg mb-1">
-          写真を選択
-        </label>
+        <label className="block text-sm font-medium text-fg mb-1">写真を選択</label>
         <input
           ref={fileRef}
           type="file"
@@ -90,11 +88,7 @@ export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
               className="relative aspect-square overflow-hidden rounded-md border border-border"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={url}
-                alt={`プレビュー ${i + 1}`}
-                className="h-full w-full object-cover"
-              />
+              <img src={url} alt={`プレビュー ${i + 1}`} className="h-full w-full object-cover" />
             </div>
           ))}
         </div>
@@ -128,9 +122,7 @@ export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
       )}
 
       {result && (
-        <p
-          className={`text-sm ${result.success ? "text-success" : "text-danger"}`}
-        >
+        <p className={`text-sm ${result.success ? "text-success" : "text-danger"}`}>
           {result.message}
         </p>
       )}

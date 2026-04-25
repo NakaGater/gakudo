@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/auth/get-user";
 import { Card, CardContent, CardHeader } from "@/components/ui";
+import { getUser } from "@/lib/auth/get-user";
 import { getActiveBillingRule, getBillingRules } from "../actions";
-import type { BillingRule } from "../types";
 import { BillingRuleForm } from "./billing-rule-form";
+import type { BillingRule } from "../types";
 
 function formatTime(time: string) {
   return time.slice(0, 5);
@@ -25,10 +25,7 @@ export default async function BillingRulesPage() {
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
 
-  const [activeRule, allRules] = await Promise.all([
-    getActiveBillingRule(),
-    getBillingRules(),
-  ]);
+  const [activeRule, allRules] = await Promise.all([getActiveBillingRule(), getBillingRules()]);
 
   return (
     <div className="p-6 max-w-4xl mx-auto flex flex-col gap-6">
@@ -48,7 +45,9 @@ export default async function BillingRulesPage() {
               </div>
               <div>
                 <dt className="text-fg-muted">延長単価</dt>
-                <dd className="font-medium text-fg">{activeRule.rate_per_unit.toLocaleString()}円</dd>
+                <dd className="font-medium text-fg">
+                  {activeRule.rate_per_unit.toLocaleString()}円
+                </dd>
               </div>
               <div>
                 <dt className="text-fg-muted">単位時間</dt>

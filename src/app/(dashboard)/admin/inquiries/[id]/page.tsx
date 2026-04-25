@@ -1,15 +1,11 @@
-import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { redirect, notFound } from "next/navigation";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { getInquiry, getReplyTemplate } from "../actions";
 import { InquiryReplyForm } from "./reply-form";
 
-export default async function InquiryDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function InquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getUser();
   if (!isStaff(user.role)) redirect("/");
@@ -91,7 +87,8 @@ export default async function InquiryDetailPage({
           <p className="text-sm text-fg whitespace-pre-wrap">{inquiry.admin_reply}</p>
           {inquiry.replied_at && (
             <p className="text-xs text-fg-muted mt-2">
-              返信日時: {new Date(inquiry.replied_at).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
+              返信日時:{" "}
+              {new Date(inquiry.replied_at).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
             </p>
           )}
         </div>

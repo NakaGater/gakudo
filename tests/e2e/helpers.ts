@@ -6,11 +6,7 @@ import { type Page } from "@playwright/test";
  * NOTE: The server action redirects to /dashboard which may 404 —
  * the caller should navigate to the desired page after this returns.
  */
-export async function loginViaForm(
-  page: Page,
-  email: string,
-  password: string,
-): Promise<void> {
+export async function loginViaForm(page: Page, email: string, password: string): Promise<void> {
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(password);
@@ -68,8 +64,7 @@ export async function getLatestEmail(
 
     if (messages.length > 0) {
       const sorted = messages.sort(
-        (a, b) =>
-          new Date(b.Created).getTime() - new Date(a.Created).getTime(),
+        (a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime(),
       );
       const latest = sorted[0];
 

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { Button } from "@/components/ui";
-import { InstagramAddForm } from "./instagram-add-form";
+import { createClient } from "@/lib/supabase/server";
 import { deleteInstagramPost, toggleInstagramPostVisibility } from "./actions";
+import { InstagramAddForm } from "./instagram-add-form";
 import type { Database } from "@/lib/supabase/types";
 
 type IgPost = Database["public"]["Tables"]["instagram_posts"]["Row"];
@@ -48,21 +48,14 @@ export default async function InstagramManagePage() {
       <InstagramAddForm />
 
       <div className="mt-8">
-        <h2 className="text-sm font-bold text-ink mb-3">
-          登録済み投稿（{postList.length}件）
-        </h2>
+        <h2 className="text-sm font-bold text-ink mb-3">登録済み投稿（{postList.length}件）</h2>
 
         {postList.length === 0 ? (
-          <p className="text-ink-mid text-center py-8">
-            まだInstagram投稿が登録されていません
-          </p>
+          <p className="text-ink-mid text-center py-8">まだInstagram投稿が登録されていません</p>
         ) : (
           <div className="flex flex-col gap-3">
             {postList.map((post) => (
-              <div
-                key={post.id}
-                className="ig-post-card"
-              >
+              <div key={post.id} className="ig-post-card">
                 <div className="ig-post-card__info">
                   <a
                     href={post.post_url}
@@ -72,29 +65,36 @@ export default async function InstagramManagePage() {
                   >
                     {post.post_url}
                   </a>
-                  {post.caption && (
-                    <p className="text-xs text-ink-mid mt-1">📝 {post.caption}</p>
-                  )}
+                  {post.caption && <p className="text-xs text-ink-mid mt-1">📝 {post.caption}</p>}
                   <p className="text-[10px] text-ink-light mt-1">
-                    登録: {post.created_at ? new Date(post.created_at).toLocaleDateString("ja-JP") : "不明"}
+                    登録:{" "}
+                    {post.created_at
+                      ? new Date(post.created_at).toLocaleDateString("ja-JP")
+                      : "不明"}
                   </p>
                 </div>
                 <div className="ig-post-card__actions">
-                  <span className={`status-badge ${post.is_visible ? "status-badge--public" : "status-badge--private"}`}>
+                  <span
+                    className={`status-badge ${post.is_visible ? "status-badge--public" : "status-badge--private"}`}
+                  >
                     {post.is_visible ? "表示中" : "非表示"}
                   </span>
-                  <form action={async () => {
-                    "use server";
-                    await toggleInstagramPostVisibility(post.id, post.is_visible ?? true);
-                  }}>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await toggleInstagramPostVisibility(post.id, post.is_visible ?? true);
+                    }}
+                  >
                     <Button variant="ghost" size="sm" type="submit">
                       {post.is_visible ? "非表示にする" : "表示する"}
                     </Button>
                   </form>
-                  <form action={async () => {
-                    "use server";
-                    await deleteInstagramPost(post.id);
-                  }}>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await deleteInstagramPost(post.id);
+                    }}
+                  >
                     <Button variant="destructive" size="sm" type="submit">
                       削除
                     </Button>

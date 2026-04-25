@@ -9,12 +9,7 @@ export type QRDisplayProps = {
   size?: number;
 };
 
-export function QRDisplay({
-  value,
-  childName,
-  grade,
-  size = 200,
-}: QRDisplayProps) {
+export function QRDisplay({ value, childName, grade, size = 200 }: QRDisplayProps) {
   return (
     <div className="flex flex-col items-center gap-4">
       <QRCode value={value} size={size} level="M" />

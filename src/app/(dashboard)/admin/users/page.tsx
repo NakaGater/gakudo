@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { UsersClient } from "./users-client";
 
 export default async function AdminUsersPage() {
@@ -8,7 +8,8 @@ export default async function AdminUsersPage() {
   if (user.role !== "admin") redirect("/");
 
   const supabase = await createClient();
-  const { data: profiles, error } = await supabase.from("profiles")
+  const { data: profiles, error } = await supabase
+    .from("profiles")
     .select("id, email, name, role, created_at")
     .order("created_at", { ascending: false });
 
@@ -38,10 +39,18 @@ export default async function AdminUsersPage() {
 
       {/* Summary pills */}
       <div className="flex flex-wrap gap-3 mb-6">
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-ink">{users.length} ユーザー</span>
-        <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-ink">{users.filter(u => u.role === "admin").length} 管理者</span>
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-ink">{users.filter(u => u.role === "teacher").length} 先生</span>
-        <span className="rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-ink">{users.filter(u => u.role === "parent").length} 保護者</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-ink">
+          {users.length} ユーザー
+        </span>
+        <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-ink">
+          {users.filter((u) => u.role === "admin").length} 管理者
+        </span>
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-ink">
+          {users.filter((u) => u.role === "teacher").length} 先生
+        </span>
+        <span className="rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-ink">
+          {users.filter((u) => u.role === "parent").length} 保護者
+        </span>
       </div>
 
       <UsersClient users={users} currentUserId={user.id} />

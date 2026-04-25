@@ -1,16 +1,13 @@
 "use client";
 
+import { Send } from "lucide-react";
 import { useActionState, useState } from "react";
+import { cn } from "@/lib/utils";
 import { submitInquiry } from "./actions";
 import type { ActionState } from "@/lib/actions/types";
-import { cn } from "@/lib/utils";
-import { Send } from "lucide-react";
 
 export function InquiryForm() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    submitInquiry,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(submitInquiry, null);
   const [type, setType] = useState<"visit" | "general">("visit");
 
   // 送信成功時
@@ -27,10 +24,7 @@ export function InquiryForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {state?.message && (
-        <div
-          role="alert"
-          className="rounded-md px-4 py-3 text-sm bg-danger/10 text-danger"
-        >
+        <div role="alert" className="rounded-md px-4 py-3 text-sm bg-danger/10 text-danger">
           {state.message}
         </div>
       )}

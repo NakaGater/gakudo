@@ -188,7 +188,11 @@ describe("createAnnouncement", () => {
     await expect(createAnnouncement(null, fd)).rejects.toThrow("NEXT_REDIRECT");
     expect(mockFrom).toHaveBeenCalledWith("announcements");
     expect(mockFrom).toHaveBeenCalledWith("announcement_recipients");
-    expect(mockUploadAttachment).toHaveBeenCalledWith("announcement", "ann-1", expect.any(FormData));
+    expect(mockUploadAttachment).toHaveBeenCalledWith(
+      "announcement",
+      "ann-1",
+      expect.any(FormData),
+    );
     expect(mockSendNotification).toHaveBeenCalledWith("ann-1", "お知らせ", "本文です");
   });
 

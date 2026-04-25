@@ -39,14 +39,10 @@ describe("QRScanner", () => {
   it("calls onScan callback when code is decoded", async () => {
     const onScan = vi.fn();
     mockStart.mockImplementation(
-      (
-        _cameraId: unknown,
-        _config: unknown,
-        onSuccess: (text: string) => void
-      ) => {
+      (_cameraId: unknown, _config: unknown, onSuccess: (text: string) => void) => {
         onSuccess("GK-ABC12345");
         return Promise.resolve();
-      }
+      },
     );
 
     render(<QRScanner onScan={onScan} />);
@@ -62,9 +58,7 @@ describe("QRScanner", () => {
     render(<QRScanner {...defaultProps} />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("カメラへのアクセスを許可してください")
-      ).toBeInTheDocument();
+      expect(screen.getByText("カメラへのアクセスを許可してください")).toBeInTheDocument();
     });
   });
 

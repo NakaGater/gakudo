@@ -8,7 +8,9 @@ test.describe("Flow 14: Profile management", () => {
 
   test("profile page renders with user info", async ({ page }) => {
     await page.goto("/profile");
-    await expect(page.getByRole("heading", { name: "プロフィール" })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "プロフィール" })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.locator('input[name="name"]')).toBeVisible();
     await expect(page.locator('input[name="email"]')).toBeVisible();
     await expect(page.getByText("管理者").first()).toBeVisible();

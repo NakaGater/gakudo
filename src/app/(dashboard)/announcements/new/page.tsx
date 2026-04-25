@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/auth/get-user";
 import { loadSelectableParents } from "@/lib/announcements/recipients-server";
+import { getUser } from "@/lib/auth/get-user";
 import { AnnouncementForm } from "./announcement-form";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "お知らせ作成",

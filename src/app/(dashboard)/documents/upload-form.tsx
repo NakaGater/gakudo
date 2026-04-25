@@ -2,8 +2,8 @@
 
 import { useActionState, useRef, useState, useCallback, type DragEvent } from "react";
 import { Button, Input } from "@/components/ui";
-import type { ActionState } from "@/lib/actions/types";
 import { uploadDocument } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
 
 const CATEGORIES = ["お便り", "スケジュール", "書類", "その他"] as const;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -147,12 +147,8 @@ export function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
             <p className="text-sm text-fg">{selectedFile.name}</p>
           ) : (
             <>
-              <p className="text-sm text-fg/60">
-                ここにファイルをドラッグ、またはクリックして選択
-              </p>
-              <p className="mt-1 text-xs text-fg/40">
-                PDF・画像 (最大10MB)
-              </p>
+              <p className="text-sm text-fg/60">ここにファイルをドラッグ、またはクリックして選択</p>
+              <p className="mt-1 text-xs text-fg/40">PDF・画像 (最大10MB)</p>
             </>
           )}
           <input
@@ -170,9 +166,7 @@ export function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
       {state && !state.success && !state.fieldErrors && (
         <p className="text-sm text-danger">{state.message}</p>
       )}
-      {state?.success && (
-        <p className="text-sm text-success">{state.message}</p>
-      )}
+      {state?.success && <p className="text-sm text-success">{state.message}</p>}
 
       <Button type="submit" loading={isPending} disabled={isPending}>
         {isPending ? "アップロード中..." : "アップロード"}

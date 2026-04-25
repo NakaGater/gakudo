@@ -9,9 +9,9 @@
  *   SUPABASE_SERVICE_ROLE_KEY
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { createClient } from "@supabase/supabase-js";
 
 // .env.local を手動パース
 const envPath = resolve(import.meta.dirname ?? ".", ".env.local");
@@ -60,12 +60,11 @@ async function main() {
     }
 
     // Auth ユーザー作成
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.createUser({
-        email: user.email,
-        password: TEST_PASSWORD,
-        email_confirm: true,
-      });
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: user.email,
+      password: TEST_PASSWORD,
+      email_confirm: true,
+    });
 
     if (authError) {
       console.error(`❌ ${user.role} Auth作成失敗:`, authError.message);

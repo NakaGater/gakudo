@@ -76,9 +76,7 @@ describe("toDashboardStatuses", () => {
 
   it("marks the last 'enter' as 'entered' with enterTime set", () => {
     const enterMap = new Map([["c1", "2024-01-15T01:00:00Z"]]);
-    const latestMap = new Map([
-      ["c1", { type: "enter", recorded_at: "2024-01-15T01:00:00Z" }],
-    ]);
+    const latestMap = new Map([["c1", { type: "enter", recorded_at: "2024-01-15T01:00:00Z" }]]);
     const [c1] = toDashboardStatuses(children, enterMap, latestMap);
     expect(c1).toEqual({
       childId: "c1",
@@ -92,9 +90,7 @@ describe("toDashboardStatuses", () => {
 
   it("marks the last 'exit' as 'exited' with both enterTime and exitTime set", () => {
     const enterMap = new Map([["c2", "2024-01-15T02:00:00Z"]]);
-    const latestMap = new Map([
-      ["c2", { type: "exit", recorded_at: "2024-01-15T08:00:00Z" }],
-    ]);
+    const latestMap = new Map([["c2", { type: "exit", recorded_at: "2024-01-15T08:00:00Z" }]]);
     const result = toDashboardStatuses(children, enterMap, latestMap);
     const c2 = result.find((r) => r.childId === "c2");
     expect(c2).toEqual({

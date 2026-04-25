@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import { AttachmentList } from "./attachment-list";
 
 const mockAttachments = [
@@ -28,17 +28,13 @@ const mockUrls: Record<string, string> = {
 
 describe("AttachmentList", () => {
   it("renders attachment file names", () => {
-    render(
-      <AttachmentList attachments={mockAttachments} downloadUrls={mockUrls} />,
-    );
+    render(<AttachmentList attachments={mockAttachments} downloadUrls={mockUrls} />);
     expect(screen.getByText("document.pdf")).toBeTruthy();
     expect(screen.getByText("photo.jpg")).toBeTruthy();
   });
 
   it("renders download links with correct URLs", () => {
-    render(
-      <AttachmentList attachments={mockAttachments} downloadUrls={mockUrls} />,
-    );
+    render(<AttachmentList attachments={mockAttachments} downloadUrls={mockUrls} />);
     const links = screen.getAllByRole("link");
     expect(links.length).toBeGreaterThanOrEqual(2);
   });
@@ -54,11 +50,7 @@ describe("AttachmentList", () => {
   it("renders delete buttons when onDelete is provided", () => {
     const onDelete = vi.fn();
     const { container } = render(
-      <AttachmentList
-        attachments={mockAttachments}
-        downloadUrls={mockUrls}
-        onDelete={onDelete}
-      />,
+      <AttachmentList attachments={mockAttachments} downloadUrls={mockUrls} onDelete={onDelete} />,
     );
     const deleteButtons = container.querySelectorAll('button[title="削除"]');
     expect(deleteButtons.length).toBe(2);
@@ -81,9 +73,7 @@ describe("AttachmentList", () => {
   });
 
   it("renders nothing when attachments array is empty", () => {
-    const { container } = render(
-      <AttachmentList attachments={[]} downloadUrls={{}} />,
-    );
+    const { container } = render(<AttachmentList attachments={[]} downloadUrls={{}} />);
     expect(container.textContent).toBe("");
   });
 });

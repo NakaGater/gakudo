@@ -2,14 +2,14 @@
 
 import { useActionState } from "react";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
-import type { ActionState } from "@/lib/actions/types";
 import { createBillingRule } from "../actions";
+import type { ActionState } from "@/lib/actions/types";
 
 export function BillingRuleForm({ onClose }: { onClose?: () => void }) {
-  const [state, formAction, isPending] = useActionState<
-    ActionState,
-    FormData
-  >(createBillingRule, null);
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    createBillingRule,
+    null,
+  );
 
   return (
     <Card>
@@ -62,9 +62,7 @@ export function BillingRuleForm({ onClose }: { onClose?: () => void }) {
             <p className="text-sm text-danger">{state.message}</p>
           )}
 
-          {state?.success && (
-            <p className="text-sm text-enter">{state.message}</p>
-          )}
+          {state?.success && <p className="text-sm text-enter">{state.message}</p>}
 
           <div className="flex items-center gap-3 pt-2">
             <Button type="submit" loading={isPending}>

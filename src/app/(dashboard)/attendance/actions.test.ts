@@ -110,7 +110,10 @@ describe("recordManualAttendance", () => {
     // 1st attendances call: no previous → null
     enqueue("attendances", { data: null, error: null });
     // 2nd attendances call: insert result
-    enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" },
+      error: null,
+    });
 
     const result = await recordManualAttendance("c1");
     expect(result.success).toBe(true);
@@ -123,9 +126,15 @@ describe("recordManualAttendance", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "花子" }, error: null });
     // Previous record was enter
-    enqueue("attendances", { data: { id: "a0", type: "enter", recorded_at: "2025-01-01T08:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a0", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+      error: null,
+    });
     // Insert returns exit
-    enqueue("attendances", { data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      error: null,
+    });
 
     const result = await recordManualAttendance("c1");
     expect(result.success).toBe(true);
@@ -148,7 +157,10 @@ describe("recordManualAttendance", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
     enqueue("attendances", { data: null, error: null });
-    enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" },
+      error: null,
+    });
 
     await recordManualAttendance("c1");
     expect(mockSendNotification).toHaveBeenCalledWith("c1", "enter", "2025-01-01T10:00:00Z");
@@ -197,7 +209,10 @@ describe("recordAttendance (QR)", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: null, error: null }); // no previous
-    enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" },
+      error: null,
+    });
 
     const result = await recordAttendance("GK-ABC");
     expect(result.success).toBe(true);
@@ -209,7 +224,10 @@ describe("recordAttendance (QR)", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: { id: "a0", type: "enter" }, error: null }); // previous enter
-    enqueue("attendances", { data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      error: null,
+    });
 
     const result = await recordAttendance("GK-ABC");
     expect(result.success).toBe(true);
@@ -231,7 +249,10 @@ describe("recordAttendance (QR)", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: null, error: null });
-    enqueue("attendances", { data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" }, error: null });
+    enqueue("attendances", {
+      data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" },
+      error: null,
+    });
 
     await recordAttendance("GK-ABC");
     expect(mockSendNotification).toHaveBeenCalledWith("c1", "enter", "2025-01-01T10:00:00Z");
@@ -275,15 +296,21 @@ describe("getTodayAttendanceStatus", () => {
 
   it("returns entered status when latest record is enter", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-    enqueue("children", { data: [
-      { id: "c1", name: "太郎", grade: 1 },
-      { id: "c2", name: "花子", grade: 2 },
-    ], error: null });
-    enqueue("attendances", { data: [
-      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
-      { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
-      { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
-    ], error: null });
+    enqueue("children", {
+      data: [
+        { id: "c1", name: "太郎", grade: 1 },
+        { id: "c2", name: "花子", grade: 2 },
+      ],
+      error: null,
+    });
+    enqueue("attendances", {
+      data: [
+        { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+        { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+        { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      ],
+      error: null,
+    });
 
     const result = await getTodayAttendanceStatus();
     expect(result).toHaveLength(2);
@@ -325,16 +352,22 @@ describe("getDashboardAttendanceStatus", () => {
 
   it("returns children with enter/exit times", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    enqueue("children", { data: [
-      { id: "c1", name: "太郎", grade: 1 },
-      { id: "c2", name: "花子", grade: 2 },
-    ], error: null });
+    enqueue("children", {
+      data: [
+        { id: "c1", name: "太郎", grade: 1 },
+        { id: "c2", name: "花子", grade: 2 },
+      ],
+      error: null,
+    });
     // Records sorted ascending
-    enqueue("attendances", { data: [
-      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
-      { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
-      { child_id: "c1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
-    ], error: null });
+    enqueue("attendances", {
+      data: [
+        { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+        { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+        { child_id: "c1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      ],
+      error: null,
+    });
 
     const result = await getDashboardAttendanceStatus();
     expect(result).toHaveLength(2);
@@ -412,35 +445,46 @@ describe("getParentAttendanceStatus", () => {
     const result = await getParentAttendanceStatus();
     expect(result.myChildren).toHaveLength(1);
     expect(result.myChildren[0]).toMatchObject({
-      childId: "c1", name: "太郎", status: "none",
-      enterTime: null, exitTime: null,
+      childId: "c1",
+      name: "太郎",
+      status: "none",
+      enterTime: null,
+      exitTime: null,
     });
   });
 
   it("returns entered status when latest record is enter", async () => {
     mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
     enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
-    enqueue("attendances", { data: [
-      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
-    ], error: null });
+    enqueue("attendances", {
+      data: [{ child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" }],
+      error: null,
+    });
 
     const result = await getParentAttendanceStatus();
     expect(result.myChildren[0]).toMatchObject({
-      status: "entered", enterTime: "2025-01-01T08:00:00Z", exitTime: null,
+      status: "entered",
+      enterTime: "2025-01-01T08:00:00Z",
+      exitTime: null,
     });
   });
 
   it("returns exited status when latest record is exit", async () => {
     mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
     enqueue("children", { data: [{ id: "c1", name: "太郎", grade: 1 }], error: null });
-    enqueue("attendances", { data: [
-      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
-      { child_id: "c1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
-    ], error: null });
+    enqueue("attendances", {
+      data: [
+        { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+        { child_id: "c1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      ],
+      error: null,
+    });
 
     const result = await getParentAttendanceStatus();
     expect(result.myChildren[0]).toMatchObject({
-      status: "exited", enterTime: "2025-01-01T08:00:00Z", exitTime: "2025-01-01T17:00:00Z",
+      status: "exited",
+      enterTime: "2025-01-01T08:00:00Z",
+      exitTime: "2025-01-01T17:00:00Z",
     });
   });
 
@@ -456,15 +500,21 @@ describe("getParentAttendanceStatus", () => {
 
   it("handles multiple children with different statuses", async () => {
     mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
-    enqueue("children", { data: [
-      { id: "c1", name: "太郎", grade: 1 },
-      { id: "c2", name: "花子", grade: 3 },
-    ], error: null });
-    enqueue("attendances", { data: [
-      { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
-      { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
-      { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
-    ], error: null });
+    enqueue("children", {
+      data: [
+        { id: "c1", name: "太郎", grade: 1 },
+        { id: "c2", name: "花子", grade: 3 },
+      ],
+      error: null,
+    });
+    enqueue("attendances", {
+      data: [
+        { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
+        { child_id: "c2", type: "enter", recorded_at: "2025-01-01T08:30:00Z" },
+        { child_id: "c2", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
+      ],
+      error: null,
+    });
 
     const result = await getParentAttendanceStatus();
     expect(result.myChildren).toHaveLength(2);

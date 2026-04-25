@@ -9,17 +9,13 @@ test.describe("Flow 3: Login failure", () => {
 
     // Should redirect back to /login with error param and show alert
     await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByText("メールアドレスまたはパスワードが正しくありません"),
-    ).toBeVisible();
+    await expect(page.getByText("メールアドレスまたはパスワードが正しくありません")).toBeVisible();
 
     // Should still be on login page
     expect(page.url()).toContain("/login");
   });
 
-  test("shows error with correct email but wrong password", async ({
-    page,
-  }) => {
+  test("shows error with correct email but wrong password", async ({ page }) => {
     await page.goto("/login");
     await page.locator('input[name="email"]').fill("admin@example.com");
     await page.locator('input[name="password"]').fill("wrongpassword");

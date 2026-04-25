@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { SelectableParent } from "@/lib/announcements/recipients-server";
 import type { RecipientAudience } from "@/lib/announcements/recipients";
+import type { SelectableParent } from "@/lib/announcements/recipients-server";
 
 interface Props {
   parents: SelectableParent[];
@@ -29,9 +29,9 @@ export function RecipientPicker({ parents, error, disabled }: Props) {
     if (!q) return parents;
     return parents.filter(
       (p) =>
-        p.name.toLowerCase().includes(q)
-        || p.email.toLowerCase().includes(q)
-        || p.childrenLabel.toLowerCase().includes(q),
+        p.name.toLowerCase().includes(q) ||
+        p.email.toLowerCase().includes(q) ||
+        p.childrenLabel.toLowerCase().includes(q),
     );
   }, [parents, query]);
 
@@ -85,9 +85,7 @@ export function RecipientPicker({ parents, error, disabled }: Props) {
           />
 
           <div className="text-xs text-fg-muted">
-            {selected.size > 0
-              ? `${selected.size}人を選択中`
-              : "1人以上選択してください"}
+            {selected.size > 0 ? `${selected.size}人を選択中` : "1人以上選択してください"}
           </div>
 
           <div className="max-h-72 overflow-y-auto flex flex-col gap-1">
@@ -111,9 +109,7 @@ export function RecipientPicker({ parents, error, disabled }: Props) {
                   />
                   <span className="flex-1 text-sm text-fg">{p.name}</span>
                   {p.childrenLabel && (
-                    <span className="text-xs text-fg-muted">
-                      {p.childrenLabel}
-                    </span>
+                    <span className="text-xs text-fg-muted">{p.childrenLabel}</span>
                   )}
                 </label>
               ))

@@ -2,6 +2,7 @@
  * @vitest-environment node
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { TEXT_LIMITS } from "@/config/constants";
 import {
   partitionByMethod,
   truncateForPush,
@@ -11,7 +12,6 @@ import {
   getVapidKeys,
   type NotificationPreferenceRow,
 } from "./send.helpers";
-import { TEXT_LIMITS } from "@/config/constants";
 
 describe("partitionByMethod", () => {
   it("returns empty lists for empty input", () => {

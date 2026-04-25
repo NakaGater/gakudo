@@ -62,48 +62,41 @@ describe("summarizeBill", () => {
   });
 
   it("ignores 'enter' records", () => {
-    expect(
-      summarizeBill(
-        [{ type: "enter", recorded_at: "2025-01-10T00:00:00Z" }],
-        rule,
-      ),
-    ).toEqual({ totalExtendedMinutes: 0, totalAmount: 0 });
+    expect(summarizeBill([{ type: "enter", recorded_at: "2025-01-10T00:00:00Z" }], rule)).toEqual({
+      totalExtendedMinutes: 0,
+      totalAmount: 0,
+    });
   });
 
   it("ignores exit records without recorded_at", () => {
-    expect(
-      summarizeBill([{ type: "exit", recorded_at: null }], rule),
-    ).toEqual({ totalExtendedMinutes: 0, totalAmount: 0 });
+    expect(summarizeBill([{ type: "exit", recorded_at: null }], rule)).toEqual({
+      totalExtendedMinutes: 0,
+      totalAmount: 0,
+    });
   });
 
   it("returns 0 amount when exit is before regular end", () => {
     // 17:30 JST = 08:30 UTC, 通常終了は 18:00 → 延長 0
-    expect(
-      summarizeBill(
-        [{ type: "exit", recorded_at: "2025-01-10T08:30:00Z" }],
-        rule,
-      ),
-    ).toEqual({ totalExtendedMinutes: 0, totalAmount: 0 });
+    expect(summarizeBill([{ type: "exit", recorded_at: "2025-01-10T08:30:00Z" }], rule)).toEqual({
+      totalExtendedMinutes: 0,
+      totalAmount: 0,
+    });
   });
 
   it("charges 1 unit (100円) for exactly 30 min extension", () => {
     // 18:30 JST = 09:30 UTC, +30 分 → ceil(30/30) = 1 unit
-    expect(
-      summarizeBill(
-        [{ type: "exit", recorded_at: "2025-01-10T09:30:00Z" }],
-        rule,
-      ),
-    ).toEqual({ totalExtendedMinutes: 30, totalAmount: 100 });
+    expect(summarizeBill([{ type: "exit", recorded_at: "2025-01-10T09:30:00Z" }], rule)).toEqual({
+      totalExtendedMinutes: 30,
+      totalAmount: 100,
+    });
   });
 
   it("rounds 45 min up to 2 units (200円)", () => {
     // 18:45 JST = 09:45 UTC, +45 分 → ceil(45/30) = 2 units
-    expect(
-      summarizeBill(
-        [{ type: "exit", recorded_at: "2025-01-10T09:45:00Z" }],
-        rule,
-      ),
-    ).toEqual({ totalExtendedMinutes: 45, totalAmount: 200 });
+    expect(summarizeBill([{ type: "exit", recorded_at: "2025-01-10T09:45:00Z" }], rule)).toEqual({
+      totalExtendedMinutes: 45,
+      totalAmount: 200,
+    });
   });
 
   it("accumulates extended minutes across multiple exits", () => {
@@ -120,10 +113,7 @@ describe("summarizeBill", () => {
 
   it("handles overnight exits (JST 翌日 00:30) without modulo collapse", () => {
     // UTC 15:30 = JST 翌日 00:30 → 通常終了 18:00 から 6.5 時間 (390 分) 延長
-    const result = summarizeBill(
-      [{ type: "exit", recorded_at: "2025-01-10T15:30:00Z" }],
-      rule,
-    );
+    const result = summarizeBill([{ type: "exit", recorded_at: "2025-01-10T15:30:00Z" }], rule);
     expect(result.totalExtendedMinutes).toBe(390);
     expect(result.totalAmount).toBe(100 * Math.ceil(390 / 30)); // 1300
   });
@@ -132,10 +122,7 @@ describe("summarizeBill", () => {
     const customRule: BillingRule = { ...rule, unit_minutes: 15, rate_per_unit: 60 };
     // 20 分延長 → ceil(20/15) = 2 units × 60 = 120
     expect(
-      summarizeBill(
-        [{ type: "exit", recorded_at: "2025-01-10T09:20:00Z" }],
-        customRule,
-      ),
+      summarizeBill([{ type: "exit", recorded_at: "2025-01-10T09:20:00Z" }], customRule),
     ).toEqual({ totalExtendedMinutes: 20, totalAmount: 120 });
   });
 });

@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
-import type { ActionResult, ActionState } from "@/lib/actions/types";
-import { ERROR_MESSAGES } from "@/config/constants";
+import { createClient } from "@/lib/supabase/server";
 import type { BillingRule } from "./types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 type FieldErrors = Record<string, string>;
 
@@ -17,7 +17,8 @@ export async function getActiveBillingRule(): Promise<BillingRule | null> {
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data } = await supabase.from("billing_rules")
+  const { data } = await supabase
+    .from("billing_rules")
     .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
     .lte("effective_from", today)
     .order("effective_from", { ascending: false })
@@ -33,7 +34,8 @@ export async function getBillingRules(): Promise<BillingRule[]> {
 
   const supabase = await createClient();
 
-  const { data } = await supabase.from("billing_rules")
+  const { data } = await supabase
+    .from("billing_rules")
     .select("id, regular_end_time, rate_per_unit, unit_minutes, effective_from, created_at")
     .order("effective_from", { ascending: false });
 
@@ -116,8 +118,7 @@ export async function calculateAllBills(
 
   const supabase = await createClient();
 
-  const { data: children, error: childrenError } = await supabase.from("children")
-    .select("id");
+  const { data: children, error: childrenError } = await supabase.from("children").select("id");
 
   if (childrenError || !children) {
     return { success: false, message: "児童データの取得に失敗しました" };
@@ -153,9 +154,7 @@ export async function calculateAllBills(
 /**
  * 請求を確定する (admin/teacher のみ)
  */
-export async function confirmBill(
-  billId: string,
-): Promise<{ success: boolean; message: string }> {
+export async function confirmBill(billId: string): Promise<{ success: boolean; message: string }> {
   const user = await getUser();
   if (!isAdminOrTeacher(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -163,7 +162,8 @@ export async function confirmBill(
 
   const supabase = await createClient();
 
-  const { error } = await supabase.from("monthly_bills")
+  const { error } = await supabase
+    .from("monthly_bills")
     .update({
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
@@ -197,7 +197,8 @@ export async function confirmAllBills(
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from("monthly_bills")
+  const { data, error } = await supabase
+    .from("monthly_bills")
     .update({
       status: "confirmed",
       confirmed_at: new Date().toISOString(),

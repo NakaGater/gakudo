@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/get-user";
 import { Button, Card, CardContent } from "@/components/ui";
+import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { DeleteNewsButton } from "./delete-news-button";
 
 export default async function AdminNewsListPage() {

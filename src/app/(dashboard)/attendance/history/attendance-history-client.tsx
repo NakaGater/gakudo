@@ -42,10 +42,7 @@ const formatTime = formatTimeJST;
 
 export { formatTime };
 
-export function calcDuration(
-  enterIso: string | null,
-  exitIso: string | null,
-): string {
+export function calcDuration(enterIso: string | null, exitIso: string | null): string {
   if (!enterIso || !exitIso) return "—";
   const diffMs = new Date(exitIso).getTime() - new Date(enterIso).getTime();
   if (diffMs <= 0) return "—";
@@ -158,10 +155,7 @@ export function AttendanceHistoryClient({
           <tbody>
             {days.map((day) =>
               day.pairs.length === 0 ? (
-                <tr
-                  key={day.date}
-                  className="border-b border-border last:border-0"
-                >
+                <tr key={day.date} className="border-b border-border last:border-0">
                   <td className="py-3">{formatDateLabel(day.date)}</td>
                   {isStaff && <td className="py-3" />}
                   <td className="py-3 text-fg-muted" colSpan={3}>
@@ -170,13 +164,8 @@ export function AttendanceHistoryClient({
                 </tr>
               ) : (
                 day.pairs.map((pair, i) => (
-                  <tr
-                    key={`${day.date}-${i}`}
-                    className="border-b border-border last:border-0"
-                  >
-                    <td className="py-3">
-                      {i === 0 ? formatDateLabel(day.date) : ""}
-                    </td>
+                  <tr key={`${day.date}-${i}`} className="border-b border-border last:border-0">
+                    <td className="py-3">{i === 0 ? formatDateLabel(day.date) : ""}</td>
                     {isStaff && <td className="py-3" />}
                     <td className="py-3">
                       {pair.enterTime ? (
@@ -192,9 +181,7 @@ export function AttendanceHistoryClient({
                         "—"
                       )}
                     </td>
-                    <td className="py-3">
-                      {calcDuration(pair.enterTime, pair.exitTime)}
-                    </td>
+                    <td className="py-3">{calcDuration(pair.enterTime, pair.exitTime)}</td>
                   </tr>
                 ))
               ),
@@ -208,25 +195,18 @@ export function AttendanceHistoryClient({
         {days.map((day) => (
           <Card key={day.date}>
             <CardContent>
-              <p className="font-medium text-fg mb-2">
-                {formatDateLabel(day.date)}
-              </p>
+              <p className="font-medium text-fg mb-2">{formatDateLabel(day.date)}</p>
               {day.pairs.length === 0 ? (
                 <p className="text-sm text-fg-muted">記録なし</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {day.pairs.map((pair, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between text-sm"
-                    >
+                    <div key={i} className="flex items-center justify-between text-sm">
                       <span>
-                        入室{" "}
-                        <Badge variant="enter">{formatTime(pair.enterTime)}</Badge>
+                        入室 <Badge variant="enter">{formatTime(pair.enterTime)}</Badge>
                       </span>
                       <span>
-                        退室{" "}
-                        <Badge variant="exit">{formatTime(pair.exitTime)}</Badge>
+                        退室 <Badge variant="exit">{formatTime(pair.exitTime)}</Badge>
                       </span>
                       <span className="text-fg-muted">
                         {calcDuration(pair.enterTime, pair.exitTime)}
@@ -241,9 +221,7 @@ export function AttendanceHistoryClient({
       </div>
 
       {days.length === 0 && (
-        <p className="text-center text-fg-muted py-12">
-          該当する履歴がありません
-        </p>
+        <p className="text-center text-fg-muted py-12">該当する履歴がありません</p>
       )}
     </div>
   );

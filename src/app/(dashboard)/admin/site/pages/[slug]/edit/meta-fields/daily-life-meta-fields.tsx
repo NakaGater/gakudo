@@ -2,11 +2,9 @@
 
 import type { MetaFieldsWithSetterProps } from "./types";
 
-export function DailyLifeMetaFields({
-  meta,
-  setMeta,
-}: MetaFieldsWithSetterProps) {
-  const activities = (meta.activities as Array<{ emoji: string; title: string; description: string }>) || [];
+export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps) {
+  const activities =
+    (meta.activities as Array<{ emoji: string; title: string; description: string }>) || [];
   const events = (meta.events as Array<{ emoji: string; title: string; season: string }>) || [];
 
   const updateActivity = (index: number, field: string, value: string) => {
@@ -59,7 +57,10 @@ export function DailyLifeMetaFields({
         <legend className="text-sm font-bold text-fg px-2">活動カード</legend>
         <div className="flex flex-col gap-4">
           {activities.map((item, i) => (
-            <div key={i} className="rounded-md border border-border p-2 sm:p-3 bg-bg-elev/50 min-w-0">
+            <div
+              key={i}
+              className="rounded-md border border-border p-2 sm:p-3 bg-bg-elev/50 min-w-0"
+            >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-fg-muted">活動 {i + 1}</span>
                 <button

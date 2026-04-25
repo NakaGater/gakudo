@@ -7,10 +7,7 @@ export type QRScannerProps = {
   onError?: (error: string) => void;
 };
 
-export function QRScanner({
-  onScan,
-  onError,
-}: QRScannerProps) {
+export function QRScanner({ onScan, onError }: QRScannerProps) {
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<unknown>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +36,7 @@ export function QRScanner({
           (decodedText: string) => {
             onScan(decodedText);
           },
-          () => {}
+          () => {},
         );
       } catch (err) {
         if (cancelled) return;

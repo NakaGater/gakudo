@@ -1,6 +1,5 @@
 import { render, screen, cleanup, act } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-
 import { HeroSlideshow } from "./hero-slideshow";
 
 beforeEach(() => {
@@ -28,16 +27,15 @@ describe("HeroSlideshow", () => {
 
     it("5秒経過してもイラストが表示されたまま", () => {
       render(<HeroSlideshow photoUrls={[]}>{ILLUSTRATION}</HeroSlideshow>);
-      act(() => { vi.advanceTimersByTime(5000); });
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
       expect(screen.getByTestId("illustration")).toBeInTheDocument();
     });
   });
 
   describe("写真がある場合", () => {
-    const photoUrls = [
-      "https://example.com/photo1.jpg",
-      "https://example.com/photo2.jpg",
-    ];
+    const photoUrls = ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"];
 
     it("初期表示はイラスト", () => {
       render(<HeroSlideshow photoUrls={photoUrls}>{ILLUSTRATION}</HeroSlideshow>);
@@ -47,14 +45,18 @@ describe("HeroSlideshow", () => {
 
     it("5秒後に写真1に切り替わる", () => {
       render(<HeroSlideshow photoUrls={photoUrls}>{ILLUSTRATION}</HeroSlideshow>);
-      act(() => { vi.advanceTimersByTime(5000); });
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
       const slide1 = screen.getByTestId("slide-1");
       expect(slide1).toHaveAttribute("data-active", "true");
     });
 
     it("10秒後に写真2に切り替わる", () => {
       render(<HeroSlideshow photoUrls={photoUrls}>{ILLUSTRATION}</HeroSlideshow>);
-      act(() => { vi.advanceTimersByTime(10000); });
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
       const slide2 = screen.getByTestId("slide-2");
       expect(slide2).toHaveAttribute("data-active", "true");
     });
@@ -62,7 +64,9 @@ describe("HeroSlideshow", () => {
     it("全スライド表示後、イラストに戻る（ループ）", () => {
       render(<HeroSlideshow photoUrls={photoUrls}>{ILLUSTRATION}</HeroSlideshow>);
       // イラスト(0) → 写真1(5s) → 写真2(10s) → イラスト(15s)
-      act(() => { vi.advanceTimersByTime(15000); });
+      act(() => {
+        vi.advanceTimersByTime(15000);
+      });
       const slide0 = screen.getByTestId("slide-0");
       expect(slide0).toHaveAttribute("data-active", "true");
     });
@@ -95,11 +99,15 @@ describe("HeroSlideshow", () => {
       expect(screen.getByTestId("slide-0")).toHaveAttribute("data-active", "true");
 
       // 5秒: 写真
-      act(() => { vi.advanceTimersByTime(5000); });
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
       expect(screen.getByTestId("slide-1")).toHaveAttribute("data-active", "true");
 
       // 10秒: イラストに戻る
-      act(() => { vi.advanceTimersByTime(5000); });
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
       expect(screen.getByTestId("slide-0")).toHaveAttribute("data-active", "true");
     });
   });
@@ -108,9 +116,7 @@ describe("HeroSlideshow", () => {
     it("タイマーがクリアされる", () => {
       const clearIntervalSpy = vi.spyOn(global, "clearInterval");
       const { unmount } = render(
-        <HeroSlideshow photoUrls={["https://example.com/photo.jpg"]}>
-          {ILLUSTRATION}
-        </HeroSlideshow>,
+        <HeroSlideshow photoUrls={["https://example.com/photo.jpg"]}>{ILLUSTRATION}</HeroSlideshow>,
       );
       unmount();
       expect(clearIntervalSpy).toHaveBeenCalled();

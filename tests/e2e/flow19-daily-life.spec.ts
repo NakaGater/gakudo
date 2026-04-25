@@ -5,9 +5,7 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
   test("daily-life page renders with title and activities", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto("/daily-life");
-    await expect(
-      page.getByRole("heading", { name: "日々の生活" }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "日々の生活" })).toBeVisible({ timeout: 10000 });
     // Subtitle
     await expect(page.getByText("のびのび、すくすく")).toBeVisible();
     // Activity cards section
@@ -48,9 +46,7 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
     const nav = page.locator("header");
     await nav.getByRole("link", { name: "日々の生活" }).click();
     await page.waitForURL("/daily-life", { timeout: 10000 });
-    await expect(
-      page.getByRole("heading", { name: "日々の生活" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "日々の生活" })).toBeVisible();
   });
 
   test("CMS: admin can edit daily-life page", async ({ page }) => {

@@ -9,7 +9,8 @@ export async function POST(request: Request) {
   const { user, supabase } = auth;
 
   // 権限チェック (admin/teacher のみ)
-  const { data: profile } = await supabase.from("profiles")
+  const { data: profile } = await supabase
+    .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
@@ -24,10 +25,7 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch (error) {
     console.error("[billing/calculate] Failed to parse request body:", error);
-    return NextResponse.json(
-      { error: "リクエストボディが不正です" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "リクエストボディが不正です" }, { status: 400 });
   }
 
   const yearMonth =
@@ -43,14 +41,10 @@ export async function POST(request: Request) {
   }
 
   // 全児童を取得
-  const { data: children, error: childrenError } = await supabase.from("children")
-    .select("id");
+  const { data: children, error: childrenError } = await supabase.from("children").select("id");
 
   if (childrenError || !children) {
-    return NextResponse.json(
-      { error: "児童データの取得に失敗しました" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "児童データの取得に失敗しました" }, { status: 500 });
   }
 
   // 各児童の月次請求を計算

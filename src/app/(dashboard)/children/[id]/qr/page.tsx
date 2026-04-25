@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { QRPrint } from "@/components/qr/qr-print";
+import { Button } from "@/components/ui";
 import { getUser } from "@/lib/auth/get-user";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
-import { Button } from "@/components/ui";
-import { QRPrint } from "@/components/qr/qr-print";
+import { createClient } from "@/lib/supabase/server";
 import { QRRegenerateButton } from "./qr-regenerate-button";
 
 type Props = {
@@ -45,11 +45,7 @@ export default async function ChildQRPage({ params }: Props) {
       </div>
 
       <div className="flex flex-col items-center gap-6">
-        <QRPrint
-          value={child.qr_code}
-          childName={child.name}
-          grade={child.grade}
-        />
+        <QRPrint value={child.qr_code} childName={child.name} grade={child.grade} />
 
         {user.role === "admin" && (
           <div className="mt-4 w-full border-t border-border pt-4">

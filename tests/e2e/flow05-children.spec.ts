@@ -10,9 +10,7 @@ test.describe("Flow 5: Children management (US-4, admin)", () => {
     await page.goto("/children");
     await expect(page.getByText("児童一覧")).toBeVisible({ timeout: 10000 });
     // "新規登録" button should be visible for admin
-    await expect(
-      page.getByRole("link", { name: "新規登録" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "新規登録" })).toBeVisible();
   });
 
   test("can create a new child and view detail", async ({ page }) => {

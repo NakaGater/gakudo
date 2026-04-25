@@ -1,10 +1,10 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { FILE_LIMITS, ERROR_MESSAGES, STORAGE } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { validateFile, validateFileType } from "@/lib/files/validation";
-import { FILE_LIMITS, ERROR_MESSAGES, STORAGE } from "@/config/constants";
+import { createClient } from "@/lib/supabase/server";
 
 const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
 
@@ -34,7 +34,11 @@ export async function uploadAttachment(
     return { success: false, message: fileValidation.message };
   }
   const file = rawFile as File;
-  const typeValidation = validateFileType(file, ALLOWED_TYPES, "PDF または画像ファイルを選択してください");
+  const typeValidation = validateFileType(
+    file,
+    ALLOWED_TYPES,
+    "PDF または画像ファイルを選択してください",
+  );
   if (!typeValidation.valid) {
     return { success: false, message: typeValidation.message };
   }
@@ -53,7 +57,8 @@ export async function uploadAttachment(
     return { success: false, message: `アップロード失敗: ${uploadError.message}` };
   }
 
-  const { data, error: dbError } = await supabase.from("attachments")
+  const { data, error: dbError } = await supabase
+    .from("attachments")
     .insert({
       entity_type: entityType,
       entity_id: entityId,

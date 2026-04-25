@@ -101,8 +101,6 @@ describe("resetPassword", () => {
       // Expected to throw due to redirect
     }
 
-    expect(mockRedirect).toHaveBeenCalledWith(
-      "/login?message=password_reset_success",
-    );
+    expect(mockRedirect).toHaveBeenCalledWith("/login?message=password_reset_success");
   });
 });

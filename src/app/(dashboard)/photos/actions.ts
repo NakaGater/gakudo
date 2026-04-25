@@ -1,15 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/types";
-import { ERROR_MESSAGES } from "@/config/constants";
 
-export async function uploadPhoto(
-  formData: FormData,
-): Promise<ActionResult> {
+export async function uploadPhoto(formData: FormData): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -19,9 +17,7 @@ export async function uploadPhoto(
   const eventName = (formData.get("event_name") as string)?.trim() || null;
   const caption = (formData.get("caption") as string)?.trim() || null;
   const visibility =
-    user.role === "admin" && formData.get("visibility") === "public"
-      ? "public"
-      : "private";
+    user.role === "admin" && formData.get("visibility") === "public" ? "public" : "private";
 
   if (files.length === 0 || !files[0]?.size) {
     return { success: false, message: "ファイルを選択してください" };
@@ -40,12 +36,10 @@ export async function uploadPhoto(
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const storagePath = `${user.id}/${timestamp}-${safeName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("photos")
-      .upload(storagePath, file, {
-        contentType: file.type,
-        upsert: false,
-      });
+    const { error: uploadError } = await supabase.storage.from("photos").upload(storagePath, file, {
+      contentType: file.type,
+      upsert: false,
+    });
 
     if (uploadError) {
       errors.push(`${file.name}: ${uploadError.message}`);
@@ -89,9 +83,7 @@ export async function setPhotoVisibility(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("photos")
-    .update({ visibility })
-    .eq("id", id);
+  const { error } = await supabase.from("photos").update({ visibility }).eq("id", id);
 
   if (error) {
     return { success: false, message: `更新に失敗しました: ${error.message}` };
@@ -110,7 +102,8 @@ export async function deletePhoto(id: string): Promise<ActionResult> {
   const supabase = await createClient();
 
   // Fetch storage_path first
-  const { data: photo, error: fetchError } = await supabase.from("photos")
+  const { data: photo, error: fetchError } = await supabase
+    .from("photos")
     .select("storage_path, uploaded_by")
     .eq("id", id)
     .single();
@@ -137,9 +130,7 @@ export async function deletePhoto(id: string): Promise<ActionResult> {
   }
 
   // Delete from DB
-  const { error: dbError } = await supabase.from("photos")
-    .delete()
-    .eq("id", id);
+  const { error: dbError } = await supabase.from("photos").delete().eq("id", id);
 
   if (dbError) {
     return { success: false, message: `削除に失敗しました: ${dbError.message}` };

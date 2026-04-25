@@ -1,20 +1,17 @@
 "use server";
 
+import { customAlphabet } from "nanoid";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { QR_CODE, ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { customAlphabet } from "nanoid";
-import { QR_CODE, ERROR_MESSAGES } from "@/config/constants";
-import type { ActionResult, ActionState } from "./types";
+import { createClient } from "@/lib/supabase/server";
 import { validateChildForm } from "./actions.helpers";
+import type { ActionResult, ActionState } from "./types";
 
 const nanoid = customAlphabet(QR_CODE.ALPHABET, QR_CODE.LENGTH);
 
-export async function createChild(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function createChild(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -26,7 +23,8 @@ export async function createChild(
   const qrCode = `GK-${nanoid()}`;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.from("children")
+  const { data, error } = await supabase
+    .from("children")
     .insert({
       name: validated.name,
       grade: validated.grade,
@@ -57,7 +55,8 @@ export async function updateChild(
   if (!validated.ok) return validated.error;
 
   const supabase = await createClient();
-  const { error } = await supabase.from("children")
+  const { error } = await supabase
+    .from("children")
     .update({ name: validated.name, grade: validated.grade })
     .eq("id", id);
 
@@ -79,7 +78,8 @@ export async function regenerateQR(childId: string): Promise<ActionResult> {
   const newQR = `GK-${nanoid()}`;
 
   const supabase = await createClient();
-  const { error } = await supabase.from("children")
+  const { error } = await supabase
+    .from("children")
     .update({ qr_code: newQR, qr_active: true })
     .eq("id", childId);
 
@@ -99,9 +99,7 @@ export async function deleteChild(id: string): Promise<ActionResult> {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("children")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("children").delete().eq("id", id);
 
   if (error) {
     return { success: false, message: `削除に失敗しました: ${error.message}` };
@@ -117,9 +115,7 @@ export type ParentSearchResult = {
   email: string;
 };
 
-export async function searchParents(
-  query: string,
-): Promise<ParentSearchResult[]> {
+export async function searchParents(query: string): Promise<ParentSearchResult[]> {
   const user = await getUser();
   if (!isStaff(user.role)) return [];
 
@@ -128,7 +124,8 @@ export async function searchParents(
   const supabase = await createClient();
   const pattern = `%${query.trim()}%`;
 
-  const { data, error } = await supabase.from("profiles")
+  const { data, error } = await supabase
+    .from("profiles")
     .select("id, name, email")
     .eq("role", "parent")
     .or(`name.ilike.${pattern},email.ilike.${pattern}`)
@@ -138,17 +135,15 @@ export async function searchParents(
   return (data ?? []) as ParentSearchResult[];
 }
 
-export async function linkParent(
-  childId: string,
-  parentId: string,
-): Promise<ActionResult> {
+export async function linkParent(childId: string, parentId: string): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("child_parents")
+  const { error } = await supabase
+    .from("child_parents")
     .upsert(
       { child_id: childId, parent_id: parentId },
       { onConflict: "child_id,parent_id", ignoreDuplicates: true },
@@ -162,17 +157,15 @@ export async function linkParent(
   return { success: true, message: "紐付けました" };
 }
 
-export async function unlinkParent(
-  childId: string,
-  parentId: string,
-): Promise<ActionResult> {
+export async function unlinkParent(childId: string, parentId: string): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("child_parents")
+  const { error } = await supabase
+    .from("child_parents")
     .delete()
     .eq("child_id", childId)
     .eq("parent_id", parentId);

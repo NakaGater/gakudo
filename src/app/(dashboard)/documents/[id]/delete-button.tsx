@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui";
 import { deleteDocument } from "../actions";
 
@@ -33,12 +33,7 @@ export function DeleteButton({ documentId }: { documentId: string }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-danger">本当に削除しますか？</span>
-      <Button
-        variant="destructive"
-        size="sm"
-        loading={isPending}
-        onClick={handleDelete}
-      >
+      <Button variant="destructive" size="sm" loading={isPending} onClick={handleDelete}>
         削除する
       </Button>
       <Button

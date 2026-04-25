@@ -122,7 +122,10 @@ describe("updateChild", () => {
       }),
     });
     const result = await updateChild("child-1", null, form({ name: "太郎", grade: "3" }));
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("FK constraint") });
+    expect(result).toMatchObject({
+      success: false,
+      message: expect.stringContaining("FK constraint"),
+    });
   });
 });
 

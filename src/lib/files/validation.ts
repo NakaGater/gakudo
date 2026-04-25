@@ -7,12 +7,19 @@ export function validateFile(file: unknown): ValidationResult {
     return { valid: false, message: "ファイルを選択してください" };
   }
   if (file.size > FILE_LIMITS.MAX_SIZE_BYTES) {
-    return { valid: false, message: `ファイルサイズは${FILE_LIMITS.MAX_SIZE_BYTES / (1024 * 1024)}MB以下にしてください` };
+    return {
+      valid: false,
+      message: `ファイルサイズは${FILE_LIMITS.MAX_SIZE_BYTES / (1024 * 1024)}MB以下にしてください`,
+    };
   }
   return { valid: true };
 }
 
-export function validateFileType(file: File, allowedTypes: readonly string[], errorMessage: string): ValidationResult {
+export function validateFileType(
+  file: File,
+  allowedTypes: readonly string[],
+  errorMessage: string,
+): ValidationResult {
   if (!allowedTypes.includes(file.type)) {
     return { valid: false, message: errorMessage };
   }

@@ -3,10 +3,7 @@
 import { FEATURE_ICONS, FEATURE_ICON_KEYS } from "@/config/feature-icons";
 import type { MetaFieldsProps } from "./types";
 
-export function HomeMetaFields({
-  meta,
-  updateMeta,
-}: MetaFieldsProps) {
+export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   type FeatureItem = { icon: string; title: string; description: string };
   const features = (meta.features as FeatureItem[]) ?? [];
 
@@ -21,7 +18,10 @@ export function HomeMetaFields({
   };
 
   const removeFeatureItem = (idx: number) => {
-    updateMeta("features", features.filter((_, i) => i !== idx));
+    updateMeta(
+      "features",
+      features.filter((_, i) => i !== idx),
+    );
   };
 
   return (
@@ -30,7 +30,9 @@ export function HomeMetaFields({
         <legend className="text-sm font-bold text-fg px-2">ヒーローセクション</legend>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-fg-muted">メインタイトル（改行で行分割）</label>
+            <label className="text-xs font-medium text-fg-muted">
+              メインタイトル（改行で行分割）
+            </label>
             <textarea
               value={(meta.hero_title as string) ?? "子どもたちの\n笑顔あふれる\n放課後を"}
               onChange={(e) => updateMeta("hero_title", e.target.value)}
@@ -39,7 +41,9 @@ export function HomeMetaFields({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-fg-muted">強調キーワード（クレヨン下線）</label>
+            <label className="text-xs font-medium text-fg-muted">
+              強調キーワード（クレヨン下線）
+            </label>
             <input
               type="text"
               value={(meta.hero_emphasis as string) ?? "笑顔あふれる"}
@@ -78,7 +82,10 @@ export function HomeMetaFields({
         <legend className="text-sm font-bold text-fg px-2">特徴カード</legend>
         <div className="flex flex-col gap-4">
           {features.map((item, idx) => (
-            <div key={idx} className="flex flex-col gap-2 p-3 border border-border/50 rounded-md bg-bg">
+            <div
+              key={idx}
+              className="flex flex-col gap-2 p-3 border border-border/50 rounded-md bg-bg"
+            >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
                   {(() => {

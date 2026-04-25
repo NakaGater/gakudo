@@ -52,17 +52,9 @@ describe("validateEnv", () => {
     delete process.env.NEXT_PUBLIC_APP_URL;
 
     expect(() => validateEnv()).not.toThrow();
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("RESEND_API_KEY"),
-    );
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("NEXT_PUBLIC_VAPID_PUBLIC_KEY"),
-    );
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("VAPID_PRIVATE_KEY"),
-    );
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("NEXT_PUBLIC_APP_URL"),
-    );
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("RESEND_API_KEY"));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("NEXT_PUBLIC_VAPID_PUBLIC_KEY"));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("VAPID_PRIVATE_KEY"));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("NEXT_PUBLIC_APP_URL"));
   });
 });

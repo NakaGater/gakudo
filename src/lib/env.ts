@@ -1,11 +1,6 @@
-const REQUIRED_ENV_VARS = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-] as const;
+const REQUIRED_ENV_VARS = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"] as const;
 
-const REQUIRED_SERVER_ENV_VARS = [
-  "SUPABASE_SERVICE_ROLE_KEY",
-] as const;
+const REQUIRED_SERVER_ENV_VARS = ["SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 // Optional but warn if missing
 const OPTIONAL_ENV_VARS = [
@@ -36,7 +31,7 @@ export function validateEnv(): void {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}\n` +
-      `Check your .env.local file.`
+        `Check your .env.local file.`,
     );
   }
 

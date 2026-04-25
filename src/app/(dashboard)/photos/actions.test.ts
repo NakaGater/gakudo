@@ -81,9 +81,7 @@ describe("uploadPhoto", () => {
     mockStorageUpload.mockResolvedValue({ error: null });
     mockInsert.mockResolvedValue({ error: null });
     await uploadPhoto(fdWith([imageFile()], { visibility: "public" }));
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ visibility: "private" }),
-    );
+    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({ visibility: "private" }));
   });
 
   it("admin can mark photos public", async () => {
@@ -91,9 +89,7 @@ describe("uploadPhoto", () => {
     mockStorageUpload.mockResolvedValue({ error: null });
     mockInsert.mockResolvedValue({ error: null });
     await uploadPhoto(fdWith([imageFile()], { visibility: "public" }));
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ visibility: "public" }),
-    );
+    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({ visibility: "public" }));
   });
 
   it("rejects non-image files inline (no upload attempt)", async () => {

@@ -1,14 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
-export async function updateProfile(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function updateProfile(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const user = await getUser();
 
   const name = formData.get("name");
@@ -21,9 +18,7 @@ export async function updateProfile(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("profiles")
-    .update({ name: name.trim() })
-    .eq("id", user.id);
+  const { error } = await supabase.from("profiles").update({ name: name.trim() }).eq("id", user.id);
 
   if (error) {
     return { success: false, message: `保存に失敗しました: ${error.message}` };

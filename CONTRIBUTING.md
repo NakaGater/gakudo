@@ -24,18 +24,18 @@ npm run dev
 
 主要コマンド:
 
-| コマンド | 用途 |
-|---|---|
-| `npm run dev` | Next.js 開発サーバ |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run test` | Vitest（1回） |
-| `npm run test:watch` | Vitest watch |
-| `npm run e2e` | Playwright 全 spec |
-| `npm run e2e:ui` | Playwright UI モード |
-| `npm run check:all` | typecheck + lint + test |
-| `npm run db:types` | Supabase 型再生成 |
-| `npm run audit` | `npm audit --audit-level=moderate` |
+| コマンド             | 用途                               |
+| -------------------- | ---------------------------------- |
+| `npm run dev`        | Next.js 開発サーバ                 |
+| `npm run typecheck`  | `tsc --noEmit`                     |
+| `npm run lint`       | ESLint                             |
+| `npm run test`       | Vitest（1回）                      |
+| `npm run test:watch` | Vitest watch                       |
+| `npm run e2e`        | Playwright 全 spec                 |
+| `npm run e2e:ui`     | Playwright UI モード               |
+| `npm run check:all`  | typecheck + lint + test            |
+| `npm run db:types`   | Supabase 型再生成                  |
+| `npm run audit`      | `npm audit --audit-level=moderate` |
 
 ## コード規約
 
@@ -65,6 +65,7 @@ Conventional Commits を推奨:
 `type`: `feat` / `fix` / `refactor` / `test` / `docs` / `chore` / `perf` / `ci`
 
 例:
+
 - `feat(announcements): add recipient picker filter`
 - `refactor(actions): migrate billing to withAuth`
 - `perf(notifications): parallelize push send with Promise.allSettled`

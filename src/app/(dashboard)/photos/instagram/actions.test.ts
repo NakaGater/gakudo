@@ -41,11 +41,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-import {
-  addInstagramPost,
-  deleteInstagramPost,
-  toggleInstagramPostVisibility,
-} from "./actions";
+import { addInstagramPost, deleteInstagramPost, toggleInstagramPostVisibility } from "./actions";
 
 function form(fields: Record<string, string>): FormData {
   const fd = new FormData();

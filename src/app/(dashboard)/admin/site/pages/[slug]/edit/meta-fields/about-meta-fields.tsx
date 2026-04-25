@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
+import { useState } from "react";
 import type { MetaFieldsProps, ScheduleItem, FacilityItem, StaffMember } from "./types";
 
-export function AboutMetaFields({
-  meta,
-  updateMeta,
-}: MetaFieldsProps) {
+export function AboutMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   const schedule = (meta.schedule as ScheduleItem[]) ?? [];
   const facilityInfo = (meta.facility_info as FacilityItem[]) ?? [];
 
@@ -22,7 +19,10 @@ export function AboutMetaFields({
   };
 
   const removeScheduleItem = (idx: number) => {
-    updateMeta("schedule", schedule.filter((_, i) => i !== idx));
+    updateMeta(
+      "schedule",
+      schedule.filter((_, i) => i !== idx),
+    );
   };
 
   const updateFacilityItem = (idx: number, field: keyof FacilityItem, value: string) => {
@@ -36,7 +36,10 @@ export function AboutMetaFields({
   };
 
   const removeFacilityItem = (idx: number) => {
-    updateMeta("facility_info", facilityInfo.filter((_, i) => i !== idx));
+    updateMeta(
+      "facility_info",
+      facilityInfo.filter((_, i) => i !== idx),
+    );
   };
 
   return (
@@ -184,10 +187,7 @@ export function AboutMetaFields({
 /* ================================================================
    職員紹介セクション（About ページ内で使用）
    ================================================================ */
-function StaffMetaFields({
-  meta,
-  updateMeta,
-}: MetaFieldsProps) {
+function StaffMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   const staff = (meta.staff_members as StaffMember[]) ?? [];
   const [uploading, setUploading] = useState<number | null>(null);
 
@@ -197,10 +197,7 @@ function StaffMetaFields({
   };
 
   const addStaff = () => {
-    updateMeta("staff_members", [
-      ...staff,
-      { name: "", role: "", photo_url: "", profile: "" },
-    ]);
+    updateMeta("staff_members", [...staff, { name: "", role: "", photo_url: "", profile: "" }]);
   };
 
   const removeStaff = (idx: number) => {
@@ -225,9 +222,7 @@ function StaffMetaFields({
       const supabase = createClient();
       const ext = file.name.split(".").pop();
       const path = `staff/${Date.now()}-${idx}.${ext}`;
-      const { error } = await supabase.storage
-        .from("photos")
-        .upload(path, file, { upsert: true });
+      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: true });
       if (error) throw error;
       const { data } = supabase.storage.from("photos").getPublicUrl(path);
       updateStaff(idx, "photo_url", data.publicUrl);
@@ -249,9 +244,7 @@ function StaffMetaFields({
             className="border border-border/50 rounded-md p-3 flex flex-col gap-3 bg-bg-elev/50"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-fg-muted">
-                職員 {idx + 1}
-              </span>
+              <span className="text-xs font-medium text-fg-muted">職員 {idx + 1}</span>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -334,9 +327,7 @@ function StaffMetaFields({
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-fg-muted">
-                プロフィール
-              </label>
+              <label className="text-xs font-medium text-fg-muted">プロフィール</label>
               <textarea
                 value={member.profile}
                 onChange={(e) => updateStaff(idx, "profile", e.target.value)}
