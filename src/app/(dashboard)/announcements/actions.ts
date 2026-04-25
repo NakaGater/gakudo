@@ -121,6 +121,10 @@ export async function markAsRead(announcementId: string): Promise<void> {
     return;
   }
 
+  // "layout" scope is required so the unread badge counter rendered in
+  // (dashboard)/layout.tsx via getBadgeCounts is recomputed. Phase 3
+  // will switch to revalidateTag("badge:unread") so we only invalidate
+  // the badge query rather than every page under /announcements.
   revalidatePath("/announcements", "layout");
   revalidatePath(`/announcements/${announcementId}`);
 }
