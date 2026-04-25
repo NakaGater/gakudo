@@ -9,8 +9,9 @@ export default function PublicLayout({
 }>) {
   return (
     <div
-      className="min-h-screen py-5 px-4 sm:px-6"
+      className="min-h-screen pb-5 px-4 sm:px-6"
       style={{
+        paddingTop: "max(1.25rem, env(safe-area-inset-top))",
         background: `#B8A88A`,
         backgroundImage: `
           repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px),
