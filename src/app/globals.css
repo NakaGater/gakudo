@@ -831,9 +831,9 @@
 
 /* ═══ Dashboard Responsive ═══ */
 @media(max-width:768px){
-  .clean-page{margin:0;border-radius:0;min-height:100vh}
+  .clean-page{margin:0;border-radius:0;min-height:calc(100vh - env(safe-area-inset-top))}
   .sidebar{display:none!important}
-  .dash{min-height:100vh}
+  .dash{min-height:calc(100vh - env(safe-area-inset-top))}
   .main{border-radius:0}
   .main__mood{border-radius:0}
   .main__content{padding:16px 16px 80px 16px;max-width:100%;overflow-x:hidden}

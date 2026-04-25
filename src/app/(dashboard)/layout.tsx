@@ -42,7 +42,23 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div data-user-role={user.role} className="desk-bg min-h-screen">
+    <div
+      data-user-role={user.role}
+      className="desk-bg min-h-screen"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-50"
+        style={{
+          height: "env(safe-area-inset-top)",
+          background: "#B8A88A",
+          backgroundImage: `
+            repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px),
+            repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.008) 50px, rgba(0,0,0,0.008) 51px)
+          `,
+        }}
+      />
       <div className="clean-page">
         <div className={`season-strip ${getSeasonClass()}`} />
         <div className="dash">
