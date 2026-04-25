@@ -19,6 +19,7 @@
     "audit": "npm audit --audit-level=moderate"
   },
   "dependencies": {
+    "@sentry/nextjs": "10.50.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.0",
     "browser-image-compression": "^2.0.2",
