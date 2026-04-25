@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getUser } from "@/lib/auth/get-user";
 import { Sidebar } from "@/components/nav/sidebar";
 import { MobileTabs } from "@/components/nav/mobile-tabs";
+import { getBadgeCounts } from "@/components/nav/get-badge-counts";
 import { PushPrompt } from "@/components/push/push-prompt";
 
 const ENTRANCE_ALLOWED_PATHS = ['/attendance', '/api/'];
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
 }>) {
   const user = await getUser();
   const mood = getMoodMessage();
+  const badgeCounts = await getBadgeCounts(user.role, user.id);
 
   // Entrance role restriction (moved from middleware to avoid extra DB query)
   if (user.role === "entrance") {
@@ -62,7 +64,7 @@ export default async function DashboardLayout({
       <div className="clean-page">
         <div className={`season-strip ${getSeasonClass()}`} />
         <div className="dash">
-          <Sidebar user={user} />
+          <Sidebar user={user} badgeCounts={badgeCounts} />
           <div className="main">
             <div className="main__mood">
               <span>{mood.icon}</span>
@@ -75,7 +77,7 @@ export default async function DashboardLayout({
           </div>
         </div>
       </div>
-      <MobileTabs user={user} />
+      <MobileTabs user={user} badgeCounts={badgeCounts} />
     </div>
   );
 }

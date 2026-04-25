@@ -6,17 +6,18 @@ import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { getNavItems } from "./nav-items";
-import { useBadgeCounts } from "./use-badge-counts";
+import type { BadgeCounts } from "./get-badge-counts";
 import type { AuthUser } from "@/lib/auth/get-user";
 
 type SidebarProps = {
   user: AuthUser;
+  badgeCounts: BadgeCounts;
 };
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, badgeCounts }: SidebarProps) {
   const pathname = usePathname();
   const items = getNavItems(user.role);
-  const { pendingInquiries, unreadAnnouncements } = useBadgeCounts(user.role, user.id);
+  const { pendingInquiries, unreadAnnouncements } = badgeCounts;
 
   const isActive = (href: string) => {
     if (pathname === href) return true;
