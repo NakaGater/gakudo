@@ -9,16 +9,14 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-// Mock supabase client
-const mockSelect = vi.fn().mockReturnValue({
-  eq: vi.fn().mockResolvedValue({ count: 0, data: [], error: null }),
-});
+// Mock supabase client (Sidebar uses signOut on logout)
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     auth: { signOut: vi.fn().mockResolvedValue({ error: null }) },
-    from: () => ({ select: mockSelect }),
   }),
 }));
+
+const emptyBadgeCounts = { pendingInquiries: 0, unreadAnnouncements: 0 };
 
 afterEach(() => {
   cleanup();
@@ -68,7 +66,7 @@ describe("Sidebar", () => {
 
   it("renders parent nav items (5 links)", () => {
     render(
-      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     const links = screen.getAllByRole("link");
     // 5 nav items + 1 logo link + 1 profile link = 7 links starting with "/"
@@ -77,14 +75,14 @@ describe("Sidebar", () => {
 
   it("renders teacher nav items (6 links)", () => {
     render(
-      <Sidebar user={{ id: "2", email: "t@b.c", name: "鈴木先生", role: "teacher" }} />,
+      <Sidebar user={{ id: "2", email: "t@b.c", name: "鈴木先生", role: "teacher" }} badgeCounts={emptyBadgeCounts} />,
     );
     expect(screen.getByText("児童管理")).toBeInTheDocument();
   });
 
   it("renders admin nav items (8 links)", () => {
     render(
-      <Sidebar user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} />,
+      <Sidebar user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} badgeCounts={emptyBadgeCounts} />,
     );
     expect(screen.getByText("ユーザー")).toBeInTheDocument();
     expect(screen.getByText("HP管理")).toBeInTheDocument();
@@ -92,14 +90,14 @@ describe("Sidebar", () => {
 
   it("shows facility name", () => {
     render(
-      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     expect(screen.getByText("星ヶ丘こどもクラブ")).toBeInTheDocument();
   });
 
   it("shows user name and logout button", () => {
     render(
-      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     expect(screen.getByText("田中太郎")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /ログアウト/ })).toBeInTheDocument();
@@ -108,7 +106,7 @@ describe("Sidebar", () => {
   it("applies active styling to current path", () => {
     mockPathname.mockReturnValue("/announcements");
     render(
-      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     const announcementsLink = screen.getByRole("link", { name: /連絡/ });
     expect(announcementsLink.className).toContain("active");
@@ -117,7 +115,7 @@ describe("Sidebar", () => {
   it("does not apply active styling to non-current paths", () => {
     mockPathname.mockReturnValue("/announcements");
     render(
-      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <Sidebar user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     const photosLink = screen.getByRole("link", { name: /写真/ });
     expect(photosLink.className).not.toContain("active");
@@ -135,7 +133,7 @@ describe("MobileTabs", () => {
 
   it("renders all 5 tab items for parent (no overflow)", () => {
     render(
-      <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     const links = screen.getAllByRole("link");
     expect(links).toHaveLength(5);
@@ -145,7 +143,7 @@ describe("MobileTabs", () => {
 
   it("renders 4 visible tabs + 'その他' button for admin", () => {
     render(
-      <MobileTabs user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} />,
+      <MobileTabs user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }} badgeCounts={emptyBadgeCounts} />,
     );
     const links = screen.getAllByRole("link");
     expect(links).toHaveLength(4);
@@ -155,7 +153,7 @@ describe("MobileTabs", () => {
   it("applies active styling to current tab", () => {
     mockPathname.mockReturnValue("/announcements");
     render(
-      <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} />,
+      <MobileTabs user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }} badgeCounts={emptyBadgeCounts} />,
     );
     const announcementsLink = screen.getByRole("link", { name: /連絡/ });
     expect(announcementsLink.className).toContain("text-accent");
