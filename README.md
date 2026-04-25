@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# gakudo
+
+学童保育施設の業務管理 SaaS（出退席 / 請求 / お知らせ配信 / 写真ギャラリー / 保護者ポータル / CMS）。
+
+- スタック: **Next.js 16 (App Router) / React 19 / TypeScript strict / Supabase / Tailwind v4 / Vitest / Playwright**
+- 設計: Server Actions + RSC、認可は Supabase RLS、PWA + Web Push、メール送信は Resend
+- ドキュメント: `docs/architecture.md`, `docs/prd.md`, `docs/adr/`
 
 ## Getting Started
 
-First, run the development server:
+セットアップ手順の詳細は `docs/getting-started.md` を参照。最短経路:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+npm install
+cp .env.example .env.local           # 値を埋める
+supabase start                       # ローカル Supabase を起動
+npm run db:types                     # 型を生成
+npm run dev                          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+E2E テストには Mailpit 経由でメールを参照する flow があるため、`supabase start` が前提です。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 主要コマンド
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| コマンド               | 内容                               |
+| ---------------------- | ---------------------------------- |
+| `npm run dev`          | 開発サーバ                         |
+| `npm run build`        | プロダクションビルド               |
+| `npm run typecheck`    | `tsc --noEmit`                     |
+| `npm run lint`         | ESLint                             |
+| `npm run format`       | Prettier 一括整形                  |
+| `npm run format:check` | Prettier の整形チェック            |
+| `npm run test`         | Vitest（1 回実行）                 |
+| `npm run test:watch`   | Vitest watch                       |
+| `npm run e2e`          | Playwright 全 spec                 |
+| `npm run e2e:ui`       | Playwright UI モード               |
+| `npm run check:all`    | typecheck + lint + test + format   |
+| `npm run db:types`     | Supabase 型再生成                  |
+| `npm run audit`        | `npm audit --audit-level=moderate` |
 
-## Learn More
+## ブランチ運用
 
-To learn more about Next.js, take a look at the following resources:
+- 開発は `develop` から feature branch を切る（例: `feat/`, `fix/`, `refactor/`）
+- 1 PR = 1 ドメイン、diff は 400 LOC を目安
+- マージ要件: CI 緑 + レビュー 1 名以上
+- コード規約・PR 手順: `CONTRIBUTING.md`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ドキュメント
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `docs/getting-started.md` — ローカル開発環境のセットアップ
+- `docs/architecture.md` — システム概要・コンポーネント分担
+- `docs/prd.md` / `docs/user-stories.md` — プロダクト要件
+- `docs/adr/` — Architecture Decision Records
+- `docs/security-report.md` — セキュリティレビュー記録
