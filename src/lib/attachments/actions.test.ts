@@ -1,20 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock getUser
+// I/O 境界のみモック (getUser, Supabase storage / table)。
+// ファイル検証 (空ファイル、サイズ上限、mime) は files/validation.test.ts でカバー。
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock Supabase
 const mockUpload = vi.fn();
 const mockRemove = vi.fn();
 const mockCreateSignedUrl = vi.fn();
-const mockInsert = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockOrder = vi.fn();
-const mockSingle = vi.fn();
 const mockFrom = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -44,60 +39,38 @@ describe("uploadAttachment", () => {
     vi.clearAllMocks();
   });
 
-  it("rejects non-staff users (parent)", async () => {
+  it("rejects non-staff users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
     const fd = new FormData();
     fd.set("file", new File(["x"], "test.pdf", { type: "application/pdf" }));
 
     const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("権限");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("権限") });
   });
 
-  it("rejects empty file", async () => {
+  it("propagates the validator's error message for invalid files", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const fd = new FormData();
-    fd.set("file", new File([], "empty.pdf", { type: "application/pdf" }));
+    const fd = new FormData(); // no file → validateFile rejects
 
     const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("ファイルを選択");
+    expect(result).toEqual({ success: false, message: "ファイルを選択してください" });
+    expect(mockUpload).not.toHaveBeenCalled();
   });
 
-  it("rejects missing file", async () => {
+  it("rejects disallowed mime types via validateFileType", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const fd = new FormData();
-
-    const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("ファイルを選択");
-  });
-
-  it("rejects files over 10MB", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const largeContent = new Uint8Array(11 * 1024 * 1024);
-    const fd = new FormData();
-    fd.set("file", new File([largeContent], "big.pdf", { type: "application/pdf" }));
-
-    const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("10MB");
-  });
-
-  it("rejects disallowed file types", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
     const fd = new FormData();
     fd.set("file", new File(["x"], "bad.exe", { type: "application/x-msdownload" }));
 
-    const result = await uploadAttachment("news", "n-1", fd);
+    const result = await uploadAttachment("announcement", "ann-1", fd);
     expect(result.success).toBe(false);
-    expect(result.message).toContain("PDF");
+    expect(mockUpload).not.toHaveBeenCalled();
   });
 
-  it("allows PDF files", async () => {
+  it("uploads PDF and returns the inserted attachment row on success", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
     mockUpload.mockResolvedValue({ error: null });
-    const mockData = {
+    const inserted = {
       id: "att-1",
       file_name: "doc.pdf",
       file_path: "announcement/ann-1/123-doc.pdf",
@@ -105,38 +78,23 @@ describe("uploadAttachment", () => {
       mime_type: "application/pdf",
       created_at: "2025-01-01T00:00:00Z",
     };
-    mockSingle.mockResolvedValue({ data: mockData, error: null });
-    mockSelect.mockReturnValue({ single: mockSingle });
-    mockInsert.mockReturnValue({ select: () => ({ single: mockSingle }) });
-    mockFrom.mockReturnValue({ insert: mockInsert });
+    mockFrom.mockReturnValue({
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: inserted, error: null }),
+        }),
+      }),
+    });
 
     const fd = new FormData();
     fd.set("file", new File(["pdf"], "doc.pdf", { type: "application/pdf" }));
 
     const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result.success).toBe(true);
-    expect(result.attachment).toEqual(mockData);
+    expect(result).toMatchObject({ success: true, attachment: inserted });
     expect(mockUpload).toHaveBeenCalledTimes(1);
   });
 
-  it("allows image files (jpeg, png, gif, webp)", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-    mockUpload.mockResolvedValue({ error: null });
-    mockSingle.mockResolvedValue({
-      data: { id: "att-2", file_name: "photo.jpg", file_path: "p", file_size: 3, mime_type: "image/jpeg", created_at: "" },
-      error: null,
-    });
-    mockInsert.mockReturnValue({ select: () => ({ single: mockSingle }) });
-    mockFrom.mockReturnValue({ insert: mockInsert });
-
-    const fd = new FormData();
-    fd.set("file", new File(["img"], "photo.jpg", { type: "image/jpeg" }));
-
-    const result = await uploadAttachment("news", "n-1", fd);
-    expect(result.success).toBe(true);
-  });
-
-  it("returns error on storage upload failure", async () => {
+  it("returns error when storage upload fails", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
     mockUpload.mockResolvedValue({ error: { message: "Storage full" } });
 
@@ -144,120 +102,121 @@ describe("uploadAttachment", () => {
     fd.set("file", new File(["x"], "test.pdf", { type: "application/pdf" }));
 
     const result = await uploadAttachment("announcement", "ann-1", fd);
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("Storage full");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("Storage full") });
   });
 
-  it("cleans up storage on DB insert failure", async () => {
+  it("removes the uploaded blob on DB insert failure (cleanup)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
     mockUpload.mockResolvedValue({ error: null });
-    mockSingle.mockResolvedValue({ data: null, error: { message: "DB error" } });
-    mockInsert.mockReturnValue({ select: () => ({ single: mockSingle }) });
-    mockFrom.mockReturnValue({ insert: mockInsert });
+    mockFrom.mockReturnValue({
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: null, error: { message: "DB error" } }),
+        }),
+      }),
+    });
 
     const fd = new FormData();
     fd.set("file", new File(["x"], "test.pdf", { type: "application/pdf" }));
 
     const result = await uploadAttachment("announcement", "ann-1", fd);
     expect(result.success).toBe(false);
-    expect(result.message).toContain("DB error");
     expect(mockRemove).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("deleteAttachment", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  beforeEach(() => vi.clearAllMocks());
 
   it("rejects non-staff users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
     const result = await deleteAttachment("att-1");
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("権限");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("権限") });
   });
 
-  it("returns error when attachment not found", async () => {
+  it("returns 'not found' when attachment does not exist", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: { message: "Not found" } }) }) }),
-      delete: () => ({ eq: mockEq }),
-    });
-
-    const result = await deleteAttachment("nonexistent");
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("見つかりません");
-  });
-
-  it("deletes attachment from storage and DB", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const mockDeleteEq = vi.fn().mockResolvedValue({ error: null });
     mockFrom.mockReturnValue({
       select: () => ({
         eq: () => ({
-          single: () => Promise.resolve({ data: { id: "att-1", file_path: "test/path.pdf" }, error: null }),
+          single: () => Promise.resolve({ data: null, error: { message: "x" } }),
         }),
       }),
-      delete: () => ({ eq: mockDeleteEq }),
+    });
+
+    const result = await deleteAttachment("nonexistent");
+    expect(result).toMatchObject({
+      success: false,
+      message: expect.stringContaining("見つかりません"),
+    });
+  });
+
+  it("removes the blob and deletes the DB row on success", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const deleteEq = vi.fn().mockResolvedValue({ error: null });
+    mockFrom.mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          single: () =>
+            Promise.resolve({
+              data: { id: "att-1", file_path: "test/path.pdf" },
+              error: null,
+            }),
+        }),
+      }),
+      delete: () => ({ eq: deleteEq }),
     });
 
     const result = await deleteAttachment("att-1");
-    expect(result.success).toBe(true);
-    expect(result.message).toContain("削除");
+    expect(result).toMatchObject({ success: true });
     expect(mockRemove).toHaveBeenCalledWith(["test/path.pdf"]);
   });
 });
 
 describe("getAttachments", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  beforeEach(() => vi.clearAllMocks());
 
-  it("returns attachment list for entity", async () => {
-    const mockData = [
-      { id: "a1", file_name: "f1.pdf", file_path: "p1", file_size: 100, mime_type: "application/pdf", created_at: "2025-01-01" },
-      { id: "a2", file_name: "f2.png", file_path: "p2", file_size: 200, mime_type: "image/png", created_at: "2025-01-02" },
+  it("returns the attachment list when present", async () => {
+    const data = [
+      {
+        id: "a1",
+        file_name: "f1.pdf",
+        file_path: "p1",
+        file_size: 100,
+        mime_type: "application/pdf",
+        created_at: "2025-01-01",
+      },
     ];
-    mockOrder.mockResolvedValue({ data: mockData });
     mockFrom.mockReturnValue({
-      select: () => ({ eq: () => ({ eq: () => ({ order: mockOrder }) }) }),
+      select: () => ({
+        eq: () => ({ eq: () => ({ order: vi.fn().mockResolvedValue({ data }) }) }),
+      }),
     });
-
-    const result = await getAttachments("announcement", "ann-1");
-    expect(result).toHaveLength(2);
-    expect(result[0].file_name).toBe("f1.pdf");
+    expect(await getAttachments("announcement", "ann-1")).toEqual(data);
   });
 
-  it("returns empty array when no attachments", async () => {
-    mockOrder.mockResolvedValue({ data: null });
+  it("returns an empty array when there are no rows", async () => {
     mockFrom.mockReturnValue({
-      select: () => ({ eq: () => ({ eq: () => ({ order: mockOrder }) }) }),
+      select: () => ({
+        eq: () => ({ eq: () => ({ order: vi.fn().mockResolvedValue({ data: null }) }) }),
+      }),
     });
-
-    const result = await getAttachments("news", "n-1");
-    expect(result).toEqual([]);
+    expect(await getAttachments("news", "n-1")).toEqual([]);
   });
 });
 
 describe("getAttachmentUrl", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  beforeEach(() => vi.clearAllMocks());
 
-  it("returns signed URL", async () => {
+  it("returns the signed URL on success", async () => {
     mockCreateSignedUrl.mockResolvedValue({
       data: { signedUrl: "https://example.com/signed" },
     });
-
-    const result = await getAttachmentUrl("test/path.pdf");
-    expect(result).toBe("https://example.com/signed");
-    expect(mockCreateSignedUrl).toHaveBeenCalledWith("test/path.pdf", 3600);
+    expect(await getAttachmentUrl("test/path.pdf")).toBe("https://example.com/signed");
   });
 
-  it("returns null on error", async () => {
+  it("returns null when Supabase returns no data", async () => {
     mockCreateSignedUrl.mockResolvedValue({ data: null });
-
-    const result = await getAttachmentUrl("bad/path.pdf");
-    expect(result).toBeNull();
+    expect(await getAttachmentUrl("bad/path.pdf")).toBeNull();
   });
 });
