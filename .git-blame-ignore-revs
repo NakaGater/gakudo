@@ -1,0 +1,9 @@
+# Bulk reformatting commits to ignore in `git blame`.
+#
+# Configure once per clone:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# GitHub honors this file automatically on the web UI.
+
+# Phase 0-D: prettier + eslint --fix bulk reformat
+5a04b0d0d5aa907b5e97e2ee2b17f1bf93572467
