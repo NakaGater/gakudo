@@ -19,6 +19,25 @@ function isEditableElement(el: Element | null): boolean {
   return (el as HTMLElement).isContentEditable === true;
 }
 
+/**
+ * タッチ対象から祖先を辿り、スクロール可能な祖先が「これ以上上にスクロールできない」
+ * 状態 (scrollTop === 0) であるかを確認する。途中の祖先がまだ上にスクロール余地を
+ * 持つ場合、ユーザーはその要素を内側スクロールしようとしているので PTR を発火させない。
+ */
+function canActivateAtTop(target: EventTarget | null): boolean {
+  let el = target instanceof Element ? (target as HTMLElement) : null;
+  while (el && el !== document.body && el !== document.documentElement) {
+    const style = window.getComputedStyle(el);
+    const overflowY = style.overflowY;
+    const scrollable =
+      (overflowY === "auto" || overflowY === "scroll") &&
+      el.scrollHeight > el.clientHeight;
+    if (scrollable && el.scrollTop > 0) return false;
+    el = el.parentElement;
+  }
+  return window.scrollY <= 0;
+}
+
 export function PullToRefresh() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("idle");
@@ -65,7 +84,7 @@ export function PullToRefresh() {
     const onTouchStart = (e: TouchEvent) => {
       if (refreshing.current) return;
       if (e.touches.length !== 1) return;
-      if (window.scrollY > 0) return;
+      if (!canActivateAtTop(e.target)) return;
       if (isEditableElement(document.activeElement)) return;
 
       const t = e.touches[0];
@@ -91,6 +110,12 @@ export function PullToRefresh() {
           return;
         }
         if (Math.abs(dx) > Math.abs(dy) || dy < 0) {
+          tracking.current = false;
+          return;
+        }
+        // touchstart 以降に内側スクロールで scrollTop が増えた可能性があるので
+        // commit する直前に再確認する。
+        if (!canActivateAtTop(e.target)) {
           tracking.current = false;
           return;
         }

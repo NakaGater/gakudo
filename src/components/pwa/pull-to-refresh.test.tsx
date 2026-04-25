@@ -201,6 +201,68 @@ describe("PullToRefresh", () => {
     expect(mockRefresh).toHaveBeenCalledTimes(2);
   });
 
+  it("内側スクロール可能な祖先がまだ上にスクロール余地を持つ場合は発火しない", () => {
+    const scroller = document.createElement("div");
+    scroller.style.overflowY = "auto";
+    Object.defineProperty(scroller, "scrollHeight", { value: 1000, configurable: true });
+    Object.defineProperty(scroller, "clientHeight", { value: 400, configurable: true });
+    Object.defineProperty(scroller, "scrollTop", { value: 200, configurable: true });
+    const child = document.createElement("div");
+    scroller.appendChild(child);
+    document.body.appendChild(scroller);
+    render(<PullToRefresh />);
+
+    const start = new Event("touchstart", { bubbles: true, cancelable: true });
+    Object.defineProperty(start, "touches", {
+      value: [{ clientX: 100, clientY: 50 }],
+      configurable: true,
+    });
+    Object.defineProperty(start, "target", { value: child, configurable: true });
+    act(() => {
+      child.dispatchEvent(start);
+    });
+    dispatchTouch("touchmove", 100, 250);
+    dispatchTouch("touchend", 100, 250);
+
+    expect(mockRefresh).not.toHaveBeenCalled();
+    document.body.removeChild(scroller);
+  });
+
+  it("内側スクロール可能な祖先が最上部 (scrollTop=0) なら発火する", () => {
+    const scroller = document.createElement("div");
+    scroller.style.overflowY = "auto";
+    Object.defineProperty(scroller, "scrollHeight", { value: 1000, configurable: true });
+    Object.defineProperty(scroller, "clientHeight", { value: 400, configurable: true });
+    Object.defineProperty(scroller, "scrollTop", { value: 0, configurable: true });
+    const child = document.createElement("div");
+    scroller.appendChild(child);
+    document.body.appendChild(scroller);
+    render(<PullToRefresh />);
+
+    const start = new Event("touchstart", { bubbles: true, cancelable: true });
+    Object.defineProperty(start, "touches", {
+      value: [{ clientX: 100, clientY: 50 }],
+      configurable: true,
+    });
+    Object.defineProperty(start, "target", { value: child, configurable: true });
+    act(() => {
+      child.dispatchEvent(start);
+    });
+    const move = new Event("touchmove", { bubbles: true, cancelable: true });
+    Object.defineProperty(move, "touches", {
+      value: [{ clientX: 100, clientY: 250 }],
+      configurable: true,
+    });
+    Object.defineProperty(move, "target", { value: child, configurable: true });
+    act(() => {
+      child.dispatchEvent(move);
+    });
+    dispatchTouch("touchend", 100, 250);
+
+    expect(mockRefresh).toHaveBeenCalledOnce();
+    document.body.removeChild(scroller);
+  });
+
   it("マルチタッチ (2 本指) では発火しない", () => {
     render(<PullToRefresh />);
 
