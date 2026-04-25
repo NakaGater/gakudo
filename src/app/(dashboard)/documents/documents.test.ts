@@ -106,7 +106,7 @@ describe("documents actions", () => {
     });
 
     it("returns fieldErrors when title missing", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
       fd.append("category", "お便り");
@@ -123,7 +123,7 @@ describe("documents actions", () => {
     });
 
     it("returns fieldErrors when category invalid", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
       fd.append("title", "Test");
@@ -141,7 +141,7 @@ describe("documents actions", () => {
     });
 
     it("returns fieldErrors when file missing", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
       fd.append("title", "Test");
@@ -153,7 +153,7 @@ describe("documents actions", () => {
     });
 
     it("returns error on storage upload failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       mockStorageUpload.mockResolvedValue({
         error: { message: "Upload failed" },
       });
@@ -173,7 +173,7 @@ describe("documents actions", () => {
     });
 
     it("returns error on DB insert failure and cleans up storage", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       mockStorageUpload.mockResolvedValue({ data: { path: "doc-path" } });
       enqueue("documents", { error: { message: "DB error" } });
 
@@ -193,7 +193,7 @@ describe("documents actions", () => {
     });
 
     it("succeeds with valid input", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       mockStorageUpload.mockResolvedValue({ data: { path: "doc-path" } });
       enqueue("documents", {
         data: { id: "doc1", title: "Test", category: "お便り" },
@@ -217,7 +217,7 @@ describe("documents actions", () => {
 
   describe("deleteDocument", () => {
     it("returns error when document not found", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("documents", { data: null });
 
       const result = await deleteDocument("doc1");
@@ -225,7 +225,7 @@ describe("documents actions", () => {
     });
 
     it("rejects unauthorized user (not admin, not uploader)", async () => {
-      mockGetUser.mockResolvedValue({ id: "user2", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user2", role: "teacher" });
       enqueue("documents", {
         data: { id: "doc1", uploaded_by: "user1" },
       });
@@ -273,7 +273,7 @@ describe("documents actions", () => {
     });
 
     it("succeeds for uploader", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("documents", {
         data: { id: "doc1", uploaded_by: "user1", file_path: "doc-path" },
       });
