@@ -8,6 +8,13 @@
   display: none;                  /* Chrome, Safari, Edge */
 }
 
+/* PWA pull-to-refresh: prevent iOS standalone rubber-band from competing
+   with our gesture. Scoped to html/body so nested scroll containers retain
+   their native overscroll behavior. */
+html, body {
+  overscroll-behavior-y: contain;
+}
+
 /* ══════════════════════════════════════════════════════════════
    星ヶ丘こどもクラブ — Design System Tokens
    Storybook / Craft Theme — GAN Refresh 58/60
