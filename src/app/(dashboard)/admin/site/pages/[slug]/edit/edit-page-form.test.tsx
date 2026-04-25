@@ -2,19 +2,10 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { EditPageForm } from "./edit-page-form";
 
-// Mock server action
+// Mock server action — only the I/O boundary; React's useActionState runs unmocked.
 vi.mock("../../../actions", () => ({
   updateSitePage: vi.fn(),
 }));
-
-// Mock useActionState
-vi.mock("react", async () => {
-  const actual = await vi.importActual("react");
-  return {
-    ...actual,
-    useActionState: () => [null, vi.fn(), false],
-  };
-});
 
 const baseProps = {
   title: "テスト",

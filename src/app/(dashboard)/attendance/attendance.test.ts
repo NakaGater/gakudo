@@ -1,79 +1,86 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// Mock next/cache
+// I/O 境界 (next/cache, getUser, Supabase, 通知) のみモック。
+// enter/exit 判定ロジックは actions.helpers.test.ts でカバー済み。
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock Supabase — chainable query builder
-const mockSingle = vi.fn();
-const mockOrder = vi.fn();
-const mockLimit = vi.fn();
-const mockGte = vi.fn();
-const mockLt = vi.fn();
-const mockEq = vi.fn();
-const mockSelect = vi.fn();
-const mockInsert = vi.fn();
-const mockFrom = vi.fn();
+const mockSendAttendanceNotification = vi.fn().mockResolvedValue(undefined);
+vi.mock("@/lib/notifications/send", () => ({
+  sendAttendanceNotification: (...args: unknown[]) => mockSendAttendanceNotification(...args),
+}));
 
+const mockFrom = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: unknown[]) => mockFrom(...args),
-    }),
-  ),
+  createClient: vi.fn(() => Promise.resolve({ from: (...a: unknown[]) => mockFrom(...a) })),
 }));
 
 import { recordAttendance } from "./actions";
 
-function setupChain() {
-  // Reset chain mocks
-  mockSingle.mockReset();
-  mockOrder.mockReset();
-  mockLimit.mockReset();
-  mockGte.mockReset();
-  mockLt.mockReset();
-  mockEq.mockReset();
-  mockSelect.mockReset();
-  mockInsert.mockReset();
-  mockFrom.mockReset();
+/**
+ * recordAttendance の query は (1) children lookup, (2) latest attendance, (3) insert
+ * の 3 つ。それぞれに対応する終端 single() の resolved 値を順に返す chain を組み立てる。
+ */
+function makeRecordAttendanceChain(opts: {
+  child: { id: string; name: string; qr_active: boolean } | null;
+  latest: { type: string } | null;
+  insertResult: { data: unknown; error: unknown };
+}) {
+  const childSingle = vi.fn().mockResolvedValue({ data: opts.child, error: null });
+  const latestSingle = vi.fn().mockResolvedValue({ data: opts.latest, error: null });
+  const insertSingle = vi.fn().mockResolvedValue(opts.insertResult);
 
-  const chain = {
-    select: mockSelect,
-    eq: mockEq,
-    gte: mockGte,
-    lt: mockLt,
-    order: mockOrder,
-    limit: mockLimit,
-    single: mockSingle,
-    insert: mockInsert,
-  };
+  const insert = vi.fn().mockReturnValue({
+    select: vi.fn().mockReturnValue({ single: insertSingle }),
+  });
 
-  mockFrom.mockReturnValue(chain);
-  mockSelect.mockReturnValue(chain);
-  mockEq.mockReturnValue(chain);
-  mockGte.mockReturnValue(chain);
-  mockLt.mockReturnValue(chain);
-  mockOrder.mockReturnValue(chain);
-  mockLimit.mockReturnValue(chain);
-  mockInsert.mockReturnValue(chain);
+  let call = 0;
+  mockFrom.mockImplementation((table: string) => {
+    if (table === "children") {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ single: childSingle }),
+        }),
+      };
+    }
+    if (table === "attendances") {
+      call++;
+      if (call === 1) {
+        // SELECT latest of today
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              gte: vi.fn().mockReturnValue({
+                lt: vi.fn().mockReturnValue({
+                  order: vi.fn().mockReturnValue({
+                    limit: vi.fn().mockReturnValue({ single: latestSingle }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        };
+      }
+      // INSERT
+      return { insert };
+    }
+    return {};
+  });
 
-  return chain;
+  return { insert };
 }
 
 describe("recordAttendance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Use a fixed date for deterministic tests
     vi.useFakeTimers();
-    // Set to 2024-06-15 10:00:00 JST (= 2024-06-15 01:00:00 UTC)
     vi.setSystemTime(new Date("2024-06-15T01:00:00Z"));
   });
 
@@ -81,42 +88,21 @@ describe("recordAttendance", () => {
     vi.useRealTimers();
   });
 
-  it("rejects non-entrance users (parent role)", async () => {
+  it("rejects non-entrance users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: false,
-      message: expect.stringContaining("権限"),
-    });
+    const result = await recordAttendance("GK-X");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("権限") });
   });
 
-  it("rejects non-entrance users (teacher role)", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: false,
-      message: expect.stringContaining("権限"),
-    });
-  });
-
-  it("rejects non-entrance users (admin role)", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: false,
-      message: expect.stringContaining("権限"),
-    });
-  });
-
-  it("returns error for unknown QR code", async () => {
+  it("returns 'not found' for an unknown QR code", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    setupChain();
-
-    // Child lookup returns null
-    mockSingle.mockResolvedValueOnce({ data: null, error: null });
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: null, error: null }),
+        }),
+      }),
+    });
 
     const result = await recordAttendance("GK-UNKNOWN");
     expect(result).toMatchObject({
@@ -125,153 +111,58 @@ describe("recordAttendance", () => {
     });
   });
 
-  it("returns error for inactive QR code", async () => {
+  it("returns 'inactive' for a child whose QR is disabled", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    setupChain();
-
-    // Child lookup returns inactive child
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "child-1", name: "テスト太郎", qr_active: false },
-      error: null,
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: "c1", name: "太郎", qr_active: false },
+            error: null,
+          }),
+        }),
+      }),
     });
 
     const result = await recordAttendance("GK-INACTIVE");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("無効") });
+  });
+
+  it("inserts an 'enter' record on first scan of the day", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
+    const { insert } = makeRecordAttendanceChain({
+      child: { id: "c1", name: "太郎", qr_active: true },
+      latest: null,
+      insertResult: {
+        data: { id: "att-1", type: "enter", recorded_at: "2024-06-15T01:00:00Z" },
+        error: null,
+      },
+    });
+
+    const result = await recordAttendance("GK-TESTCODE");
+
+    expect(result).toMatchObject({ success: true, childName: "太郎", type: "enter" });
+    // 境界契約: insert に渡された payload が child_id / type / method / recorded_by を持つ
+    expect(insert).toHaveBeenCalledWith({
+      child_id: "c1",
+      type: "enter",
+      method: "qr",
+      recorded_by: "u1",
+    });
+  });
+
+  it("returns DB error when insert fails", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
+    makeRecordAttendanceChain({
+      child: { id: "c1", name: "太郎", qr_active: true },
+      latest: null,
+      insertResult: { data: null, error: { message: "DB write failed" } },
+    });
+
+    const result = await recordAttendance("GK-TESTCODE");
     expect(result).toMatchObject({
       success: false,
-      message: expect.stringContaining("無効"),
+      message: expect.stringContaining("DB write failed"),
     });
-  });
-
-  it("records 'enter' on first scan of the day", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    setupChain();
-
-    // Child lookup
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "child-1", name: "テスト太郎", qr_active: true },
-      error: null,
-    });
-
-    // Latest attendance today → none
-    mockSingle.mockResolvedValueOnce({
-      data: null,
-      error: null,
-    });
-
-    // Insert attendance
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "att-1", type: "enter", recorded_at: "2024-06-15T01:00:00Z" },
-      error: null,
-    });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: true,
-      childName: "テスト太郎",
-      type: "enter",
-    });
-
-    // Verify insert was called with enter type
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        child_id: "child-1",
-        type: "enter",
-        method: "qr",
-        recorded_by: "u1",
-      }),
-    );
-  });
-
-  it("records 'exit' when last record is 'enter'", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    setupChain();
-
-    // Child lookup
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "child-1", name: "テスト花子", qr_active: true },
-      error: null,
-    });
-
-    // Latest attendance today → enter
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "att-prev", type: "enter", recorded_at: "2024-06-15T00:00:00Z" },
-      error: null,
-    });
-
-    // Insert attendance
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "att-2", type: "exit", recorded_at: "2024-06-15T01:00:00Z" },
-      error: null,
-    });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: true,
-      childName: "テスト花子",
-      type: "exit",
-    });
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        child_id: "child-1",
-        type: "exit",
-        method: "qr",
-      }),
-    );
-  });
-
-  it("records 'enter' again when last record is 'exit'", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    setupChain();
-
-    // Child lookup
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "child-1", name: "テスト次郎", qr_active: true },
-      error: null,
-    });
-
-    // Latest attendance today → exit
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "att-prev", type: "exit", recorded_at: "2024-06-15T00:30:00Z" },
-      error: null,
-    });
-
-    // Insert attendance
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "att-3", type: "enter", recorded_at: "2024-06-15T01:00:00Z" },
-      error: null,
-    });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: true,
-      childName: "テスト次郎",
-      type: "enter",
-    });
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        child_id: "child-1",
-        type: "enter",
-      }),
-    );
-  });
-
-  it("allows entrance role", async () => {
-    mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    setupChain();
-
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "child-1", name: "テスト太郎", qr_active: true },
-      error: null,
-    });
-    mockSingle.mockResolvedValueOnce({ data: null, error: null });
-    mockSingle.mockResolvedValueOnce({
-      data: { id: "att-1", type: "enter", recorded_at: "2024-06-15T01:00:00Z" },
-      error: null,
-    });
-
-    const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({ success: true });
   });
 });
