@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { validateFile, validateFileType } from "@/lib/files/validation";
+import { validateFile, validateFileMagicBytes, validateFileType } from "@/lib/files/validation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
@@ -48,6 +48,17 @@ export async function uploadDocument(
       );
       if (!typeVal.valid) {
         fieldErrors.file = typeVal.message;
+      } else {
+        // Defense-in-depth: file.type comes from the browser. Verify
+        // the bytes actually match before accepting the upload.
+        const magicVal = await validateFileMagicBytes(
+          file,
+          ALLOWED_TYPES,
+          "ファイルの内容が宣言された形式と一致しません",
+        );
+        if (!magicVal.valid) {
+          fieldErrors.file = magicVal.message;
+        }
       }
     }
   }

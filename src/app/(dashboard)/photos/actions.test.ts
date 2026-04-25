@@ -47,8 +47,13 @@ vi.mock("next/cache", () => ({
 import { uploadPhoto, setPhotoVisibility, deletePhoto } from "./actions";
 
 function imageFile(name = "img.jpg", type = "image/jpeg", size = 32): File {
-  const blob = new Blob([new Uint8Array(size)], { type });
-  return new File([blob], name, { type });
+  // Real JPEG magic bytes so validateFileMagicBytes accepts the fixture.
+  const bytes = new Uint8Array(size);
+  bytes[0] = 0xff;
+  bytes[1] = 0xd8;
+  bytes[2] = 0xff;
+  bytes[3] = 0xe0;
+  return new File([bytes], name, { type });
 }
 
 function fdWith(files: File[], fields: Record<string, string> = {}): FormData {
@@ -97,6 +102,19 @@ describe("uploadPhoto", () => {
       type: "text/plain",
     });
     const result = await uploadPhoto(fdWith([txt]));
+    expect(result.success).toBe(false);
+    expect(mockStorageUpload).not.toHaveBeenCalled();
+  });
+
+  it("rejects an image file whose bytes don't match the claimed MIME", async () => {
+    // Claims image/jpeg but starts with PNG magic bytes.
+    const bytes = new Uint8Array(16);
+    bytes[0] = 0x89;
+    bytes[1] = 0x50;
+    bytes[2] = 0x4e;
+    bytes[3] = 0x47;
+    const lying = new File([bytes], "lying.jpg", { type: "image/jpeg" });
+    const result = await uploadPhoto(fdWith([lying]));
     expect(result.success).toBe(false);
     expect(mockStorageUpload).not.toHaveBeenCalled();
   });

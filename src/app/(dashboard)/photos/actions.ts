@@ -4,8 +4,11 @@ import { revalidatePath } from "next/cache";
 import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { validateFileMagicBytes } from "@/lib/files/validation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/types";
+
+const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
 
 export async function uploadPhoto(formData: FormData): Promise<ActionResult> {
   const user = await getUser();
@@ -29,6 +32,18 @@ export async function uploadPhoto(formData: FormData): Promise<ActionResult> {
   for (const file of files) {
     if (!file.type.startsWith("image/")) {
       errors.push(`${file.name}: 画像ファイルのみアップロードできます`);
+      continue;
+    }
+
+    // Defense-in-depth: file.type is browser-supplied. Verify the
+    // bytes match before uploading to storage.
+    const magicVal = await validateFileMagicBytes(
+      file,
+      ALLOWED_PHOTO_TYPES,
+      "ファイルの内容が画像形式と一致しません",
+    );
+    if (!magicVal.valid) {
+      errors.push(`${file.name}: ${magicVal.message}`);
       continue;
     }
 

@@ -43,8 +43,14 @@ vi.mock("next/cache", () => ({
 import { uploadDocument, deleteDocument } from "./actions";
 
 function pdfFile(name = "guide.pdf", size = 64): File {
-  const blob = new Blob([new Uint8Array(size)], { type: "application/pdf" });
-  return new File([blob], name, { type: "application/pdf" });
+  // Real PDF magic bytes (%PDF) so validateFileMagicBytes accepts the
+  // fixture; size is padded to keep the upload-size assertions happy.
+  const bytes = new Uint8Array(size);
+  bytes[0] = 0x25; // %
+  bytes[1] = 0x50; // P
+  bytes[2] = 0x44; // D
+  bytes[3] = 0x46; // F
+  return new File([bytes], name, { type: "application/pdf" });
 }
 
 function form(fields: Record<string, string | File>): FormData {
@@ -98,6 +104,18 @@ describe("uploadDocument", () => {
     const result = await uploadDocument(null, form({ title: "t", category: "お便り", file: exe }));
     expect(result.success).toBe(false);
     expect(result.fieldErrors?.file).toBeTruthy();
+  });
+
+  it("rejects a renamed executable that claims application/pdf", async () => {
+    // Browser-supplied MIME passes validateFileType, but the bytes are
+    // a Windows executable. validateFileMagicBytes catches the spoof.
+    const evil = new File([new Uint8Array([0x4d, 0x5a, 0x90, 0x00, 0x03])], "evil.pdf", {
+      type: "application/pdf",
+    });
+    const result = await uploadDocument(null, form({ title: "t", category: "お便り", file: evil }));
+    expect(result.success).toBe(false);
+    expect(result.fieldErrors?.file).toBeTruthy();
+    expect(mockStorageUpload).not.toHaveBeenCalled();
   });
 
   it("happy path: uploads and inserts a row", async () => {
