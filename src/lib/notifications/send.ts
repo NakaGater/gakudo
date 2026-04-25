@@ -83,14 +83,18 @@ export async function sendAnnouncementNotification(
 
   const { pushIds, emailIds } = partitionByMethod(prefs as NotificationPreferenceRow[]);
 
+  // push と email は独立した外部 I/O なので並列実行する。
+  const tasks: Array<Promise<void>> = [];
   if (pushIds.length > 0) {
     const payload = buildAnnouncementPayload(title, body, `/announcements/${announcementId}`);
-    await sendPushNotifications(supabase, pushIds, payload);
+    tasks.push(sendPushNotifications(supabase, pushIds, payload));
   }
-
   if (emailIds.length > 0) {
-    await sendEmailNotifications(supabase, emailIds, `【星ヶ丘こどもクラブ】${title}`, body);
+    tasks.push(
+      sendEmailNotifications(supabase, emailIds, `【星ヶ丘こどもクラブ】${title}`, body),
+    );
   }
+  await Promise.all(tasks);
 }
 
 async function sendPushNotifications(
@@ -228,16 +232,19 @@ export async function sendAttendanceNotification(
   const childName = (child as { name: string }).name;
   const messages = formatAttendanceMessages(childName, type, recordedAt);
 
+  const tasks: Array<Promise<void>> = [];
   if (pushIds.length > 0) {
     const payload = JSON.stringify({
       title: messages.pushMessage,
       body: messages.pushMessage,
       url: "/attendance",
     });
-    await sendPushNotifications(supabase, pushIds, payload);
+    tasks.push(sendPushNotifications(supabase, pushIds, payload));
   }
-
   if (emailIds.length > 0) {
-    await sendEmailNotifications(supabase, emailIds, messages.emailSubject, messages.emailBody);
+    tasks.push(
+      sendEmailNotifications(supabase, emailIds, messages.emailSubject, messages.emailBody),
+    );
   }
+  await Promise.all(tasks);
 }
