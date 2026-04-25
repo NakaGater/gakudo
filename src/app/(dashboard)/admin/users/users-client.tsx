@@ -141,7 +141,7 @@ export function UsersClient({ users, currentUserId }: { users: Profile[]; curren
         <DeleteConfirm user={deletingUser} onClose={() => setDeletingUser(null)} />
       )}
 
-      <div className="rounded-md overflow-hidden">
+      <div className="rounded-md overflow-x-auto">
         <table className="admin-table">
           <thead>
             <tr className="border-b border-border text-left">
