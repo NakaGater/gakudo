@@ -1,21 +1,13 @@
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
-import { TEXT_LIMITS } from "@/config/constants";
-
-function getVapidKeys() {
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  if (!publicKey || !privateKey) {
-    throw new Error("VAPID keys are not configured");
-  }
-  return { publicKey, privateKey };
-}
-
-interface NotificationPreferenceRow {
-  user_id: string;
-  method: "push" | "email" | "both" | "off";
-}
+import {
+  partitionByMethod,
+  buildAnnouncementPayload,
+  formatAttendanceMessages,
+  getVapidKeys,
+  type NotificationPreferenceRow,
+} from "./send.helpers";
 
 interface PushSubscriptionRow {
   user_id: string;
@@ -37,7 +29,6 @@ export async function sendAnnouncementNotification(
 ): Promise<void> {
   const supabase = createAdminClient();
 
-  // Fetch parents who have notifications enabled
   const { data: prefs, error: prefsError } = await supabase
     .from("notification_preferences")
     .select("user_id, method")
@@ -50,31 +41,27 @@ export async function sendAnnouncementNotification(
     return;
   }
 
-  const preferences = prefs as NotificationPreferenceRow[];
-  const pushUserIds = preferences
-    .filter((p) => p.method === "push" || p.method === "both")
-    .map((p) => p.user_id);
-  const emailUserIds = preferences
-    .filter((p) => p.method === "email" || p.method === "both")
-    .map((p) => p.user_id);
+  const { pushIds, emailIds } = partitionByMethod(prefs as NotificationPreferenceRow[]);
 
-  // Send push notifications
-  if (pushUserIds.length > 0) {
-    await sendPushNotifications(supabase, pushUserIds, title, body, `/announcements/${announcementId}`);
+  if (pushIds.length > 0) {
+    const payload = buildAnnouncementPayload(title, body, `/announcements/${announcementId}`);
+    await sendPushNotifications(supabase, pushIds, payload);
   }
 
-  // Send email notifications
-  if (emailUserIds.length > 0) {
-    await sendEmailNotifications(supabase, emailUserIds, `【星ヶ丘こどもクラブ】${title}`, body);
+  if (emailIds.length > 0) {
+    await sendEmailNotifications(
+      supabase,
+      emailIds,
+      `【星ヶ丘こどもクラブ】${title}`,
+      body,
+    );
   }
 }
 
 async function sendPushNotifications(
   supabase: ReturnType<typeof createAdminClient>,
   userIds: string[],
-  title: string,
-  body: string,
-  url: string,
+  payload: string,
 ): Promise<void> {
   let vapidKeys: { publicKey: string; privateKey: string };
   try {
@@ -99,13 +86,6 @@ async function sendPushNotifications(
     console.error("[notifications] Failed to fetch push subscriptions:", subsError?.message);
     return;
   }
-
-  const truncatedBody = body.length > TEXT_LIMITS.NOTIFICATION_BODY_LENGTH ? body.slice(0, TEXT_LIMITS.NOTIFICATION_BODY_LENGTH) + "…" : body;
-  const payload = JSON.stringify({
-    title,
-    body: truncatedBody,
-    url,
-  });
 
   for (const row of subs as PushSubscriptionRow[]) {
     try {
@@ -137,11 +117,7 @@ async function sendEmailNotifications(
 
   for (const profile of profiles as ProfileRow[]) {
     try {
-      await sendEmail({
-        to: profile.email,
-        subject,
-        text: body,
-      });
+      await sendEmail({ to: profile.email, subject, text: body });
     } catch (err) {
       console.error(
         `[notifications] Email failed for user ${profile.id}:`,
@@ -151,17 +127,6 @@ async function sendEmailNotifications(
   }
 }
 
-/** Format ISO timestamp as HH:mm in JST */
-function formatJSTTime(isoString: string): string {
-  const date = new Date(isoString);
-  return date.toLocaleTimeString("ja-JP", {
-    timeZone: "Asia/Tokyo",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
-
 export async function sendAttendanceNotification(
   childId: string,
   type: "enter" | "exit",
@@ -169,7 +134,6 @@ export async function sendAttendanceNotification(
 ): Promise<void> {
   const supabase = createAdminClient();
 
-  // 1. Fetch child name
   const { data: child, error: childError } = await supabase
     .from("children")
     .select("name")
@@ -183,7 +147,6 @@ export async function sendAttendanceNotification(
     return;
   }
 
-  // 2. Fetch linked parent IDs
   const { data: links, error: linksError } = await supabase
     .from("child_parents")
     .select("parent_id")
@@ -195,7 +158,6 @@ export async function sendAttendanceNotification(
 
   const parentIds = (links as { parent_id: string }[]).map((l) => l.parent_id);
 
-  // 3. Fetch notification preferences for parents
   const { data: prefs, error: prefsError } = await supabase
     .from("notification_preferences")
     .select("user_id, method")
@@ -205,36 +167,27 @@ export async function sendAttendanceNotification(
     return;
   }
 
-  const activePrefs = (prefs as NotificationPreferenceRow[]).filter(
-    (p) => p.method === "push" || p.method === "email" || p.method === "both",
-  );
+  const { pushIds, emailIds } = partitionByMethod(prefs as NotificationPreferenceRow[]);
+  if (pushIds.length === 0 && emailIds.length === 0) return;
 
-  if (activePrefs.length === 0) return;
-
-  // 4. Build messages
-  const jstTime = formatJSTTime(recordedAt);
-  const actionLabel = type === "enter" ? "入室" : "退室";
   const childName = (child as { name: string }).name;
+  const messages = formatAttendanceMessages(childName, type, recordedAt);
 
-  const pushMessage = `${childName}が${actionLabel}しました (${jstTime})`;
-  const emailSubject = `【星ヶ丘こどもクラブ】${childName}の${actionLabel}通知`;
-  const emailBody = `${childName}が${jstTime}に${actionLabel}しました。`;
-
-  // 5. Send push notifications
-  const pushUserIds = activePrefs
-    .filter((p) => p.method === "push" || p.method === "both")
-    .map((p) => p.user_id);
-
-  if (pushUserIds.length > 0) {
-    await sendPushNotifications(supabase, pushUserIds, pushMessage, pushMessage, "/attendance");
+  if (pushIds.length > 0) {
+    const payload = JSON.stringify({
+      title: messages.pushMessage,
+      body: messages.pushMessage,
+      url: "/attendance",
+    });
+    await sendPushNotifications(supabase, pushIds, payload);
   }
 
-  // 6. Send email notifications
-  const emailUserIds = activePrefs
-    .filter((p) => p.method === "email" || p.method === "both")
-    .map((p) => p.user_id);
-
-  if (emailUserIds.length > 0) {
-    await sendEmailNotifications(supabase, emailUserIds, emailSubject, emailBody);
+  if (emailIds.length > 0) {
+    await sendEmailNotifications(
+      supabase,
+      emailIds,
+      messages.emailSubject,
+      messages.emailBody,
+    );
   }
 }
