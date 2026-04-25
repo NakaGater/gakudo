@@ -90,9 +90,7 @@ export async function sendAnnouncementNotification(
     tasks.push(sendPushNotifications(supabase, pushIds, payload));
   }
   if (emailIds.length > 0) {
-    tasks.push(
-      sendEmailNotifications(supabase, emailIds, `【星ヶ丘こどもクラブ】${title}`, body),
-    );
+    tasks.push(sendEmailNotifications(supabase, emailIds, `【星ヶ丘こどもクラブ】${title}`, body));
   }
   await Promise.all(tasks);
 }

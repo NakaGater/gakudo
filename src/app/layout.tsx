@@ -5,17 +5,24 @@ import { validateEnv } from "@/lib/env";
 import type { Metadata } from "next";
 import "./globals.css";
 
+// Body font: every page uses it via --font-body, so it stays preloaded.
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
+// Story / hand display fonts: used only in scoped components (--font-story,
+// --font-hand). Preloading them on every page hurt LCP because Japanese
+// font payloads are large; with preload: false they load on-demand and
+// system fallbacks render until they arrive (display: "swap").
 const zenMaruGothic = Zen_Maru_Gothic({
   variable: "--font-zen-maru-gothic",
   weight: ["400", "500", "700", "900"],
   subsets: ["latin"],
   display: "swap",
+  preload: false,
 });
 
 const yuseiMagic = Yusei_Magic({
@@ -23,6 +30,7 @@ const yuseiMagic = Yusei_Magic({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
