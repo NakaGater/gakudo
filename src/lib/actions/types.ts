@@ -1,6 +1,9 @@
-/** Server Action の共通レスポンス型 */
-export type ActionState = {
+/** Server Action が返す結果オブジェクト (常に非null) */
+export type ActionResult = {
   success: boolean;
   message: string;
   fieldErrors?: Record<string, string>;
-} | null;
+};
+
+/** useActionState の state 型 (初期値は null) */
+export type ActionState = ActionResult | null;

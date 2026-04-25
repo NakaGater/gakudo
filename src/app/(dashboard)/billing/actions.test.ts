@@ -43,7 +43,7 @@ const mockFrom = vi.fn(() => createChain());
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      from: (...args: unknown[]) => mockFrom(...args),
+      from: mockFrom,
     }),
   ),
 }));

@@ -109,7 +109,7 @@ describe("inviteUser", () => {
     mockGetUser.mockResolvedValue({ id: "user-id", role: "teacher" });
 
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "test@example.com",
         name: "Test User",
@@ -123,7 +123,7 @@ describe("inviteUser", () => {
 
   it("2. returns error for missing email", async () => {
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "",
         name: "Test User",
@@ -137,7 +137,7 @@ describe("inviteUser", () => {
 
   it("3. returns error for missing name", async () => {
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "test@example.com",
         name: "",
@@ -151,7 +151,7 @@ describe("inviteUser", () => {
 
   it("4. returns error for invalid role", async () => {
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "test@example.com",
         name: "Test User",
@@ -170,7 +170,7 @@ describe("inviteUser", () => {
     });
 
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "test@example.com",
         name: "Test User",
@@ -187,7 +187,7 @@ describe("inviteUser", () => {
     mockState.upsertError = { message: "Database error" };
 
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "test@example.com",
         name: "Test User",
@@ -201,7 +201,7 @@ describe("inviteUser", () => {
 
   it("7. succeeds with valid input", async () => {
     const result = await inviteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         email: "test@example.com",
         name: "Test User",
@@ -228,7 +228,7 @@ describe("updateUser", () => {
     mockGetUser.mockResolvedValue({ id: "user-id", role: "teacher" });
 
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
         name: "Updated Name",
@@ -242,7 +242,7 @@ describe("updateUser", () => {
 
   it("9. returns error for empty ID", async () => {
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "",
         name: "Updated Name",
@@ -256,7 +256,7 @@ describe("updateUser", () => {
 
   it("10. returns error for empty name", async () => {
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
         name: "",
@@ -270,7 +270,7 @@ describe("updateUser", () => {
 
   it("11. returns error for invalid role", async () => {
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
         name: "Updated Name",
@@ -284,7 +284,7 @@ describe("updateUser", () => {
 
   it("12. prevents self-modification (targetId === user.id)", async () => {
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "admin-user-id",
         name: "Updated Name",
@@ -300,7 +300,7 @@ describe("updateUser", () => {
     mockState.updateError = { message: "Update failed" };
 
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
         name: "Updated Name",
@@ -318,7 +318,7 @@ describe("updateUser", () => {
     });
 
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
         name: "Updated Name",
@@ -332,7 +332,7 @@ describe("updateUser", () => {
 
   it("15. succeeds with valid input", async () => {
     const result = await updateUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
         name: "Updated Name",
@@ -359,7 +359,7 @@ describe("deleteUser", () => {
     mockGetUser.mockResolvedValue({ id: "user-id", role: "teacher" });
 
     const result = await deleteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
       })
@@ -371,7 +371,7 @@ describe("deleteUser", () => {
 
   it("17. returns error for empty ID", async () => {
     const result = await deleteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "",
       })
@@ -383,7 +383,7 @@ describe("deleteUser", () => {
 
   it("18. prevents self-deletion", async () => {
     const result = await deleteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "admin-user-id",
       })
@@ -397,7 +397,7 @@ describe("deleteUser", () => {
     mockState.deleteError = { message: "Delete failed" };
 
     const result = await deleteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
       })
@@ -413,7 +413,7 @@ describe("deleteUser", () => {
     });
 
     const result = await deleteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
       })
@@ -425,7 +425,7 @@ describe("deleteUser", () => {
 
   it("21. succeeds with valid input", async () => {
     const result = await deleteUser(
-      { success: true },
+      { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
       })

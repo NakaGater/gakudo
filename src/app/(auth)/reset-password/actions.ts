@@ -2,12 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export async function resetPassword(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 

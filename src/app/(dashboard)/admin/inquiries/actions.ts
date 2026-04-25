@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { ERROR_MESSAGES } from "@/config/constants";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult } from "@/lib/actions/types";
 
 export type InquiryRow = {
   id: string;
@@ -87,7 +87,7 @@ export async function replyToInquiry(
   inquiryId: string,
   action: "approved" | "declined" | "replied",
   replyText: string,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };

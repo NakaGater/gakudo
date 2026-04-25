@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import type { Database, Json } from "@/lib/supabase/types";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 type SitePageUpdate = Database["public"]["Tables"]["site_pages"]["Update"];
 
@@ -13,7 +13,7 @@ export async function updateSitePage(
   slug: string,
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
 

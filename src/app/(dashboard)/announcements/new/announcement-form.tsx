@@ -4,7 +4,7 @@ import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
 import { FileUploader } from "@/components/attachments/file-uploader";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 import { createAnnouncement } from "../actions";
 
 type FileInfo = { file: File };
@@ -13,7 +13,7 @@ export function AnnouncementForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [pendingFiles, setPendingFiles] = useState<FileInfo[]>([]);
 
-  const wrappedAction = async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
+  const wrappedAction = async (_prev: ActionState, formData: FormData): Promise<ActionResult> => {
     // フォームデータに添付ファイルを追加
     for (const f of pendingFiles) {
       formData.append("files", f.file);

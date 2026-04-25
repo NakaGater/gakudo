@@ -5,12 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { ERROR_MESSAGES } from "@/config/constants";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export async function addInstagramPost(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -57,7 +57,7 @@ export async function addInstagramPost(
   return { success: true, message: "" };
 }
 
-export async function deleteInstagramPost(id: string): Promise<ActionState> {
+export async function deleteInstagramPost(id: string): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -78,7 +78,7 @@ export async function deleteInstagramPost(id: string): Promise<ActionState> {
 export async function toggleInstagramPostVisibility(
   id: string,
   currentVisible: boolean,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };

@@ -3,7 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import { Button, Input } from "@/components/ui";
 import { FileUploader } from "@/components/attachments/file-uploader";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 import { createNews } from "../actions";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ export function CreateNewsForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [pendingFiles, setPendingFiles] = useState<FileInfo[]>([]);
 
-  const wrappedAction = async (_prev: ActionState, formData: FormData): Promise<ActionState> => {
+  const wrappedAction = async (_prev: ActionState, formData: FormData): Promise<ActionResult> => {
     for (const f of pendingFiles) {
       formData.append("files", f.file);
     }

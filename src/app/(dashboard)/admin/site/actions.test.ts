@@ -28,7 +28,7 @@ const mockFrom = vi.fn(() => ({ update: mockUpdate }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      from: (...args: unknown[]) => mockFrom(...args),
+      from: mockFrom,
     }),
   ),
 }));
