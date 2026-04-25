@@ -64,6 +64,10 @@ export async function deleteNews(id: string): Promise<ActionResult> {
   }
 
   revalidatePath("/news");
+  // /news/[id] is now ISR-cached; invalidate the deleted entry so its
+  // public detail page returns 404 immediately instead of waiting for
+  // the 1-hour lazy refresh.
+  revalidatePath(`/news/${id}`);
   revalidatePath("/admin/site/news");
 
   return { success: true, message: "削除しました" };

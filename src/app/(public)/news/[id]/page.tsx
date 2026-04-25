@@ -14,8 +14,15 @@ const dateFormat = new Intl.DateTimeFormat("ja-JP", {
   day: "numeric",
 });
 
-// generateStaticParams removed — createClient() uses cookies() which is
-// unavailable at build time. Pages are rendered dynamically instead.
+// News content rarely changes within an hour. ISR caches the rendered
+// page (and its generateMetadata response) per id and refreshes lazily.
+// Background refresh keeps stale-while-revalidate semantics; staff can
+// trigger immediate refresh via revalidatePath in the news editor.
+//
+// Build-time pre-rendering via generateStaticParams stays disabled
+// because createClient() depends on cookies() which is not available
+// during `next build`. Per-request ISR still gives us the cache hit.
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
