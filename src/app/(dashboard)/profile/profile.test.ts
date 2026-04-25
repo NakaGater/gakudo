@@ -35,7 +35,7 @@ const createChain = (table: string): Record<string, unknown> => {
         if (prop === "single") {
           return () => Promise.resolve(dequeue(table));
         }
-        return (..._: unknown[]) => handler();
+        return () => handler();
       },
     });
   return handler();
@@ -63,7 +63,7 @@ describe("profile actions", () => {
       const fd = new FormData();
       fd.append("name", "");
 
-      const result = await updateProfile(null as any, fd);
+      const result = await updateProfile(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -74,7 +74,7 @@ describe("profile actions", () => {
       const fd = new FormData();
       fd.append("name", longName);
 
-      const result = await updateProfile(null as any, fd);
+      const result = await updateProfile(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -85,7 +85,7 @@ describe("profile actions", () => {
       const fd = new FormData();
       fd.append("name", "Valid Name");
 
-      const result = await updateProfile(null as any, fd);
+      const result = await updateProfile(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -96,7 +96,7 @@ describe("profile actions", () => {
       const fd = new FormData();
       fd.append("name", "Valid Name");
 
-      const result = await updateProfile(null as any, fd);
+      const result = await updateProfile(null, fd);
       expect(result.success).toBe(true);
       expect(mockRevalidatePath).toHaveBeenCalled();
     });

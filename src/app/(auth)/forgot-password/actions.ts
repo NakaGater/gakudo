@@ -1,12 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export async function forgotPassword(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const email = formData.get("email") as string;
 
   if (!email) {

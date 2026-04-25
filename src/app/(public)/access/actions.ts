@@ -1,12 +1,12 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export async function submitInquiry(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const type = formData.get("type") as string;
   const name = (formData.get("name") as string)?.trim();
   const email = (formData.get("email") as string)?.trim();

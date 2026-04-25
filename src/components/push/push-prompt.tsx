@@ -21,14 +21,21 @@ export function PushPrompt() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    try {
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) return
-      if (Notification.permission === 'granted') return
-      if (Notification.permission === 'denied') return
-      if (localStorage.getItem(DISMISSED_KEY)) return
-      setVisible(true)
-    } catch (error) {
-      console.error("[push-prompt] Failed to check notification state:", error)
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled) return
+      try {
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) return
+        if (Notification.permission === 'granted') return
+        if (Notification.permission === 'denied') return
+        if (localStorage.getItem(DISMISSED_KEY)) return
+        setVisible(true)
+      } catch (error) {
+        console.error("[push-prompt] Failed to check notification state:", error)
+      }
+    })
+    return () => {
+      cancelled = true
     }
   }, [])
 

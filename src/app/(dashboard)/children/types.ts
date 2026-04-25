@@ -1,3 +1,4 @@
-import type { ActionState as BaseActionState } from "@/lib/actions/types";
+import type { ActionResult as BaseActionResult } from "@/lib/actions/types";
 
-export type ActionState = NonNullable<BaseActionState> & { childId?: string } | null;
+export type ActionResult = BaseActionResult & { childId?: string };
+export type ActionState = ActionResult | null;

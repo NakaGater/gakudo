@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 import type { BillingRule } from "./types";
 
@@ -43,7 +43,7 @@ export async function getBillingRules(): Promise<BillingRule[]> {
 export async function createBillingRule(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };

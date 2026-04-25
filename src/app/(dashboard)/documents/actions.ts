@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { validateFile, validateFileType } from "@/lib/files/validation";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 
 const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
@@ -13,7 +13,7 @@ const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
 export async function uploadDocument(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -99,7 +99,7 @@ export async function uploadDocument(
 
 export async function deleteDocument(
   id: string,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   const supabase = await createClient();
 

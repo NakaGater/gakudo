@@ -19,12 +19,6 @@ const { mockSingle, mockUpdate, mockFrom } = vi.hoisted(() => {
   const mockUpdate = vi.fn().mockReturnValue({
     eq: vi.fn().mockResolvedValue({ error: null }),
   });
-  const mockOrder = vi.fn().mockResolvedValue({ data: [] });
-  const mockEqWithOrder = vi.fn().mockReturnValue({ order: mockOrder });
-  const mockSelectAll = vi.fn().mockReturnValue({
-    order: mockOrder,
-    eq: mockEqWithOrder,
-  });
   const mockFrom = vi.fn().mockImplementation((table: string) => {
     if (table === "inquiries") {
       return {

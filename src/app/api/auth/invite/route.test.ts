@@ -19,17 +19,17 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 const mockInviteUserByEmail = vi.fn()
-const mockUpsert = vi.fn(() => Promise.resolve({ error: null }))
+const mockUpsert = vi.fn().mockResolvedValue({ error: null })
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
     auth: {
       admin: {
-        inviteUserByEmail: (...args: unknown[]) => mockInviteUserByEmail(...args),
+        inviteUserByEmail: mockInviteUserByEmail,
       },
     },
     from: () => ({
-      upsert: (...args: unknown[]) => mockUpsert(...args),
+      upsert: mockUpsert,
     }),
   }),
 }))

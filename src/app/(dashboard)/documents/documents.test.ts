@@ -60,7 +60,7 @@ const createChain = (table: string): Record<string, unknown> => {
         if (prop === "single") {
           return () => Promise.resolve(dequeue(table));
         }
-        return (..._: unknown[]) => handler();
+        return () => handler();
       },
     });
   return handler();
@@ -99,7 +99,7 @@ describe("documents actions", () => {
         new File(["content"], "test.pdf", { type: "application/pdf" })
       );
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -113,7 +113,7 @@ describe("documents actions", () => {
         new File(["content"], "test.pdf", { type: "application/pdf" })
       );
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
       expect(result.fieldErrors?.title).toBeDefined();
     });
@@ -129,7 +129,7 @@ describe("documents actions", () => {
         new File(["content"], "test.pdf", { type: "application/pdf" })
       );
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
       expect(result.fieldErrors?.category).toBeDefined();
     });
@@ -141,7 +141,7 @@ describe("documents actions", () => {
       fd.append("title", "Test");
       fd.append("category", "お便り");
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
       expect(result.fieldErrors?.file).toBeDefined();
     });
@@ -160,7 +160,7 @@ describe("documents actions", () => {
         new File(["content"], "test.pdf", { type: "application/pdf" })
       );
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -177,7 +177,7 @@ describe("documents actions", () => {
         new File(["content"], "test.pdf", { type: "application/pdf" })
       );
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
       expect(mockStorageRemove).toHaveBeenCalled();
     });
@@ -197,7 +197,7 @@ describe("documents actions", () => {
         new File(["content"], "test.pdf", { type: "application/pdf" })
       );
 
-      const result = await uploadDocument(null as any, fd);
+      const result = await uploadDocument(null, fd);
       expect(result.success).toBe(true);
       expect(mockRevalidatePath).toHaveBeenCalled();
     });

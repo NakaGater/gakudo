@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 const VALID_ROLES = ["parent", "teacher", "admin", "entrance"] as const;
 type Role = (typeof VALID_ROLES)[number];
@@ -11,7 +11,7 @@ type Role = (typeof VALID_ROLES)[number];
 export async function inviteUser(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -68,7 +68,7 @@ export async function inviteUser(
 export async function updateUser(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -124,7 +124,7 @@ export async function updateUser(
 export async function deleteUser(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };

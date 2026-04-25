@@ -51,7 +51,7 @@ const createChain = (table: string): Record<string, unknown> => {
         if (prop === "single") {
           return () => Promise.resolve(dequeue(table));
         }
-        return (..._: unknown[]) => handler();
+        return () => handler();
       },
     });
   return handler();
@@ -79,7 +79,7 @@ describe("instagram actions", () => {
       const fd = new FormData();
       fd.append("post_url", "https://www.instagram.com/p/ABC123/");
 
-      const result = await addInstagramPost(null as any, fd);
+      const result = await addInstagramPost(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -89,7 +89,7 @@ describe("instagram actions", () => {
       const fd = new FormData();
       fd.append("post_url", "");
 
-      const result = await addInstagramPost(null as any, fd);
+      const result = await addInstagramPost(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -99,7 +99,7 @@ describe("instagram actions", () => {
       const fd = new FormData();
       fd.append("post_url", "https://www.twitter.com/some/post");
 
-      const result = await addInstagramPost(null as any, fd);
+      const result = await addInstagramPost(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -111,7 +111,7 @@ describe("instagram actions", () => {
       const fd = new FormData();
       fd.append("post_url", "https://www.instagram.com/p/ABC123/");
 
-      const result = await addInstagramPost(null as any, fd);
+      const result = await addInstagramPost(null, fd);
       expect(result.success).toBe(false);
     });
 
@@ -125,7 +125,7 @@ describe("instagram actions", () => {
       const fd = new FormData();
       fd.append("post_url", "https://www.instagram.com/p/ABC123/");
 
-      const result = await addInstagramPost(null as any, fd);
+      const result = await addInstagramPost(null, fd);
       expect(result.success).toBe(true);
       expect(mockRevalidatePath).toHaveBeenCalled();
     });
@@ -140,7 +140,7 @@ describe("instagram actions", () => {
       const fd = new FormData();
       fd.append("post_url", "https://www.instagram.com/reel/ABC123/");
 
-      const result = await addInstagramPost(null as any, fd);
+      const result = await addInstagramPost(null, fd);
       expect(result.success).toBe(true);
       expect(mockRevalidatePath).toHaveBeenCalled();
     });

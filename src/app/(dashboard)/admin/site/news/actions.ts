@@ -6,14 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import type { Database } from "@/lib/supabase/types";
 import { uploadAttachment } from "@/lib/attachments/actions";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 type SiteNewsInsert = Database["public"]["Tables"]["site_news"]["Insert"];
 
 export async function createNews(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
 
@@ -58,7 +58,7 @@ export async function createNews(
   redirect("/admin/site/news");
 }
 
-export async function deleteNews(id: string): Promise<ActionState> {
+export async function deleteNews(id: string): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
 

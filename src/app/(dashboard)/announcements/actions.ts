@@ -7,13 +7,13 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { sendAnnouncementNotification } from "@/lib/notifications/send";
 import { uploadAttachment } from "@/lib/attachments/actions";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 
 export async function createAnnouncement(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };

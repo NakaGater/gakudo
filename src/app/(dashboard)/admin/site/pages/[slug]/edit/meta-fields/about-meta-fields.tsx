@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { MetaFieldsProps, ScheduleItem, FacilityItem, StaffMember } from "./types";
 
 export function AboutMetaFields({
@@ -305,9 +306,11 @@ function StaffMetaFields({
               <label className="text-xs font-medium text-fg-muted">写真</label>
               <div className="flex items-center gap-3">
                 {member.photo_url && (
-                  <img
+                  <Image
                     src={member.photo_url}
                     alt={member.name || "職員写真"}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover border border-border"
                   />
                 )}

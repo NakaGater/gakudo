@@ -6,7 +6,7 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { customAlphabet } from "nanoid";
 import { QR_CODE, ERROR_MESSAGES } from "@/config/constants";
-import type { ActionState } from "./types";
+import type { ActionResult, ActionState } from "./types";
 
 const nanoid = customAlphabet(QR_CODE.ALPHABET, QR_CODE.LENGTH);
 
@@ -33,7 +33,7 @@ function validateChildForm(formData: FormData): ValidationResult {
 export async function createChild(
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -66,7 +66,7 @@ export async function updateChild(
   id: string,
   _prev: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -89,7 +89,7 @@ export async function updateChild(
   return { success: true, message: "更新しました" };
 }
 
-export async function regenerateQR(childId: string): Promise<ActionState> {
+export async function regenerateQR(childId: string): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -111,7 +111,7 @@ export async function regenerateQR(childId: string): Promise<ActionState> {
   return { success: true, message: "QRコードを再発行しました" };
 }
 
-export async function deleteChild(id: string): Promise<ActionState> {
+export async function deleteChild(id: string): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -160,7 +160,7 @@ export async function searchParents(
 export async function linkParent(
   childId: string,
   parentId: string,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -184,7 +184,7 @@ export async function linkParent(
 export async function unlinkParent(
   childId: string,
   parentId: string,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };

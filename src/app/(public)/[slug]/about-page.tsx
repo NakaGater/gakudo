@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { SlugPageProps } from "./page-props";
 
 export function AboutPage({ title, content, metadata }: SlugPageProps) {
@@ -97,9 +98,12 @@ export function AboutPage({ title, content, metadata }: SlugPageProps) {
                     style={{ position: "relative" }}
                   >
                     {member.photo_url ? (
-                      <img
+                      <Image
                         src={member.photo_url}
                         alt={member.name}
+                        width={400}
+                        height={300}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="polaroid__img"
                       />
                     ) : (

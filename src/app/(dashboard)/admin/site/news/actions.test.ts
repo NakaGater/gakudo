@@ -31,11 +31,12 @@ vi.mock("@/lib/attachments/actions", () => ({
 const mockSingle = vi.fn();
 const mockSelect = vi.fn(() => ({ single: mockSingle }));
 const mockInsert = vi.fn(() => ({ select: mockSelect }));
-const mockFrom = vi.fn(() => ({ insert: mockInsert }));
+const mockFrom = vi.fn();
+mockFrom.mockReturnValue({ insert: mockInsert });
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      from: (...args: unknown[]) => mockFrom(...args),
+      from: mockFrom,
     }),
   ),
 }));

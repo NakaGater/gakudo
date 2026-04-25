@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FaqAccordion } from "@/app/(public)/components/faq-accordion";
 import type { SlugPageProps } from "./page-props";
 
@@ -37,7 +38,7 @@ export function FaqPage({ title, content, metadata }: SlugPageProps) {
               💬 その他のご質問は
             </p>
             <p className="text-xs text-ink-mid leading-relaxed">
-              お気軽に<a href="/#inquiry" className="text-cr-orange font-bold hover:underline">お問い合わせフォーム</a>からご連絡ください。
+              お気軽に<Link href="/#inquiry" className="text-cr-orange font-bold hover:underline">お問い合わせフォーム</Link>からご連絡ください。
               <br />見学のお申し込みも随時受け付けております。
             </p>
           </div>

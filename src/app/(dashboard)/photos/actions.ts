@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 
 export async function uploadPhoto(
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
@@ -82,7 +82,7 @@ export async function uploadPhoto(
 export async function setPhotoVisibility(
   id: string,
   visibility: "public" | "private",
-): Promise<ActionState> {
+): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -101,7 +101,7 @@ export async function setPhotoVisibility(
   return { success: true, message: "更新しました" };
 }
 
-export async function deletePhoto(id: string): Promise<ActionState> {
+export async function deletePhoto(id: string): Promise<ActionResult> {
   const user = await getUser();
   if (!isStaff(user.role)) {
     return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
