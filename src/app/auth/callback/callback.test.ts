@@ -31,7 +31,9 @@ describe("exchangeCodeForSession", () => {
   it("returns error when code exchange fails", async () => {
     mockExchangeCodeForSession.mockResolvedValue({ error: { message: "Invalid code" } });
     const result = await exchangeCodeForSession("bad-code");
-    expect(result).toEqual({ success: false, message: "Invalid code" });
+    // Phase 2-B: raw token-exchange error is sanitized away.
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("Invalid code");
   });
 });
 
@@ -52,7 +54,9 @@ describe("setSessionFromTokens", () => {
   it("returns error when setSession fails", async () => {
     mockSetSession.mockResolvedValue({ error: { message: "Invalid token" } });
     const result = await setSessionFromTokens("bad", "bad");
-    expect(result).toEqual({ success: false, message: "Invalid token" });
+    // Phase 2-B: raw token error is sanitized away.
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("Invalid token");
     expect(mockGetUser).not.toHaveBeenCalled();
   });
 });

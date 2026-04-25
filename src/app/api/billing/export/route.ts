@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
 import { generateBillingCSV } from "@/lib/billing/csv";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
 export async function GET(request: Request) {
   const auth = await requireAuth();
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
   if (billsError) {
     return NextResponse.json(
-      { error: `データ取得に失敗しました: ${billsError.message}` },
+      { error: sanitizeError(billsError, "データ取得に失敗しました") },
       { status: 500 },
     );
   }

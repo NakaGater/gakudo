@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
 import { calculateMonthlyBill } from "@/lib/billing/calculate";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
 export async function POST(request: Request) {
   const auth = await requireAuth();
@@ -58,10 +59,7 @@ export async function POST(request: Request) {
       processed++;
     } catch (err) {
       // 料金ルール未設定の場合はエラーを返す
-      return NextResponse.json(
-        { error: err instanceof Error ? err.message : "計算エラー" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: sanitizeError(err, "計算エラー") }, { status: 500 });
     }
   }
 
