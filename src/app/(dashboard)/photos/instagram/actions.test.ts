@@ -108,16 +108,16 @@ describe("addInstagramPost", () => {
     );
   });
 
-  // Regex hardening — Phase 2-A: pattern lacks `$` anchor so trailing junk
-  // after the post id is currently accepted. This test is recorded as
-  // skipped so Phase 2-A flips it to active by appending `\/?$` to the
-  // regex.
-  it.skip("[Phase 2-A] rejects URLs with trailing junk after the post id", async () => {
-    const result = await addInstagramPost(
-      null,
-      form({ post_url: "https://www.instagram.com/p/abc123/<script>" }),
-    );
+  // Phase 2-A: regex anchored with `\/?$` so trailing junk is rejected.
+  it.each([
+    "https://www.instagram.com/p/abc123/<script>",
+    "https://instagram.com/p/abc123/?utm=foo",
+    "https://www.instagram.com/p/abc123/extra",
+    "https://instagram.com/p/abc123/#",
+  ])("rejects URLs with trailing junk after the post id: %s", async (url) => {
+    const result = await addInstagramPost(null, form({ post_url: url }));
     expect(result.success).toBe(false);
+    expect(result.message).toMatch(/Instagram投稿URL/);
   });
 });
 
