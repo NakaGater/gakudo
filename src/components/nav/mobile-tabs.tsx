@@ -6,20 +6,21 @@ import { usePathname } from "next/navigation";
 import { MoreHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNavItems } from "./nav-items";
-import { useBadgeCounts } from "./use-badge-counts";
+import type { BadgeCounts } from "./get-badge-counts";
 import type { AuthUser } from "@/lib/auth/get-user";
 
 const VISIBLE_TABS = 4;
 
 type MobileTabsProps = {
   user: AuthUser;
+  badgeCounts: BadgeCounts;
 };
 
-export function MobileTabs({ user }: MobileTabsProps) {
+export function MobileTabs({ user, badgeCounts }: MobileTabsProps) {
   const pathname = usePathname();
   const allItems = getNavItems(user.role);
   const [moreOpen, setMoreOpen] = useState(false);
-  const { pendingInquiries, unreadAnnouncements } = useBadgeCounts(user.role, user.id);
+  const { pendingInquiries, unreadAnnouncements } = badgeCounts;
 
   const needsMore = allItems.length > VISIBLE_TABS + 1;
   const visibleItems = needsMore ? allItems.slice(0, VISIBLE_TABS) : allItems;

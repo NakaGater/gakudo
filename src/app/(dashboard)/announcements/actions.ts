@@ -82,12 +82,16 @@ export async function markAsRead(announcementId: string): Promise<void> {
   if (user.role !== "parent") return;
 
   const supabase = await createClient();
-  await supabase.from("announcement_reads").upsert(
+  const { error } = await supabase.from("announcement_reads").upsert(
     { announcement_id: announcementId, user_id: user.id },
     { onConflict: "announcement_id,user_id", ignoreDuplicates: true },
   );
+  if (error) {
+    console.error("[announcements] markAsRead failed:", error);
+    return;
+  }
 
-  revalidatePath("/announcements");
+  revalidatePath("/announcements", "layout");
   revalidatePath(`/announcements/${announcementId}`);
 }
 

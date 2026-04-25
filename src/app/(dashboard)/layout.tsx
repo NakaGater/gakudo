@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getUser } from "@/lib/auth/get-user";
 import { Sidebar } from "@/components/nav/sidebar";
 import { MobileTabs } from "@/components/nav/mobile-tabs";
+import { getBadgeCounts } from "@/components/nav/get-badge-counts";
 import { PushPrompt } from "@/components/push/push-prompt";
 
 const ENTRANCE_ALLOWED_PATHS = ['/attendance', '/api/'];
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
 }>) {
   const user = await getUser();
   const mood = getMoodMessage();
+  const badgeCounts = await getBadgeCounts(user.role, user.id);
 
   // Entrance role restriction (moved from middleware to avoid extra DB query)
   if (user.role === "entrance") {
@@ -42,11 +44,27 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div data-user-role={user.role} className="desk-bg min-h-screen">
+    <div
+      data-user-role={user.role}
+      className="desk-bg min-h-screen"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-50"
+        style={{
+          height: "env(safe-area-inset-top)",
+          background: "#B8A88A",
+          backgroundImage: `
+            repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px),
+            repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.008) 50px, rgba(0,0,0,0.008) 51px)
+          `,
+        }}
+      />
       <div className="clean-page">
         <div className={`season-strip ${getSeasonClass()}`} />
         <div className="dash">
-          <Sidebar user={user} />
+          <Sidebar user={user} badgeCounts={badgeCounts} />
           <div className="main">
             <div className="main__mood">
               <span>{mood.icon}</span>
@@ -59,7 +77,7 @@ export default async function DashboardLayout({
           </div>
         </div>
       </div>
-      <MobileTabs user={user} />
+      <MobileTabs user={user} badgeCounts={badgeCounts} />
     </div>
   );
 }
