@@ -5,11 +5,17 @@ import Link from "next/link";
 import { Button, Input, Card, CardContent, CardHeader } from "@/components/ui";
 import { FileUploader } from "@/components/attachments/file-uploader";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
+import type { SelectableParent } from "@/lib/announcements/recipients-server";
 import { createAnnouncement } from "../actions";
+import { RecipientPicker } from "./recipient-picker";
 
 type FileInfo = { file: File };
 
-export function AnnouncementForm() {
+interface Props {
+  parents: SelectableParent[];
+}
+
+export function AnnouncementForm({ parents }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [pendingFiles, setPendingFiles] = useState<FileInfo[]>([]);
 
@@ -33,7 +39,7 @@ export function AnnouncementForm() {
       <Card>
         <CardHeader>
           <p className="text-sm text-fg-muted">
-            保護者向けのお知らせを作成します。
+            保護者向けのお知らせを作成します。送信対象は「全員」または「個別選択」から選べます。
           </p>
         </CardHeader>
         <CardContent>
@@ -64,6 +70,12 @@ export function AnnouncementForm() {
                 </p>
               )}
             </div>
+
+            <RecipientPicker
+              parents={parents}
+              error={state?.fieldErrors?.recipients}
+              disabled={isPending}
+            />
 
             <FileUploader
               files={pendingFiles}

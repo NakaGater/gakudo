@@ -2,6 +2,10 @@ import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
 import {
+  resolveTargetUserIds,
+  type RecipientRow,
+} from "@/lib/announcements/recipients";
+import {
   partitionByMethod,
   buildAnnouncementPayload,
   formatAttendanceMessages,
@@ -29,9 +33,54 @@ export async function sendAnnouncementNotification(
 ): Promise<void> {
   const supabase = createAdminClient();
 
+  // 1) このお知らせの送信対象を解決する
+  const { data: recipients, error: recipientsError } = await supabase
+    .from("announcement_recipients")
+    .select("recipient_type, recipient_user_id")
+    .eq("announcement_id", announcementId);
+
+  if (recipientsError) {
+    console.error(
+      "[notifications] Failed to fetch recipients:",
+      recipientsError.message,
+    );
+    return;
+  }
+
+  const rows = (recipients ?? []) as RecipientRow[];
+  if (rows.length === 0) return;
+
+  const includesAll = rows.some((r) => r.recipient_type === "all");
+
+  // 'all' の場合は全保護者を、それ以外は指名されたユーザーのみを対象に
+  let targetUserIds: string[];
+  if (includesAll) {
+    const { data: parents, error: parentsError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "parent");
+    if (parentsError || !parents) {
+      console.error(
+        "[notifications] Failed to fetch parents:",
+        parentsError?.message,
+      );
+      return;
+    }
+    targetUserIds = resolveTargetUserIds(
+      rows,
+      (parents as { id: string }[]).map((p) => p.id),
+    );
+  } else {
+    targetUserIds = resolveTargetUserIds(rows, []);
+  }
+
+  if (targetUserIds.length === 0) return;
+
+  // 2) 対象ユーザーの通知設定を取得し、push/email 別に振り分け
   const { data: prefs, error: prefsError } = await supabase
     .from("notification_preferences")
     .select("user_id, method")
+    .in("user_id", targetUserIds)
     .in("method", ["push", "email", "both"]);
 
   if (prefsError || !prefs || (prefs as NotificationPreferenceRow[]).length === 0) {
