@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/auth/get-user";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
@@ -21,7 +22,7 @@ export async function updateProfile(_prev: ActionState, formData: FormData): Pro
   const { error } = await supabase.from("profiles").update({ name: name.trim() }).eq("id", user.id);
 
   if (error) {
-    return { success: false, message: `保存に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "保存に失敗しました") };
   }
 
   revalidatePath("/profile");

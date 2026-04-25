@@ -146,11 +146,16 @@ describe("recordManualAttendance", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
     enqueue("attendances", { data: null, error: null }); // no previous
-    enqueue("attendances", { data: null, error: { message: "insert failed" } }); // insert error
+    enqueue("attendances", {
+      data: null,
+      error: { message: "constraint attendances_pkey violated" },
+    }); // insert error
 
     const result = await recordManualAttendance("c1");
     expect(result.success).toBe(false);
-    expect(result.message).toContain("insert failed");
+    // Phase 2-B: sanitized — DB error never reaches the user.
+    expect(result.message).toMatch(/記録に失敗/);
+    expect(result.message).not.toContain("constraint");
   });
 
   it("sends notification after recording", async () => {
@@ -238,11 +243,13 @@ describe("recordAttendance (QR)", () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
     enqueue("attendances", { data: null, error: null });
-    enqueue("attendances", { data: null, error: { message: "DB error" } });
+    enqueue("attendances", { data: null, error: { message: "schema_internal_xyz" } });
 
     const result = await recordAttendance("GK-ABC");
     expect(result.success).toBe(false);
-    expect(result.message).toContain("DB error");
+    // Phase 2-B: DB error must not leak.
+    expect(result.message).not.toContain("schema_internal_xyz");
+    expect(result.message).toMatch(/記録に失敗/);
   });
 
   it("sends notification after QR recording", async () => {

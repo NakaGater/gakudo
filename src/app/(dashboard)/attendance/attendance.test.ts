@@ -151,18 +151,18 @@ describe("recordAttendance", () => {
     });
   });
 
-  it("returns DB error when insert fails", async () => {
+  it("returns sanitized error when insert fails", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     makeRecordAttendanceChain({
       child: { id: "c1", name: "太郎", qr_active: true },
       latest: null,
-      insertResult: { data: null, error: { message: "DB write failed" } },
+      insertResult: { data: null, error: { message: "internal_pg_detail" } },
     });
 
     const result = await recordAttendance("GK-TESTCODE");
-    expect(result).toMatchObject({
-      success: false,
-      message: expect.stringContaining("DB write failed"),
-    });
+    // Phase 2-B: DB message is sanitized; only the fallback reaches the user.
+    expect(result.success).toBe(false);
+    expect(result.message).toMatch(/記録に失敗/);
+    expect(result.message).not.toContain("internal_pg_detail");
   });
 });

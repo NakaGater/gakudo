@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isAdminOrTeacher } from "@/lib/auth/roles";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
 import type { BillingRule } from "./types";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
@@ -94,7 +95,7 @@ export async function createBillingRule(
   });
 
   if (error) {
-    return { success: false, message: `ルールの作成に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "ルールの作成に失敗しました") };
   }
 
   revalidatePath("/billing/rules");
@@ -135,10 +136,7 @@ export async function calculateAllBills(
       totalAmount += result.totalAmount;
       processed++;
     } catch (err) {
-      return {
-        success: false,
-        message: err instanceof Error ? err.message : "計算エラー",
-      };
+      return { success: false, message: sanitizeError(err, "計算エラー") };
     }
   }
 
@@ -173,7 +171,7 @@ export async function confirmBill(billId: string): Promise<{ success: boolean; m
     .eq("status", "draft");
 
   if (error) {
-    return { success: false, message: `確定に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "確定に失敗しました") };
   }
 
   revalidatePath("/billing");
@@ -209,7 +207,7 @@ export async function confirmAllBills(
     .select("id");
 
   if (error) {
-    return { success: false, message: `一括確定に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "一括確定に失敗しました") };
   }
 
   const confirmed = (data as { id: string }[] | null)?.length ?? 0;
@@ -243,10 +241,7 @@ export async function calculateSingleBill(
   try {
     await calculateMonthlyBill(childId, yearMonth);
   } catch (err) {
-    return {
-      success: false,
-      message: err instanceof Error ? err.message : "計算エラー",
-    };
+    return { success: false, message: sanitizeError(err, "計算エラー") };
   }
 
   revalidatePath("/billing");

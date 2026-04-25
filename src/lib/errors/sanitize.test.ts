@@ -7,11 +7,8 @@ vi.mock("@sentry/nextjs", () => ({
 
 import { sanitizeError } from "./sanitize";
 
-const originalEnv = process.env.NODE_ENV;
-
 afterEach(() => {
   vi.unstubAllEnvs();
-  process.env.NODE_ENV = originalEnv;
 });
 
 beforeEach(() => {
