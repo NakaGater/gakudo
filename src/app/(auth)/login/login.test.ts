@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { login } from "./actions";
 
-// Mock next/cache
+// I/O 境界のみモック: next/cache, next/navigation, Supabase client.
+// ロール → リダイレクト先のマッピングは actions.helpers.test.ts で純粋にカバー済み。
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock next/navigation with redirect that throws
 const mockRedirect = vi.fn().mockImplementation((url: string) => {
   throw new Error(`NEXT_REDIRECT:${url}`);
 });
@@ -15,18 +15,12 @@ vi.mock("next/navigation", () => ({
   redirect: (url: string) => mockRedirect(url),
 }));
 
-// Mock Supabase client
 const mockSignInWithPassword = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
 const mockFrom = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
-    auth: {
-      signInWithPassword: mockSignInWithPassword,
-    },
+    auth: { signInWithPassword: mockSignInWithPassword },
     from: mockFrom,
   })),
 }));
@@ -46,108 +40,46 @@ describe("login", () => {
     formData.append("email", "user@example.com");
     formData.append("password", "wrongpassword");
 
-    try {
-      await login(formData);
-    } catch {
-      // Expected to throw due to redirect
-    }
-
+    await expect(login(formData)).rejects.toThrow("NEXT_REDIRECT:/login?error=invalid_credentials");
     expect(mockRedirect).toHaveBeenCalledWith("/login?error=invalid_credentials");
   });
 
-  it("redirects staff (admin) to /attendance/dashboard", async () => {
-    mockSingle.mockResolvedValueOnce({ data: { role: "admin" }, error: null });
-    mockEq.mockReturnValueOnce({ single: mockSingle });
-    mockSelect.mockReturnValueOnce({ eq: mockEq });
-    mockFrom.mockReturnValueOnce({ select: mockSelect });
-
+  it("redirects authenticated user to the path returned by getRedirectPathForRole", async () => {
     mockSignInWithPassword.mockResolvedValueOnce({
       data: { user: { id: "u1" } },
       error: null,
     });
 
+    // role=admin → /attendance/dashboard (per pure helper test)
+    const single = vi.fn().mockResolvedValue({ data: { role: "admin" }, error: null });
+    const eq = vi.fn().mockReturnValue({ single });
+    const select = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockReturnValue({ select });
+
     const formData = new FormData();
     formData.append("email", "admin@example.com");
     formData.append("password", "password123");
 
-    try {
-      await login(formData);
-    } catch {
-      // Expected to throw due to redirect
-    }
-
+    await expect(login(formData)).rejects.toThrow("NEXT_REDIRECT:/attendance/dashboard");
     expect(mockRedirect).toHaveBeenCalledWith("/attendance/dashboard");
   });
 
-  it("redirects staff (teacher) to /attendance/dashboard", async () => {
-    mockSingle.mockResolvedValueOnce({ data: { role: "teacher" }, error: null });
-    mockEq.mockReturnValueOnce({ single: mockSingle });
-    mockSelect.mockReturnValueOnce({ eq: mockEq });
-    mockFrom.mockReturnValueOnce({ select: mockSelect });
-
+  it("redirects users without a profile row to /announcements (default branch)", async () => {
     mockSignInWithPassword.mockResolvedValueOnce({
       data: { user: { id: "u2" } },
       error: null,
     });
 
-    const formData = new FormData();
-    formData.append("email", "teacher@example.com");
-    formData.append("password", "password123");
-
-    try {
-      await login(formData);
-    } catch {
-      // Expected to throw due to redirect
-    }
-
-    expect(mockRedirect).toHaveBeenCalledWith("/attendance/dashboard");
-  });
-
-  it("redirects staff (entrance) to /attendance/dashboard", async () => {
-    mockSingle.mockResolvedValueOnce({ data: { role: "entrance" }, error: null });
-    mockEq.mockReturnValueOnce({ single: mockSingle });
-    mockSelect.mockReturnValueOnce({ eq: mockEq });
-    mockFrom.mockReturnValueOnce({ select: mockSelect });
-
-    mockSignInWithPassword.mockResolvedValueOnce({
-      data: { user: { id: "u3" } },
-      error: null,
-    });
-
-    const formData = new FormData();
-    formData.append("email", "entrance@example.com");
-    formData.append("password", "password123");
-
-    try {
-      await login(formData);
-    } catch {
-      // Expected to throw due to redirect
-    }
-
-    expect(mockRedirect).toHaveBeenCalledWith("/attendance/dashboard");
-  });
-
-  it("redirects parent to /announcements", async () => {
-    mockSingle.mockResolvedValueOnce({ data: { role: "parent" }, error: null });
-    mockEq.mockReturnValueOnce({ single: mockSingle });
-    mockSelect.mockReturnValueOnce({ eq: mockEq });
-    mockFrom.mockReturnValueOnce({ select: mockSelect });
-
-    mockSignInWithPassword.mockResolvedValueOnce({
-      data: { user: { id: "u4" } },
-      error: null,
-    });
+    const single = vi.fn().mockResolvedValue({ data: null, error: null });
+    const eq = vi.fn().mockReturnValue({ single });
+    const select = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockReturnValue({ select });
 
     const formData = new FormData();
     formData.append("email", "parent@example.com");
     formData.append("password", "password123");
 
-    try {
-      await login(formData);
-    } catch {
-      // Expected to throw due to redirect
-    }
-
+    await expect(login(formData)).rejects.toThrow("NEXT_REDIRECT:/announcements");
     expect(mockRedirect).toHaveBeenCalledWith("/announcements");
   });
 });
