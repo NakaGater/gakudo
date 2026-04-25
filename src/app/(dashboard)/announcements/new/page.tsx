@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth/get-user";
+import { loadSelectableParents } from "@/lib/announcements/recipients-server";
 import { AnnouncementForm } from "./announcement-form";
 
 export const metadata: Metadata = {
@@ -13,5 +14,6 @@ export default async function NewAnnouncementPage() {
     redirect("/announcements");
   }
 
-  return <AnnouncementForm />;
+  const parents = await loadSelectableParents();
+  return <AnnouncementForm parents={parents} />;
 }

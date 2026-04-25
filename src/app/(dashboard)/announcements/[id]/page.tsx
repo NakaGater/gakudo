@@ -9,6 +9,10 @@ import { getReadCount } from "../actions";
 import { MarkRead } from "./mark-read";
 import { getAttachments, getAttachmentUrl } from "@/lib/attachments/actions";
 import { AttachmentList } from "@/components/attachments/attachment-list";
+import {
+  summarizeRecipients,
+  type RecipientRow,
+} from "@/lib/announcements/recipients";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -48,6 +52,31 @@ export default async function AnnouncementDetailPage({ params }: Props) {
   const announcement = data as unknown as AnnouncementRow;
   const readCount = isStaff ? await getReadCount(id) : null;
 
+  // 送信対象（スタッフ向けに表示）
+  let recipientLabel: string | null = null;
+  if (isStaff) {
+    const { data: recipientRows } = await supabase
+      .from("announcement_recipients")
+      .select("recipient_type, recipient_user_id")
+      .eq("announcement_id", id);
+    const rows = (recipientRows ?? []) as RecipientRow[];
+
+    const userIds = rows
+      .filter((r) => r.recipient_type === "user" && r.recipient_user_id)
+      .map((r) => r.recipient_user_id as string);
+    const nameByUserId = new Map<string, string>();
+    if (userIds.length > 0) {
+      const { data: names } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .in("id", userIds);
+      for (const n of (names ?? []) as { id: string; name: string }[]) {
+        nameByUserId.set(n.id, n.name);
+      }
+    }
+    recipientLabel = summarizeRecipients(rows, nameByUserId);
+  }
+
   // 添付ファイル取得
   const attachments = await getAttachments("announcement", id);
   const downloadUrls: Record<string, string> = {};
@@ -74,11 +103,14 @@ export default async function AnnouncementDetailPage({ params }: Props) {
         <CardContent className="flex flex-col gap-4">
           <h1 className="text-2xl font-bold text-fg">{announcement.title}</h1>
 
-          <div className="flex items-center gap-3 text-sm text-fg/50">
+          <div className="flex items-center flex-wrap gap-3 text-sm text-fg/50">
             <span>{announcement.author?.name ?? ""}</span>
             <time dateTime={announcement.created_at}>
               {dateFormatter.format(new Date(announcement.created_at))}
             </time>
+            {isStaff && recipientLabel && (
+              <Badge>対象: {recipientLabel}</Badge>
+            )}
             {isStaff && readCount !== null && (
               <Badge>{readCount}人が既読</Badge>
             )}

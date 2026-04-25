@@ -34,6 +34,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_recipients: {
+        Row: {
+          announcement_id: string
+          created_at: string | null
+          id: string
+          recipient_type: string
+          recipient_user_id: string | null
+        }
+        Insert: {
+          announcement_id: string
+          created_at?: string | null
+          id?: string
+          recipient_type: string
+          recipient_user_id?: string | null
+        }
+        Update: {
+          announcement_id?: string
+          created_at?: string | null
+          id?: string
+          recipient_type?: string
+          recipient_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_recipients_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_recipients_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcement_reads: {
         Row: {
           announcement_id: string

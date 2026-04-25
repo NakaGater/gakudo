@@ -50,7 +50,7 @@ beforeEach(() => {
 });
 
 describe("sendAnnouncementNotification", () => {
-  it("does nothing when no preferences are returned", async () => {
+  it("does nothing when announcement has no recipients", async () => {
     mockFrom.mockReturnValue(chain({ data: [], error: null }));
 
     await sendAnnouncementNotification("ann-1", "title", "body");
@@ -59,8 +59,17 @@ describe("sendAnnouncementNotification", () => {
     expect(mockEmailSend).not.toHaveBeenCalled();
   });
 
-  it("delivers a push notification to subscribed users", async () => {
+  it("delivers a push notification to subscribed users (audience=all)", async () => {
     mockFrom.mockImplementation((table: string) => {
+      if (table === "announcement_recipients") {
+        return chain({
+          data: [{ recipient_type: "all", recipient_user_id: null }],
+          error: null,
+        });
+      }
+      if (table === "profiles") {
+        return chain({ data: [{ id: "u1", email: "u1@example.com" }], error: null });
+      }
       if (table === "notification_preferences") {
         return chain({ data: [{ user_id: "u1", method: "push" }], error: null });
       }
@@ -90,13 +99,22 @@ describe("sendAnnouncementNotification", () => {
     expect(subscriptionArg.endpoint).toBe("https://push.example.com/1");
   });
 
-  it("delivers an email to email-preference users", async () => {
+  it("delivers an email to email-preference users (audience=all)", async () => {
     mockFrom.mockImplementation((table: string) => {
-      if (table === "notification_preferences") {
-        return chain({ data: [{ user_id: "u2", method: "email" }], error: null });
+      if (table === "announcement_recipients") {
+        return chain({
+          data: [{ recipient_type: "all", recipient_user_id: null }],
+          error: null,
+        });
       }
       if (table === "profiles") {
-        return chain({ data: [{ id: "u2", email: "parent@example.com" }], error: null });
+        return chain({
+          data: [{ id: "u2", email: "parent@example.com" }],
+          error: null,
+        });
+      }
+      if (table === "notification_preferences") {
+        return chain({ data: [{ user_id: "u2", method: "email" }], error: null });
       }
       return chain({ data: [], error: null });
     });
@@ -110,8 +128,54 @@ describe("sendAnnouncementNotification", () => {
     );
   });
 
+  it("limits delivery to selected users when audience=user", async () => {
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "announcement_recipients") {
+        return chain({
+          data: [{ recipient_type: "user", recipient_user_id: "selected-1" }],
+          error: null,
+        });
+      }
+      if (table === "profiles") {
+        return chain({
+          data: [{ id: "selected-1", email: "selected@example.com" }],
+          error: null,
+        });
+      }
+      if (table === "notification_preferences") {
+        // 'other' user has email pref but isn't in the recipients filter,
+        // so the .in("user_id", [...]) should exclude them
+        return chain({
+          data: [{ user_id: "selected-1", method: "email" }],
+          error: null,
+        });
+      }
+      return chain({ data: [], error: null });
+    });
+    mockEmailSend.mockResolvedValue({ id: "e1" });
+
+    await sendAnnouncementNotification("ann-5", "個別連絡", "ご相談");
+
+    expect(mockEmailSend).toHaveBeenCalledTimes(1);
+    expect(mockEmailSend).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "selected@example.com" }),
+    );
+  });
+
   it("does not throw when push delivery fails (and proceeds to email)", async () => {
     mockFrom.mockImplementation((table: string) => {
+      if (table === "announcement_recipients") {
+        return chain({
+          data: [{ recipient_type: "all", recipient_user_id: null }],
+          error: null,
+        });
+      }
+      if (table === "profiles") {
+        return chain({
+          data: [{ id: "u4", email: "u4@example.com" }],
+          error: null,
+        });
+      }
       if (table === "notification_preferences") {
         return chain({ data: [{ user_id: "u4", method: "both" }], error: null });
       }
@@ -128,9 +192,6 @@ describe("sendAnnouncementNotification", () => {
           ],
           error: null,
         });
-      }
-      if (table === "profiles") {
-        return chain({ data: [{ id: "u4", email: "u4@example.com" }], error: null });
       }
       return chain({ data: [], error: null });
     });

@@ -7,6 +7,11 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { sendAnnouncementNotification } from "@/lib/notifications/send";
 import { uploadAttachment } from "@/lib/attachments/actions";
+import {
+  buildRecipientRows,
+  parseRecipientsFromFormData,
+  type ParsedRecipients,
+} from "@/lib/announcements/recipients";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 import { ERROR_MESSAGES } from "@/config/constants";
 
@@ -22,7 +27,7 @@ export async function createAnnouncement(
   const title = formData.get("title");
   const body = formData.get("body");
 
-  const fieldErrors: { title?: string; body?: string } = {};
+  const fieldErrors: { title?: string; body?: string; recipients?: string } = {};
 
   if (typeof title !== "string" || !title.trim()) {
     fieldErrors.title = "タイトルを入力してください";
@@ -34,7 +39,15 @@ export async function createAnnouncement(
     fieldErrors.body = "本文を入力してください";
   }
 
-  if (fieldErrors.title || fieldErrors.body) {
+  const recipientsResult = parseRecipientsFromFormData(formData);
+  let recipients: ParsedRecipients | null = null;
+  if (!recipientsResult.ok) {
+    fieldErrors.recipients = recipientsResult.message;
+  } else {
+    recipients = recipientsResult.value;
+  }
+
+  if (fieldErrors.title || fieldErrors.body || fieldErrors.recipients || !recipients) {
     return { success: false, message: "入力内容を確認してください", fieldErrors };
   }
 
@@ -54,6 +67,20 @@ export async function createAnnouncement(
 
   const announcementId = data.id as string;
 
+  // 送信対象を保存（all / grade / user の混在可）
+  const recipientRows = buildRecipientRows(announcementId, recipients);
+  const { error: recipientsError } = await supabase
+    .from("announcement_recipients")
+    .insert(recipientRows);
+  if (recipientsError) {
+    // 送信対象が保存できないと閲覧不可になるためロールバック相当でお知らせも消す
+    await supabase.from("announcements").delete().eq("id", announcementId);
+    return {
+      success: false,
+      message: `送信対象の保存に失敗しました: ${recipientsError.message}`,
+    };
+  }
+
   // 添付ファイルのアップロード
   const files = formData.getAll("files");
   for (const file of files) {
@@ -66,7 +93,7 @@ export async function createAnnouncement(
 
   // Best-effort notification dispatch (non-blocking)
   sendAnnouncementNotification(
-    "new",
+    announcementId,
     (title as string).trim(),
     (body as string).trim(),
   ).catch((err) => {
