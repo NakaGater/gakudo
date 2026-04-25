@@ -9,7 +9,7 @@ export default function PublicLayout({
 }>) {
   return (
     <div
-      className="min-h-screen pb-5 px-4 sm:px-6"
+      className="h-[100dvh] flex flex-col pb-5 px-4 sm:px-6 overflow-hidden"
       style={{
         paddingTop: "max(1.25rem, env(safe-area-inset-top))",
         background: `#B8A88A`,
@@ -32,10 +32,12 @@ export default function PublicLayout({
           `,
         }}
       />
-      <div className="book-page mx-auto flex flex-col">
+      <div className="book-page mx-auto flex flex-col flex-1 min-h-0 w-full">
         <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <main className="flex-1 min-h-0 overflow-y-auto">
+          {children}
+          <Footer />
+        </main>
       </div>
     </div>
   );
