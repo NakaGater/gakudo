@@ -151,7 +151,7 @@ export async function getDashboardAttendanceStatus(): Promise<DashboardChildStat
 }
 
 export async function getParentAttendanceStatus(): Promise<ParentAttendanceData> {
-  const user = await getUser();
+  await getUser();
   const supabase = await createClient();
   const { start, end } = todayRangeJST();
 

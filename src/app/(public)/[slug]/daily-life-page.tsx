@@ -1,5 +1,13 @@
 import type { SlugPageProps } from "./page-props";
 
+function stableRotation(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  }
+  return ((Math.abs(hash) % 31) / 10 - 1.5).toFixed(1);
+}
+
 export function DailyLifePage({ title, content, metadata }: SlugPageProps) {
   const subtitle = (metadata?.subtitle as string) || "のびのび、すくすく。放課後の「もうひとつの家」";
   const activities = (metadata?.activities as Array<{ emoji: string; title: string; description: string }>) || [];
@@ -66,7 +74,7 @@ export function DailyLifePage({ title, content, metadata }: SlugPageProps) {
                   className="sticky-note px-4 py-3 text-center"
                   style={{
                     background: seasonColors[item.season] || "#FFF8C5",
-                    transform: `rotate(${(Math.random() * 3 - 1.5).toFixed(1)}deg)`,
+                    transform: `rotate(${stableRotation(item.title)}deg)`,
                     minWidth: "120px",
                   }}
                 >

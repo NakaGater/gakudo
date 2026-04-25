@@ -22,22 +22,29 @@ export function NotificationSettings() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-      setStatus("unsupported");
-      return;
-    }
-    if (Notification.permission === "denied") {
-      setStatus("denied");
-      return;
-    }
+    let cancelled = false;
 
-    // Check if we have an active push subscription
-    navigator.serviceWorker.ready
-      .then((reg) => reg.pushManager.getSubscription())
-      .then((sub) => {
-        setStatus(sub ? "enabled" : "disabled");
-      })
-      .catch(() => setStatus("disabled"));
+    const computeStatus = async (): Promise<Status> => {
+      if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+        return "unsupported";
+      }
+      if (Notification.permission === "denied") return "denied";
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        return sub ? "enabled" : "disabled";
+      } catch {
+        return "disabled";
+      }
+    };
+
+    computeStatus().then((next) => {
+      if (!cancelled) setStatus(next);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleEnable = useCallback(async () => {

@@ -28,13 +28,13 @@ const createChain = () => {
         if (prop === "single") return mockResult;
         // For terminal methods that return a promise directly
         if (prop === "select") {
-          return (..._: unknown[]) => {
+          return () => {
             const next = handler();
             // If select is called after update/delete (returns promise-like)
             return next;
           };
         }
-        return (..._: unknown[]) => handler();
+        return () => handler();
       },
     });
   return handler();
