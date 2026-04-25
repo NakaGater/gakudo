@@ -836,7 +836,7 @@
   .dash{min-height:calc(100vh - env(safe-area-inset-top))}
   .main{border-radius:0}
   .main__mood{border-radius:0}
-  .main__content{padding:16px 16px 80px 16px;max-width:100%;overflow-x:hidden}
+  .main__content{padding:16px 16px calc(72px + env(safe-area-inset-bottom)) 16px;max-width:100%;overflow-x:hidden}
   .clipboard{padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .admin-table{min-width:560px}
   .ledger-wrap{padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
