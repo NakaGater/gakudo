@@ -24,6 +24,10 @@ const eslintConfig = defineConfig([
           alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
+      // Phase 1-G: lock the current clean state. The codebase already
+      // satisfies exhaustive-deps; promoting it to error keeps it that
+      // way and prevents stale-closure regressions.
+      "react-hooks/exhaustive-deps": "error",
     },
   },
   // eslint-config-prettier disables stylistic rules that conflict with Prettier.
