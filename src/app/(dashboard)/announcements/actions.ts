@@ -11,6 +11,7 @@ import {
 import { uploadAttachment } from "@/lib/attachments/actions";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendAnnouncementNotification } from "@/lib/notifications/send";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
@@ -63,7 +64,7 @@ export async function createAnnouncement(
     .single();
 
   if (error) {
-    return { success: false, message: `投稿に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "投稿に失敗しました") };
   }
 
   const announcementId = data.id as string;
@@ -78,7 +79,7 @@ export async function createAnnouncement(
     await supabase.from("announcements").delete().eq("id", announcementId);
     return {
       success: false,
-      message: `送信対象の保存に失敗しました: ${recipientsError.message}`,
+      message: sanitizeError(recipientsError, "送信対象の保存に失敗しました"),
     };
   }
 

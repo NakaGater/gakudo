@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { uploadAttachment } from "@/lib/attachments/actions";
 import { getUser } from "@/lib/auth/get-user";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 import type { Database } from "@/lib/supabase/types";
@@ -33,7 +34,7 @@ export async function createNews(_prev: ActionState, formData: FormData): Promis
   const { data, error } = await supabase.from("site_news").insert(insertData).select("id").single();
 
   if (error) {
-    return { success: false, message: `作成に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "作成に失敗しました") };
   }
 
   const newsId = data.id as string;
@@ -60,7 +61,7 @@ export async function deleteNews(id: string): Promise<ActionResult> {
   const { error } = await supabase.from("site_news").delete().eq("id", id);
 
   if (error) {
-    return { success: false, message: `削除に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "削除に失敗しました") };
   }
 
   revalidatePath("/news");

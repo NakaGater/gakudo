@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { validateFile, validateFileMagicBytes, validateFileType } from "@/lib/files/validation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
@@ -88,7 +89,7 @@ export async function uploadDocument(
   if (uploadError) {
     return {
       success: false,
-      message: `アップロードに失敗しました: ${uploadError.message}`,
+      message: sanitizeError(uploadError, "アップロードに失敗しました"),
     };
   }
 
@@ -104,7 +105,7 @@ export async function uploadDocument(
     await supabase.storage.from("documents").remove([filePath]);
     return {
       success: false,
-      message: `保存に失敗しました: ${dbError.message}`,
+      message: sanitizeError(dbError, "保存に失敗しました"),
     };
   }
 
@@ -136,7 +137,7 @@ export async function deleteDocument(id: string): Promise<ActionResult> {
   if (storageError) {
     return {
       success: false,
-      message: `ファイル削除に失敗しました: ${storageError.message}`,
+      message: sanitizeError(storageError, "ファイル削除に失敗しました"),
     };
   }
 
@@ -145,7 +146,7 @@ export async function deleteDocument(id: string): Promise<ActionResult> {
   if (dbError) {
     return {
       success: false,
-      message: `削除に失敗しました: ${dbError.message}`,
+      message: sanitizeError(dbError, "削除に失敗しました"),
     };
   }
 

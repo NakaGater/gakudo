@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { validateFileMagicBytes } from "@/lib/files/validation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/types";
@@ -57,7 +58,7 @@ export async function uploadPhoto(formData: FormData): Promise<ActionResult> {
     });
 
     if (uploadError) {
-      errors.push(`${file.name}: ${uploadError.message}`);
+      errors.push(`${file.name}: ${sanitizeError(uploadError, "アップロードに失敗しました")}`);
       continue;
     }
 
@@ -72,7 +73,7 @@ export async function uploadPhoto(formData: FormData): Promise<ActionResult> {
     if (insertError) {
       // Clean up uploaded file on DB insert failure
       await supabase.storage.from("photos").remove([storagePath]);
-      errors.push(`${file.name}: ${insertError.message}`);
+      errors.push(`${file.name}: ${sanitizeError(insertError, "保存に失敗しました")}`);
     }
   }
 
@@ -101,7 +102,7 @@ export async function setPhotoVisibility(
   const { error } = await supabase.from("photos").update({ visibility }).eq("id", id);
 
   if (error) {
-    return { success: false, message: `更新に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "更新に失敗しました") };
   }
 
   revalidatePath("/photos");
@@ -140,7 +141,7 @@ export async function deletePhoto(id: string): Promise<ActionResult> {
   if (storageError) {
     return {
       success: false,
-      message: `ストレージ削除に失敗しました: ${storageError.message}`,
+      message: sanitizeError(storageError, "ストレージ削除に失敗しました"),
     };
   }
 
@@ -148,7 +149,7 @@ export async function deletePhoto(id: string): Promise<ActionResult> {
   const { error: dbError } = await supabase.from("photos").delete().eq("id", id);
 
   if (dbError) {
-    return { success: false, message: `削除に失敗しました: ${dbError.message}` };
+    return { success: false, message: sanitizeError(dbError, "削除に失敗しました") };
   }
 
   revalidatePath("/photos");

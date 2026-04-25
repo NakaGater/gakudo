@@ -75,7 +75,8 @@ describe("deleteNews", () => {
 
     const result = await deleteNews("news-1");
     expect(result?.success).toBe(false);
-    expect(result?.message).toContain("FK violation");
+    expect(result?.message).not.toContain("FK violation");
+    expect(result?.success).toBe(false);
   });
 });
 
@@ -142,6 +143,7 @@ describe("createNews", () => {
 
     const result = await createNews(null, fd);
     expect(result?.success).toBe(false);
-    expect(result?.message).toContain("DB error");
+    expect(result?.message).not.toContain("DB error");
+    expect(result?.success).toBe(false);
   });
 });

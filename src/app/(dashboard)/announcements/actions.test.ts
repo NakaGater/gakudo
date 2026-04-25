@@ -207,7 +207,8 @@ describe("createAnnouncement", () => {
 
     const result = await createAnnouncement(null, fd);
     expect(result?.success).toBe(false);
-    expect(result?.message).toContain("DB error");
+    expect(result?.message).not.toContain("DB error");
+    expect(result?.success).toBe(false);
   });
 
   it("rolls back announcement when recipients insert fails", async () => {
@@ -222,7 +223,8 @@ describe("createAnnouncement", () => {
 
     const result = await createAnnouncement(null, fd);
     expect(result?.success).toBe(false);
-    expect(result?.message).toContain("recipients fail");
+    expect(result?.message).not.toContain("recipients fail");
+    expect(result?.success).toBe(false);
     expect(mockAnnouncementsDelete).toHaveBeenCalled();
     expect(mockSendNotification).not.toHaveBeenCalled();
   });

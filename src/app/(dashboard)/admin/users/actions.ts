@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/auth/get-user";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
@@ -41,7 +42,7 @@ export async function inviteUser(_prev: ActionState, formData: FormData): Promis
   if (inviteError) {
     return {
       success: false,
-      message: `招待に失敗しました: ${inviteError.message}`,
+      message: sanitizeError(inviteError, "招待に失敗しました"),
     };
   }
 
@@ -55,7 +56,7 @@ export async function inviteUser(_prev: ActionState, formData: FormData): Promis
   if (profileError) {
     return {
       success: false,
-      message: `プロフィールの作成に失敗しました: ${profileError.message}`,
+      message: sanitizeError(profileError, "プロフィールの作成に失敗しました"),
     };
   }
 
@@ -98,7 +99,7 @@ export async function updateUser(_prev: ActionState, formData: FormData): Promis
   if (profileError) {
     return {
       success: false,
-      message: `更新に失敗しました: ${profileError.message}`,
+      message: sanitizeError(profileError, "更新に失敗しました"),
     };
   }
 
@@ -109,7 +110,7 @@ export async function updateUser(_prev: ActionState, formData: FormData): Promis
   if (authError) {
     return {
       success: false,
-      message: `Auth更新に失敗しました: ${authError.message}`,
+      message: sanitizeError(authError, "Auth更新に失敗しました"),
     };
   }
 
@@ -139,7 +140,7 @@ export async function deleteUser(_prev: ActionState, formData: FormData): Promis
   if (profileError) {
     return {
       success: false,
-      message: `プロフィール削除に失敗しました: ${profileError.message}`,
+      message: sanitizeError(profileError, "プロフィール削除に失敗しました"),
     };
   }
 
@@ -148,7 +149,7 @@ export async function deleteUser(_prev: ActionState, formData: FormData): Promis
   if (authError) {
     return {
       success: false,
-      message: `Auth削除に失敗しました: ${authError.message}`,
+      message: sanitizeError(authError, "Auth削除に失敗しました"),
     };
   }
 
