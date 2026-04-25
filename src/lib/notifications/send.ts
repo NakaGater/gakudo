@@ -122,15 +122,25 @@ async function sendPushNotifications(
     return;
   }
 
-  for (const row of subs as PushSubscriptionRow[]) {
-    try {
-      await webpush.sendNotification(row.subscription, payload);
-    } catch (err) {
+  const rows = subs as PushSubscriptionRow[];
+  const results = await Promise.allSettled(
+    rows.map((row) => webpush.sendNotification(row.subscription, payload)),
+  );
+  let failures = 0;
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      failures += 1;
+      const reason = result.reason;
       console.error(
-        `[notifications] Push failed for user ${row.user_id}:`,
-        err instanceof Error ? err.message : err,
+        `[notifications] Push failed for user ${rows[i].user_id}:`,
+        reason instanceof Error ? reason.message : reason,
       );
     }
+  });
+  if (failures > 0) {
+    console.error(
+      `[notifications] Push fan-out: ${rows.length - failures}/${rows.length} delivered, ${failures} failed`,
+    );
   }
 }
 
@@ -150,15 +160,25 @@ async function sendEmailNotifications(
     return;
   }
 
-  for (const profile of profiles as ProfileRow[]) {
-    try {
-      await sendEmail({ to: profile.email, subject, text: body });
-    } catch (err) {
+  const rows = profiles as ProfileRow[];
+  const results = await Promise.allSettled(
+    rows.map((profile) => sendEmail({ to: profile.email, subject, text: body })),
+  );
+  let failures = 0;
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      failures += 1;
+      const reason = result.reason;
       console.error(
-        `[notifications] Email failed for user ${profile.id}:`,
-        err instanceof Error ? err.message : err,
+        `[notifications] Email failed for user ${rows[i].id}:`,
+        reason instanceof Error ? reason.message : reason,
       );
     }
+  });
+  if (failures > 0) {
+    console.error(
+      `[notifications] Email fan-out: ${rows.length - failures}/${rows.length} delivered, ${failures} failed`,
+    );
   }
 }
 
