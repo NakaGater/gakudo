@@ -211,6 +211,139 @@ describe("sendAnnouncementNotification", () => {
   });
 });
 
+describe("sendAnnouncementNotification — partial failure & concurrency", () => {
+  it("delivers to the remaining subscriptions when one push fails (Promise.allSettled)", async () => {
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "announcement_recipients") {
+        return chain({
+          data: [
+            { recipient_type: "user", recipient_user_id: "u1" },
+            { recipient_type: "user", recipient_user_id: "u2" },
+            { recipient_type: "user", recipient_user_id: "u3" },
+          ],
+          error: null,
+        });
+      }
+      if (table === "notification_preferences") {
+        return chain({
+          data: [
+            { user_id: "u1", method: "push" },
+            { user_id: "u2", method: "push" },
+            { user_id: "u3", method: "push" },
+          ],
+          error: null,
+        });
+      }
+      if (table === "push_subscriptions") {
+        return chain({
+          data: [
+            {
+              user_id: "u1",
+              subscription: { endpoint: "https://push/1", keys: { p256dh: "k", auth: "a" } },
+            },
+            {
+              user_id: "u2",
+              subscription: { endpoint: "https://push/2", keys: { p256dh: "k", auth: "a" } },
+            },
+            {
+              user_id: "u3",
+              subscription: { endpoint: "https://push/3", keys: { p256dh: "k", auth: "a" } },
+            },
+          ],
+          error: null,
+        });
+      }
+      return chain({ data: [], error: null });
+    });
+
+    // u2 fails, u1 and u3 succeed.
+    mockSendNotification.mockImplementation((sub: { endpoint: string }) => {
+      if (sub.endpoint === "https://push/2") {
+        return Promise.reject(new Error("gone"));
+      }
+      return Promise.resolve({});
+    });
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await sendAnnouncementNotification("ann-pf", "件名", "本文");
+
+    expect(mockSendNotification).toHaveBeenCalledTimes(3);
+    const calledEndpoints = mockSendNotification.mock.calls
+      .map((c) => (c[0] as { endpoint: string }).endpoint)
+      .sort();
+    expect(calledEndpoints).toEqual(["https://push/1", "https://push/2", "https://push/3"]);
+    errSpy.mockRestore();
+  });
+
+  it("dispatches push notifications concurrently (no head-of-line blocking)", async () => {
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "announcement_recipients") {
+        return chain({
+          data: [
+            { recipient_type: "user", recipient_user_id: "u1" },
+            { recipient_type: "user", recipient_user_id: "u2" },
+            { recipient_type: "user", recipient_user_id: "u3" },
+          ],
+          error: null,
+        });
+      }
+      if (table === "notification_preferences") {
+        return chain({
+          data: [
+            { user_id: "u1", method: "push" },
+            { user_id: "u2", method: "push" },
+            { user_id: "u3", method: "push" },
+          ],
+          error: null,
+        });
+      }
+      if (table === "push_subscriptions") {
+        return chain({
+          data: [
+            {
+              user_id: "u1",
+              subscription: { endpoint: "https://push/1", keys: { p256dh: "k", auth: "a" } },
+            },
+            {
+              user_id: "u2",
+              subscription: { endpoint: "https://push/2", keys: { p256dh: "k", auth: "a" } },
+            },
+            {
+              user_id: "u3",
+              subscription: { endpoint: "https://push/3", keys: { p256dh: "k", auth: "a" } },
+            },
+          ],
+          error: null,
+        });
+      }
+      return chain({ data: [], error: null });
+    });
+
+    // Three deferred promises so we can assert they're all in-flight before any resolves.
+    const deferreds: Array<{ resolve: (v: unknown) => void; promise: Promise<unknown> }> = [];
+    mockSendNotification.mockImplementation(() => {
+      let resolve!: (v: unknown) => void;
+      const promise = new Promise((r) => {
+        resolve = r;
+      });
+      deferreds.push({ resolve, promise });
+      return promise;
+    });
+
+    const send = sendAnnouncementNotification("ann-conc", "title", "body");
+
+    // Yield once so awaited prelude (recipient/pref/sub fetches + push dispatch) can run.
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
+
+    // All three pushes are in-flight before any resolves — proves concurrency.
+    expect(deferreds).toHaveLength(3);
+
+    deferreds.forEach((d) => d.resolve({}));
+    await send;
+  });
+});
+
 describe("sendAttendanceNotification", () => {
   it("does nothing when no parents are linked", async () => {
     mockFrom.mockImplementation((table: string) => {
