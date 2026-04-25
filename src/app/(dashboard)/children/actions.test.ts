@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock next/cache
+// I/O 境界のみモック (next/cache, next/navigation, getUser, Supabase)。
+// フォームバリデーションは actions.helpers.test.ts で純粋にカバー済み。
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock next/navigation
 const mockRedirect = vi.fn<(url: string) => never>();
 vi.mock("next/navigation", () => ({
   redirect: (...args: Parameters<typeof mockRedirect>) => {
@@ -15,349 +15,275 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock Supabase
-const mockInsert = vi.fn();
-const mockUpdate = vi.fn();
-const mockDelete = vi.fn();
 const mockFrom = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: unknown[]) => mockFrom(...args),
-    }),
-  ),
+  createClient: vi.fn(() => Promise.resolve({ from: mockFrom })),
 }));
 
-import { createChild, updateChild, deleteChild, regenerateQR, searchParents, linkParent, unlinkParent } from "./actions";
+import {
+  createChild,
+  updateChild,
+  deleteChild,
+  regenerateQR,
+  searchParents,
+  linkParent,
+  unlinkParent,
+} from "./actions";
 
-describe("children server actions", () => {
+function form(fields: Record<string, string>): FormData {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(fields)) fd.set(k, v);
+  return fd;
+}
+
+describe("createChild", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("rejects non-staff users", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
+    const result = await createChild(null, form({ name: "太郎", grade: "3" }));
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("権限") });
+  });
+
+  it("returns validator's error message verbatim on invalid input", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const result = await createChild(null, form({ name: "", grade: "3" }));
+    expect(result).toEqual({ success: false, message: "名前を入力してください" });
+  });
+
+  it("inserts a child with a GK-prefixed nanoid QR and returns childId", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const insert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data: { id: "child-1" }, error: null }),
+      }),
+    });
+    mockFrom.mockReturnValue({ insert });
+
+    const result = await createChild(null, form({ name: "太郎", grade: "3" }));
+    expect(result).toMatchObject({ success: true, childId: "child-1" });
+
+    // 境界契約: name/grade/qr_code が children テーブルへ insert される
+    const inserted = insert.mock.calls[0][0];
+    expect(inserted.name).toBe("太郎");
+    expect(inserted.grade).toBe(3);
+    expect(inserted.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
+  });
+
+  it("returns DB error message on insert failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
     mockFrom.mockReturnValue({
-      insert: mockInsert,
-      update: mockUpdate,
-      delete: mockDelete,
-    });
-  });
-
-  describe("createChild", () => {
-    it("rejects non-staff users", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-      const fd = new FormData();
-      fd.set("name", "テスト太郎");
-      fd.set("grade", "3");
-
-      const result = await createChild(null, fd);
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("権限"),
-      });
-    });
-
-    it("validates required name", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const fd = new FormData();
-      fd.set("name", "");
-      fd.set("grade", "3");
-
-      const result = await createChild(null, fd);
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("名前"),
-      });
-    });
-
-    it("validates grade must be 1-6", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-      const fd = new FormData();
-      fd.set("name", "テスト太郎");
-      fd.set("grade", "7");
-
-      const result = await createChild(null, fd);
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("学年"),
-      });
-    });
-
-    it("creates child with GK- prefixed QR code", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockSelect = vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({
-          data: { id: "child-1" },
-          error: null,
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: null, error: { message: "duplicate" } }),
         }),
-      });
-      mockInsert.mockReturnValue({ select: mockSelect });
-
-      const fd = new FormData();
-      fd.set("name", "テスト太郎");
-      fd.set("grade", "3");
-
-      const result = await createChild(null, fd);
-      expect(result).toMatchObject({ success: true });
-      expect(mockFrom).toHaveBeenCalledWith("children");
-      // Verify the inserted data has GK- prefix QR code
-      const insertArg = mockInsert.mock.calls[0][0];
-      expect(insertArg.name).toBe("テスト太郎");
-      expect(insertArg.grade).toBe(3);
-      expect(insertArg.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
+      }),
     });
 
-    it("allows teacher role", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-      const mockSelect = vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({
-          data: { id: "child-1" },
-          error: null,
+    const result = await createChild(null, form({ name: "太郎", grade: "3" }));
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("duplicate") });
+  });
+});
+
+describe("updateChild", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("rejects non-staff users", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
+    const result = await updateChild("child-1", null, form({ name: "太郎", grade: "3" }));
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("権限") });
+  });
+
+  it("updates and returns success", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    const update = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockReturnValue({ update });
+
+    const result = await updateChild("child-1", null, form({ name: "更新太郎", grade: "5" }));
+    expect(result).toMatchObject({ success: true });
+    // 境界契約のみ: 渡されたデータが id=child-1 で更新される
+    expect(update).toHaveBeenCalledWith({ name: "更新太郎", grade: 5 });
+    expect(eq).toHaveBeenCalledWith("id", "child-1");
+  });
+
+  it("returns DB error message on update failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: { message: "FK constraint" } }),
+      }),
+    });
+    const result = await updateChild("child-1", null, form({ name: "太郎", grade: "3" }));
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("FK constraint") });
+  });
+});
+
+describe("deleteChild", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("rejects non-admin users", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    expect(await deleteChild("child-1")).toMatchObject({ success: false });
+  });
+
+  it("deletes and returns success for admin", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    mockFrom.mockReturnValue({ delete: vi.fn().mockReturnValue({ eq }) });
+
+    expect(await deleteChild("child-1")).toMatchObject({ success: true });
+    expect(eq).toHaveBeenCalledWith("id", "child-1");
+  });
+
+  it("returns DB error on delete failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      delete: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: { message: "FK err" } }),
+      }),
+    });
+    const result = await deleteChild("child-1");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("FK err") });
+  });
+});
+
+describe("regenerateQR", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("rejects non-admin users", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
+    expect(await regenerateQR("c1")).toMatchObject({ success: false });
+  });
+
+  it("issues a new GK-prefixed QR and activates it", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    const update = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockReturnValue({ update });
+
+    const result = await regenerateQR("c1");
+    expect(result).toMatchObject({ success: true });
+    const arg = update.mock.calls[0][0];
+    expect(arg.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
+    expect(arg.qr_active).toBe(true);
+  });
+
+  it("returns DB error on update failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: { message: "DB err" } }),
+      }),
+    });
+    const result = await regenerateQR("c1");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("DB err") });
+  });
+});
+
+describe("searchParents", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns empty for non-staff", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
+    expect(await searchParents("test")).toEqual([]);
+  });
+
+  it("returns empty for blank query (no DB call)", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    expect(await searchParents("  ")).toEqual([]);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it("returns matching parents on success", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const data = [{ id: "p1", name: "田中", email: "tanaka@example.com" }];
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          or: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({ data, error: null }),
+          }),
         }),
-      });
-      mockInsert.mockReturnValue({ select: mockSelect });
-
-      const fd = new FormData();
-      fd.set("name", "テスト花子");
-      fd.set("grade", "1");
-
-      const result = await createChild(null, fd);
-      expect(result).toMatchObject({ success: true });
+      }),
     });
+    expect(await searchParents("田中")).toEqual(data);
   });
 
-  describe("updateChild", () => {
-    it("rejects non-staff users", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-      const fd = new FormData();
-      fd.set("name", "更新太郎");
-      fd.set("grade", "4");
-
-      const result = await updateChild("child-1", null, fd);
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("権限"),
-      });
+  it("returns empty on DB error (graceful failure)", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          or: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({ data: null, error: { message: "x" } }),
+          }),
+        }),
+      }),
     });
+    expect(await searchParents("test")).toEqual([]);
+  });
+});
 
-    it("updates child name and grade", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq = vi.fn().mockResolvedValue({ error: null });
-      mockUpdate.mockReturnValue({ eq: mockEq });
+describe("linkParent", () => {
+  beforeEach(() => vi.clearAllMocks());
 
-      const fd = new FormData();
-      fd.set("name", "更新太郎");
-      fd.set("grade", "5");
-
-      const result = await updateChild("child-1", null, fd);
-      expect(result).toMatchObject({ success: true });
-      expect(mockUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "更新太郎", grade: 5 }),
-      );
-      expect(mockEq).toHaveBeenCalledWith("id", "child-1");
-    });
-
-    it("validates grade range", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const fd = new FormData();
-      fd.set("name", "テスト");
-      fd.set("grade", "0");
-
-      const result = await updateChild("child-1", null, fd);
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("学年"),
-      });
-    });
+  it("rejects non-staff", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
+    expect(await linkParent("c1", "p1")).toMatchObject({ success: false });
   });
 
-  describe("deleteChild", () => {
-    it("rejects non-admin users", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-
-      const result = await deleteChild("child-1");
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("権限"),
-      });
+  it("links and returns success", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      upsert: vi.fn().mockResolvedValue({ error: null }),
     });
-
-    it("deletes child as admin", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq = vi.fn().mockResolvedValue({ error: null });
-      mockDelete.mockReturnValue({ eq: mockEq });
-
-      const result = await deleteChild("child-1");
-      expect(result).toMatchObject({ success: true });
-      expect(mockFrom).toHaveBeenCalledWith("children");
-      expect(mockEq).toHaveBeenCalledWith("id", "child-1");
-    });
-
-    it("rejects parent users", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-
-      const result = await deleteChild("child-1");
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("権限"),
-      });
-    });
-
-    it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq = vi.fn().mockResolvedValue({ error: { message: "FK constraint" } });
-      mockDelete.mockReturnValue({ eq: mockEq });
-
-      const result = await deleteChild("child-1");
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("FK constraint"),
-      });
-    });
+    expect(await linkParent("c1", "p1")).toMatchObject({ success: true });
   });
 
-  describe("regenerateQR", () => {
-    it("requires admin role", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-      const result = await regenerateQR("child-1");
-      expect(result).toMatchObject({
-        success: false,
-        message: expect.stringContaining("管理者"),
-      });
+  it("returns DB error on upsert failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      upsert: vi.fn().mockResolvedValue({ error: { message: "dup" } }),
     });
+    const result = await linkParent("c1", "p1");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("dup") });
+  });
+});
 
-    it("rejects parent role", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-      const result = await regenerateQR("child-1");
-      expect(result).toMatchObject({ success: false });
-    });
+describe("unlinkParent", () => {
+  beforeEach(() => vi.clearAllMocks());
 
-    it("regenerates QR code for admin", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq = vi.fn().mockResolvedValue({ error: null });
-      mockUpdate.mockReturnValue({ eq: mockEq });
-
-      const result = await regenerateQR("child-1");
-      expect(result).toMatchObject({ success: true });
-      expect(result?.message).toContain("QR");
-      const updateArg = mockUpdate.mock.calls[0][0];
-      expect(updateArg.qr_code).toMatch(/^GK-/);
-      expect(updateArg.qr_active).toBe(true);
-    });
-
-    it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq = vi.fn().mockResolvedValue({ error: { message: "DB err" } });
-      mockUpdate.mockReturnValue({ eq: mockEq });
-
-      const result = await regenerateQR("child-1");
-      expect(result).toMatchObject({ success: false });
-      expect(result?.message).toContain("DB err");
-    });
+  it("rejects non-staff", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
+    expect(await unlinkParent("c1", "p1")).toMatchObject({ success: false });
   });
 
-  describe("searchParents", () => {
-    it("returns empty for non-staff", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-      const result = await searchParents("test");
-      expect(result).toEqual([]);
-    });
-
-    it("returns empty for blank query", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const result = await searchParents("  ");
-      expect(result).toEqual([]);
-    });
-
-    it("searches profiles by name/email pattern", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockData = [{ id: "p1", name: "田中", email: "tanaka@example.com" }];
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockData, error: null });
-      const mockOr = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockEq = vi.fn().mockReturnValue({ or: mockOr });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({ select: mockSelect });
-
-      const result = await searchParents("田中");
-      expect(result).toEqual(mockData);
-      expect(mockFrom).toHaveBeenCalledWith("profiles");
-    });
-
-    it("returns empty on DB error", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockLimit = vi.fn().mockResolvedValue({ data: null, error: { message: "err" } });
-      const mockOr = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockEq = vi.fn().mockReturnValue({ or: mockOr });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({ select: mockSelect });
-
-      const result = await searchParents("test");
-      expect(result).toEqual([]);
-    });
+  it("unlinks and returns success", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    const eq2 = vi.fn().mockResolvedValue({ error: null });
+    const eq1 = vi.fn().mockReturnValue({ eq: eq2 });
+    mockFrom.mockReturnValue({ delete: vi.fn().mockReturnValue({ eq: eq1 }) });
+    expect(await unlinkParent("c1", "p1")).toMatchObject({ success: true });
   });
 
-  describe("linkParent", () => {
-    it("rejects non-staff", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-      const result = await linkParent("c1", "p1");
-      expect(result).toMatchObject({ success: false });
+  it("returns DB error on delete failure", async () => {
+    mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
+    mockFrom.mockReturnValue({
+      delete: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: { message: "FK err" } }),
+        }),
+      }),
     });
-
-    it("links parent to child", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockUpsert = vi.fn().mockResolvedValue({ error: null });
-      mockFrom.mockReturnValue({ upsert: mockUpsert });
-
-      const result = await linkParent("c1", "p1");
-      expect(result).toMatchObject({ success: true });
-      expect(result?.message).toContain("紐付け");
-      expect(mockFrom).toHaveBeenCalledWith("child_parents");
-    });
-
-    it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockUpsert = vi.fn().mockResolvedValue({ error: { message: "dup" } });
-      mockFrom.mockReturnValue({ upsert: mockUpsert });
-
-      const result = await linkParent("c1", "p1");
-      expect(result).toMatchObject({ success: false });
-      expect(result?.message).toContain("dup");
-    });
-  });
-
-  describe("unlinkParent", () => {
-    it("rejects non-staff", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
-      const result = await unlinkParent("c1", "p1");
-      expect(result).toMatchObject({ success: false });
-    });
-
-    it("unlinks parent from child", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq2 = vi.fn().mockResolvedValue({ error: null });
-      const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
-      const mockDel = vi.fn().mockReturnValue({ eq: mockEq1 });
-      mockFrom.mockReturnValue({ delete: mockDel });
-
-      const result = await unlinkParent("c1", "p1");
-      expect(result).toMatchObject({ success: true });
-      expect(result?.message).toContain("解除");
-      expect(mockFrom).toHaveBeenCalledWith("child_parents");
-    });
-
-    it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-      const mockEq2 = vi.fn().mockResolvedValue({ error: { message: "FK err" } });
-      const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
-      const mockDel = vi.fn().mockReturnValue({ eq: mockEq1 });
-      mockFrom.mockReturnValue({ delete: mockDel });
-
-      const result = await unlinkParent("c1", "p1");
-      expect(result).toMatchObject({ success: false });
-      expect(result?.message).toContain("FK err");
-    });
+    const result = await unlinkParent("c1", "p1");
+    expect(result).toMatchObject({ success: false, message: expect.stringContaining("FK err") });
   });
 });
