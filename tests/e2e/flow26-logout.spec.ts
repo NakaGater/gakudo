@@ -88,19 +88,20 @@ test.describe("Flow 26: Logout via Server Action", () => {
   });
 
   test.describe("profile-page logout button", () => {
+    // /profile の <LogoutButton /> と sidebar の icon-only ログアウトボタンは
+    // どちらも accessible name "ログアウト"（前者は visible text、後者は
+    // aria-label 由来）。一方プロフィールのボタンは visible text として
+    // "ログアウト" を持ち、sidebar のものはアイコンのみで text content が空。
+    // `:has-text()` は text content のみ見るため sidebar とは衝突しない。
+    const profileLogoutSelector = 'button[type="submit"]:has-text("ログアウト")';
+
     test("admin: profile logout returns to public homepage and clears cookies", async ({
       page,
     }) => {
       await loginViaForm(page, "admin@example.com", "password123");
       await page.goto("/profile");
 
-      // /profile のログアウトボタンはテキスト付き ("ログアウト")。
-      // sidebar の icon-only ボタンと同じアクセシブル名なので
-      // form 要素経由で曖昧さを回避する。
-      const profileLogoutForm = page.locator("main form").filter({
-        has: page.getByRole("button", { name: "ログアウト" }),
-      });
-      const submitBtn = profileLogoutForm.getByRole("button", { name: "ログアウト" });
+      const submitBtn = page.locator(profileLogoutSelector);
       await expect(submitBtn).toBeVisible();
       await submitBtn.click();
 
@@ -115,10 +116,7 @@ test.describe("Flow 26: Logout via Server Action", () => {
       await loginViaForm(page, "parent@example.com", "password123");
       await page.goto("/profile");
 
-      const submitBtn = page
-        .locator("main form")
-        .filter({ has: page.getByRole("button", { name: "ログアウト" }) })
-        .getByRole("button", { name: "ログアウト" });
+      const submitBtn = page.locator(profileLogoutSelector);
       await submitBtn.click();
 
       await page.waitForURL((url) => url.pathname === "/", { timeout: 15000 });

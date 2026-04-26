@@ -45,7 +45,12 @@ test.describe("Flow 15: CMS / HP management (admin)", () => {
     await expect(page.getByText("E2Eニュース記事").first()).toBeVisible();
   });
 
-  test("public home page shows created article", async ({ page }) => {
+  test("public home page shows created article", async ({ page, context }) => {
+    // beforeEach logs in as admin; middleware bounces authenticated visitors
+    // from "/" to "/attendance/status". To verify the article actually
+    // surfaces on the *public* homepage we drop the auth cookies first so
+    // we look at the page as an anonymous visitor would.
+    await context.clearCookies();
     await page.goto("/");
     await expect(page.getByText("E2Eニュース記事").first()).toBeVisible({ timeout: 10000 });
   });
