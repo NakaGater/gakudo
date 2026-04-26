@@ -77,7 +77,7 @@ export default async function BillingListPage({ searchParams }: Props) {
       .order("child_id");
 
     if (childIds.length === 1) {
-      query = query.eq("child_id", childIds[0]);
+      query = query.eq("child_id", childIds[0]!);
     } else {
       query = query.in("child_id", childIds);
     }

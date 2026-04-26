@@ -18,7 +18,7 @@ async function callerIp(): Promise<string> {
   // hop in x-forwarded-for since it's the closest to the client; a
   // chained list means upstream proxies appended their own.
   const fwd = h.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
+  if (fwd) return fwd.split(",")[0]?.trim() ?? "unknown";
   return h.get("x-real-ip") ?? "unknown";
 }
 

@@ -134,7 +134,7 @@ async function sendPushNotifications(
       failures += 1;
       const reason = result.reason;
       console.error(
-        `[notifications] Push failed for user ${rows[i].user_id}:`,
+        `[notifications] Push failed for user ${rows[i]!.user_id}:`,
         reason instanceof Error ? reason.message : reason,
       );
     }
@@ -172,7 +172,7 @@ async function sendEmailNotifications(
       failures += 1;
       const reason = result.reason;
       console.error(
-        `[notifications] Email failed for user ${rows[i].id}:`,
+        `[notifications] Email failed for user ${rows[i]!.id}:`,
         reason instanceof Error ? reason.message : reason,
       );
     }

@@ -28,7 +28,7 @@ describe("sendEmail", () => {
     });
 
     expect(mockFetch).toHaveBeenCalledOnce();
-    const [url, opts] = mockFetch.mock.calls[0];
+    const [url, opts] = mockFetch.mock.calls[0]!;
     expect(url).toContain("/send");
     expect(opts.method).toBe("POST");
 
@@ -55,7 +55,7 @@ describe("sendEmail", () => {
       from: "こどもクラブ <info@school.com>",
     });
 
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
     expect(body.From.Name).toBe("こどもクラブ");
     expect(body.From.Email).toBe("info@school.com");
   });
@@ -76,7 +76,7 @@ describe("sendEmail", () => {
       from: "plain@email.com",
     });
 
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
     expect(body.From.Name).toBe("");
     expect(body.From.Email).toBe("plain@email.com");
   });

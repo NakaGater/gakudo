@@ -89,6 +89,7 @@ export function PullToRefresh() {
       if (isEditableElement(document.activeElement)) return;
 
       const t = e.touches[0];
+      if (!t) return;
       startY.current = t.clientY;
       startX.current = t.clientX;
       tracking.current = true;
@@ -103,6 +104,7 @@ export function PullToRefresh() {
       }
 
       const t = e.touches[0];
+      if (!t) return;
       const dy = t.clientY - startY.current;
       const dx = t.clientX - startX.current;
 

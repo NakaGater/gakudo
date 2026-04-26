@@ -19,7 +19,7 @@ const envContent = readFileSync(envPath, "utf-8");
 const env: Record<string, string> = {};
 for (const line of envContent.split("\n")) {
   const match = line.match(/^([^#=]+)=(.*)$/);
-  if (match) env[match[1].trim()] = match[2].trim();
+  if (match && match[1] && match[2] !== undefined) env[match[1].trim()] = match[2].trim();
 }
 
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;

@@ -77,7 +77,8 @@ export default async function InquiriesPage({
           </p>
           <div className="flex flex-col gap-3">
             {inquiries.map((inq) => {
-              const statusInfo = STATUS_LABELS[inq.status] ?? STATUS_LABELS.pending;
+              const statusInfo = STATUS_LABELS[inq.status] ??
+                STATUS_LABELS.pending ?? { label: inq.status, color: "" };
               return (
                 <Link
                   key={inq.id}

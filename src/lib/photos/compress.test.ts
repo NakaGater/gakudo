@@ -47,7 +47,7 @@ describe("compressPhoto", () => {
 
     await compressPhoto(input);
 
-    const callOptions = mockedCompression.mock.calls[0][1];
+    const callOptions = mockedCompression.mock.calls[0]![1];
     expect(callOptions?.maxWidthOrHeight).toBe(1920);
   });
 

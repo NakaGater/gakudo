@@ -14,7 +14,9 @@ const JST_OFFSET_MINUTES = 9 * 60;
 
 /** "HH:MM[:SS]" → JST midnight からの分数 */
 export function parseEndTimeToMinutes(hhmmss: string): number {
-  const [h, m] = hhmmss.split(":").map(Number);
+  const parts = hhmmss.split(":");
+  const h = Number(parts[0]);
+  const m = Number(parts[1]);
   return h * 60 + m;
 }
 

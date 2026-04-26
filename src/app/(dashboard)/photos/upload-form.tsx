@@ -42,7 +42,7 @@ export function UploadForm({ isAdmin }: { isAdmin: boolean }) {
 
       const total = files.length;
       for (let i = 0; i < total; i++) {
-        const compressed = await compressPhoto(files[i]);
+        const compressed = await compressPhoto(files[i]!);
         formData.append("files", compressed);
         setProgress(Math.round(((i + 1) / total) * 80));
       }

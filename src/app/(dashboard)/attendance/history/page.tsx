@@ -72,17 +72,15 @@ function buildDayRecords(allDates: string[], rows: AttendanceRow[]): DayRecord[]
     const pairs: AttendancePair[] = [];
     let i = 0;
     while (i < dayRows.length) {
-      if (dayRows[i].type === "enter") {
-        const enter = dayRows[i].recorded_at;
-        const exit =
-          i + 1 < dayRows.length && dayRows[i + 1].type === "exit"
-            ? dayRows[i + 1].recorded_at
-            : null;
-        pairs.push({ enterTime: enter, exitTime: exit });
+      const current = dayRows[i]!;
+      if (current.type === "enter") {
+        const next = dayRows[i + 1];
+        const exit = next && next.type === "exit" ? next.recorded_at : null;
+        pairs.push({ enterTime: current.recorded_at, exitTime: exit });
         i += exit ? 2 : 1;
       } else {
         // Orphan exit without preceding enter
-        pairs.push({ enterTime: null, exitTime: dayRows[i].recorded_at });
+        pairs.push({ enterTime: null, exitTime: current.recorded_at });
         i += 1;
       }
     }
@@ -158,7 +156,7 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
     .order("recorded_at", { ascending: true });
 
   if (childIds.length === 1) {
-    query = query.eq("child_id", childIds[0]);
+    query = query.eq("child_id", childIds[0]!);
   } else {
     query = query.in("child_id", childIds);
   }
