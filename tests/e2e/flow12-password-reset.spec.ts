@@ -50,7 +50,10 @@ test.describe("Flow 12: Password reset (PKCE)", () => {
     await page.locator('input[name="email"]').fill(TEST_EMAIL);
     await page.getByRole("button", { name: "送信" }).click();
 
-    await expect(page.getByText("メール送信完了")).toBeVisible({
+    // Use heading role rather than getByText: Next's `__next-route-announcer__`
+    // <div role="alert" aria-live="assertive"> echoes the page title and
+    // collides with strict mode (two "メール送信完了" matches).
+    await expect(page.getByRole("heading", { name: "メール送信完了" })).toBeVisible({
       timeout: 10000,
     });
 
