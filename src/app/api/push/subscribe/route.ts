@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api/auth";
+import { withApiAuth } from "@/lib/api/auth";
 import type { Json } from "@/lib/supabase/types";
 
 interface PushSubscriptionBody {
@@ -21,11 +21,9 @@ function isValidSubscription(body: unknown): body is PushSubscriptionBody {
   return true;
 }
 
-export async function POST(request: Request) {
-  const auth = await requireAuth();
-  if (auth.error) return auth.error;
-  const { user, supabase } = auth;
+const ALL_ROLES = ["parent", "teacher", "admin", "entrance"] as const;
 
+export const POST = withApiAuth(ALL_ROLES, async ({ user, supabase }, request: Request) => {
   let body: unknown;
   try {
     body = await request.json();
@@ -86,13 +84,9 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ message: "プッシュ通知を登録しました" }, { status: 201 });
-}
+});
 
-export async function DELETE(request: Request) {
-  const auth = await requireAuth();
-  if (auth.error) return auth.error;
-  const { user, supabase } = auth;
-
+export const DELETE = withApiAuth(ALL_ROLES, async ({ user, supabase }, request: Request) => {
   let body: unknown;
   try {
     body = await request.json();
@@ -119,4 +113,4 @@ export async function DELETE(request: Request) {
   }
 
   return NextResponse.json({ message: "プッシュ通知の登録を解除しました" }, { status: 200 });
-}
+});

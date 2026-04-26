@@ -12,6 +12,19 @@ vi.mock("@/lib/supabase/server", () => ({
   ),
 }));
 
+// Phase 2-E: withApiAuth fetches the caller's profile via supabase.from("profiles").
+// Tests below configure mockFrom for the route's tables; this helper lets each
+// test return a default-allowed profile so the auth gate doesn't 403.
+function profileChain(role: string) {
+  return {
+    select: () => ({
+      eq: () => ({
+        single: () => Promise.resolve({ data: { role }, error: null }),
+      }),
+    }),
+  };
+}
+
 import { POST, DELETE } from "./route";
 
 const validSubscription = {
@@ -33,6 +46,10 @@ function makeRequest(body?: unknown, method = "POST") {
 describe("POST /api/push/subscribe", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
+      return {};
+    });
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -93,6 +110,7 @@ describe("POST /api/push/subscribe", () => {
     const mockPrefUpsert = vi.fn().mockResolvedValue({ error: null });
 
     mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
       if (table === "push_subscriptions") {
         return { select: mockSelect, insert: mockInsert };
       }
@@ -139,6 +157,7 @@ describe("POST /api/push/subscribe", () => {
     const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 });
 
     mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
       if (table === "push_subscriptions") {
         return { select: mockSelect };
       }
@@ -163,6 +182,7 @@ describe("POST /api/push/subscribe", () => {
     const mockInsert = vi.fn().mockResolvedValue({ error: { message: "insert failed" } });
 
     mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
       if (table === "push_subscriptions") {
         return { select: mockSelect, insert: mockInsert };
       }
@@ -189,6 +209,7 @@ describe("POST /api/push/subscribe", () => {
     const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 });
 
     mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
       if (table === "push_subscriptions") {
         return { select: mockSelect };
       }
@@ -203,6 +224,10 @@ describe("POST /api/push/subscribe", () => {
 describe("DELETE /api/push/subscribe", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
+      return {};
+    });
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -250,6 +275,7 @@ describe("DELETE /api/push/subscribe", () => {
     const mockDelete = vi.fn().mockReturnValue({ eq: mockEq1 });
 
     mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
       if (table === "push_subscriptions") {
         return { delete: mockDelete };
       }
@@ -273,6 +299,7 @@ describe("DELETE /api/push/subscribe", () => {
     const mockDelete = vi.fn().mockReturnValue({ eq: mockEq1 });
 
     mockFrom.mockImplementation((table: string) => {
+      if (table === "profiles") return profileChain("parent");
       if (table === "push_subscriptions") {
         return { delete: mockDelete };
       }

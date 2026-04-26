@@ -72,8 +72,8 @@ function passes(guard: ApiGuard, role: string): boolean {
  */
 export function withApiAuth<TArgs extends unknown[]>(
   guard: ApiGuard,
-  handler: (ctx: ApiAuthContext, ...args: TArgs) => Promise<NextResponse> | NextResponse,
-): (...args: TArgs) => Promise<NextResponse> {
+  handler: (ctx: ApiAuthContext, ...args: TArgs) => Promise<Response> | Response,
+): (...args: TArgs) => Promise<Response> {
   return async (...args: TArgs) => {
     const auth = await requireAuth();
     if (auth.error) return auth.error;

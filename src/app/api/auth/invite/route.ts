@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api/auth";
+import { withApiAuth } from "@/lib/api/auth";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -10,21 +10,7 @@ function isValidRole(value: unknown): value is Role {
   return typeof value === "string" && VALID_ROLES.includes(value as Role);
 }
 
-export async function POST(request: Request) {
-  const auth = await requireAuth();
-  if (auth.error) return auth.error;
-  const { user, supabase } = auth;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || profile.role !== "admin") {
-    return NextResponse.json({ error: "管理者権限が必要です" }, { status: 403 });
-  }
-
+export const POST = withApiAuth("admin", async (_ctx, request: Request) => {
   let body: unknown;
   try {
     body = await request.json();
@@ -76,4 +62,4 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ message: "招待メールを送信しました" }, { status: 201 });
-}
+});
