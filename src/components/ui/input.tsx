@@ -2,8 +2,11 @@ import { forwardRef, type InputHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
+  // exactOptionalPropertyTypes: callers commonly pass `error={errors?.field}`
+  // which is `string | undefined`. Allow explicit undefined to keep that
+  // ergonomic — it has the same UI effect as the prop being absent.
+  label?: string | undefined;
+  error?: string | undefined;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(

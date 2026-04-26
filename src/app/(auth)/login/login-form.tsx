@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { login } from "./actions";
 
-export function LoginForm({ error }: { error?: string }) {
+export function LoginForm({ error }: { error?: string | undefined }) {
   return (
     <div className="book-cover animate-pop-in">
       {/* Header with star */}

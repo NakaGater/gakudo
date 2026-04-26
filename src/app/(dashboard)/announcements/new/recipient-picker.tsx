@@ -7,8 +7,8 @@ import type { SelectableParent } from "@/lib/announcements/recipients-server";
 interface Props {
   parents: SelectableParent[];
   /** バリデーションエラー（サーバから返す） */
-  error?: string;
-  disabled?: boolean;
+  error?: string | undefined;
+  disabled?: boolean | undefined;
 }
 
 /**

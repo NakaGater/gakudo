@@ -23,9 +23,9 @@ export type { DashboardChildStatus } from "./actions.helpers";
 // union collapses to a single shape and callsites can keep narrowing on
 // `success && childName && type && recordedAt`.
 export type AttendanceResult = ActionResult & {
-  childName?: string;
-  type?: "enter" | "exit";
-  recordedAt?: string;
+  childName?: string | undefined;
+  type?: "enter" | "exit" | undefined;
+  recordedAt?: string | undefined;
 };
 
 export type ChildAttendanceStatus = {
