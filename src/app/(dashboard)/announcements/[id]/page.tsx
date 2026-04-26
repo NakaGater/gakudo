@@ -35,6 +35,8 @@ export default async function AnnouncementDetailPage({ params }: Props) {
   const supabase = await createClient();
   const isStaff = user.role === "teacher" || user.role === "admin";
 
+  // Phase 3-C: `.returns<T>()` collapses `data` to AnnouncementRow without
+  // an `as unknown as` cast.
   const { data } = await supabase
     .from("announcements")
     .select(
@@ -42,11 +44,12 @@ export default async function AnnouncementDetailPage({ params }: Props) {
        author:profiles!announcements_posted_by_fkey(name)`,
     )
     .eq("id", id)
+    .returns<AnnouncementRow[]>()
     .single();
 
   if (!data) notFound();
 
-  const announcement = data as unknown as AnnouncementRow;
+  const announcement = data;
   const readCount = isStaff ? await getReadCount(id) : null;
 
   // 送信対象（スタッフ向けに表示）

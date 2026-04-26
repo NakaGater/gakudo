@@ -44,13 +44,14 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       "id, title, category, file_path, uploaded_by, created_at, uploader:profiles!documents_uploaded_by_fkey(name)",
     )
     .eq("id", id)
+    .returns<DocumentDetail[]>()
     .single();
 
   if (error || !data) {
     notFound();
   }
 
-  const doc = data as unknown as DocumentDetail;
+  const doc = data;
   const canDelete = user.role === "admin" || user.id === doc.uploaded_by;
 
   // Generate signed URL

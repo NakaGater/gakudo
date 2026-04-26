@@ -23,7 +23,16 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
   // Parallel: count + data fetch
   const countQuery = supabase.from("announcements").select("*", { count: "exact", head: true });
 
-  const dataQuery = supabase
+  type AnnouncementRow = {
+    id: string;
+    title: string;
+    body: string;
+    created_at: string;
+    author: { name: string };
+    announcement_reads: { user_id: string }[];
+  };
+
+  const baseQuery = supabase
     .from("announcements")
     .select(
       `id, title, body, created_at,
@@ -34,24 +43,17 @@ export default async function AnnouncementsPage({ searchParams }: Props) {
     .order("created_at", { ascending: false })
     .range(offset, offset + PAGE_SIZE - 1);
 
-  if (!isStaff) {
-    dataQuery.eq("announcement_reads.user_id", user.id);
-  }
+  // Phase 3-C: `.returns<T>()` typed at the chain end so `data` is
+  // AnnouncementRow[] without an `as unknown as` cast.
+  const dataQuery = (
+    isStaff ? baseQuery : baseQuery.eq("announcement_reads.user_id", user.id)
+  ).returns<AnnouncementRow[]>();
 
   const [{ count }, { data }] = await Promise.all([countQuery, dataQuery]);
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  type AnnouncementRow = {
-    id: string;
-    title: string;
-    body: string;
-    created_at: string;
-    author: { name: string };
-    announcement_reads: { user_id: string }[];
-  };
-
-  const announcements = (data ?? []) as unknown as AnnouncementRow[];
+  const announcements = data ?? [];
 
   return (
     <>

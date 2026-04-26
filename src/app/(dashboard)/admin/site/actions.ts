@@ -44,7 +44,7 @@ export const updateSitePage = withAuth(
     const updateData: SitePageUpdate = {
       title: title.trim(),
       content,
-      metadata: metadata as unknown as Json,
+      metadata: metadata as Json,
       updated_by: user.id,
     };
     const { error } = await supabase.from("site_pages").update(updateData).eq("slug", slug);
