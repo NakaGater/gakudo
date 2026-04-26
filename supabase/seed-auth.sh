@@ -67,8 +67,12 @@ for u in users:
 # --- ユーザー作成 ---
 create_user "admin@example.com" "password123" "管理者テスト" "admin"
 create_user "entrance@example.com" "password123" "入口端末" "entrance"
+create_user "teacher@example.com" "password123" "先生テスト" "teacher"
+create_user "parent@example.com" "password123" "保護者テスト" "parent"
 
 echo ""
 echo "=== テストアカウント ==="
-echo "📧 管理者:   admin@example.com / password123"
+echo "📧 管理者:   admin@example.com   / password123"
 echo "📧 入口端末: entrance@example.com / password123"
+echo "📧 先生:     teacher@example.com  / password123"
+echo "📧 保護者:   parent@example.com   / password123"
