@@ -8,9 +8,7 @@ describe("useArrayEditor", () => {
   it("add() appends a fresh defaults entry", () => {
     const onChange = vi.fn();
     const items: Row[] = [{ time: "9:00", label: "登所" }];
-    const { result } = renderHook(() =>
-      useArrayEditor(items, onChange, { time: "", label: "" }),
-    );
+    const { result } = renderHook(() => useArrayEditor(items, onChange, { time: "", label: "" }));
 
     act(() => {
       result.current.add();
@@ -28,9 +26,7 @@ describe("useArrayEditor", () => {
       { time: "9:00", label: "登所" },
       { time: "12:00", label: "昼食" },
     ];
-    const { result } = renderHook(() =>
-      useArrayEditor(items, onChange, { time: "", label: "" }),
-    );
+    const { result } = renderHook(() => useArrayEditor(items, onChange, { time: "", label: "" }));
 
     act(() => {
       result.current.update(1, { label: "おやつ" });
@@ -49,9 +45,7 @@ describe("useArrayEditor", () => {
       { time: "12:00", label: "昼食" },
       { time: "17:00", label: "退所" },
     ];
-    const { result } = renderHook(() =>
-      useArrayEditor(items, onChange, { time: "", label: "" }),
-    );
+    const { result } = renderHook(() => useArrayEditor(items, onChange, { time: "", label: "" }));
 
     act(() => {
       result.current.remove(1);

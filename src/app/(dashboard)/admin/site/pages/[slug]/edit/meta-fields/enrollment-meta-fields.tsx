@@ -19,26 +19,25 @@ export function EnrollmentMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   const documents = (meta.documents as string[]) ?? [];
   const notes = (meta.notes as string[]) ?? [];
 
-  const hoursEditor = useArrayEditor<Hour>(
-    hours,
-    (next) => updateMeta("hours", next),
-    { label: "", time: "" },
-  );
-  const feesEditor = useArrayEditor<Fee>(
-    fees,
-    (next) => updateMeta("fees", next),
-    { label: "", amount: "", note: "" },
-  );
+  const hoursEditor = useArrayEditor<Hour>(hours, (next) => updateMeta("hours", next), {
+    label: "",
+    time: "",
+  });
+  const feesEditor = useArrayEditor<Fee>(fees, (next) => updateMeta("fees", next), {
+    label: "",
+    amount: "",
+    note: "",
+  });
   const siblingFeesEditor = useArrayEditor<Fee>(
     siblingFees,
     (next) => updateMeta("sibling_fees", next),
     { label: "", amount: "", note: "" },
   );
-  const stepsEditor = useArrayEditor<Step>(
-    steps,
-    (next) => updateMeta("steps", next),
-    { emoji: "📌", title: "", description: "" },
-  );
+  const stepsEditor = useArrayEditor<Step>(steps, (next) => updateMeta("steps", next), {
+    emoji: "📌",
+    title: "",
+    description: "",
+  });
 
   const updateStringAt = (key: string, list: string[], idx: number, value: string) => {
     updateMeta(
