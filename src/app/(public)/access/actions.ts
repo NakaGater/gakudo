@@ -1,7 +1,25 @@
 "use server";
 
+import { headers } from "next/headers";
+import { checkRateLimit } from "@/lib/ratelimit/check";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
+
+// Public form, abuse-prone. 10 submissions per hour per (IP, email)
+// pair is well above any legitimate use and well below what a basic
+// flood would generate.
+const INQUIRY_MAX = 10;
+const INQUIRY_WINDOW_MS = 60 * 60 * 1000; // 1h
+
+async function callerIp(): Promise<string> {
+  const h = await headers();
+  // Vercel and most proxies fan out to one of these. Take the first
+  // hop in x-forwarded-for since it's the closest to the client; a
+  // chained list means upstream proxies appended their own.
+  const fwd = h.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0].trim();
+  return h.get("x-real-ip") ?? "unknown";
+}
 
 export async function submitInquiry(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const type = formData.get("type") as string;
@@ -26,6 +44,17 @@ export async function submitInquiry(_prev: ActionState, formData: FormData): Pro
   }
   if (type === "visit" && !preferredDate) {
     return { success: false, message: "見学予約の場合は希望日時を入力してください。" };
+  }
+
+  const ip = await callerIp();
+  const rateKey = `inquiry|${ip}|${email}`;
+  const limit = await checkRateLimit(rateKey, INQUIRY_MAX, INQUIRY_WINDOW_MS);
+  if (!limit.ok) {
+    const minutes = Math.ceil(limit.retryAfterSeconds / 60);
+    return {
+      success: false,
+      message: `送信回数が上限に達しました。約${minutes}分後にもう一度お試しください。`,
+    };
   }
 
   try {

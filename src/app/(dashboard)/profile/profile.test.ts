@@ -58,7 +58,7 @@ describe("profile actions", () => {
 
   describe("updateProfile", () => {
     it("returns error for empty name", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "parent" });
 
       const fd = new FormData();
       fd.append("name", "");
@@ -68,7 +68,7 @@ describe("profile actions", () => {
     });
 
     it("returns error for name > 50 chars", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "parent" });
 
       const longName = "a".repeat(51);
       const fd = new FormData();
@@ -79,7 +79,7 @@ describe("profile actions", () => {
     });
 
     it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "parent" });
       enqueue("profiles", { error: { message: "DB error" } });
 
       const fd = new FormData();
@@ -90,7 +90,7 @@ describe("profile actions", () => {
     });
 
     it("succeeds with valid name", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "parent" });
       enqueue("profiles", { data: { id: "user1", name: "Valid Name" } });
 
       const fd = new FormData();

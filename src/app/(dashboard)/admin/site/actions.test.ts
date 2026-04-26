@@ -120,6 +120,7 @@ describe("updateSitePage", () => {
 
     const result = await updateSitePage("home", null, fd);
     expect(result?.success).toBe(false);
-    expect(result?.message).toContain("DB error");
+    expect(result?.message).not.toContain("DB error");
+    expect(result?.success).toBe(false);
   });
 });

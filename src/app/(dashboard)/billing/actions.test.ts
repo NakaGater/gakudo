@@ -159,7 +159,9 @@ describe("createBillingRule", () => {
 
     const result = await createBillingRule(null, fd);
     expect(result?.success).toBe(false);
-    expect(result?.message).toContain("DB error");
+    // Phase 2-B: raw DB message is sanitized away; only the fallback leaks.
+    expect(result?.message).toMatch(/作成に失敗/);
+    expect(result?.message).not.toContain("DB error");
   });
 });
 
@@ -285,10 +287,12 @@ describe("calculateSingleBill", () => {
 
   it("returns error on calculation failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockCalculateMonthlyBill.mockRejectedValue(new Error("計算エラーです"));
+    mockCalculateMonthlyBill.mockRejectedValue(new Error("INTERNAL_SCHEMA_LEAK"));
 
     const result = await calculateSingleBill("c1", "2025-01");
     expect(result.success).toBe(false);
-    expect(result.message).toContain("計算エラーです");
+    // Phase 2-B: thrown error message must not leak to the user.
+    expect(result.message).toMatch(/計算エラー/);
+    expect(result.message).not.toContain("INTERNAL_SCHEMA_LEAK");
   });
 });

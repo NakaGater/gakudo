@@ -16,6 +16,22 @@ vi.mock("@/lib/email/send", () => ({
   sendEmail: vi.fn().mockResolvedValue({ id: "test" }),
 }));
 
+// next/headers — return a Headers-like object the action can read.
+vi.mock("next/headers", () => ({
+  headers: () =>
+    Promise.resolve({
+      get: (key: string) => (key.toLowerCase() === "x-forwarded-for" ? "1.2.3.4" : null),
+    }),
+}));
+
+// Rate limiter — default to allow; individual tests override per-case.
+const { mockCheckRateLimit } = vi.hoisted(() => ({
+  mockCheckRateLimit: vi.fn().mockResolvedValue({ ok: true }),
+}));
+vi.mock("@/lib/ratelimit/check", () => ({
+  checkRateLimit: (...a: unknown[]) => mockCheckRateLimit(...a),
+}));
+
 import { submitInquiry } from "./actions";
 
 function makeFormData(fields: Record<string, string>): FormData {
@@ -147,5 +163,44 @@ describe("submitInquiry", () => {
     );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("種別");
+  });
+
+  it("uses (ip, email) as the rate limit key", async () => {
+    await submitInquiry(
+      null,
+      makeFormData({
+        type: "general",
+        name: "太郎",
+        email: "user@example.com",
+        message: "ok",
+      }),
+    );
+    expect(mockCheckRateLimit).toHaveBeenCalledWith(
+      "inquiry|1.2.3.4|user@example.com",
+      expect.any(Number),
+      expect.any(Number),
+    );
+  });
+
+  it("returns a friendly retry message when rate limit is exceeded", async () => {
+    mockCheckRateLimit.mockResolvedValueOnce({
+      ok: false,
+      retryAfterSeconds: 1234,
+      limit: 10,
+      windowMs: 3_600_000,
+    });
+    const result = await submitInquiry(
+      null,
+      makeFormData({
+        type: "general",
+        name: "太郎",
+        email: "spammer@example.com",
+        message: "ok",
+      }),
+    );
+    expect(result.success).toBe(false);
+    expect(result.message).toMatch(/上限|もう一度/);
+    // Important: when denied, do NOT touch the database.
+    expect(mockInsert).not.toHaveBeenCalled();
   });
 });

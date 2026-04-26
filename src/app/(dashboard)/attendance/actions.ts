@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff, isEntrance } from "@/lib/auth/roles";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendAttendanceNotification } from "@/lib/notifications/send";
 import { createClient } from "@/lib/supabase/server";
 import { todayRangeJST } from "@/lib/time/jst";
@@ -186,7 +187,7 @@ async function createAttendanceRecord(
     .single();
 
   if (insertError) {
-    return { success: false, message: `記録に失敗しました: ${insertError.message}` };
+    return { success: false, message: sanitizeError(insertError, "記録に失敗しました") };
   }
 
   for (const p of revalidatePaths) revalidatePath(p);

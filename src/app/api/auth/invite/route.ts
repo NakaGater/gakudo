@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const VALID_ROLES = ["parent", "teacher", "admin"] as const;
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
 
   if (inviteError) {
     return NextResponse.json(
-      { error: `招待に失敗しました: ${inviteError.message}` },
+      { error: sanitizeError(inviteError, "招待に失敗しました") },
       { status: 400 },
     );
   }
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
   if (profileError) {
     return NextResponse.json(
-      { error: `プロフィールの作成に失敗しました: ${profileError.message}` },
+      { error: sanitizeError(profileError, "プロフィールの作成に失敗しました") },
       { status: 500 },
     );
   }

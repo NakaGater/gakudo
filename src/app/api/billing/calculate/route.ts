@@ -1,24 +1,9 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api/auth";
-import { isAdminOrTeacher } from "@/lib/auth/roles";
+import { withApiAuth } from "@/lib/api/auth";
 import { calculateMonthlyBill } from "@/lib/billing/calculate";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
-export async function POST(request: Request) {
-  const auth = await requireAuth();
-  if (auth.error) return auth.error;
-  const { user, supabase } = auth;
-
-  // 権限チェック (admin/teacher のみ)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || !isAdminOrTeacher(profile.role)) {
-    return NextResponse.json({ error: "権限がありません" }, { status: 403 });
-  }
-
+export const POST = withApiAuth("adminOrTeacher", async ({ supabase }, request: Request) => {
   // リクエストボディ解析
   let body: unknown;
   try {
@@ -58,10 +43,7 @@ export async function POST(request: Request) {
       processed++;
     } catch (err) {
       // 料金ルール未設定の場合はエラーを返す
-      return NextResponse.json(
-        { error: err instanceof Error ? err.message : "計算エラー" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: sanitizeError(err, "計算エラー") }, { status: 500 });
     }
   }
 
@@ -69,4 +51,4 @@ export async function POST(request: Request) {
     processed,
     total_amount: totalAmount,
   });
-}
+});

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth/get-user";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 import type { Database, Json } from "@/lib/supabase/types";
@@ -47,7 +48,7 @@ export async function updateSitePage(
   const { error } = await supabase.from("site_pages").update(updateData).eq("slug", slug);
 
   if (error) {
-    return { success: false, message: `保存に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "保存に失敗しました") };
   }
 
   revalidatePath("/");

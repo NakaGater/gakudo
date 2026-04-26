@@ -44,3 +44,23 @@ export function validateEnv(): void {
     }
   }
 }
+
+/**
+ * Read a required environment variable or throw with a clear message.
+ *
+ * Phase 2-F: callers in lib/supabase/{server,admin,client}.ts use
+ * this so env validation lives in one place rather than being
+ * duplicated as inline `process.env.X!` non-null assertions or
+ * bespoke if-checks.
+ */
+export function requireEnv(key: string, friendlyName?: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(
+      `Missing required environment variable ${key}` +
+        (friendlyName ? ` (${friendlyName})` : "") +
+        ". Check your .env.local file.",
+    );
+  }
+  return value;
+}

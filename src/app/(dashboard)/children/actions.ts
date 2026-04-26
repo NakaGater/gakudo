@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { QR_CODE, ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
 import { validateChildForm } from "./actions.helpers";
 import type { ActionResult, ActionState } from "./types";
@@ -34,7 +35,7 @@ export async function createChild(_prev: ActionState, formData: FormData): Promi
     .single();
 
   if (error) {
-    return { success: false, message: `登録に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "登録に失敗しました") };
   }
 
   revalidatePath("/children");
@@ -61,7 +62,7 @@ export async function updateChild(
     .eq("id", id);
 
   if (error) {
-    return { success: false, message: `更新に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "更新に失敗しました") };
   }
 
   revalidatePath("/children");
@@ -84,7 +85,7 @@ export async function regenerateQR(childId: string): Promise<ActionResult> {
     .eq("id", childId);
 
   if (error) {
-    return { success: false, message: `再発行に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "再発行に失敗しました") };
   }
 
   revalidatePath(`/children/${childId}`);
@@ -102,7 +103,7 @@ export async function deleteChild(id: string): Promise<ActionResult> {
   const { error } = await supabase.from("children").delete().eq("id", id);
 
   if (error) {
-    return { success: false, message: `削除に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "削除に失敗しました") };
   }
 
   revalidatePath("/children");
@@ -150,7 +151,7 @@ export async function linkParent(childId: string, parentId: string): Promise<Act
     );
 
   if (error) {
-    return { success: false, message: `紐付けに失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "紐付けに失敗しました") };
   }
 
   revalidatePath(`/children/${childId}`);
@@ -171,7 +172,7 @@ export async function unlinkParent(childId: string, parentId: string): Promise<A
     .eq("parent_id", parentId);
 
   if (error) {
-    return { success: false, message: `解除に失敗しました: ${error.message}` };
+    return { success: false, message: sanitizeError(error, "解除に失敗しました") };
   }
 
   revalidatePath(`/children/${childId}`);

@@ -82,7 +82,12 @@ describe("photos actions", () => {
       mockGetUser.mockResolvedValue({ role: "parent" });
 
       const fd = new FormData();
-      fd.append("files", new File(["img"], "test.jpg", { type: "image/jpeg" }));
+      fd.append(
+        "files",
+        new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), "img"], "test.jpg", {
+          type: "image/jpeg",
+        }),
+      );
 
       const result = await uploadPhoto(fd);
       expect(result.success).toBe(false);
@@ -114,7 +119,12 @@ describe("photos actions", () => {
       });
 
       const fd = new FormData();
-      fd.append("files", new File(["img"], "test.jpg", { type: "image/jpeg" }));
+      fd.append(
+        "files",
+        new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), "img"], "test.jpg", {
+          type: "image/jpeg",
+        }),
+      );
 
       const result = await uploadPhoto(fd);
       expect(result.success).toBe(false);
@@ -126,7 +136,12 @@ describe("photos actions", () => {
       enqueue("photos", { data: { id: "photo1", filename: "test.jpg" } });
 
       const fd = new FormData();
-      fd.append("files", new File(["img"], "test.jpg", { type: "image/jpeg" }));
+      fd.append(
+        "files",
+        new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), "img"], "test.jpg", {
+          type: "image/jpeg",
+        }),
+      );
 
       const result = await uploadPhoto(fd);
       expect(result.success).toBe(true);

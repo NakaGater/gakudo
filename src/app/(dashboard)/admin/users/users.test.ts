@@ -180,7 +180,8 @@ describe("inviteUser", () => {
 
     expect(result.success).toBe(false);
     expect(result.message).toContain("招待に失敗しました");
-    expect(result.message).toContain("User already exists");
+    expect(result.message).not.toContain("User already exists");
+    expect(result.success).toBe(false);
   });
 
   it("6. returns error on profile upsert failure", async () => {

@@ -21,8 +21,10 @@ export async function addInstagramPost(
     return { success: false, message: "Instagram URLを入力してください" };
   }
 
-  // Instagram URL validation
-  const igPattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[\w-]+/;
+  // Instagram URL validation. The trailing `\/?$` anchors the match so
+  // suffixes like `https://instagram.com/p/abc/<script>` are rejected
+  // (Phase 2-A: hardened from Phase 0-C's skipped regression test).
+  const igPattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[\w-]+\/?$/;
   if (!igPattern.test(postUrl.trim())) {
     return {
       success: false,

@@ -88,7 +88,8 @@ describe("createChild", () => {
     });
 
     const result = await createChild(null, form({ name: "太郎", grade: "3" }));
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("duplicate") });
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("duplicate");
   });
 });
 
@@ -122,10 +123,9 @@ describe("updateChild", () => {
       }),
     });
     const result = await updateChild("child-1", null, form({ name: "太郎", grade: "3" }));
-    expect(result).toMatchObject({
-      success: false,
-      message: expect.stringContaining("FK constraint"),
-    });
+    expect(result.success).toBe(false);
+    // Phase 2-B: raw DB message is sanitized away.
+    expect(result.message).not.toContain("FK constraint");
   });
 });
 
@@ -154,7 +154,8 @@ describe("deleteChild", () => {
       }),
     });
     const result = await deleteChild("child-1");
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("FK err") });
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("FK err");
   });
 });
 
@@ -187,7 +188,8 @@ describe("regenerateQR", () => {
       }),
     });
     const result = await regenerateQR("c1");
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("DB err") });
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("DB err");
   });
 });
 
@@ -257,7 +259,8 @@ describe("linkParent", () => {
       upsert: vi.fn().mockResolvedValue({ error: { message: "dup" } }),
     });
     const result = await linkParent("c1", "p1");
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("dup") });
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("dup");
   });
 });
 
@@ -287,6 +290,7 @@ describe("unlinkParent", () => {
       }),
     });
     const result = await unlinkParent("c1", "p1");
-    expect(result).toMatchObject({ success: false, message: expect.stringContaining("FK err") });
+    expect(result.success).toBe(false);
+    expect(result.message).not.toContain("FK err");
   });
 });
