@@ -95,7 +95,7 @@ describe("sendAnnouncementNotification", () => {
 
     expect(mockSendNotification).toHaveBeenCalledTimes(1);
     // 境界契約: subscription 引数のキーが endpoint で一致すること
-    const [subscriptionArg] = mockSendNotification.mock.calls[0];
+    const [subscriptionArg] = mockSendNotification.mock.calls[0]!;
     expect(subscriptionArg.endpoint).toBe("https://push.example.com/1");
   });
 
@@ -389,7 +389,7 @@ describe("sendAttendanceNotification", () => {
     await sendAttendanceNotification("c1", "enter", "2024-01-15T06:30:00.000Z");
 
     expect(mockSendNotification).toHaveBeenCalledTimes(1);
-    const [subscription, payloadJson] = mockSendNotification.mock.calls[0];
+    const [subscription, payloadJson] = mockSendNotification.mock.calls[0]!;
     expect(subscription.endpoint).toBe("https://push.example.com/p1");
     // JSON 本体の組み立てロジックは helpers でカバー済みなので、ここでは含有のみ確認
     expect(payloadJson).toContain("太郎");

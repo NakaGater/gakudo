@@ -7,11 +7,10 @@ type Question = { q: string; a: string };
 
 export function FaqMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   const questions = (meta.questions as Question[]) ?? [];
-  const editor = useArrayEditor<Question>(
-    questions,
-    (next) => updateMeta("questions", next),
-    { q: "", a: "" },
-  );
+  const editor = useArrayEditor<Question>(questions, (next) => updateMeta("questions", next), {
+    q: "",
+    a: "",
+  });
 
   const moveQuestion = (index: number, direction: -1 | 1) => {
     const newIndex = index + direction;

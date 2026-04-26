@@ -65,8 +65,5 @@ export function useArrayEditor<T>(
     [onChange],
   );
 
-  return useMemo(
-    () => ({ items, add, update, remove, set }),
-    [items, add, update, remove, set],
-  );
+  return useMemo(() => ({ items, add, update, remove, set }), [items, add, update, remove, set]);
 }

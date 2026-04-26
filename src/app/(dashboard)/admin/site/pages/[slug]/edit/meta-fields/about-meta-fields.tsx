@@ -169,11 +169,12 @@ function StaffMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   const staff = (meta.staff_members as StaffMember[]) ?? [];
   const [uploading, setUploading] = useState<number | null>(null);
 
-  const editor = useArrayEditor<StaffMember>(
-    staff,
-    (next) => updateMeta("staff_members", next),
-    { name: "", role: "", photo_url: "", profile: "" },
-  );
+  const editor = useArrayEditor<StaffMember>(staff, (next) => updateMeta("staff_members", next), {
+    name: "",
+    role: "",
+    photo_url: "",
+    profile: "",
+  });
 
   const moveStaff = (idx: number, dir: -1 | 1) => {
     const next = [...staff];

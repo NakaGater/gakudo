@@ -7,11 +7,11 @@ import type { MetaFieldsProps } from "./types";
 export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   type FeatureItem = { icon: string; title: string; description: string };
   const features = (meta.features as FeatureItem[]) ?? [];
-  const editor = useArrayEditor<FeatureItem>(
-    features,
-    (next) => updateMeta("features", next),
-    { icon: "Star", title: "", description: "" },
-  );
+  const editor = useArrayEditor<FeatureItem>(features, (next) => updateMeta("features", next), {
+    icon: "Star",
+    title: "",
+    description: "",
+  });
 
   return (
     <>
