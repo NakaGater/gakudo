@@ -15,11 +15,11 @@ export function DailyLifeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
     (next) => updateMeta("activities", next),
     { emoji: "🎯", title: "", description: "" },
   );
-  const eventEditor = useArrayEditor<Event>(
-    events,
-    (next) => updateMeta("events", next),
-    { emoji: "🎉", title: "", season: "通年" },
-  );
+  const eventEditor = useArrayEditor<Event>(events, (next) => updateMeta("events", next), {
+    emoji: "🎉",
+    title: "",
+    season: "通年",
+  });
 
   return (
     <>

@@ -27,7 +27,9 @@ test.describe("Flow 24: parent role boundary", () => {
 
   test("parent is redirected away from /admin/inquiries", async ({ page }) => {
     await page.goto("/admin/inquiries");
-    await page.waitForURL((url) => !url.pathname.startsWith("/admin/inquiries"), { timeout: 10000 });
+    await page.waitForURL((url) => !url.pathname.startsWith("/admin/inquiries"), {
+      timeout: 10000,
+    });
     expect(page.url()).not.toContain("/admin/inquiries");
   });
 
