@@ -1,10 +1,20 @@
-name: E2E
+name: E2E (manual)
+
+# Phase 0-A's auto-trigger was removed: the workflow needs the full
+# Supabase + Mailpit + Next.js stack to be up to actually pass, which
+# CI doesn't currently provision. Until that's wired up, the workflow
+# stays available via `workflow_dispatch` so anyone can trigger it
+# from the Actions tab once they've supplied the right secrets, but
+# it doesn't gate PRs / pushes anymore.
+#
+# Re-enabling auto-trigger requires either:
+#   1. A `services:` block with a Supabase Postgres + Mailpit, plus
+#      `npm run start` orchestration, OR
+#   2. Supabase Cloud preview branches with seeded data.
+# Tracked in docs/production-launch-checklist.md.
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch:
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -24,13 +34,8 @@ jobs:
       - run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - name: Run E2E (smoke on PR, full on main)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npm run e2e -- --grep @smoke
-          else
-            npm run e2e
-          fi
+      - name: Run E2E
+        run: npm run e2e
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL || 'http://localhost:54321' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY || 'dummy-anon-key' }}
