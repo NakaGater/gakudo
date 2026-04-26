@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
-// Mock auth
 const { mockUser, mockGetUser } = vi.hoisted(() => {
   const mockUser = { id: "admin-1", email: "admin@test.com", name: "管理者", role: "admin" };
   const mockGetUser = vi.fn().mockResolvedValue(mockUser);
@@ -11,72 +11,12 @@ vi.mock("@/lib/auth/get-user", () => ({
   getUser: mockGetUser,
 }));
 
-// Mock Supabase
-const { mockSingle, mockUpdate, mockFrom } = vi.hoisted(() => {
-  const mockSingle = vi.fn().mockResolvedValue({ data: { email: "user@test.com", name: "太郎" } });
-  const mockEq = vi.fn().mockReturnValue({ single: mockSingle });
-  const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-  const mockUpdate = vi.fn().mockReturnValue({
-    eq: vi.fn().mockResolvedValue({ error: null }),
-  });
-  const mockFrom = vi.fn().mockImplementation((table: string) => {
-    if (table === "inquiries") {
-      return {
-        select: (...args: unknown[]) => {
-          if (
-            typeof args[1] === "object" &&
-            args[1] !== null &&
-            "count" in (args[1] as Record<string, unknown>)
-          ) {
-            // Phase 3-D: getInquiries now runs count + data queries in
-            // parallel. The countQuery is awaited directly OR after .eq(),
-            // so both shapes need to be thenable to `{ count }`.
-            const countResolved = (resolve: (v: unknown) => void) =>
-              resolve({ count: 3, error: null });
-            return {
-              then: countResolved,
-              eq: vi.fn().mockReturnValue({ then: countResolved }),
-            };
-          }
-          if (typeof args[0] === "string") {
-            // Phase 3-E: getInquiries / getInquiry now request explicit
-            // columns; previously this branch was gated on "*".
-            // Phase 3-D: order().range() is the new pagination shape.
-            const dataResolve = (resolve: (v: unknown) => void) =>
-              resolve({ data: [], error: null });
-            const orderResult = {
-              then: dataResolve,
-              range: vi.fn().mockReturnValue({
-                then: dataResolve,
-                eq: vi.fn().mockReturnValue({ then: dataResolve }),
-              }),
-              eq: vi.fn().mockReturnValue({
-                then: dataResolve,
-                range: vi.fn().mockReturnValue({ then: dataResolve }),
-              }),
-            };
-            return {
-              order: vi.fn().mockReturnValue(orderResult),
-              eq: vi.fn().mockReturnValue({
-                single: mockSingle,
-                order: vi.fn().mockReturnValue(orderResult),
-                range: vi.fn().mockReturnValue({ then: dataResolve }),
-              }),
-              range: vi.fn().mockReturnValue({ then: dataResolve }),
-            };
-          }
-          return mockSelect();
-        },
-        update: mockUpdate,
-      };
-    }
-    return { select: mockSelect };
-  });
-  return { mockSingle, mockUpdate, mockFrom };
-});
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue({ from: mockFrom }),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
 
 vi.mock("next/cache", () => ({
@@ -88,17 +28,20 @@ vi.mock("@/lib/email/send", () => ({
 }));
 
 import {
-  getReplyTemplate,
-  replyToInquiry,
   getInquiries,
   getInquiry,
   getPendingInquiryCount,
+  getReplyTemplate,
+  replyToInquiry,
 } from "./actions";
 
 describe("getInquiries", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetUser.mockResolvedValue(mockUser);
+    holder.current = createSupabaseMock({
+      tables: { inquiries: { data: [], error: null, count: 3 } },
+    });
   });
 
   it("returns an empty page for non-staff users", async () => {
@@ -131,6 +74,7 @@ describe("getInquiry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetUser.mockResolvedValue(mockUser);
+    holder.current = createSupabaseMock();
   });
 
   it("returns null for non-staff users", async () => {
@@ -140,13 +84,19 @@ describe("getInquiry", () => {
   });
 
   it("returns inquiry data for staff", async () => {
-    mockSingle.mockResolvedValue({ data: { id: "test-id", name: "太郎", status: "pending" } });
+    holder.current = createSupabaseMock({
+      tables: {
+        inquiries: { data: { id: "test-id", name: "太郎", status: "pending" }, error: null },
+      },
+    });
     const result = await getInquiry("test-id");
     expect(result).toBeTruthy();
   });
 
   it("returns null when not found", async () => {
-    mockSingle.mockResolvedValue({ data: null });
+    holder.current = createSupabaseMock({
+      tables: { inquiries: { data: null, error: null } },
+    });
     const result = await getInquiry("missing");
     expect(result).toBeNull();
   });
@@ -156,6 +106,9 @@ describe("getPendingInquiryCount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetUser.mockResolvedValue(mockUser);
+    holder.current = createSupabaseMock({
+      tables: { inquiries: { data: null, error: null, count: 3 } },
+    });
   });
 
   it("returns 0 for non-staff users", async () => {
@@ -195,8 +148,11 @@ describe("replyToInquiry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetUser.mockResolvedValue(mockUser);
-    mockUpdate.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
-    mockSingle.mockResolvedValue({ data: { email: "user@test.com", name: "太郎" } });
+    holder.current = createSupabaseMock({
+      tables: {
+        inquiries: { data: { email: "user@test.com", name: "太郎" }, error: null },
+      },
+    });
   });
 
   it("rejects non-staff users", async () => {
@@ -207,15 +163,21 @@ describe("replyToInquiry", () => {
   });
 
   it("returns error when inquiry not found", async () => {
-    mockSingle.mockResolvedValue({ data: null });
+    holder.current = createSupabaseMock({
+      tables: { inquiries: { data: null, error: null } },
+    });
     const result = await replyToInquiry("missing-id", "approved", "承認します");
     expect(result.success).toBe(false);
     expect(result.message).toContain("見つかりません");
   });
 
   it("returns error when update fails", async () => {
-    mockUpdate.mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: { message: "DB error" } }),
+    holder.current = createSupabaseMock({
+      tableResolver: (table, op) => {
+        if (table !== "inquiries") return undefined;
+        if (op === "update") return { data: null, error: { message: "DB error" } };
+        return { data: { email: "user@test.com", name: "太郎" }, error: null };
+      },
     });
     const result = await replyToInquiry("test-id", "approved", "承認します");
     expect(result.success).toBe(false);

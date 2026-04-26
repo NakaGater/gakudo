@@ -1,12 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
-// Mock next/cache
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock next/navigation
 const mockRedirect = vi.fn<(url: string) => never>();
 vi.mock("next/navigation", () => ({
   redirect: (...args: Parameters<typeof mockRedirect>) => {
@@ -15,30 +14,22 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock uploadAttachment
 const mockUploadAttachment = vi.fn();
 vi.mock("@/lib/attachments/actions", () => ({
   uploadAttachment: (...args: unknown[]) => mockUploadAttachment(...args),
 }));
 
-// Mock Supabase - chainable query builder
-const mockSingle = vi.fn();
-const mockSelect = vi.fn(() => ({ single: mockSingle }));
-const mockInsert = vi.fn(() => ({ select: mockSelect }));
-const mockFrom = vi.fn();
-mockFrom.mockReturnValue({ insert: mockInsert });
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: mockFrom,
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
 
 import { createNews, deleteNews } from "./actions";
@@ -46,6 +37,7 @@ import { createNews, deleteNews } from "./actions";
 describe("deleteNews", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-admin with UNAUTHORIZED (Phase 2-C: redirect → ActionResult)", async () => {
@@ -58,35 +50,33 @@ describe("deleteNews", () => {
 
   it("deletes news successfully", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const mockEq = vi.fn().mockResolvedValue({ error: null });
-    const mockDelete = vi.fn(() => ({ eq: mockEq }));
-    mockFrom.mockReturnValue({ delete: mockDelete });
 
     const result = await deleteNews("news-1");
     expect(result).toEqual({ success: true, message: "削除しました" });
-    expect(mockFrom).toHaveBeenCalledWith("site_news");
+    expect(holder.current!.spies.fromCalls).toContain("site_news");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "site_news", op: "delete" }),
+    );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/news");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/site/news");
   });
 
   it("returns error on DB failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const mockEq = vi.fn().mockResolvedValue({ error: { message: "FK violation" } });
-    const mockDelete = vi.fn(() => ({ eq: mockEq }));
-    mockFrom.mockReturnValue({ delete: mockDelete });
+    holder.current = createSupabaseMock({
+      tables: { site_news: { data: null, error: { message: "FK violation" } } },
+    });
 
     const result = await deleteNews("news-1");
     expect(result?.success).toBe(false);
     expect(result?.message).not.toContain("FK violation");
-    expect(result?.success).toBe(false);
   });
 });
 
 describe("createNews", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Restore the chainable mock for createNews
-    mockFrom.mockImplementation(() => ({ insert: mockInsert }));
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-admin with UNAUTHORIZED (Phase 2-C: redirect → ActionResult)", async () => {
@@ -122,7 +112,9 @@ describe("createNews", () => {
 
   it("creates news and handles file uploads", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockSingle.mockResolvedValue({ data: { id: "news-1" }, error: null });
+    holder.current = createSupabaseMock({
+      tables: { site_news: { data: { id: "news-1" }, error: null } },
+    });
     mockUploadAttachment.mockResolvedValue({ success: true });
 
     const fd = new FormData();
@@ -132,14 +124,16 @@ describe("createNews", () => {
 
     // createNews calls redirect on success, which throws
     await expect(createNews(null, fd)).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockFrom).toHaveBeenCalledWith("site_news");
+    expect(holder.current!.spies.fromCalls).toContain("site_news");
     expect(mockUploadAttachment).toHaveBeenCalledWith("news", "news-1", expect.any(FormData));
     expect(mockRevalidatePath).toHaveBeenCalledWith("/news");
   });
 
   it("returns error on DB failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockSingle.mockResolvedValue({ data: null, error: { message: "DB error" } });
+    holder.current = createSupabaseMock({
+      tables: { site_news: { data: null, error: { message: "DB error" } } },
+    });
 
     const fd = new FormData();
     fd.set("title", "Test");
@@ -148,6 +142,5 @@ describe("createNews", () => {
     const result = await createNews(null, fd);
     expect(result?.success).toBe(false);
     expect(result?.message).not.toContain("DB error");
-    expect(result?.success).toBe(false);
   });
 });

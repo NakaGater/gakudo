@@ -1,15 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 const mockUpdateUser = vi.fn();
 
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
+  createClient: () =>
     Promise.resolve({
+      ...holder.current!.client,
       auth: {
+        ...holder.current!.client.auth,
         updateUser: (...args: unknown[]) => mockUpdateUser(...args),
       },
     }),
-  ),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -29,6 +35,7 @@ function form(fields: Record<string, string>): FormData {
 describe("resetPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("rejects passwords shorter than 8 characters", async () => {

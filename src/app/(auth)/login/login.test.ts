@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 import { login } from "./actions";
 
 // I/O 境界のみモック: next/cache, next/navigation, Supabase client.
@@ -16,18 +17,26 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockSignInWithPassword = vi.fn();
-const mockFrom = vi.fn();
+
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(async () => ({
-    auth: { signInWithPassword: mockSignInWithPassword },
-    from: mockFrom,
-  })),
+  createClient: () =>
+    Promise.resolve({
+      ...holder.current!.client,
+      auth: {
+        ...holder.current!.client.auth,
+        signInWithPassword: (...args: unknown[]) => mockSignInWithPassword(...args),
+      },
+    }),
 }));
 
 describe("login", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("redirects to /login?error=invalid_credentials on auth error", async () => {
@@ -51,10 +60,9 @@ describe("login", () => {
     });
 
     // role=admin → /attendance/dashboard (per pure helper test)
-    const single = vi.fn().mockResolvedValue({ data: { role: "admin" }, error: null });
-    const eq = vi.fn().mockReturnValue({ single });
-    const select = vi.fn().mockReturnValue({ eq });
-    mockFrom.mockReturnValue({ select });
+    holder.current = createSupabaseMock({
+      tables: { profiles: { data: { role: "admin" }, error: null } },
+    });
 
     const formData = new FormData();
     formData.append("email", "admin@example.com");
@@ -70,10 +78,9 @@ describe("login", () => {
       error: null,
     });
 
-    const single = vi.fn().mockResolvedValue({ data: null, error: null });
-    const eq = vi.fn().mockReturnValue({ single });
-    const select = vi.fn().mockReturnValue({ eq });
-    mockFrom.mockReturnValue({ select });
+    holder.current = createSupabaseMock({
+      tables: { profiles: { data: null, error: null } },
+    });
 
     const formData = new FormData();
     formData.append("email", "parent@example.com");

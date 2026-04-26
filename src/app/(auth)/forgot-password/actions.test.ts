@@ -1,15 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 const mockResetPasswordForEmail = vi.fn();
 
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
+  createClient: () =>
     Promise.resolve({
+      ...holder.current!.client,
       auth: {
+        ...holder.current!.client.auth,
         resetPasswordForEmail: (...args: unknown[]) => mockResetPasswordForEmail(...args),
       },
     }),
-  ),
 }));
 
 import { forgotPassword } from "./actions";
@@ -23,6 +29,7 @@ function form(fields: Record<string, string>): FormData {
 describe("forgotPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.example.com");
   });
 

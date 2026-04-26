@@ -1,12 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
-// Mock next/cache
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock next/navigation
 const mockRedirect = vi.fn<(url: string) => never>();
 vi.mock("next/navigation", () => ({
   redirect: (...args: Parameters<typeof mockRedirect>) => {
@@ -15,22 +14,17 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock Supabase - chainable query builder
-const mockEq = vi.fn();
-const mockUpdate = vi.fn(() => ({ eq: mockEq }));
-const mockFrom = vi.fn(() => ({ update: mockUpdate }));
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: mockFrom,
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
 
 import { updateSitePage } from "./actions";
@@ -38,6 +32,7 @@ import { updateSitePage } from "./actions";
 describe("updateSitePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-admin users with UNAUTHORIZED (Phase 2-C: redirect → ActionResult)", async () => {
@@ -85,7 +80,6 @@ describe("updateSitePage", () => {
 
   it("updates page successfully", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockEq.mockResolvedValue({ error: null });
 
     const fd = new FormData();
     fd.set("title", "ホーム");
@@ -95,14 +89,15 @@ describe("updateSitePage", () => {
     const result = await updateSitePage("home", null, fd);
     expect(result?.success).toBe(true);
     expect(result?.message).toContain("保存");
-    expect(mockFrom).toHaveBeenCalledWith("site_pages");
-    expect(mockEq).toHaveBeenCalledWith("slug", "home");
+    expect(holder.current!.spies.fromCalls).toContain("site_pages");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "site_pages", op: "update" }),
+    );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
   });
 
   it("updates page without metadata", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockEq.mockResolvedValue({ error: null });
 
     const fd = new FormData();
     fd.set("title", "アクセス");
@@ -114,7 +109,9 @@ describe("updateSitePage", () => {
 
   it("returns error on DB failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockEq.mockResolvedValue({ error: { message: "DB error" } });
+    holder.current = createSupabaseMock({
+      tables: { site_pages: { data: null, error: { message: "DB error" } } },
+    });
 
     const fd = new FormData();
     fd.set("title", "ホーム");
@@ -123,6 +120,5 @@ describe("updateSitePage", () => {
     const result = await updateSitePage("home", null, fd);
     expect(result?.success).toBe(false);
     expect(result?.message).not.toContain("DB error");
-    expect(result?.success).toBe(false);
   });
 });

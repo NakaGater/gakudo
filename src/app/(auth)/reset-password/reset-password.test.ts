@@ -1,13 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 import { resetPassword } from "./actions";
 
-// Mock next/cache
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock next/navigation with redirect that throws
 const mockRedirect = vi.fn().mockImplementation((url: string) => {
   throw new Error(`NEXT_REDIRECT:${url}`);
 });
@@ -15,20 +14,27 @@ vi.mock("next/navigation", () => ({
   redirect: (url: string) => mockRedirect(url),
 }));
 
-// Mock Supabase client
 const mockUpdateUser = vi.fn();
 
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(async () => ({
-    auth: {
-      updateUser: mockUpdateUser,
-    },
-  })),
+  createClient: () =>
+    Promise.resolve({
+      ...holder.current!.client,
+      auth: {
+        ...holder.current!.client.auth,
+        updateUser: mockUpdateUser,
+      },
+    }),
 }));
 
 describe("resetPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("returns error for empty password", async () => {
