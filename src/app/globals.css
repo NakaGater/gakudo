@@ -2722,7 +2722,13 @@ body {
 /* ═══ Responsive breakpoints ═══ */
 @media (max-width: 768px) {
   .book-page {
-    margin: 8px;
+    /* Vertical-only margin — `margin: 8px` (4 sides) combined with
+       `w-full` (Tailwind class on the JSX wrapper) overflows the
+       parent by 16px on the horizontal axis. The parent has
+       overflow:hidden, so only the right side gets clipped — the
+       page visibly shifts right with shrunken right padding. Keep
+       this 2-value form so horizontal margins stay 0. */
+    margin: 8px 0;
   }
   .hero-slideshow {
     height: 200px;

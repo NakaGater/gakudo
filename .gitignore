@@ -51,3 +51,6 @@ supabase/.branches/
 # Claude Code per-user settings (project settings.json is committed,
 # settings.local.json is personal and varies per developer)
 .claude/settings.local.json
+
+# Playwright MCP snapshot/screenshot cache (per-session debugging output)
+.playwright-mcp/
