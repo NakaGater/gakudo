@@ -40,11 +40,13 @@ describe("updateSitePage", () => {
     vi.clearAllMocks();
   });
 
-  it("redirects non-admin users", async () => {
+  it("rejects non-admin users with UNAUTHORIZED (Phase 2-C: redirect → ActionResult)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
 
-    await expect(updateSitePage("home", null, new FormData())).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockRedirect).toHaveBeenCalledWith("/");
+    const result = await updateSitePage("home", null, new FormData());
+    expect(result?.success).toBe(false);
+    expect(result?.message).toMatch(/権限/);
+    expect(mockRedirect).not.toHaveBeenCalled();
   });
 
   it("validates title is required", async () => {

@@ -48,10 +48,12 @@ describe("deleteNews", () => {
     vi.clearAllMocks();
   });
 
-  it("redirects non-admin users", async () => {
+  it("rejects non-admin with UNAUTHORIZED (Phase 2-C: redirect → ActionResult)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-    await expect(deleteNews("news-1")).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockRedirect).toHaveBeenCalledWith("/");
+    const result = await deleteNews("news-1");
+    expect(result.success).toBe(false);
+    expect(result.message).toMatch(/権限/);
+    expect(mockRedirect).not.toHaveBeenCalled();
   });
 
   it("deletes news successfully", async () => {
@@ -87,11 +89,13 @@ describe("createNews", () => {
     mockFrom.mockImplementation(() => ({ insert: mockInsert }));
   });
 
-  it("redirects non-admin users", async () => {
+  it("rejects non-admin with UNAUTHORIZED (Phase 2-C: redirect → ActionResult)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
 
-    await expect(createNews(null, new FormData())).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockRedirect).toHaveBeenCalledWith("/");
+    const result = await createNews(null, new FormData());
+    expect(result?.success).toBe(false);
+    expect(result?.message).toMatch(/権限/);
+    expect(mockRedirect).not.toHaveBeenCalled();
   });
 
   it("validates title is required", async () => {
