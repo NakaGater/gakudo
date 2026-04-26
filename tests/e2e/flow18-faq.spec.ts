@@ -5,9 +5,7 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
   test("FAQ page renders with title and questions", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto("/faq");
-    await expect(
-      page.getByRole("heading", { name: "Q&A" }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "Q&A" })).toBeVisible({ timeout: 10000 });
     // Subtitle
     await expect(page.getByText("はじめての方もご安心ください")).toBeVisible();
     // At least one Q marker visible
@@ -49,9 +47,7 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
     const nav = page.locator("header");
     await nav.getByRole("link", { name: "Q&A" }).click();
     await page.waitForURL("/faq", { timeout: 10000 });
-    await expect(
-      page.getByRole("heading", { name: "Q&A" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Q&A" })).toBeVisible();
   });
 
   test("CMS: admin can edit FAQ page", async ({ page }) => {

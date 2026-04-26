@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { LoginForm } from "./login-form";
 
 vi.mock("next/navigation", () => ({
@@ -20,16 +20,10 @@ describe("LoginForm", () => {
     render(<LoginForm />);
 
     expect(screen.getByLabelText("メールアドレス")).toBeInTheDocument();
-    expect(screen.getByLabelText("メールアドレス")).toHaveAttribute(
-      "type",
-      "email",
-    );
+    expect(screen.getByLabelText("メールアドレス")).toHaveAttribute("type", "email");
 
     expect(screen.getByLabelText("パスワード")).toBeInTheDocument();
-    expect(screen.getByLabelText("パスワード")).toHaveAttribute(
-      "type",
-      "password",
-    );
+    expect(screen.getByLabelText("パスワード")).toHaveAttribute("type", "password");
   });
 
   it("renders submit button", () => {
@@ -56,9 +50,7 @@ describe("LoginForm", () => {
     expect(
       screen.getByText("メールアドレスまたはパスワードが正しくありません"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("alert"),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("does not show error message when no error", () => {

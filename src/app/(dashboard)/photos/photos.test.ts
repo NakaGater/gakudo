@@ -101,10 +101,7 @@ describe("photos actions", () => {
       mockGetUser.mockResolvedValue({ role: "staff" });
 
       const fd = new FormData();
-      fd.append(
-        "files",
-        new File(["content"], "test.txt", { type: "text/plain" })
-      );
+      fd.append("files", new File(["content"], "test.txt", { type: "text/plain" }));
 
       const result = await uploadPhoto(fd);
       expect(result.success).toBe(false);

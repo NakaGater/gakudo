@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { Button, Input } from "@/components/ui";
 import { FileUploader } from "@/components/attachments/file-uploader";
-import type { ActionResult, ActionState } from "@/lib/actions/types";
-import { createNews } from "../actions";
+import { Button, Input } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { createNews } from "../actions";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 type FileInfo = { file: File };
 
@@ -20,18 +20,12 @@ export function CreateNewsForm() {
     return createNews(_prev, formData);
   };
 
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    wrappedAction,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(wrappedAction, null);
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-6">
       {state?.message && !state.success && (
-        <div
-          role="alert"
-          className="rounded-md bg-danger/10 px-4 py-3 text-sm text-danger"
-        >
+        <div role="alert" className="rounded-md bg-danger/10 px-4 py-3 text-sm text-danger">
           {state.message}
         </div>
       )}
@@ -56,11 +50,7 @@ export function CreateNewsForm() {
         />
       </div>
 
-      <FileUploader
-        files={pendingFiles}
-        onChange={setPendingFiles}
-        disabled={isPending}
-      />
+      <FileUploader files={pendingFiles} onChange={setPendingFiles} disabled={isPending} />
 
       <div className="flex justify-end">
         <Button type="submit" loading={isPending}>

@@ -94,10 +94,7 @@ describe("documents actions", () => {
       const fd = new FormData();
       fd.append("title", "Test Doc");
       fd.append("category", "お便り");
-      fd.append(
-        "file",
-        new File(["content"], "test.pdf", { type: "application/pdf" })
-      );
+      fd.append("file", new File(["content"], "test.pdf", { type: "application/pdf" }));
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
@@ -108,10 +105,7 @@ describe("documents actions", () => {
 
       const fd = new FormData();
       fd.append("category", "お便り");
-      fd.append(
-        "file",
-        new File(["content"], "test.pdf", { type: "application/pdf" })
-      );
+      fd.append("file", new File(["content"], "test.pdf", { type: "application/pdf" }));
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
@@ -124,10 +118,7 @@ describe("documents actions", () => {
       const fd = new FormData();
       fd.append("title", "Test");
       fd.append("category", "invalid");
-      fd.append(
-        "file",
-        new File(["content"], "test.pdf", { type: "application/pdf" })
-      );
+      fd.append("file", new File(["content"], "test.pdf", { type: "application/pdf" }));
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
@@ -155,10 +146,7 @@ describe("documents actions", () => {
       const fd = new FormData();
       fd.append("title", "Test");
       fd.append("category", "お便り");
-      fd.append(
-        "file",
-        new File(["content"], "test.pdf", { type: "application/pdf" })
-      );
+      fd.append("file", new File(["content"], "test.pdf", { type: "application/pdf" }));
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
@@ -172,10 +160,7 @@ describe("documents actions", () => {
       const fd = new FormData();
       fd.append("title", "Test");
       fd.append("category", "お便り");
-      fd.append(
-        "file",
-        new File(["content"], "test.pdf", { type: "application/pdf" })
-      );
+      fd.append("file", new File(["content"], "test.pdf", { type: "application/pdf" }));
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
@@ -192,10 +177,7 @@ describe("documents actions", () => {
       const fd = new FormData();
       fd.append("title", "Test");
       fd.append("category", "お便り");
-      fd.append(
-        "file",
-        new File(["content"], "test.pdf", { type: "application/pdf" })
-      );
+      fd.append("file", new File(["content"], "test.pdf", { type: "application/pdf" }));
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(true);

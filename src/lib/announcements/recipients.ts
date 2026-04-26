@@ -20,17 +20,19 @@ export interface ParsedRecipients {
 }
 
 /** FormData から送信対象を取り出して検証する */
-export function parseRecipientsFromFormData(formData: FormData): {
-  ok: true;
-  value: ParsedRecipients;
-} | {
-  ok: false;
-  message: string;
-} {
+export function parseRecipientsFromFormData(formData: FormData):
+  | {
+      ok: true;
+      value: ParsedRecipients;
+    }
+  | {
+      ok: false;
+      message: string;
+    } {
   const rawAudience = formData.get("audience");
   if (
-    typeof rawAudience !== "string"
-    || !RECIPIENT_AUDIENCES.includes(rawAudience as RecipientAudience)
+    typeof rawAudience !== "string" ||
+    !RECIPIENT_AUDIENCES.includes(rawAudience as RecipientAudience)
   ) {
     return { ok: false, message: "送信対象の指定が不正です" };
   }
@@ -79,10 +81,7 @@ export function buildRecipientRows(
 }
 
 /** 通知先ユーザーIDを recipient 行から解決する */
-export function resolveTargetUserIds(
-  rows: RecipientRow[],
-  allParentIds: string[],
-): string[] {
+export function resolveTargetUserIds(rows: RecipientRow[], allParentIds: string[]): string[] {
   const result = new Set<string>();
   let includeAll = false;
   for (const r of rows) {

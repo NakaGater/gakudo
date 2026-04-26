@@ -29,9 +29,7 @@ test.describe("Flow 15: CMS / HP management (admin)", () => {
   test("site news list renders", async ({ page }) => {
     await page.goto("/admin/site/news");
     await expect(page.getByText("お知らせ管理")).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByRole("link", { name: "新規作成" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "新規作成" })).toBeVisible();
   });
 
   test("can create a news article", async ({ page }) => {

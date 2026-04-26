@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useTransition, useCallback } from "react";
 import Link from "next/link";
+import { useState, useRef, useTransition, useCallback } from "react";
 import { QRScanner } from "@/components/qr/qr-scanner";
 import { recordAttendance } from "./actions";
 import { AttendanceResult } from "./attendance-result";
@@ -24,39 +24,36 @@ export default function QrScannerPage() {
   const lastScannedRef = useRef<string>("");
   const cooldownRef = useRef(false);
 
-  const processQrCode = useCallback(
-    (qrCode: string) => {
-      if (!qrCode?.trim() || cooldownRef.current) return;
-      if (qrCode === lastScannedRef.current) return;
+  const processQrCode = useCallback((qrCode: string) => {
+    if (!qrCode?.trim() || cooldownRef.current) return;
+    if (qrCode === lastScannedRef.current) return;
 
-      lastScannedRef.current = qrCode;
-      cooldownRef.current = true;
-      setTimeout(() => {
-        cooldownRef.current = false;
-        lastScannedRef.current = "";
-      }, 3000);
+    lastScannedRef.current = qrCode;
+    cooldownRef.current = true;
+    setTimeout(() => {
+      cooldownRef.current = false;
+      lastScannedRef.current = "";
+    }, 3000);
 
-      setError(null);
-      startTransition(async () => {
-        const res = await recordAttendance(qrCode.trim());
-        if (res.success && res.childName && res.type && res.recordedAt) {
-          setResult({
-            type: res.type,
-            childName: res.childName,
-            recordedAt: res.recordedAt,
-          });
-          if (res.type === "enter") {
-            enterAudioRef.current?.play().catch(() => {});
-          } else {
-            exitAudioRef.current?.play().catch(() => {});
-          }
+    setError(null);
+    startTransition(async () => {
+      const res = await recordAttendance(qrCode.trim());
+      if (res.success && res.childName && res.type && res.recordedAt) {
+        setResult({
+          type: res.type,
+          childName: res.childName,
+          recordedAt: res.recordedAt,
+        });
+        if (res.type === "enter") {
+          enterAudioRef.current?.play().catch(() => {});
         } else {
-          setError(res.message);
+          exitAudioRef.current?.play().catch(() => {});
         }
-      });
-    },
-    [],
-  );
+      } else {
+        setError(res.message);
+      }
+    });
+  }, []);
 
   const handleScan = useCallback(
     (decodedText: string) => {
@@ -87,10 +84,7 @@ export default function QrScannerPage() {
       {/* QR Scanner */}
       {scannerEnabled ? (
         <div className="qr-frame" style={{ aspectRatio: "1", maxWidth: 320 }}>
-          <QRScanner
-            onScan={handleScan}
-            onError={handleCameraError}
-          />
+          <QRScanner onScan={handleScan} onError={handleCameraError} />
           <div className="qr-frame__inner" />
           <div className="qr-frame__scan" />
         </div>
@@ -98,9 +92,7 @@ export default function QrScannerPage() {
         <div className="qr-frame" style={{ aspectRatio: "1", maxWidth: 320 }}>
           <div className="qr-frame__inner" />
           <div className="qr-frame__hint">
-            {cameraError
-              ? "カメラにアクセスできません"
-              : "スキャナーが停止中です"}
+            {cameraError ? "カメラにアクセスできません" : "スキャナーが停止中です"}
             <br />
             <button
               className="btn btn-outline btn-sm"
@@ -131,11 +123,16 @@ export default function QrScannerPage() {
       </form>
 
       {error && (
-        <p role="alert" style={{ color: "var(--absent)", fontSize: 13, marginTop: 8 }}>{error}</p>
+        <p role="alert" style={{ color: "var(--absent)", fontSize: 13, marginTop: 8 }}>
+          {error}
+        </p>
       )}
 
       <div style={{ marginTop: 20, textAlign: "center" }}>
-        <Link href="/attendance/manual" style={{ fontSize: 12, color: "var(--ink-light)", fontFamily: "var(--font-hand)" }}>
+        <Link
+          href="/attendance/manual"
+          style={{ fontSize: 12, color: "var(--ink-light)", fontFamily: "var(--font-hand)" }}
+        >
           ✏️ 手動入力ページへ
         </Link>
       </div>

@@ -15,8 +15,6 @@ test.describe("Flow 8: Billing (US-17)", () => {
 
   test("billing rules page renders", async ({ page }) => {
     await page.goto("/billing/rules");
-    await expect(
-      page.getByRole("heading", { name: "料金ルール" }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "料金ルール" })).toBeVisible({ timeout: 10000 });
   });
 });

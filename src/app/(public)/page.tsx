@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { TEXT_LIMITS } from "@/config/constants";
-import { HeroSlideshow } from "./components/hero-slideshow";
-import { getFeatureIcon } from "@/config/feature-icons";
 import { MapPin, Clock, Send } from "lucide-react";
+import Link from "next/link";
 import { InquiryForm } from "@/app/(public)/access/inquiry-form";
+import { TEXT_LIMITS } from "@/config/constants";
+import { getFeatureIcon } from "@/config/feature-icons";
+import { createClient } from "@/lib/supabase/server";
+import { HeroSlideshow } from "./components/hero-slideshow";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "星ヶ丘こどもクラブ — 子どもたちの笑顔あふれる放課後を",
@@ -37,8 +37,7 @@ const DEFAULT_FEATURES: FeatureItem[] = [
   {
     icon: "Calendar",
     title: "季節の行事",
-    description:
-      "お花見、七夕、クリスマス会など四季折々の行事を通じて、豊かな思い出を育みます。",
+    description: "お花見、七夕、クリスマス会など四季折々の行事を通じて、豊かな思い出を育みます。",
   },
   {
     icon: "Apple",
@@ -66,11 +65,7 @@ export default async function HomePage() {
 
     // 3クエリを並列実行（アクセス情報はhomeメタデータに統合）
     const [homeResult, photosResult, newsResult] = await Promise.all([
-      supabase
-        .from("site_pages")
-        .select("title, content, metadata")
-        .eq("slug", "home")
-        .single(),
+      supabase.from("site_pages").select("title, content, metadata").eq("slug", "home").single(),
       supabase
         .from("photos")
         .select("storage_path")
@@ -83,7 +78,11 @@ export default async function HomePage() {
         .order("published_at", { ascending: false }),
     ]);
 
-    const homePage = homeResult.data as { title: string; content: string; metadata: Record<string, unknown> } | null;
+    const homePage = homeResult.data as {
+      title: string;
+      content: string;
+      metadata: Record<string, unknown>;
+    } | null;
     if (homePage?.content) {
       heroText = homePage.content;
     }
@@ -117,7 +116,9 @@ export default async function HomePage() {
       );
     }
 
-    const news = newsResult.data as { id: string; title: string; body: string; published_at: string }[] | null;
+    const news = newsResult.data as
+      | { id: string; title: string; body: string; published_at: string }[]
+      | null;
     if (news && news.length > 0) {
       newsItems = news;
     }
@@ -129,19 +130,34 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="relative px-5 pt-6 md:px-10 md:pt-10">
         {/* Ambient stars */}
-        <span className="absolute top-[8%] right-[12%] text-[10px] opacity-30 animate-float pointer-events-none hidden md:inline" style={{ color: "var(--cr-yellow)" }} aria-hidden="true">⭐</span>
-        <span className="absolute top-[5%] left-[8%] text-[7px] opacity-30 animate-float pointer-events-none hidden md:inline" style={{ color: "var(--cr-yellow)", animationDelay: "2s" }} aria-hidden="true">⭐</span>
+        <span
+          className="absolute top-[8%] right-[12%] text-[10px] opacity-30 animate-float pointer-events-none hidden md:inline"
+          style={{ color: "var(--cr-yellow)" }}
+          aria-hidden="true"
+        >
+          ⭐
+        </span>
+        <span
+          className="absolute top-[5%] left-[8%] text-[7px] opacity-30 animate-float pointer-events-none hidden md:inline"
+          style={{ color: "var(--cr-yellow)", animationDelay: "2s" }}
+          aria-hidden="true"
+        >
+          ⭐
+        </span>
 
         <div className="grid items-center gap-6 md:gap-8 grid-cols-1 md:grid-cols-[1.1fr_0.9fr]">
           {/* Text side */}
           <div>
             <div className="mb-3 font-hand text-xs text-cr-orange">📖 だい１しょう</div>
-            <h1 className="font-story font-black text-ink ink-bleed" style={{
-              fontSize: "clamp(28px, 6vw, 46px)",
-              lineHeight: "1.18",
-              letterSpacing: "-.025em",
-              textWrap: "balance",
-            }}>
+            <h1
+              className="font-story font-black text-ink ink-bleed"
+              style={{
+                fontSize: "clamp(28px, 6vw, 46px)",
+                lineHeight: "1.18",
+                letterSpacing: "-.025em",
+                textWrap: "balance",
+              }}
+            >
               {heroTitle.split("\n").map((line, i, arr) => (
                 <span key={i}>
                   {line.includes(heroEmphasis) ? (
@@ -157,7 +173,10 @@ export default async function HomePage() {
                 </span>
               ))}
             </h1>
-            <p className="mt-3 text-[13px] leading-[1.9] text-ink-mid" style={{ maxWidth: "420px" }}>
+            <p
+              className="mt-3 text-[13px] leading-[1.9] text-ink-mid"
+              style={{ maxWidth: "420px" }}
+            >
               {heroText}
             </p>
             <div className="mt-5 flex flex-wrap gap-2.5">
@@ -178,54 +197,175 @@ export default async function HomePage() {
 
           {/* Hero illustration — craft landscape with 星ちゃん + slideshow */}
           <HeroSlideshow photoUrls={photoUrls}>
-            <div className="relative overflow-hidden"
-              style={{ height: "280px", background: "linear-gradient(180deg, #FFF9E6 0%, #FDEBD0 25%, #D5F5E3 65%, #3A8A64 100%)" }}
+            <div
+              className="relative overflow-hidden"
+              style={{
+                height: "280px",
+                background:
+                  "linear-gradient(180deg, #FFF9E6 0%, #FDEBD0 25%, #D5F5E3 65%, #3A8A64 100%)",
+              }}
             >
               {/* Watercolor overlay */}
-              <div className="absolute inset-0 z-[3] pointer-events-none" style={{
-                background: "radial-gradient(ellipse at 30% 60%, rgba(255,217,61,.08) 0%, transparent 40%), radial-gradient(ellipse at 70% 30%, rgba(200,110,138,.06) 0%, transparent 35%), radial-gradient(ellipse at 50% 80%, rgba(58,138,100,.06) 0%, transparent 40%)",
-                mixBlendMode: "multiply"
-              }} />
+              <div
+                className="absolute inset-0 z-[3] pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 30% 60%, rgba(255,217,61,.08) 0%, transparent 40%), radial-gradient(ellipse at 70% 30%, rgba(200,110,138,.06) 0%, transparent 35%), radial-gradient(ellipse at 50% 80%, rgba(58,138,100,.06) 0%, transparent 40%)",
+                  mixBlendMode: "multiply",
+                }}
+              />
               {/* Stars */}
-              <span className="absolute top-[8%] left-[12%] text-[10px]" style={{ color: "var(--cr-yellow)", opacity: .3, animation: "starPulse 8s ease-in-out infinite" }} aria-hidden="true">⭐</span>
-              <span className="absolute top-[5%] right-[18%] text-[7px]" style={{ color: "var(--cr-yellow)", opacity: .3, animation: "starPulse 8s ease-in-out infinite", animationDelay: "2s" }} aria-hidden="true">⭐</span>
-              <span className="absolute top-[14%] left-[42%] text-[6px]" style={{ color: "var(--cr-yellow)", opacity: .3, animation: "starPulse 8s ease-in-out infinite", animationDelay: "4s" }} aria-hidden="true">⭐</span>
-              <span className="absolute top-[10%] right-[30%] text-[8px]" style={{ color: "var(--cr-yellow)", opacity: .3, animation: "starPulse 8s ease-in-out infinite", animationDelay: "1s" }} aria-hidden="true">⭐</span>
+              <span
+                className="absolute top-[8%] left-[12%] text-[10px]"
+                style={{
+                  color: "var(--cr-yellow)",
+                  opacity: 0.3,
+                  animation: "starPulse 8s ease-in-out infinite",
+                }}
+                aria-hidden="true"
+              >
+                ⭐
+              </span>
+              <span
+                className="absolute top-[5%] right-[18%] text-[7px]"
+                style={{
+                  color: "var(--cr-yellow)",
+                  opacity: 0.3,
+                  animation: "starPulse 8s ease-in-out infinite",
+                  animationDelay: "2s",
+                }}
+                aria-hidden="true"
+              >
+                ⭐
+              </span>
+              <span
+                className="absolute top-[14%] left-[42%] text-[6px]"
+                style={{
+                  color: "var(--cr-yellow)",
+                  opacity: 0.3,
+                  animation: "starPulse 8s ease-in-out infinite",
+                  animationDelay: "4s",
+                }}
+                aria-hidden="true"
+              >
+                ⭐
+              </span>
+              <span
+                className="absolute top-[10%] right-[30%] text-[8px]"
+                style={{
+                  color: "var(--cr-yellow)",
+                  opacity: 0.3,
+                  animation: "starPulse 8s ease-in-out infinite",
+                  animationDelay: "1s",
+                }}
+                aria-hidden="true"
+              >
+                ⭐
+              </span>
               {/* Birds */}
-              <span className="absolute top-[12%] right-[12%] text-sm opacity-45" aria-hidden="true">🐦</span>
-              <span className="absolute top-[9%] right-[7%] text-xs opacity-35 -scale-x-100" aria-hidden="true">🐦</span>
+              <span
+                className="absolute top-[12%] right-[12%] text-sm opacity-45"
+                aria-hidden="true"
+              >
+                🐦
+              </span>
+              <span
+                className="absolute top-[9%] right-[7%] text-xs opacity-35 -scale-x-100"
+                aria-hidden="true"
+              >
+                🐦
+              </span>
               {/* Hills */}
-              <svg className="absolute bottom-0 w-full z-[1]" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+              <svg
+                className="absolute bottom-0 w-full z-[1]"
+                viewBox="0 0 400 120"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
                 <path d="M0 80Q100 20 200 50T400 30V120H0Z" fill="#3A8A64" opacity=".25" />
                 <path d="M0 90Q150 40 250 65T400 50V120H0Z" fill="#3A8A64" opacity=".18" />
               </svg>
               {/* Building */}
-              <svg className="absolute bottom-[22%] left-1/2 -translate-x-1/2 w-[90px] z-[2]" viewBox="0 0 100 85" aria-hidden="true">
+              <svg
+                className="absolute bottom-[22%] left-1/2 -translate-x-1/2 w-[90px] z-[2]"
+                viewBox="0 0 100 85"
+                aria-hidden="true"
+              >
                 <rect x="5" y="20" width="90" height="65" rx="3" fill="#D14B40" opacity=".2" />
                 <rect x="15" y="36" width="16" height="16" rx="2" fill="white" opacity=".5" />
                 <rect x="42" y="36" width="16" height="16" rx="2" fill="white" opacity=".5" />
                 <rect x="69" y="36" width="16" height="16" rx="2" fill="white" opacity=".5" />
                 <rect x="38" y="60" width="24" height="25" rx="2" fill="#D14B40" opacity=".25" />
                 <polygon points="50,0 0,20 100,20" fill="#D14B40" opacity=".18" />
-                <path d="M50 4l2.5 7.5h8l-6 4.5 2 7-6.5-5-6.5 5 2-7-6-4.5h8z" fill="#FFD93D" opacity=".9" />
+                <path
+                  d="M50 4l2.5 7.5h8l-6 4.5 2 7-6.5-5-6.5 5 2-7-6-4.5h8z"
+                  fill="#FFD93D"
+                  opacity=".9"
+                />
               </svg>
               {/* 星ちゃん mascot on roof */}
               <div className="absolute bottom-[46%] left-1/2 -translate-x-1/2 z-[3]">
                 <svg width="30" height="36" viewBox="0 0 32 38" aria-hidden="true">
-                  <path d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z" fill="#FFD93D" stroke="#E8B830" strokeWidth="1.5"/>
-                  <circle cx="12" cy="14" r="1.5" fill="#3B2F20"/>
-                  <circle cx="20" cy="14" r="1.5" fill="#3B2F20"/>
-                  <circle cx="9" cy="17" r="2" fill="#FFB5C5" opacity=".55"/>
-                  <circle cx="23" cy="17" r="2" fill="#FFB5C5" opacity=".55"/>
-                  <path d="M12 18 Q16 22 20 18" fill="none" stroke="#3B2F20" strokeWidth="1.2" strokeLinecap="round"/>
-                  <line x1="27" y1="16" x2="31" y2="10" stroke="#E8B830" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="5" y1="16" x2="1" y2="18" stroke="#E8B830" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="10" y1="28" x2="9" y2="34" stroke="#E8B830" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="22" y1="28" x2="23" y2="34" stroke="#E8B830" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path
+                    d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z"
+                    fill="#FFD93D"
+                    stroke="#E8B830"
+                    strokeWidth="1.5"
+                  />
+                  <circle cx="12" cy="14" r="1.5" fill="#3B2F20" />
+                  <circle cx="20" cy="14" r="1.5" fill="#3B2F20" />
+                  <circle cx="9" cy="17" r="2" fill="#FFB5C5" opacity=".55" />
+                  <circle cx="23" cy="17" r="2" fill="#FFB5C5" opacity=".55" />
+                  <path
+                    d="M12 18 Q16 22 20 18"
+                    fill="none"
+                    stroke="#3B2F20"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="27"
+                    y1="16"
+                    x2="31"
+                    y2="10"
+                    stroke="#E8B830"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="5"
+                    y1="16"
+                    x2="1"
+                    y2="18"
+                    stroke="#E8B830"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="10"
+                    y1="28"
+                    x2="9"
+                    y2="34"
+                    stroke="#E8B830"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="22"
+                    y1="28"
+                    x2="23"
+                    y2="34"
+                    stroke="#E8B830"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
               {/* Colored balls */}
-              <div className="absolute bottom-[10%] left-[18%] z-[2] flex gap-3.5" aria-hidden="true">
+              <div
+                className="absolute bottom-[10%] left-[18%] z-[2] flex gap-3.5"
+                aria-hidden="true"
+              >
                 <div className="w-4 h-4 rounded-full bg-cr-red opacity-35" />
                 <div className="w-4 h-4 rounded-full bg-cr-blue opacity-35" />
                 <div className="w-4 h-4 rounded-full bg-star opacity-35" />
@@ -236,7 +376,13 @@ export default async function HomePage() {
       </section>
 
       {/* Features — sticky note grid */}
-      <section className="px-5 py-8 md:px-10 md:py-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(255,217,61,.03) 50%, transparent 100%)" }}>
+      <section
+        className="px-5 py-8 md:px-10 md:py-10"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent 0%, rgba(255,217,61,.03) 50%, transparent 100%)",
+        }}
+      >
         <div className="text-center mb-5">
           <h2 className="font-story font-black text-ink inline-block" style={{ fontSize: "22px" }}>
             <span className="crayon-underline">{featuresHeading}</span>
@@ -247,10 +393,30 @@ export default async function HomePage() {
           {featureItems.map((feature, i) => {
             const IconComponent = getFeatureIcon(feature.icon);
             const stickyColors = [
-              { bg: "sticky-note--yellow", iconBg: "#FFE5D5", iconColor: "var(--cr-orange)", iconBorder: "var(--cr-orange)" },
-              { bg: "sticky-note--green", iconBg: "#D5F5E3", iconColor: "var(--cr-green)", iconBorder: "var(--cr-green)" },
-              { bg: "sticky-note--blue", iconBg: "#D6EEF8", iconColor: "var(--cr-blue)", iconBorder: "var(--cr-blue)" },
-              { bg: "sticky-note--pink", iconBg: "#FFE0E8", iconColor: "var(--cr-pink)", iconBorder: "var(--cr-pink)" },
+              {
+                bg: "sticky-note--yellow",
+                iconBg: "#FFE5D5",
+                iconColor: "var(--cr-orange)",
+                iconBorder: "var(--cr-orange)",
+              },
+              {
+                bg: "sticky-note--green",
+                iconBg: "#D5F5E3",
+                iconColor: "var(--cr-green)",
+                iconBorder: "var(--cr-green)",
+              },
+              {
+                bg: "sticky-note--blue",
+                iconBg: "#D6EEF8",
+                iconColor: "var(--cr-blue)",
+                iconBorder: "var(--cr-blue)",
+              },
+              {
+                bg: "sticky-note--pink",
+                iconBg: "#FFE0E8",
+                iconColor: "var(--cr-pink)",
+                iconBorder: "var(--cr-pink)",
+              },
             ];
             const s = stickyColors[i % stickyColors.length];
             return (
@@ -286,23 +452,28 @@ export default async function HomePage() {
           background: "var(--page-deep)",
         }}
       >
-        <h2 className="font-story font-black text-ink mb-4 text-center" style={{ fontSize: "20px" }}>
+        <h2
+          className="font-story font-black text-ink mb-4 text-center"
+          style={{ fontSize: "20px" }}
+        >
           <span className="crayon-underline">お知らせ</span>
         </h2>
         {newsItems.length > 0 ? (
           <div className="flex flex-col gap-3 max-w-2xl mx-auto">
             {newsItems.map((item) => (
-              <Link
-                key={item.id}
-                href={`/news/${item.id}`}
-                className="news-card"
-              >
+              <Link key={item.id} href={`/news/${item.id}`} className="news-card">
                 <p className="news-card__date">
-                  {new Date(item.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+                  {new Date(item.published_at).toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </p>
                 <h3 className="news-card__title">{item.title}</h3>
                 <p className="news-card__body">
-                  {item.body.length > TEXT_LIMITS.PREVIEW_EXCERPT_LENGTH ? `${item.body.slice(0, TEXT_LIMITS.PREVIEW_EXCERPT_LENGTH)}…` : item.body}
+                  {item.body.length > TEXT_LIMITS.PREVIEW_EXCERPT_LENGTH
+                    ? `${item.body.slice(0, TEXT_LIMITS.PREVIEW_EXCERPT_LENGTH)}…`
+                    : item.body}
                 </p>
               </Link>
             ))}
@@ -319,7 +490,8 @@ export default async function HomePage() {
             <span className="crayon-underline">アクセス</span>
           </h2>
           <p className="text-[13px] text-ink-mid mt-1.5">
-            {(accessMeta?.subtitle as string) || "お気軽にお越しください。見学も随時受け付けております。"}
+            {(accessMeta?.subtitle as string) ||
+              "お気軽にお越しください。見学も随時受け付けております。"}
           </p>
         </div>
         <div className="mx-auto max-w-4xl">
@@ -352,14 +524,19 @@ export default async function HomePage() {
                 <MapPin size={20} className="mt-1 text-cr-orange shrink-0" />
                 <div>
                   <h3 className="font-bold font-story text-ink mb-1">所在地</h3>
-                  <p className="text-ink-mid text-sm leading-relaxed whitespace-pre-wrap">{accessContent || "住所未設定"}</p>
+                  <p className="text-ink-mid text-sm leading-relaxed whitespace-pre-wrap">
+                    {accessContent || "住所未設定"}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <Clock size={20} className="mt-1 text-cr-orange shrink-0" />
                 <div>
                   <h3 className="font-bold font-story text-ink mb-1">開所時間</h3>
-                  <p className="text-ink-mid text-sm whitespace-pre-wrap">{(accessMeta?.opening_hours as string) || "平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00"}</p>
+                  <p className="text-ink-mid text-sm whitespace-pre-wrap">
+                    {(accessMeta?.opening_hours as string) ||
+                      "平日: 放課後〜19:00\n土曜・長期休暇: 8:00〜19:00"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -368,19 +545,26 @@ export default async function HomePage() {
       </section>
 
       {/* Inquiry — 見学申し込み・お問い合わせフォーム（折りたたみ） */}
-      <details id="inquiry" className="group mx-5 mt-6 mb-8 md:mx-10 md:mt-8 md:mb-10" style={{
-        background: "var(--page-deep)",
-        border: "1px solid var(--page-edge)",
-        borderRadius: "12px",
-        overflow: "hidden",
-      }}>
+      <details
+        id="inquiry"
+        className="group mx-5 mt-6 mb-8 md:mx-10 md:mt-8 md:mb-10"
+        style={{
+          background: "var(--page-deep)",
+          border: "1px solid var(--page-edge)",
+          borderRadius: "12px",
+          overflow: "hidden",
+        }}
+      >
         <summary className="cursor-pointer list-none text-center px-5 py-6 md:px-9 md:py-7">
-          <div className="text-2xl mb-2"><Send size={24} className="inline text-cr-orange" /></div>
+          <div className="text-2xl mb-2">
+            <Send size={24} className="inline text-cr-orange" />
+          </div>
           <h2 className="font-story font-black text-ink" style={{ fontSize: "20px" }}>
             {(accessMeta?.visit_heading as string) || "見学申し込み・お問い合わせ"}
           </h2>
           <p className="text-sm text-ink-mid mt-2 whitespace-pre-wrap leading-relaxed">
-            {(accessMeta?.visit_text as string) || "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
+            {(accessMeta?.visit_text as string) ||
+              "入所をご検討中の方は、お気軽にお電話ください。\n施設の見学は随時受け付けております。"}
           </p>
           <span className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-[10px] border-2 border-page-edge bg-white px-[22px] py-[10px] text-sm font-bold font-story text-ink shadow-[0_2px_0_var(--page-edge)] transition-all hover:border-cr-orange hover:text-cr-orange hover:-translate-y-px group-open:hidden">
             ▼ フォームを開く

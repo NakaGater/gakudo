@@ -34,12 +34,15 @@ export function FaqPage({ title, content, metadata }: SlugPageProps) {
       <section style={{ padding: "0 24px 40px" }}>
         <div className="mx-auto max-w-3xl text-center">
           <div className="rounded-xl bg-page-deep border-2 border-page-edge p-6 shadow-[2px_2px_0_var(--page-edge)]">
-            <p className="text-sm text-ink font-story font-bold mb-2">
-              💬 その他のご質問は
-            </p>
+            <p className="text-sm text-ink font-story font-bold mb-2">💬 その他のご質問は</p>
             <p className="text-xs text-ink-mid leading-relaxed">
-              お気軽に<Link href="/#inquiry" className="text-cr-orange font-bold hover:underline">お問い合わせフォーム</Link>からご連絡ください。
-              <br />見学のお申し込みも随時受け付けております。
+              お気軽に
+              <Link href="/#inquiry" className="text-cr-orange font-bold hover:underline">
+                お問い合わせフォーム
+              </Link>
+              からご連絡ください。
+              <br />
+              見学のお申し込みも随時受け付けております。
             </p>
           </div>
         </div>

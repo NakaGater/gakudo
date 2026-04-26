@@ -34,72 +34,117 @@ describe("submitInquiry", () => {
   });
 
   it("requires type field", async () => {
-    const result = await submitInquiry(null, makeFormData({ name: "太郎", email: "a@b.c", message: "test" }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({ name: "太郎", email: "a@b.c", message: "test" }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("種別");
   });
 
   it("requires name field", async () => {
-    const result = await submitInquiry(null, makeFormData({ type: "visit", email: "a@b.c", message: "test" }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({ type: "visit", email: "a@b.c", message: "test" }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("お名前");
   });
 
   it("requires valid email", async () => {
-    const result = await submitInquiry(null, makeFormData({ type: "visit", name: "太郎", email: "invalid", message: "test" }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({ type: "visit", name: "太郎", email: "invalid", message: "test" }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("メールアドレス");
   });
 
   it("requires message field", async () => {
-    const result = await submitInquiry(null, makeFormData({ type: "visit", name: "太郎", email: "a@b.c" }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({ type: "visit", name: "太郎", email: "a@b.c" }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("メッセージ");
   });
 
   it("requires preferred_date for visit type", async () => {
-    const result = await submitInquiry(null, makeFormData({
-      type: "visit", name: "太郎", email: "a@b.c", message: "見学希望",
-    }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({
+        type: "visit",
+        name: "太郎",
+        email: "a@b.c",
+        message: "見学希望",
+      }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("希望日時");
   });
 
   it("does not require preferred_date for general type", async () => {
-    const result = await submitInquiry(null, makeFormData({
-      type: "general", name: "太郎", email: "a@b.c", message: "質問です",
-    }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({
+        type: "general",
+        name: "太郎",
+        email: "a@b.c",
+        message: "質問です",
+      }),
+    );
     expect(result?.success).toBe(true);
   });
 
   it("succeeds with valid visit data", async () => {
-    const result = await submitInquiry(null, makeFormData({
-      type: "visit", name: "太郎", email: "a@b.c", message: "見学希望", preferred_date: "12月15日",
-    }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({
+        type: "visit",
+        name: "太郎",
+        email: "a@b.c",
+        message: "見学希望",
+        preferred_date: "12月15日",
+      }),
+    );
     expect(result?.success).toBe(true);
     expect(result?.message).toContain("受け付けました");
     expect(mockFrom).toHaveBeenCalledWith("inquiries");
-    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
-      type: "visit",
-      name: "太郎",
-      email: "a@b.c",
-      preferred_date: "12月15日",
-    }));
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "visit",
+        name: "太郎",
+        email: "a@b.c",
+        preferred_date: "12月15日",
+      }),
+    );
   });
 
   it("returns error when DB insert fails", async () => {
     mockInsert.mockResolvedValue({ error: { message: "DB error" } });
-    const result = await submitInquiry(null, makeFormData({
-      type: "general", name: "太郎", email: "a@b.c", message: "質問",
-    }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({
+        type: "general",
+        name: "太郎",
+        email: "a@b.c",
+        message: "質問",
+      }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("失敗");
   });
 
   it("rejects invalid type values", async () => {
-    const result = await submitInquiry(null, makeFormData({
-      type: "invalid", name: "太郎", email: "a@b.c", message: "test",
-    }));
+    const result = await submitInquiry(
+      null,
+      makeFormData({
+        type: "invalid",
+        name: "太郎",
+        email: "a@b.c",
+        message: "test",
+      }),
+    );
     expect(result?.success).toBe(false);
     expect(result?.message).toContain("種別");
   });

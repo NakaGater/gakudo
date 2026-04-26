@@ -40,7 +40,9 @@ export function InstagramEmbeds({ posts }: InstagramEmbedProps) {
   return (
     <div className="gallery-event">
       <div className="gallery-event__hdr">
-        <span className="ge-emoji" style={{ marginRight: 6 }}>📸</span>
+        <span className="ge-emoji" style={{ marginRight: 6 }}>
+          📸
+        </span>
         Instagramから
       </div>
       <div className="ig-grid">
@@ -71,9 +73,7 @@ export function InstagramEmbeds({ posts }: InstagramEmbedProps) {
                 Instagramで見る
               </a>
             </blockquote>
-            {post.caption && (
-              <p className="ig-embed-caption">{post.caption}</p>
-            )}
+            {post.caption && <p className="ig-embed-caption">{post.caption}</p>}
           </div>
         ))}
       </div>

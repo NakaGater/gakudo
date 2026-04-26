@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { GalleryGrid, type GalleryPhoto } from "./gallery-grid";
 import { InstagramEmbeds } from "./instagram-embeds";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "フォトギャラリー | 星ヶ丘こどもクラブ",
-  description:
-    "星ヶ丘こどもクラブの活動風景やイベントの写真をご覧いただけます。",
+  description: "星ヶ丘こどもクラブの活動風景やイベントの写真をご覧いただけます。",
 };
 
 function buildPublicUrl(storagePath: string): string {

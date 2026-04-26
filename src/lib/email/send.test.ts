@@ -92,7 +92,7 @@ describe("sendEmail", () => {
 
     const { sendEmail } = await import("./send");
     await expect(
-      sendEmail({ to: "user@example.com", subject: "テスト", text: "本文" })
+      sendEmail({ to: "user@example.com", subject: "テスト", text: "本文" }),
     ).rejects.toThrow("Mailpit send failed: 500");
   });
 

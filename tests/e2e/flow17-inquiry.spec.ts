@@ -109,7 +109,9 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
     await page.getByText(testName).first().click();
 
     // 詳細ページの内容
-    await expect(page.getByText(`${testName} さんからのお問い合わせ`)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(`${testName} さんからのお問い合わせ`)).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText("detail-test@example.com")).toBeVisible();
     await expect(page.getByText("090-1234-5678")).toBeVisible();
     await expect(page.getByText("1月10日 14:00")).toBeVisible();

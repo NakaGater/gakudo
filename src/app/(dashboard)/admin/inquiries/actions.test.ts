@@ -23,7 +23,11 @@ const { mockSingle, mockUpdate, mockFrom } = vi.hoisted(() => {
     if (table === "inquiries") {
       return {
         select: (...args: unknown[]) => {
-          if (typeof args[1] === "object" && args[1] !== null && "count" in (args[1] as Record<string, unknown>)) {
+          if (
+            typeof args[1] === "object" &&
+            args[1] !== null &&
+            "count" in (args[1] as Record<string, unknown>)
+          ) {
             return { eq: vi.fn().mockResolvedValue({ count: 3 }) };
           }
           if (args[0] === "*") {
@@ -65,7 +69,13 @@ vi.mock("@/lib/email/send", () => ({
   sendEmail: vi.fn().mockResolvedValue({ id: "test" }),
 }));
 
-import { getReplyTemplate, replyToInquiry, getInquiries, getInquiry, getPendingInquiryCount } from "./actions";
+import {
+  getReplyTemplate,
+  replyToInquiry,
+  getInquiries,
+  getInquiry,
+  getPendingInquiryCount,
+} from "./actions";
 
 describe("getInquiries", () => {
   beforeEach(() => {
@@ -182,7 +192,9 @@ describe("replyToInquiry", () => {
   });
 
   it("returns error when update fails", async () => {
-    mockUpdate.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: { message: "DB error" } }) });
+    mockUpdate.mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: { message: "DB error" } }),
+    });
     const result = await replyToInquiry("test-id", "approved", "承認します");
     expect(result.success).toBe(false);
     expect(result.message).toContain("更新に失敗");

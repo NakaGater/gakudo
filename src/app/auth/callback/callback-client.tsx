@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { exchangeCodeForSession, setSessionFromTokens } from "./actions";
 
 export function CallbackClient() {
@@ -24,9 +24,7 @@ export function CallbackClient() {
       }
 
       // Implicit flow: #access_token= ハッシュフラグメント
-      const hashStr =
-        sessionStorage.getItem("__auth_hash") ||
-        window.location.hash.substring(1);
+      const hashStr = sessionStorage.getItem("__auth_hash") || window.location.hash.substring(1);
       sessionStorage.removeItem("__auth_hash");
 
       if (!hashStr) {

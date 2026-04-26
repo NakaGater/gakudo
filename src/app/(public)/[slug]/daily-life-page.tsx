@@ -9,19 +9,22 @@ function stableRotation(seed: string): string {
 }
 
 export function DailyLifePage({ title, content, metadata }: SlugPageProps) {
-  const subtitle = (metadata?.subtitle as string) || "のびのび、すくすく。放課後の「もうひとつの家」";
-  const activities = (metadata?.activities as Array<{ emoji: string; title: string; description: string }>) || [];
-  const events = (metadata?.events as Array<{ emoji: string; title: string; season: string }>) || [];
+  const subtitle =
+    (metadata?.subtitle as string) || "のびのび、すくすく。放課後の「もうひとつの家」";
+  const activities =
+    (metadata?.activities as Array<{ emoji: string; title: string; description: string }>) || [];
+  const events =
+    (metadata?.events as Array<{ emoji: string; title: string; season: string }>) || [];
   const philosophyHeading = (metadata?.philosophy_heading as string) || "親と子の「共育ち」";
   const philosophyEmoji = (metadata?.philosophy_emoji as string) || "🤝";
   const philosophyText = (metadata?.philosophy_text as string) || "";
 
   const seasonColors: Record<string, string> = {
-    "春": "#FFE0F0",
-    "夏": "#D6EEF8",
-    "秋": "#FFF3CD",
-    "冬": "#E8F0FE",
-    "通年": "#D5F5E3",
+    春: "#FFE0F0",
+    夏: "#D6EEF8",
+    秋: "#FFF3CD",
+    冬: "#E8F0FE",
+    通年: "#D5F5E3",
   };
 
   return (
@@ -42,7 +45,10 @@ export function DailyLifePage({ title, content, metadata }: SlugPageProps) {
       {activities.length > 0 && (
         <section style={{ padding: "24px 24px" }}>
           <div className="mx-auto max-w-4xl">
-            <h2 className="font-story font-black text-ink text-center mb-6" style={{ fontSize: "20px" }}>
+            <h2
+              className="font-story font-black text-ink text-center mb-6"
+              style={{ fontSize: "20px" }}
+            >
               <span className="crayon-underline">毎日の活動</span>
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -62,9 +68,17 @@ export function DailyLifePage({ title, content, metadata }: SlugPageProps) {
       )}
 
       {events.length > 0 && (
-        <section style={{ padding: "24px 24px", background: "linear-gradient(180deg, transparent, rgba(255,217,61,.03), transparent)" }}>
+        <section
+          style={{
+            padding: "24px 24px",
+            background: "linear-gradient(180deg, transparent, rgba(255,217,61,.03), transparent)",
+          }}
+        >
           <div className="mx-auto max-w-4xl">
-            <h2 className="font-story font-black text-ink text-center mb-6" style={{ fontSize: "20px" }}>
+            <h2
+              className="font-story font-black text-ink text-center mb-6"
+              style={{ fontSize: "20px" }}
+            >
               <span className="crayon-underline">季節の行事</span>
             </h2>
             <div className="flex flex-wrap gap-3 justify-center">

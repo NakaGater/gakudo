@@ -1,6 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 import {
   AttendanceHistoryClient,
   type DayRecord,
@@ -51,10 +51,7 @@ type AttendanceRow = {
 };
 
 /** Group raw rows by date (JST) and pair enter/exit */
-function buildDayRecords(
-  allDates: string[],
-  rows: AttendanceRow[],
-): DayRecord[] {
+function buildDayRecords(allDates: string[], rows: AttendanceRow[]): DayRecord[] {
   // Group rows by JST date
   const byDate = new Map<string, AttendanceRow[]>();
   for (const r of rows) {
@@ -69,10 +66,7 @@ function buildDayRecords(
   return allDates.map((date) => {
     const dayRows = byDate.get(date) ?? [];
     // Sort chronologically
-    dayRows.sort(
-      (a, b) =>
-        new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime(),
-    );
+    dayRows.sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
 
     // Pair enter→exit
     const pairs: AttendancePair[] = [];
@@ -125,27 +119,22 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
   // Fetch children the user can see
   let childrenOptions: ChildOption[] = [];
   if (staff) {
-    const { data } = await supabase.from("children")
-      .select("id, name")
-      .order("name");
+    const { data } = await supabase.from("children").select("id, name").order("name");
     childrenOptions = (data ?? []) as ChildOption[];
   } else {
     // Parent: get children via child_parents
-    const { data } = await supabase.from("child_parents")
+    const { data } = await supabase
+      .from("child_parents")
       .select("child_id, children(id, name)")
       .eq("parent_id", user.id);
 
-    childrenOptions = (data ?? []).map(
-      (row: { children: { id: string; name: string } }) => ({
-        id: row.children.id,
-        name: row.children.name,
-      }),
-    );
+    childrenOptions = (data ?? []).map((row: { children: { id: string; name: string } }) => ({
+      id: row.children.id,
+      name: row.children.name,
+    }));
   }
 
-  const childIds = params.child
-    ? [params.child]
-    : childrenOptions.map((c) => c.id);
+  const childIds = params.child ? [params.child] : childrenOptions.map((c) => c.id);
 
   if (childIds.length === 0) {
     return (
@@ -161,7 +150,8 @@ export default async function AttendanceHistoryPage({ searchParams }: Props) {
   }
 
   // Fetch attendance records
-  let query = supabase.from("attendances")
+  let query = supabase
+    .from("attendances")
     .select("id, child_id, type, recorded_at")
     .gte("recorded_at", rangeStart)
     .lt("recorded_at", rangeEnd)

@@ -1,10 +1,10 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { getNavItems } from "./nav-items";
 import type { BadgeCounts } from "./get-badge-counts";
 import type { AuthUser } from "@/lib/auth/get-user";
@@ -23,7 +23,11 @@ export function Sidebar({ user, badgeCounts }: SidebarProps) {
     if (pathname === href) return true;
     if (href === "/attendance/dashboard" || href === "/attendance/status") return false;
     if (href === "/attendance") {
-      return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard" && pathname !== "/attendance/status";
+      return (
+        pathname.startsWith("/attendance/") &&
+        pathname !== "/attendance/dashboard" &&
+        pathname !== "/attendance/status"
+      );
     }
     if (href === "/photos") {
       return pathname.startsWith("/photos") || pathname.startsWith("/photos/instagram");
@@ -37,14 +41,25 @@ export function Sidebar({ user, badgeCounts }: SidebarProps) {
     window.location.href = "/";
   }
 
-  const roleLabel = user.role === "admin" ? "管理者" : user.role === "teacher" ? "先生" : user.role === "entrance" ? "入口端末" : "保護者";
+  const roleLabel =
+    user.role === "admin"
+      ? "管理者"
+      : user.role === "teacher"
+        ? "先生"
+        : user.role === "entrance"
+          ? "入口端末"
+          : "保護者";
 
   return (
     <aside className="sidebar hidden md:flex">
       <div className="sb__hd">
         <Link href={user.role === "parent" ? "/attendance/status" : "/attendance/dashboard"}>
           <span className="sb__mark">⭐</span>
-          <span className="sb__name">星ヶ丘<br />こどもクラブ</span>
+          <span className="sb__name">
+            星ヶ丘
+            <br />
+            こどもクラブ
+          </span>
         </Link>
       </div>
 
@@ -53,12 +68,10 @@ export function Sidebar({ user, badgeCounts }: SidebarProps) {
           const Icon = item.icon;
           const active = isActive(item.href);
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn("ni", active && "active")}
-            >
-              <span className="ni__ic"><Icon size={16} strokeWidth={2} /></span>
+            <Link key={item.href} href={item.href} className={cn("ni", active && "active")}>
+              <span className="ni__ic">
+                <Icon size={16} strokeWidth={2} />
+              </span>
               {item.label}
               {item.href === "/admin/inquiries" && pendingInquiries > 0 && (
                 <span className="ml-auto inline-flex items-center justify-center rounded-full bg-cr-red text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1">
@@ -76,7 +89,10 @@ export function Sidebar({ user, badgeCounts }: SidebarProps) {
       </nav>
 
       <div className="sb__ft">
-        <Link href="/profile" className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity">
+        <Link
+          href="/profile"
+          className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+        >
           <div className="sb__av">{user.name.charAt(0)}</div>
           <div className="min-w-0 flex-1">
             <div className="sb__uname truncate">{user.name}</div>

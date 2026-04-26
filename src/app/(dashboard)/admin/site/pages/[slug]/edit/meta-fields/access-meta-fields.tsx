@@ -2,10 +2,7 @@
 
 import type { MetaFieldsProps } from "./types";
 
-export function AccessMetaFields({
-  meta,
-  updateMeta,
-}: MetaFieldsProps) {
+export function AccessMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   return (
     <fieldset className="border border-border rounded-md p-2 sm:p-4 w-full box-border">
       <legend className="text-sm font-bold text-fg px-2">アクセス情報</legend>

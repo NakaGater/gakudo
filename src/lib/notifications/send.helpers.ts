@@ -27,11 +27,7 @@ export function truncateForPush(body: string): string {
 }
 
 /** push 通知用 JSON ペイロードを生成 (本文は自動で truncate) */
-export function buildAnnouncementPayload(
-  title: string,
-  body: string,
-  url: string,
-): string {
+export function buildAnnouncementPayload(title: string, body: string, url: string): string {
   return JSON.stringify({ title, body: truncateForPush(body), url });
 }
 

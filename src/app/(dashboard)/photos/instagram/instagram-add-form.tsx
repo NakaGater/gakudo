@@ -47,9 +47,7 @@ export function InstagramAddForm() {
       {state?.message && !state.success && (
         <p className="text-cr-red text-xs mt-2">{state.message}</p>
       )}
-      {state?.success && (
-        <p className="text-cr-green text-xs mt-2">✅ 登録しました</p>
-      )}
+      {state?.success && <p className="text-cr-green text-xs mt-2">✅ 登録しました</p>}
     </form>
   );
 }

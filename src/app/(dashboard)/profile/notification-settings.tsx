@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -77,7 +77,9 @@ export function NotificationSettings() {
       if (res.ok) {
         setStatus("enabled");
         // Clear any dismissed prompt state
-        try { localStorage.removeItem("push-prompt-dismissed"); } catch {}
+        try {
+          localStorage.removeItem("push-prompt-dismissed");
+        } catch {}
       }
     } catch (err) {
       console.error("Push enable failed:", err);
@@ -136,23 +138,13 @@ export function NotificationSettings() {
         )}
 
         {status === "enabled" && (
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={busy}
-            onClick={handleDisable}
-          >
+          <Button variant="secondary" size="sm" loading={busy} onClick={handleDisable}>
             通知を無効にする
           </Button>
         )}
 
         {status === "disabled" && (
-          <Button
-            variant="primary"
-            size="sm"
-            loading={busy}
-            onClick={handleEnable}
-          >
+          <Button variant="primary" size="sm" loading={busy} onClick={handleEnable}>
             通知を有効にする
           </Button>
         )}

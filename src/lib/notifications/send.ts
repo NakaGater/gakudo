@@ -1,10 +1,7 @@
 import webpush from "web-push";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveTargetUserIds, type RecipientRow } from "@/lib/announcements/recipients";
 import { sendEmail } from "@/lib/email/send";
-import {
-  resolveTargetUserIds,
-  type RecipientRow,
-} from "@/lib/announcements/recipients";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   partitionByMethod,
   buildAnnouncementPayload,
@@ -40,10 +37,7 @@ export async function sendAnnouncementNotification(
     .eq("announcement_id", announcementId);
 
   if (recipientsError) {
-    console.error(
-      "[notifications] Failed to fetch recipients:",
-      recipientsError.message,
-    );
+    console.error("[notifications] Failed to fetch recipients:", recipientsError.message);
     return;
   }
 
@@ -60,10 +54,7 @@ export async function sendAnnouncementNotification(
       .select("id")
       .eq("role", "parent");
     if (parentsError || !parents) {
-      console.error(
-        "[notifications] Failed to fetch parents:",
-        parentsError?.message,
-      );
+      console.error("[notifications] Failed to fetch parents:", parentsError?.message);
       return;
     }
     targetUserIds = resolveTargetUserIds(
@@ -92,19 +83,16 @@ export async function sendAnnouncementNotification(
 
   const { pushIds, emailIds } = partitionByMethod(prefs as NotificationPreferenceRow[]);
 
+  // push と email は独立した外部 I/O なので並列実行する。
+  const tasks: Array<Promise<void>> = [];
   if (pushIds.length > 0) {
     const payload = buildAnnouncementPayload(title, body, `/announcements/${announcementId}`);
-    await sendPushNotifications(supabase, pushIds, payload);
+    tasks.push(sendPushNotifications(supabase, pushIds, payload));
   }
-
   if (emailIds.length > 0) {
-    await sendEmailNotifications(
-      supabase,
-      emailIds,
-      `【星ヶ丘こどもクラブ】${title}`,
-      body,
-    );
+    tasks.push(sendEmailNotifications(supabase, emailIds, `【星ヶ丘こどもクラブ】${title}`, body));
   }
+  await Promise.all(tasks);
 }
 
 async function sendPushNotifications(
@@ -136,15 +124,25 @@ async function sendPushNotifications(
     return;
   }
 
-  for (const row of subs as PushSubscriptionRow[]) {
-    try {
-      await webpush.sendNotification(row.subscription, payload);
-    } catch (err) {
+  const rows = subs as PushSubscriptionRow[];
+  const results = await Promise.allSettled(
+    rows.map((row) => webpush.sendNotification(row.subscription, payload)),
+  );
+  let failures = 0;
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      failures += 1;
+      const reason = result.reason;
       console.error(
-        `[notifications] Push failed for user ${row.user_id}:`,
-        err instanceof Error ? err.message : err,
+        `[notifications] Push failed for user ${rows[i].user_id}:`,
+        reason instanceof Error ? reason.message : reason,
       );
     }
+  });
+  if (failures > 0) {
+    console.error(
+      `[notifications] Push fan-out: ${rows.length - failures}/${rows.length} delivered, ${failures} failed`,
+    );
   }
 }
 
@@ -164,15 +162,25 @@ async function sendEmailNotifications(
     return;
   }
 
-  for (const profile of profiles as ProfileRow[]) {
-    try {
-      await sendEmail({ to: profile.email, subject, text: body });
-    } catch (err) {
+  const rows = profiles as ProfileRow[];
+  const results = await Promise.allSettled(
+    rows.map((profile) => sendEmail({ to: profile.email, subject, text: body })),
+  );
+  let failures = 0;
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      failures += 1;
+      const reason = result.reason;
       console.error(
-        `[notifications] Email failed for user ${profile.id}:`,
-        err instanceof Error ? err.message : err,
+        `[notifications] Email failed for user ${rows[i].id}:`,
+        reason instanceof Error ? reason.message : reason,
       );
     }
+  });
+  if (failures > 0) {
+    console.error(
+      `[notifications] Email fan-out: ${rows.length - failures}/${rows.length} delivered, ${failures} failed`,
+    );
   }
 }
 
@@ -222,21 +230,19 @@ export async function sendAttendanceNotification(
   const childName = (child as { name: string }).name;
   const messages = formatAttendanceMessages(childName, type, recordedAt);
 
+  const tasks: Array<Promise<void>> = [];
   if (pushIds.length > 0) {
     const payload = JSON.stringify({
       title: messages.pushMessage,
       body: messages.pushMessage,
       url: "/attendance",
     });
-    await sendPushNotifications(supabase, pushIds, payload);
+    tasks.push(sendPushNotifications(supabase, pushIds, payload));
   }
-
   if (emailIds.length > 0) {
-    await sendEmailNotifications(
-      supabase,
-      emailIds,
-      messages.emailSubject,
-      messages.emailBody,
+    tasks.push(
+      sendEmailNotifications(supabase, emailIds, messages.emailSubject, messages.emailBody),
     );
   }
+  await Promise.all(tasks);
 }

@@ -49,10 +49,7 @@ type TouchType = "touchstart" | "touchmove" | "touchend" | "touchcancel";
 
 function dispatchTouch(type: TouchType, x: number, y: number): Event {
   const event = new Event(type, { bubbles: true, cancelable: true });
-  const touches =
-    type === "touchend" || type === "touchcancel"
-      ? []
-      : [{ clientX: x, clientY: y }];
+  const touches = type === "touchend" || type === "touchcancel" ? [] : [{ clientX: x, clientY: y }];
   Object.defineProperty(event, "touches", {
     value: touches,
     configurable: true,

@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  addInstagramPost,
-  deleteInstagramPost,
-  toggleInstagramPostVisibility,
-} from "./actions";
+import { addInstagramPost, deleteInstagramPost, toggleInstagramPostVisibility } from "./actions";
 
 // Mock revalidatePath
 const mockRevalidatePath = vi.fn();

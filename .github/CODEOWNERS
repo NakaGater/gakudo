@@ -1,0 +1,13 @@
+# Default owners for everything
+* @NakaGater
+
+# Authentication / authorization
+/src/lib/auth/ @NakaGater
+/src/app/(auth)/ @NakaGater
+
+# Database schema and migrations
+/supabase/ @NakaGater
+/src/lib/supabase/ @NakaGater
+
+# CI / DX
+/.github/ @NakaGater

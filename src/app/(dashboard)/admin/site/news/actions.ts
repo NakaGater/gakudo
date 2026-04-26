@@ -2,18 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/get-user";
-import type { Database } from "@/lib/supabase/types";
 import { uploadAttachment } from "@/lib/attachments/actions";
+import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
+import type { Database } from "@/lib/supabase/types";
 
 type SiteNewsInsert = Database["public"]["Tables"]["site_news"]["Insert"];
 
-export async function createNews(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function createNews(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") redirect("/");
 
@@ -33,10 +30,7 @@ export async function createNews(
     body: body.trim(),
     created_by: user.id,
   };
-  const { data, error } = await supabase.from("site_news")
-    .insert(insertData)
-    .select("id")
-    .single();
+  const { data, error } = await supabase.from("site_news").insert(insertData).select("id").single();
 
   if (error) {
     return { success: false, message: `作成に失敗しました: ${error.message}` };
@@ -63,15 +57,17 @@ export async function deleteNews(id: string): Promise<ActionResult> {
   if (user.role !== "admin") redirect("/");
 
   const supabase = await createClient();
-  const { error } = await supabase.from("site_news")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("site_news").delete().eq("id", id);
 
   if (error) {
     return { success: false, message: `削除に失敗しました: ${error.message}` };
   }
 
   revalidatePath("/news");
+  // /news/[id] is now ISR-cached; invalidate the deleted entry so its
+  // public detail page returns 404 immediately instead of waiting for
+  // the 1-hour lazy refresh.
+  revalidatePath(`/news/${id}`);
   revalidatePath("/admin/site/news");
 
   return { success: true, message: "削除しました" };

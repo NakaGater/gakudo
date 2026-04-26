@@ -20,14 +20,7 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max) + "…";
 }
 
-export function AnnouncementCard({
-  id,
-  title,
-  body,
-  author,
-  date,
-  isRead,
-}: AnnouncementCardProps) {
+export function AnnouncementCard({ id, title, body, author, date, isRead }: AnnouncementCardProps) {
   return (
     <Link href={`/announcements/${id}`} className="block">
       <div className={`ann-card ${!isRead ? "ann-card--unread" : "ann-card--read"}`}>

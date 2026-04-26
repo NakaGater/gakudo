@@ -3,10 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
-export async function submitInquiry(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function submitInquiry(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const type = formData.get("type") as string;
   const name = (formData.get("name") as string)?.trim();
   const email = (formData.get("email") as string)?.trim();
@@ -54,7 +51,10 @@ export async function submitInquiry(
       console.error("[inquiry] Confirmation email failed:", err);
     }
 
-    return { success: true, message: "お問い合わせを受け付けました。確認メールをお送りしましたのでご確認ください。" };
+    return {
+      success: true,
+      message: "お問い合わせを受け付けました。確認メールをお送りしましたのでご確認ください。",
+    };
   } catch {
     return { success: false, message: "送信に失敗しました。もう一度お試しください。" };
   }

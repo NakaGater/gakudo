@@ -1,19 +1,12 @@
 import { test, expect } from "@playwright/test";
-import {
-  loginViaForm,
-  getLatestEmail,
-  extractLinkFromEmail,
-  clearMailbox,
-} from "./helpers";
+import { loginViaForm, getLatestEmail, extractLinkFromEmail, clearMailbox } from "./helpers";
 
 const INVITE_EMAIL = `e2e-invite-${Date.now()}@test.com`;
 const INVITE_NAME = "E2Eテストユーザー";
 const INVITE_PASSWORD = "testpass1234";
 
 test.describe("Flow 13: Invite → set password → login", () => {
-  test("admin invites user, user sets password and logs in", async ({
-    page,
-  }) => {
+  test("admin invites user, user sets password and logs in", async ({ page }) => {
     await clearMailbox(INVITE_EMAIL);
 
     // 1. Admin logs in
@@ -50,9 +43,9 @@ test.describe("Flow 13: Invite → set password → login", () => {
 
     // 8. Navigate to invite link (Supabase verifies → redirects to /auth/callback → /reset-password)
     await page.goto(inviteLink);
-    await expect(
-      page.getByRole("heading", { name: "パスワードを変更" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "パスワードを変更" })).toBeVisible({
+      timeout: 15000,
+    });
 
     // 9. Set password
     await page.locator('input[name="password"]').fill(INVITE_PASSWORD);

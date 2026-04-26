@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { FileText } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { UploadSection } from "./upload-section";
 
 type DocumentRow = {
@@ -80,14 +80,10 @@ export default async function DocumentsPage() {
                     <Link key={doc.id} href={`/documents/${doc.id}`}>
                       <div className="doc-card">
                         <div className="min-w-0 flex-1">
-                          <p className="doc-card__title truncate">
-                            {doc.title}
-                          </p>
+                          <p className="doc-card__title truncate">{doc.title}</p>
                           <p className="doc-card__meta">
                             {doc.uploader?.name ?? "不明"} ・{" "}
-                            {new Date(doc.created_at).toLocaleDateString(
-                              "ja-JP",
-                            )}
+                            {new Date(doc.created_at).toLocaleDateString("ja-JP")}
                           </p>
                         </div>
                         <span className="status-badge">{doc.category}</span>

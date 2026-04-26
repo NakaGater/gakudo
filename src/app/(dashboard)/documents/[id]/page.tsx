@@ -1,11 +1,11 @@
-import Link from "next/link";
-import Image from "next/image";
-import { notFound } from "next/navigation";
 import { ArrowLeft, Download } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/get-user";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Badge, Card, CardContent } from "@/components/ui";
 import { STORAGE } from "@/config/constants";
+import { getUser } from "@/lib/auth/get-user";
+import { createClient } from "@/lib/supabase/server";
 import { DeleteButton } from "./delete-button";
 
 type DocumentDetail = {
@@ -33,11 +33,7 @@ function isPdf(filePath: string): boolean {
   return getFileExtension(filePath) === ".pdf";
 }
 
-export default async function DocumentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function DocumentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getUser();
   const supabase = await createClient();
@@ -89,9 +85,7 @@ export default async function DocumentDetailPage({
                 </div>
                 <div className="flex gap-1">
                   <dt>アップロード日:</dt>
-                  <dd>
-                    {new Date(doc.created_at).toLocaleDateString("ja-JP")}
-                  </dd>
+                  <dd>{new Date(doc.created_at).toLocaleDateString("ja-JP")}</dd>
                 </div>
                 <div className="flex gap-1">
                   <dt>アップロード者:</dt>
@@ -129,13 +123,7 @@ export default async function DocumentDetailPage({
   );
 }
 
-function FilePreview({
-  filePath,
-  signedUrl,
-}: {
-  filePath: string;
-  signedUrl: string;
-}) {
+function FilePreview({ filePath, signedUrl }: { filePath: string; signedUrl: string }) {
   if (isImage(filePath)) {
     return (
       <div className="flex justify-center rounded-md border border-border bg-bg p-4">

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { replyToInquiry } from "../actions";
 import { cn } from "@/lib/utils";
+import { replyToInquiry } from "../actions";
 
 type Props = {
   inquiryId: string;
@@ -100,7 +100,10 @@ export function InquiryReplyForm({ inquiryId, approveTemplate, declineTemplate }
           />
 
           {result && !result.success && (
-            <div role="alert" className="mt-2 rounded-md px-3 py-2 text-xs bg-danger/10 text-danger">
+            <div
+              role="alert"
+              className="mt-2 rounded-md px-3 py-2 text-xs bg-danger/10 text-danger"
+            >
               {result.message}
             </div>
           )}

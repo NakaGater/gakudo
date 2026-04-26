@@ -30,7 +30,9 @@ test.describe("Flow 11: User management page (admin)", () => {
     await expect(page.getByRole("button", { name: "保存" })).toBeVisible();
 
     // Cancel edit via X button in the edit form row
-    const editForm = page.locator("form").filter({ has: page.locator('button[type="submit"]', { hasText: "保存" }) });
+    const editForm = page
+      .locator("form")
+      .filter({ has: page.locator('button[type="submit"]', { hasText: "保存" }) });
     await editForm.locator('button[type="button"]').click();
     await expect(page.locator('select[name="role"]')).not.toBeVisible();
   });

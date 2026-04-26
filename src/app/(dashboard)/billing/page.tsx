@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 import { currentYearMonthJST } from "@/lib/time/jst";
-import { MonthSelector } from "./month-selector";
 import { CalculateAllButton } from "./calculate-all-button";
+import { MonthSelector } from "./month-selector";
 
 type BillRow = {
   id: string;
@@ -48,15 +48,14 @@ export default async function BillingListPage({ searchParams }: Props) {
   const childNames = new Map<string, string>();
 
   if (staff) {
-    const { data } = await supabase.from("children")
-      .select("id, name")
-      .order("name");
+    const { data } = await supabase.from("children").select("id, name").order("name");
     for (const c of (data ?? []) as { id: string; name: string }[]) {
       childIds.push(c.id);
       childNames.set(c.id, c.name);
     }
   } else {
-    const { data } = await supabase.from("child_parents")
+    const { data } = await supabase
+      .from("child_parents")
       .select("child_id, children(id, name)")
       .eq("parent_id", user.id);
     for (const row of (data ?? []) as {
@@ -71,7 +70,8 @@ export default async function BillingListPage({ searchParams }: Props) {
   // Fetch monthly bills for the selected month
   let bills: BillRow[] = [];
   if (childIds.length > 0) {
-    let query = supabase.from("monthly_bills")
+    let query = supabase
+      .from("monthly_bills")
       .select("id, child_id, year_month, total_extended_minutes, total_amount, status")
       .eq("year_month", yearMonth)
       .order("child_id");
@@ -84,14 +84,16 @@ export default async function BillingListPage({ searchParams }: Props) {
 
     const { data } = await query;
 
-    bills = ((data ?? []) as {
-      id: string;
-      child_id: string;
-      year_month: string;
-      total_extended_minutes: number;
-      total_amount: number;
-      status: "draft" | "confirmed";
-    }[]).map((b) => ({
+    bills = (
+      (data ?? []) as {
+        id: string;
+        child_id: string;
+        year_month: string;
+        total_extended_minutes: number;
+        total_amount: number;
+        status: "draft" | "confirmed";
+      }[]
+    ).map((b) => ({
       ...b,
       child_name: childNames.get(b.child_id) ?? "不明",
     }));
@@ -114,10 +116,7 @@ export default async function BillingListPage({ searchParams }: Props) {
         <h1 className="main__title font-story">💰 月次請求一覧</h1>
         {staff && (
           <div className="flex items-center gap-3">
-            <Link
-              href="/billing/rules"
-              className="text-sm text-cr-orange hover:underline"
-            >
+            <Link href="/billing/rules" className="text-sm text-cr-orange hover:underline">
               料金ルール →
             </Link>
           </div>
@@ -126,16 +125,29 @@ export default async function BillingListPage({ searchParams }: Props) {
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl p-4 text-center" style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}>
+        <div
+          className="rounded-xl p-4 text-center"
+          style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)" }}
+        >
           <p className="text-2xl font-bold text-ink">{bills.length}</p>
           <p className="text-sm text-ink-mid">対象児童</p>
         </div>
-        <div className="rounded-xl p-4 text-center" style={{ background: "linear-gradient(135deg, #dbeafe, #bfdbfe)" }}>
-          <p className="text-2xl font-bold text-ink">{formatMinutes(bills.reduce((s, b) => s + b.total_extended_minutes, 0))}</p>
+        <div
+          className="rounded-xl p-4 text-center"
+          style={{ background: "linear-gradient(135deg, #dbeafe, #bfdbfe)" }}
+        >
+          <p className="text-2xl font-bold text-ink">
+            {formatMinutes(bills.reduce((s, b) => s + b.total_extended_minutes, 0))}
+          </p>
           <p className="text-sm text-ink-mid">延長合計</p>
         </div>
-        <div className="rounded-xl p-4 text-center" style={{ background: "linear-gradient(135deg, #fce7f3, #fbcfe8)" }}>
-          <p className="text-2xl font-bold text-ink">{formatAmount(bills.reduce((s, b) => s + b.total_amount, 0))}</p>
+        <div
+          className="rounded-xl p-4 text-center"
+          style={{ background: "linear-gradient(135deg, #fce7f3, #fbcfe8)" }}
+        >
+          <p className="text-2xl font-bold text-ink">
+            {formatAmount(bills.reduce((s, b) => s + b.total_amount, 0))}
+          </p>
           <p className="text-sm text-ink-mid">合計金額</p>
         </div>
       </div>
@@ -189,7 +201,9 @@ export default async function BillingListPage({ searchParams }: Props) {
                           {formatAmount(bill.total_amount)}
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`status-badge ${bill.status === "confirmed" ? "status-badge--confirmed" : "status-badge--draft"}`}>
+                          <span
+                            className={`status-badge ${bill.status === "confirmed" ? "status-badge--confirmed" : "status-badge--draft"}`}
+                          >
                             {bill.status === "confirmed" ? "確定済" : "下書き"}
                           </span>
                         </td>
@@ -207,10 +221,7 @@ export default async function BillingListPage({ searchParams }: Props) {
           {/* Mobile card list */}
           <div className="flex flex-col gap-3 md:hidden">
             {bills.map((bill) => (
-              <Link
-                key={bill.id}
-                href={`/billing/${bill.year_month}?child=${bill.child_id}`}
-              >
+              <Link key={bill.id} href={`/billing/${bill.year_month}?child=${bill.child_id}`}>
                 <div className="rounded-lg border border-border p-4 flex items-center justify-between">
                   <div>
                     <p className="font-medium text-ink">{bill.child_name}</p>
@@ -219,7 +230,9 @@ export default async function BillingListPage({ searchParams }: Props) {
                       <span className="amt">{formatAmount(bill.total_amount)}</span>
                     </p>
                   </div>
-                  <span className={`status-badge ${bill.status === "confirmed" ? "status-badge--confirmed" : "status-badge--draft"}`}>
+                  <span
+                    className={`status-badge ${bill.status === "confirmed" ? "status-badge--confirmed" : "status-badge--draft"}`}
+                  >
                     {bill.status === "confirmed" ? "確定済" : "下書き"}
                   </span>
                 </div>

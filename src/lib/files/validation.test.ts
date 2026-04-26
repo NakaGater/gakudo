@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { validateFile, validateFileType } from "./validation";
 import { FILE_LIMITS } from "@/config/constants";
+import { validateFile, validateFileType } from "./validation";
 
 describe("validateFile", () => {
   it("rejects non-File values", () => {
@@ -27,20 +27,16 @@ describe("validateFile", () => {
   });
 
   it("accepts a file at exactly MAX_SIZE_BYTES", () => {
-    const exact = new File(
-      [new Uint8Array(FILE_LIMITS.MAX_SIZE_BYTES)],
-      "exact.pdf",
-      { type: "application/pdf" },
-    );
+    const exact = new File([new Uint8Array(FILE_LIMITS.MAX_SIZE_BYTES)], "exact.pdf", {
+      type: "application/pdf",
+    });
     expect(validateFile(exact)).toEqual({ valid: true });
   });
 
   it("rejects files larger than MAX_SIZE_BYTES", () => {
-    const oversized = new File(
-      [new Uint8Array(FILE_LIMITS.MAX_SIZE_BYTES + 1)],
-      "big.pdf",
-      { type: "application/pdf" },
-    );
+    const oversized = new File([new Uint8Array(FILE_LIMITS.MAX_SIZE_BYTES + 1)], "big.pdf", {
+      type: "application/pdf",
+    });
     const result = validateFile(oversized);
     expect(result.valid).toBe(false);
     if (!result.valid) {
@@ -59,15 +55,14 @@ describe("validateFileType", () => {
 
   it("accepts a file whose mime is in the allowed list", () => {
     const pdf = new File(["x"], "doc.pdf", { type: "application/pdf" });
-    expect(validateFileType(pdf, allowed, "PDF または画像ファイルを選択してください"))
-      .toEqual({ valid: true });
+    expect(validateFileType(pdf, allowed, "PDF または画像ファイルを選択してください")).toEqual({
+      valid: true,
+    });
   });
 
   it("rejects a file whose mime is not in the allowed list", () => {
     const exe = new File(["x"], "bad.exe", { type: "application/x-msdownload" });
-    expect(
-      validateFileType(exe, allowed, "PDF または画像ファイルを選択してください"),
-    ).toEqual({
+    expect(validateFileType(exe, allowed, "PDF または画像ファイルを選択してください")).toEqual({
       valid: false,
       message: "PDF または画像ファイルを選択してください",
     });

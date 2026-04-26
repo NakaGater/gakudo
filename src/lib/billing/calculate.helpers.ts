@@ -58,8 +58,7 @@ export function summarizeBill(
       return sum + calculateExtendedMinutes(exitMinutes, regularEndMinutes);
     }, 0);
 
-  const units =
-    totalExtendedMinutes > 0 ? Math.ceil(totalExtendedMinutes / rule.unit_minutes) : 0;
+  const units = totalExtendedMinutes > 0 ? Math.ceil(totalExtendedMinutes / rule.unit_minutes) : 0;
   const totalAmount = units * rule.rate_per_unit;
 
   return { totalExtendedMinutes, totalAmount };

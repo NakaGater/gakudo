@@ -37,16 +37,13 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
   const prev = useCallback(
     () =>
       setLightboxIndex((i) =>
-        i !== null ? (i - 1 + flatPhotos.length) % flatPhotos.length : null
+        i !== null ? (i - 1 + flatPhotos.length) % flatPhotos.length : null,
       ),
-    [flatPhotos.length]
+    [flatPhotos.length],
   );
   const next = useCallback(
-    () =>
-      setLightboxIndex((i) =>
-        i !== null ? (i + 1) % flatPhotos.length : null
-      ),
-    [flatPhotos.length]
+    () => setLightboxIndex((i) => (i !== null ? (i + 1) % flatPhotos.length : null)),
+    [flatPhotos.length],
   );
 
   useEffect(() => {
@@ -66,7 +63,14 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
 
   const groups = groupByEvent(photos);
 
-  const tapeVariants = ["polaroid--tape", "", "polaroid--tape-pink", "", "polaroid--tape-green", ""];
+  const tapeVariants = [
+    "polaroid--tape",
+    "",
+    "polaroid--tape-pink",
+    "",
+    "polaroid--tape-green",
+    "",
+  ];
 
   return (
     <>
@@ -89,7 +93,9 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
                   tabIndex={0}
                   className={`polaroid${tape ? ` ${tape}` : ""}`}
                   onClick={() => setLightboxIndex(flatIndex)}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setLightboxIndex(flatIndex); }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") setLightboxIndex(flatIndex);
+                  }}
                   aria-label={photo.caption ?? "写真を拡大表示"}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -99,9 +105,7 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
                     className="polaroid__img"
                     loading="lazy"
                   />
-                  {photo.caption && (
-                    <span className="polaroid__caption">{photo.caption}</span>
-                  )}
+                  {photo.caption && <span className="polaroid__caption">{photo.caption}</span>}
                 </div>
               );
             })}
@@ -119,13 +123,19 @@ export function GalleryGrid({ photos }: { photos: GalleryPhoto[] }) {
           onClick={close}
         >
           <div className="gal-lb__inner" onClick={(e) => e.stopPropagation()}>
-            <button className="gal-lb__close" onClick={close} aria-label="閉じる">✕</button>
+            <button className="gal-lb__close" onClick={close} aria-label="閉じる">
+              ✕
+            </button>
 
             {flatPhotos.length > 1 && (
-              <button className="gal-lb__nav gal-lb__nav--prev" onClick={prev} aria-label="前へ">‹</button>
+              <button className="gal-lb__nav gal-lb__nav--prev" onClick={prev} aria-label="前へ">
+                ‹
+              </button>
             )}
             {flatPhotos.length > 1 && (
-              <button className="gal-lb__nav gal-lb__nav--next" onClick={next} aria-label="次へ">›</button>
+              <button className="gal-lb__nav gal-lb__nav--next" onClick={next} aria-label="次へ">
+                ›
+              </button>
             )}
 
             {/* eslint-disable-next-line @next/next/no-img-element */}

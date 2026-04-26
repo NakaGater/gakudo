@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { markAsRead } from "../actions";
 
 export function MarkRead({ announcementId }: { announcementId: string }) {

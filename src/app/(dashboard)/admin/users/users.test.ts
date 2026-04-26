@@ -114,7 +114,7 @@ describe("inviteUser", () => {
         email: "test@example.com",
         name: "Test User",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -128,7 +128,7 @@ describe("inviteUser", () => {
         email: "",
         name: "Test User",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -142,7 +142,7 @@ describe("inviteUser", () => {
         email: "test@example.com",
         name: "",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -156,7 +156,7 @@ describe("inviteUser", () => {
         email: "test@example.com",
         name: "Test User",
         role: "invalid_role",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -175,7 +175,7 @@ describe("inviteUser", () => {
         email: "test@example.com",
         name: "Test User",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -192,7 +192,7 @@ describe("inviteUser", () => {
         email: "test@example.com",
         name: "Test User",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -206,7 +206,7 @@ describe("inviteUser", () => {
         email: "test@example.com",
         name: "Test User",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(true);
@@ -233,7 +233,7 @@ describe("updateUser", () => {
         id: "target-user-id",
         name: "Updated Name",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -247,7 +247,7 @@ describe("updateUser", () => {
         id: "",
         name: "Updated Name",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -261,7 +261,7 @@ describe("updateUser", () => {
         id: "target-user-id",
         name: "",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -275,7 +275,7 @@ describe("updateUser", () => {
         id: "target-user-id",
         name: "Updated Name",
         role: "invalid_role",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -289,7 +289,7 @@ describe("updateUser", () => {
         id: "admin-user-id",
         name: "Updated Name",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -305,7 +305,7 @@ describe("updateUser", () => {
         id: "target-user-id",
         name: "Updated Name",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -323,7 +323,7 @@ describe("updateUser", () => {
         id: "target-user-id",
         name: "Updated Name",
         role: "parent",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -337,7 +337,7 @@ describe("updateUser", () => {
         id: "target-user-id",
         name: "Updated Name",
         role: "teacher",
-      })
+      }),
     );
 
     expect(result.success).toBe(true);
@@ -362,7 +362,7 @@ describe("deleteUser", () => {
       { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -374,7 +374,7 @@ describe("deleteUser", () => {
       { success: true, message: "" },
       makeFormData({
         id: "",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -386,7 +386,7 @@ describe("deleteUser", () => {
       { success: true, message: "" },
       makeFormData({
         id: "admin-user-id",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -400,7 +400,7 @@ describe("deleteUser", () => {
       { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -416,7 +416,7 @@ describe("deleteUser", () => {
       { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
-      })
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -428,7 +428,7 @@ describe("deleteUser", () => {
       { success: true, message: "" },
       makeFormData({
         id: "target-user-id",
-      })
+      }),
     );
 
     expect(result.success).toBe(true);

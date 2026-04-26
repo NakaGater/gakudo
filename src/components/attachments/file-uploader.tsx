@@ -3,13 +3,7 @@
 import { useRef, useState, useCallback, type DragEvent } from "react";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-];
+const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/gif", "image/webp"];
 
 type FileInfo = { file: File; preview?: string };
 
@@ -74,8 +68,14 @@ export function FileUploader({ files, onChange, multiple = true, disabled = fals
       <label className="text-sm font-medium text-fg">添付ファイル</label>
 
       <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+        }}
         onDrop={handleDrop}
         onClick={() => !disabled && fileInputRef.current?.click()}
         className={`flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-4 transition-colors ${
@@ -94,9 +94,7 @@ export function FileUploader({ files, onChange, multiple = true, disabled = fals
           }
         }}
       >
-        <p className="text-sm text-fg/60">
-          ファイルをドラッグ、またはクリックして選択
-        </p>
+        <p className="text-sm text-fg/60">ファイルをドラッグ、またはクリックして選択</p>
         <p className="mt-1 text-xs text-fg/40">
           PDF・画像 (最大10MB){multiple ? " — 複数選択可" : ""}
         </p>
@@ -124,16 +122,16 @@ export function FileUploader({ files, onChange, multiple = true, disabled = fals
               className="flex items-center justify-between rounded-md border border-border bg-bg-elev px-3 py-2 text-sm"
             >
               <span className="truncate text-fg">
-                {f.file.type === "application/pdf" ? "📄" : "🖼️"}{" "}
-                {f.file.name}
-                <span className="ml-2 text-xs text-fg-muted">
-                  ({formatSize(f.file.size)})
-                </span>
+                {f.file.type === "application/pdf" ? "📄" : "🖼️"} {f.file.name}
+                <span className="ml-2 text-xs text-fg-muted">({formatSize(f.file.size)})</span>
               </span>
               {!disabled && (
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(idx);
+                  }}
                   className="ml-2 text-danger hover:text-danger/80 text-xs"
                 >
                   ✕

@@ -11,9 +11,7 @@ test.describe("Flow 7: Announcements (US-10)", () => {
     await expect(page.getByText("お知らせ").first()).toBeVisible({
       timeout: 10000,
     });
-    await expect(
-      page.getByRole("link", { name: "新規作成" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "新規作成" })).toBeVisible();
   });
 
   test("can create a new announcement", async ({ page }) => {

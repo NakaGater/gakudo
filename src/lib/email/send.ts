@@ -9,8 +9,7 @@
 const MAILPIT_API = process.env.MAILPIT_API_URL ?? "http://127.0.0.1:54324/api/v1";
 
 const DEFAULT_FROM =
-  process.env.NOTIFICATION_EMAIL_FROM ??
-  "星ヶ丘こどもクラブ <noreply@yourdomain.com>";
+  process.env.NOTIFICATION_EMAIL_FROM ?? "星ヶ丘こどもクラブ <noreply@yourdomain.com>";
 
 interface SendEmailParams {
   to: string;
@@ -34,10 +33,7 @@ export async function sendEmail({
   return sendViaMailpit({ to, subject, text, from });
 }
 
-async function sendViaResend(
-  params: SendEmailParams,
-  apiKey: string,
-): Promise<{ id: string }> {
+async function sendViaResend(params: SendEmailParams, apiKey: string): Promise<{ id: string }> {
   const { Resend } = await import("resend");
   const resend = new Resend(apiKey);
 
@@ -51,9 +47,7 @@ async function sendViaResend(
   return { id: result.data?.id ?? "unknown" };
 }
 
-async function sendViaMailpit(
-  params: SendEmailParams,
-): Promise<{ id: string }> {
+async function sendViaMailpit(params: SendEmailParams): Promise<{ id: string }> {
   const fromParsed = parseEmailAddress(params.from!);
 
   const res = await fetch(`${MAILPIT_API}/send`, {

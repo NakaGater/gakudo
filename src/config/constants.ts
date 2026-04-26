@@ -8,13 +8,7 @@ export const QR_CODE = {
 
 export const FILE_LIMITS = {
   MAX_SIZE_BYTES: 10 * 1024 * 1024,
-  ALLOWED_DOCUMENT_TYPES: [
-    "application/pdf",
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-  ],
+  ALLOWED_DOCUMENT_TYPES: ["application/pdf", "image/jpeg", "image/png", "image/gif", "image/webp"],
 } as const;
 
 export const ERROR_MESSAGES = {

@@ -1,12 +1,12 @@
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { getUser } from "@/lib/auth/get-user";
-import { Sidebar } from "@/components/nav/sidebar";
-import { MobileTabs } from "@/components/nav/mobile-tabs";
+import { redirect } from "next/navigation";
 import { getBadgeCounts } from "@/components/nav/get-badge-counts";
+import { MobileTabs } from "@/components/nav/mobile-tabs";
+import { Sidebar } from "@/components/nav/sidebar";
 import { PushPrompt } from "@/components/push/push-prompt";
+import { getUser } from "@/lib/auth/get-user";
 
-const ENTRANCE_ALLOWED_PATHS = ['/attendance', '/api/'];
+const ENTRANCE_ALLOWED_PATHS = ["/attendance", "/api/"];
 
 function getSeasonClass(): string {
   const h = new Date().getHours();
@@ -37,7 +37,7 @@ export default async function DashboardLayout({
   if (user.role === "entrance") {
     const headersList = await headers();
     const pathname = headersList.get("x-pathname") || "";
-    const allowed = ENTRANCE_ALLOWED_PATHS.some(p => pathname.startsWith(p));
+    const allowed = ENTRANCE_ALLOWED_PATHS.some((p) => pathname.startsWith(p));
     if (!allowed) {
       redirect("/attendance/dashboard");
     }
@@ -71,9 +71,7 @@ export default async function DashboardLayout({
               <span>{mood.text}</span>
             </div>
             <PushPrompt />
-            <div className="main__content">
-              {children}
-            </div>
+            <div className="main__content">{children}</div>
           </div>
         </div>
       </div>

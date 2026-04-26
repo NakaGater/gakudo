@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
-import type { Database, Json } from "@/lib/supabase/types";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
+import type { Database, Json } from "@/lib/supabase/types";
 
 type SitePageUpdate = Database["public"]["Tables"]["site_pages"]["Update"];
 
@@ -44,9 +44,7 @@ export async function updateSitePage(
     metadata: metadata as unknown as Json,
     updated_by: user.id,
   };
-  const { error } = await supabase.from("site_pages")
-    .update(updateData)
-    .eq("slug", slug);
+  const { error } = await supabase.from("site_pages").update(updateData).eq("slug", slug);
 
   if (error) {
     return { success: false, message: `保存に失敗しました: ${error.message}` };

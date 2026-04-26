@@ -1,14 +1,14 @@
 {
-    "$schema": "https://json.schemastore.org/claude-code-settings.json",
-    "extraKnownMarketplaces": {
-        "fastest-mvp": {
-            "source": {
-                "source": "github",
-                "repo": "nakagater/fastest-mvp"
-            }
-        }
-    },
-    "enabledPlugins": {
-        "fastest-mvp@fastest-mvp": true
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "fastest-mvp": {
+      "source": {
+        "source": "github",
+        "repo": "nakagater/fastest-mvp"
+      }
     }
+  },
+  "enabledPlugins": {
+    "fastest-mvp@fastest-mvp": true
+  }
 }

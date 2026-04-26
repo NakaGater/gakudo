@@ -1,12 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { type AuthUser } from "@/lib/auth/get-user";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import type { ActionState } from "@/lib/actions/types";
+import { type AuthUser } from "@/lib/auth/get-user";
 import { updateProfile } from "./actions";
+import type { ActionState } from "@/lib/actions/types";
 
 const roleLabels: Record<AuthUser["role"], string> = {
   parent: "保護者",
@@ -21,10 +21,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ user, success }: ProfileFormProps) {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    updateProfile,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(updateProfile, null);
 
   const showSuccess = state?.success || (success && state === null);
 
@@ -32,13 +29,19 @@ export function ProfileForm({ user, success }: ProfileFormProps) {
     <Card className="max-w-lg id-card" style={{ maxWidth: 480 }}>
       <CardHeader>
         <div className="flex flex-col items-center gap-3">
-          <div className="avatar-lg flex items-center justify-center rounded-full text-3xl font-bold" style={{ width: 72, height: 72, background: "linear-gradient(135deg, #fbbf24, #f59e0b)", color: "#fff" }}>
+          <div
+            className="avatar-lg flex items-center justify-center rounded-full text-3xl font-bold"
+            style={{
+              width: 72,
+              height: 72,
+              background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
+              color: "#fff",
+            }}
+          >
             {user.name?.charAt(0) ?? "?"}
           </div>
           <p className="text-lg font-bold text-ink">{user.name}</p>
-          <span className={`role-badge role-badge--${user.role}`}>
-            {roleLabels[user.role]}
-          </span>
+          <span className={`role-badge role-badge--${user.role}`}>{roleLabels[user.role]}</span>
         </div>
       </CardHeader>
       <form action={formAction}>

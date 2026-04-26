@@ -1,9 +1,5 @@
 import { test, expect } from "@playwright/test";
-import {
-  getLatestEmail,
-  extractLinkFromEmail,
-  clearMailbox,
-} from "./helpers";
+import { getLatestEmail, extractLinkFromEmail, clearMailbox } from "./helpers";
 
 const TEST_EMAIL = "admin@example.com";
 const ORIGINAL_PASSWORD = "password123";
@@ -15,27 +11,23 @@ const SERVICE_ROLE_KEY =
 
 async function adminResetPassword(email: string, newPassword: string) {
   // Get user by email
-  const listRes = await fetch(
-    `${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`,
-    { headers: { Authorization: `Bearer ${SERVICE_ROLE_KEY}`, apikey: SERVICE_ROLE_KEY } },
-  );
+  const listRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`, {
+    headers: { Authorization: `Bearer ${SERVICE_ROLE_KEY}`, apikey: SERVICE_ROLE_KEY },
+  });
   const { users } = await listRes.json();
   const user = users.find((u: { email: string }) => u.email === email);
   if (!user) throw new Error(`User ${email} not found`);
 
   // Update password via admin API
-  const updateRes = await fetch(
-    `${SUPABASE_URL}/auth/v1/admin/users/${user.id}`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
-        apikey: SERVICE_ROLE_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ password: newPassword }),
+  const updateRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${user.id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      apikey: SERVICE_ROLE_KEY,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ password: newPassword }),
+  });
   if (!updateRes.ok) throw new Error(`Failed to reset password: ${updateRes.status}`);
 }
 
@@ -49,15 +41,10 @@ test.describe("Flow 12: Password reset (PKCE)", () => {
     await adminResetPassword(TEST_EMAIL, ORIGINAL_PASSWORD);
   });
 
-  test("forgot password → reset → login with new password", async ({
-    page,
-    context,
-  }) => {
+  test("forgot password → reset → login with new password", async ({ page, context }) => {
     // 1. Go to forgot-password page
     await page.goto("/forgot-password");
-    await expect(
-      page.getByRole("heading", { name: "パスワードをお忘れですか" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "パスワードをお忘れですか" })).toBeVisible();
 
     // 2. Request password reset
     await page.locator('input[name="email"]').fill(TEST_EMAIL);
@@ -74,9 +61,9 @@ test.describe("Flow 12: Password reset (PKCE)", () => {
 
     // 4. Navigate to the reset link (Supabase verifies → /auth/callback?code=... → /reset-password)
     await page.goto(resetLink);
-    await expect(
-      page.getByRole("heading", { name: "パスワードを変更" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "パスワードを変更" })).toBeVisible({
+      timeout: 15000,
+    });
 
     // 5. Set new password
     await page.locator('input[name="password"]').fill(NEW_PASSWORD);

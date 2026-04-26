@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { validateFile, validateFileType } from "@/lib/files/validation";
+import { createClient } from "@/lib/supabase/server";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
-import { FILE_LIMITS, ERROR_MESSAGES } from "@/config/constants";
 
 const ALLOWED_TYPES = FILE_LIMITS.ALLOWED_DOCUMENT_TYPES;
 
@@ -41,7 +41,11 @@ export async function uploadDocument(
     if (!fileVal.valid) {
       fieldErrors.file = fileVal.message;
     } else {
-      const typeVal = validateFileType(file, ALLOWED_TYPES, "PDF または画像ファイルを選択してください");
+      const typeVal = validateFileType(
+        file,
+        ALLOWED_TYPES,
+        "PDF または画像ファイルを選択してください",
+      );
       if (!typeVal.valid) {
         fieldErrors.file = typeVal.message;
       }
@@ -97,9 +101,7 @@ export async function uploadDocument(
   return { success: true, message: "資料をアップロードしました" };
 }
 
-export async function deleteDocument(
-  id: string,
-): Promise<ActionResult> {
+export async function deleteDocument(id: string): Promise<ActionResult> {
   const user = await getUser();
   const supabase = await createClient();
 
@@ -118,9 +120,7 @@ export async function deleteDocument(
     return { success: false, message: "削除権限がありません" };
   }
 
-  const { error: storageError } = await supabase.storage
-    .from("documents")
-    .remove([doc.file_path]);
+  const { error: storageError } = await supabase.storage.from("documents").remove([doc.file_path]);
 
   if (storageError) {
     return {
@@ -129,10 +129,7 @@ export async function deleteDocument(
     };
   }
 
-  const { error: dbError } = await supabase
-    .from("documents")
-    .delete()
-    .eq("id", id);
+  const { error: dbError } = await supabase.from("documents").delete().eq("id", id);
 
   if (dbError) {
     return {

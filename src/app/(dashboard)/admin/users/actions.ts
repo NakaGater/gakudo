@@ -1,17 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 const VALID_ROLES = ["parent", "teacher", "admin", "entrance"] as const;
 type Role = (typeof VALID_ROLES)[number];
 
-export async function inviteUser(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function inviteUser(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -33,11 +30,13 @@ export async function inviteUser(
 
   const adminClient = createAdminClient();
 
-  const { data: inviteData, error: inviteError } =
-    await adminClient.auth.admin.inviteUserByEmail(email.trim(), {
+  const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
+    email.trim(),
+    {
       data: { name: name.trim(), role },
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000"}/auth/callback?type=invite`,
-    });
+    },
+  );
 
   if (inviteError) {
     return {
@@ -65,10 +64,7 @@ export async function inviteUser(
   return { success: true, message: "招待メールを送信しました" };
 }
 
-export async function updateUser(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function updateUser(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -94,7 +90,8 @@ export async function updateUser(
 
   const adminClient = createAdminClient();
 
-  const { error: profileError } = await adminClient.from("profiles")
+  const { error: profileError } = await adminClient
+    .from("profiles")
     .update({ name: name.trim(), role: role as Role })
     .eq("id", targetId);
 
@@ -105,10 +102,9 @@ export async function updateUser(
     };
   }
 
-  const { error: authError } = await adminClient.auth.admin.updateUserById(
-    targetId,
-    { user_metadata: { name: name.trim(), role } },
-  );
+  const { error: authError } = await adminClient.auth.admin.updateUserById(targetId, {
+    user_metadata: { name: name.trim(), role },
+  });
 
   if (authError) {
     return {
@@ -121,10 +117,7 @@ export async function updateUser(
   return { success: true, message: "ユーザー情報を更新しました" };
 }
 
-export async function deleteUser(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionResult> {
+export async function deleteUser(_prev: ActionState, formData: FormData): Promise<ActionResult> {
   const user = await getUser();
   if (user.role !== "admin") {
     return { success: false, message: "管理者権限が必要です" };
@@ -141,9 +134,7 @@ export async function deleteUser(
 
   const adminClient = createAdminClient();
 
-  const { error: profileError } = await adminClient.from("profiles")
-    .delete()
-    .eq("id", targetId);
+  const { error: profileError } = await adminClient.from("profiles").delete().eq("id", targetId);
 
   if (profileError) {
     return {

@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import {
-  searchParents,
-  linkParent,
-  unlinkParent,
-  type ParentSearchResult,
-} from "../actions";
+import { searchParents, linkParent, unlinkParent, type ParentSearchResult } from "../actions";
 
 type LinkedParent = {
   parent_id: string;
@@ -89,15 +84,10 @@ export function LinkParent({ childId, linkedParents }: Props) {
       {/* Currently linked parents */}
       {linkedParents.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-fg-muted mb-2">
-            紐付け済みの保護者
-          </h3>
+          <h3 className="text-sm font-medium text-fg-muted mb-2">紐付け済みの保護者</h3>
           <ul className="flex flex-col gap-2">
             {linkedParents.map((p) => (
-              <li
-                key={p.parent_id}
-                className="flex items-center justify-between text-sm"
-              >
+              <li key={p.parent_id} className="flex items-center justify-between text-sm">
                 <div>
                   <span className="font-medium text-fg">{p.name}</span>
                   <span className="text-fg-muted ml-2">{p.email}</span>
@@ -124,9 +114,7 @@ export function LinkParent({ childId, linkedParents }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        {searching && (
-          <p className="text-xs text-fg-muted mt-1">検索中...</p>
-        )}
+        {searching && <p className="text-xs text-fg-muted mt-1">検索中...</p>}
         {filteredResults.length > 0 && (
           <ul className="absolute z-10 mt-1 w-full rounded-md border border-border bg-bg-elev shadow-lg max-h-48 overflow-y-auto">
             {filteredResults.map((p) => (
@@ -147,20 +135,13 @@ export function LinkParent({ childId, linkedParents }: Props) {
             ))}
           </ul>
         )}
-        {query.trim() &&
-          !searching &&
-          filteredResults.length === 0 &&
-          results.length === 0 && (
-            <p className="text-xs text-fg-muted mt-1">
-              該当する保護者が見つかりません
-            </p>
-          )}
+        {query.trim() && !searching && filteredResults.length === 0 && results.length === 0 && (
+          <p className="text-xs text-fg-muted mt-1">該当する保護者が見つかりません</p>
+        )}
       </div>
 
       {/* Feedback */}
-      {feedback && (
-        <p className="text-sm text-success">{feedback}</p>
-      )}
+      {feedback && <p className="text-sm text-success">{feedback}</p>}
     </div>
   );
 }

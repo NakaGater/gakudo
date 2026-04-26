@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import type { Metadata } from "next";
 import { CallbackClient } from "./callback-client";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "認証処理中... | 星ヶ丘こどもクラブ",

@@ -1,14 +1,14 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { getInquiries } from "./actions";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending:  { label: "未対応", color: "bg-cr-yellow/20 text-cr-orange border-cr-yellow" },
+  pending: { label: "未対応", color: "bg-cr-yellow/20 text-cr-orange border-cr-yellow" },
   approved: { label: "承認済み", color: "bg-cr-green/10 text-cr-green border-cr-green/30" },
   declined: { label: "お断り", color: "bg-cr-red/10 text-cr-red border-cr-red/30" },
-  replied:  { label: "返信済み", color: "bg-cr-blue/10 text-cr-blue border-cr-blue/30" },
+  replied: { label: "返信済み", color: "bg-cr-blue/10 text-cr-blue border-cr-blue/30" },
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -76,7 +76,9 @@ export default async function InquiriesPage({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs">{TYPE_LABELS[inq.type] ?? inq.type}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusInfo.color}`}>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusInfo.color}`}
+                      >
                         {statusInfo.label}
                       </span>
                     </div>

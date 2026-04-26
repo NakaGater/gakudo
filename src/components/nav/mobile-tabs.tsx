@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { MoreHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MoreHorizontal, X } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { getNavItems } from "./nav-items";
 import type { BadgeCounts } from "./get-badge-counts";
@@ -30,7 +30,11 @@ export function MobileTabs({ user, badgeCounts }: MobileTabsProps) {
     if (pathname === href) return true;
     if (href === "/attendance/dashboard" || href === "/attendance/status") return false;
     if (href === "/attendance") {
-      return pathname.startsWith("/attendance/") && pathname !== "/attendance/dashboard" && pathname !== "/attendance/status";
+      return (
+        pathname.startsWith("/attendance/") &&
+        pathname !== "/attendance/dashboard" &&
+        pathname !== "/attendance/status"
+      );
     }
     return pathname.startsWith(href + "/");
   };

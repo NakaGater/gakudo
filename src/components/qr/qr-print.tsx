@@ -32,7 +32,10 @@ export function QRPrint({ value, childName, grade }: QRPrintProps) {
         }
       `}</style>
 
-      <div id="qr-print-card" className="flex flex-col items-center gap-6 p-8 border border-border rounded-lg bg-white">
+      <div
+        id="qr-print-card"
+        className="flex flex-col items-center gap-6 p-8 border border-border rounded-lg bg-white"
+      >
         <h2 className="text-xl font-bold text-fg">{childName}</h2>
         <QRDisplay value={value} childName={childName} grade={grade} size={180} />
       </div>

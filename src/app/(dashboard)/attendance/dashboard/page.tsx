@@ -1,14 +1,10 @@
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
-import { Button } from "@/components/ui";
-import {
-  getDashboardAttendanceStatus,
-  type DashboardChildStatus,
-} from "../actions";
-
 import { formatTimeJST } from "@/lib/time/jst";
+import { getDashboardAttendanceStatus, type DashboardChildStatus } from "../actions";
 
 function formatTime(iso: string): string {
   return formatTimeJST(iso);
@@ -52,7 +48,9 @@ export default async function AttendanceDashboardPage() {
         <span className="att-name">{child.name}</span>
         <span className="att-grade">{child.grade}年</span>
         <span className="att-status">
-          <span className={`tag ${cfg.tagClass}`}>{cfg.icon} {cfg.label}</span>
+          <span className={`tag ${cfg.tagClass}`}>
+            {cfg.icon} {cfg.label}
+          </span>
         </span>
         <span className="att-time">
           {child.status === "entered" && child.enterTime && formatTime(child.enterTime)}
@@ -77,7 +75,9 @@ export default async function AttendanceDashboardPage() {
           <p className="main__date">{dateStr}</p>
         </div>
         <form action={handleRefresh}>
-          <Button type="submit" variant="secondary" size="sm">🔄 更新</Button>
+          <Button type="submit" variant="secondary" size="sm">
+            🔄 更新
+          </Button>
         </form>
       </div>
 
@@ -85,10 +85,23 @@ export default async function AttendanceDashboardPage() {
       <div className="summary-strip">
         <div className="summary-strip__hoshi">
           <svg width="24" height="28" viewBox="0 0 32 38" aria-hidden>
-            <path d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z" fill="#FFD93D" stroke="#E8B830" strokeWidth="1.5"/>
-            <circle cx="12" cy="14" r="1.5" fill="#3B2F20"/><circle cx="20" cy="14" r="1.5" fill="#3B2F20"/>
-            <circle cx="9" cy="17" r="2" fill="#FFB5C5" opacity=".55"/><circle cx="23" cy="17" r="2" fill="#FFB5C5" opacity=".55"/>
-            <path d="M13 18 Q16 21 19 18" fill="none" stroke="#3B2F20" strokeWidth="1" strokeLinecap="round"/>
+            <path
+              d="M16 2l3.5 10.5H30l-8.5 6.5 3.2 10L16 22.5 7.3 29l3.2-10L2 12.5h10.5z"
+              fill="#FFD93D"
+              stroke="#E8B830"
+              strokeWidth="1.5"
+            />
+            <circle cx="12" cy="14" r="1.5" fill="#3B2F20" />
+            <circle cx="20" cy="14" r="1.5" fill="#3B2F20" />
+            <circle cx="9" cy="17" r="2" fill="#FFB5C5" opacity=".55" />
+            <circle cx="23" cy="17" r="2" fill="#FFB5C5" opacity=".55" />
+            <path
+              d="M13 18 Q16 21 19 18"
+              fill="none"
+              stroke="#3B2F20"
+              strokeWidth="1"
+              strokeLinecap="round"
+            />
           </svg>
           <div>
             <span className="summary-strip__date">{dateStr}</span>
@@ -99,17 +112,23 @@ export default async function AttendanceDashboardPage() {
           <div className="summary-strip__stat">
             <span className="ss-icon">🏠</span>
             <span className="ss-num ss-num--in">{entered}</span>
-            <span className="ss-label"><strong>入室中</strong></span>
+            <span className="ss-label">
+              <strong>入室中</strong>
+            </span>
           </div>
           <div className="summary-strip__stat">
             <span className="ss-icon">👋</span>
             <span className="ss-num ss-num--left">{exited}</span>
-            <span className="ss-label"><strong>退室済</strong></span>
+            <span className="ss-label">
+              <strong>退室済</strong>
+            </span>
           </div>
           <div className="summary-strip__stat">
             <span className="ss-icon">💤</span>
             <span className="ss-num ss-num--out">{none}</span>
-            <span className="ss-label"><strong>未入室</strong></span>
+            <span className="ss-label">
+              <strong>未入室</strong>
+            </span>
           </div>
         </div>
         {entered === total && total > 0 && (
@@ -121,16 +140,26 @@ export default async function AttendanceDashboardPage() {
       <div className="teacher-note" style={{ marginTop: "-6px", position: "relative", zIndex: 0 }}>
         <span className="teacher-note__icon">✏️</span>
         <div>
-          <div className="teacher-note__text"><em>きょうも みんな げんきに すごそうね ⭐</em></div>
+          <div className="teacher-note__text">
+            <em>きょうも みんな げんきに すごそうね ⭐</em>
+          </div>
         </div>
       </div>
 
       {/* Filter pills */}
       <div className="filters">
-        <span className="fpill active">すべて<span className="fpill__c">({total})</span></span>
-        <span className="fpill">⭐ 入室中<span className="fpill__c">({entered})</span></span>
-        <span className="fpill">👋 退室済<span className="fpill__c">({exited})</span></span>
-        <span className="fpill">☆ 未入室<span className="fpill__c">({none})</span></span>
+        <span className="fpill active">
+          すべて<span className="fpill__c">({total})</span>
+        </span>
+        <span className="fpill">
+          ⭐ 入室中<span className="fpill__c">({entered})</span>
+        </span>
+        <span className="fpill">
+          👋 退室済<span className="fpill__c">({exited})</span>
+        </span>
+        <span className="fpill">
+          ☆ 未入室<span className="fpill__c">({none})</span>
+        </span>
       </div>
 
       {/* Attendance grouped by status */}
@@ -141,7 +170,9 @@ export default async function AttendanceDashboardPage() {
           {enteredChildren.length > 0 && (
             <>
               <div className="grade-div">
-                <div className="grade-div__label">🏠 入室中 <span className="grade-div__count">（{enteredChildren.length}名）</span></div>
+                <div className="grade-div__label">
+                  🏠 入室中 <span className="grade-div__count">（{enteredChildren.length}名）</span>
+                </div>
                 <div className="grade-div__line" />
               </div>
               <div className="att-card">{enteredChildren.map(renderAttRow)}</div>
@@ -150,7 +181,9 @@ export default async function AttendanceDashboardPage() {
           {exitedChildren.length > 0 && (
             <>
               <div className="grade-div">
-                <div className="grade-div__label">👋 退室済 <span className="grade-div__count">（{exitedChildren.length}名）</span></div>
+                <div className="grade-div__label">
+                  👋 退室済 <span className="grade-div__count">（{exitedChildren.length}名）</span>
+                </div>
                 <div className="grade-div__line" />
               </div>
               <div className="att-card">{exitedChildren.map(renderAttRow)}</div>
@@ -159,7 +192,9 @@ export default async function AttendanceDashboardPage() {
           {noneChildren.length > 0 && (
             <>
               <div className="grade-div">
-                <div className="grade-div__label">💤 未入室 <span className="grade-div__count">（{noneChildren.length}名）</span></div>
+                <div className="grade-div__label">
+                  💤 未入室 <span className="grade-div__count">（{noneChildren.length}名）</span>
+                </div>
                 <div className="grade-div__line" />
               </div>
               <div className="att-card">{noneChildren.map(renderAttRow)}</div>
