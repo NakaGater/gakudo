@@ -13,24 +13,31 @@ import { getUser } from "@/lib/auth/get-user";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendAnnouncementNotification } from "@/lib/notifications/send";
 import { createClient } from "@/lib/supabase/server";
+import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export const createAnnouncement = withAuth(
   ["admin", "teacher", "entrance"],
   async ({ user, supabase }, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const title = formData.get("title");
-    const body = formData.get("body");
-
     const fieldErrors: { title?: string; body?: string; recipients?: string } = {};
 
-    if (typeof title !== "string" || !title.trim()) {
-      fieldErrors.title = "タイトルを入力してください";
-    } else if (title.trim().length > 200) {
-      fieldErrors.title = "タイトルは200文字以内で入力してください";
+    // Phase 2-D: getString handles required + max-length in one call.
+    const titleR = getString(formData, "title", { max: 200 });
+    let title = "";
+    if (!titleR.ok) {
+      fieldErrors.title = titleR.error.includes("以内")
+        ? "タイトルは200文字以内で入力してください"
+        : "タイトルを入力してください";
+    } else {
+      title = titleR.value;
     }
 
-    if (typeof body !== "string" || !body.trim()) {
-      fieldErrors.body = "本文を入力してください";
+    const bodyR = getString(formData, "body", { message: "本文を入力してください" });
+    let body = "";
+    if (!bodyR.ok) {
+      fieldErrors.body = bodyR.error;
+    } else {
+      body = bodyR.value;
     }
 
     const recipientsResult = parseRecipientsFromFormData(formData);
@@ -48,8 +55,8 @@ export const createAnnouncement = withAuth(
     const { data, error } = await supabase
       .from("announcements")
       .insert({
-        title: (title as string).trim(),
-        body: (body as string).trim(),
+        title,
+        body,
         posted_by: user.id,
       })
       .select("id")
@@ -86,11 +93,7 @@ export const createAnnouncement = withAuth(
     }
 
     // Best-effort notification dispatch (non-blocking)
-    sendAnnouncementNotification(
-      announcementId,
-      (title as string).trim(),
-      (body as string).trim(),
-    ).catch((err) => {
+    sendAnnouncementNotification(announcementId, title, body).catch((err) => {
       console.error("[announcements] Notification dispatch failed:", err);
     });
 

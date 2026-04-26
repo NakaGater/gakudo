@@ -5,6 +5,7 @@ import { withAuth } from "@/lib/actions/middleware";
 import { getUser } from "@/lib/auth/get-user";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
+import { getNumber, getString } from "@/lib/validation/form";
 import type { BillingRule } from "./types";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
@@ -50,43 +51,47 @@ export async function getBillingRules(): Promise<BillingRule[]> {
 export const createBillingRule = withAuth(
   "admin",
   async ({ user, supabase }, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const regularEndTime = formData.get("regular_end_time");
-    const ratePerUnit = formData.get("rate_per_unit");
-    const unitMinutes = formData.get("unit_minutes");
-    const effectiveFrom = formData.get("effective_from");
+    // Phase 2-D: getString / getNumber centralize the typeof + range
+    // checks; messages preserved.
+    const regularEndTimeR = getString(formData, "regular_end_time", {
+      message: "通常終了時刻を入力してください",
+    });
+    const ratePerUnitR = getNumber(formData, "rate_per_unit", {
+      min: 1,
+      message: "有効な単価を入力してください",
+    });
+    const unitMinutesR = getNumber(formData, "unit_minutes", {
+      min: 1,
+      message: "有効な単位時間を入力してください",
+    });
+    const effectiveFromR = getString(formData, "effective_from", {
+      message: "適用開始日を入力してください",
+    });
 
     const fieldErrors: FieldErrors = {};
-
-    if (typeof regularEndTime !== "string" || !regularEndTime.trim()) {
-      fieldErrors.regular_end_time = "通常終了時刻を入力してください";
-    }
-
-    if (typeof ratePerUnit !== "string" || !ratePerUnit.trim() || Number(ratePerUnit) <= 0) {
-      fieldErrors.rate_per_unit = "有効な単価を入力してください";
-    }
-
-    if (typeof unitMinutes !== "string" || !unitMinutes.trim() || Number(unitMinutes) <= 0) {
-      fieldErrors.unit_minutes = "有効な単位時間を入力してください";
-    }
-
-    if (typeof effectiveFrom !== "string" || !effectiveFrom.trim()) {
-      fieldErrors.effective_from = "適用開始日を入力してください";
-    }
+    if (!regularEndTimeR.ok) fieldErrors.regular_end_time = regularEndTimeR.error;
+    if (!ratePerUnitR.ok) fieldErrors.rate_per_unit = ratePerUnitR.error;
+    if (!unitMinutesR.ok) fieldErrors.unit_minutes = unitMinutesR.error;
+    if (!effectiveFromR.ok) fieldErrors.effective_from = effectiveFromR.error;
 
     if (
       fieldErrors.regular_end_time ||
       fieldErrors.rate_per_unit ||
       fieldErrors.unit_minutes ||
-      fieldErrors.effective_from
+      fieldErrors.effective_from ||
+      !regularEndTimeR.ok ||
+      !ratePerUnitR.ok ||
+      !unitMinutesR.ok ||
+      !effectiveFromR.ok
     ) {
       return { success: false, message: "入力内容を確認してください", fieldErrors };
     }
 
     const { error } = await supabase.from("billing_rules").insert({
-      regular_end_time: (regularEndTime as string).trim(),
-      rate_per_unit: Number(ratePerUnit),
-      unit_minutes: Number(unitMinutes),
-      effective_from: (effectiveFrom as string).trim(),
+      regular_end_time: regularEndTimeR.value,
+      rate_per_unit: ratePerUnitR.value,
+      unit_minutes: unitMinutesR.value,
+      effective_from: effectiveFromR.value,
       created_by: user.id,
     });
 
