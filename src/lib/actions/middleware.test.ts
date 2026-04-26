@@ -5,16 +5,28 @@ vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-const mockCreateClient = vi.fn();
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: () => mockCreateClient(),
-}));
+// Factory-built supabase mock: not actively used by withAuth-wrapped
+// tests, but a real client is what production code receives in `ctx`,
+// so the type compatibility check (`createClient: () => Promise<...>`)
+// stays accurate.
+const supabaseClientCreated = vi.hoisted(() => ({ count: 0 }));
+
+vi.mock("@/lib/supabase/server", async () => {
+  const { createSupabaseMock } = await import("@/test/supabase-mock-factory");
+  return {
+    createClient: () => {
+      supabaseClientCreated.count += 1;
+      const { client } = createSupabaseMock();
+      return Promise.resolve(client);
+    },
+  };
+});
 
 import { withAuth } from "./middleware";
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockCreateClient.mockResolvedValue({ supabase: "stub" });
+  supabaseClientCreated.count = 0;
 });
 
 describe("withAuth", () => {
@@ -35,10 +47,12 @@ describe("withAuth", () => {
 
     const result = await wrapped();
     expect(result).toEqual({ success: true, message: "ok" });
-    expect(handler).toHaveBeenCalledWith({
-      user: { id: "u1", role: "admin" },
-      supabase: { supabase: "stub" },
-    });
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user: { id: "u1", role: "admin" },
+        supabase: expect.any(Object),
+      }),
+    );
   });
 
   it("admits any role in an allow-list guard", async () => {
@@ -87,6 +101,6 @@ describe("withAuth", () => {
     const wrapped = withAuth("admin", vi.fn());
 
     await wrapped();
-    expect(mockCreateClient).not.toHaveBeenCalled();
+    expect(supabaseClientCreated.count).toBe(0);
   });
 });

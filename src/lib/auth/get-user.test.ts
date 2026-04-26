@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock next/navigation
 const mockRedirect = vi.fn<(url: string) => never>();
 vi.mock("next/navigation", () => ({
   redirect: (...args: Parameters<typeof mockRedirect>) => {
@@ -9,51 +8,46 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-// Mock Supabase server client
-const mockGetSession = vi.fn();
-const mockFrom = vi.fn();
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      auth: { getSession: mockGetSession },
-      from: mockFrom,
-    }),
-  ),
+const controller = vi.hoisted(() => ({
+  authUser: null as { id: string; email: string } | null,
+  profile: null as { id: string; email: string; name: string; role: string } | null,
+  profileError: null as unknown,
 }));
 
-// Import after mocks are set up
+vi.mock("@/lib/supabase/server", async () => {
+  const { createSupabaseMock } = await import("@/test/supabase-mock-factory");
+  return {
+    createClient: () => {
+      const { client } = createSupabaseMock({
+        authUser: controller.authUser,
+        tableResolver: (table: string) => {
+          if (table !== "profiles") return undefined;
+          return { data: controller.profile, error: controller.profileError };
+        },
+      });
+      return Promise.resolve(client);
+    },
+  };
+});
+
 import { getUser } from "./get-user";
 
 describe("getUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    controller.authUser = null;
+    controller.profile = null;
+    controller.profileError = null;
   });
 
   it("returns user profile when authenticated", async () => {
-    const mockSession = {
-      user: { id: "user-123", email: "test@example.com" },
-    };
-    const mockProfile = {
+    controller.authUser = { id: "user-123", email: "test@example.com" };
+    controller.profile = {
       id: "user-123",
       email: "test@example.com",
       name: "Test User",
-      role: "parent" as const,
+      role: "parent",
     };
-
-    mockGetSession.mockResolvedValue({
-      data: { session: mockSession },
-      error: null,
-    });
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: mockProfile,
-            error: null,
-          }),
-        }),
-      }),
-    });
 
     const result = await getUser();
 
@@ -66,32 +60,13 @@ describe("getUser", () => {
   });
 
   it("redirects to /login when not authenticated", async () => {
-    mockGetSession.mockResolvedValue({
-      data: { session: null },
-      error: { message: "Not authenticated" },
-    });
-
     await expect(getUser()).rejects.toThrow("NEXT_REDIRECT:/login");
     expect(mockRedirect).toHaveBeenCalledWith("/login");
   });
 
   it("redirects to /login when profile not found", async () => {
-    mockGetSession.mockResolvedValue({
-      data: {
-        session: { user: { id: "user-123", email: "test@example.com" } },
-      },
-      error: null,
-    });
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: null,
-            error: { message: "Not found" },
-          }),
-        }),
-      }),
-    });
+    controller.authUser = { id: "user-123", email: "test@example.com" };
+    controller.profileError = { message: "Not found" };
 
     await expect(getUser()).rejects.toThrow("NEXT_REDIRECT:/login");
     expect(mockRedirect).toHaveBeenCalledWith("/login");
