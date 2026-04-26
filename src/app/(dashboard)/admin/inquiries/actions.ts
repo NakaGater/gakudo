@@ -6,42 +6,14 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/types";
-
-export type InquiryRow = {
-  id: string;
-  type: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  preferred_date: string | null;
-  message: string;
-  status: string;
-  admin_reply: string | null;
-  replied_at: string | null;
-  replied_by: string | null;
-  created_at: string | null;
-};
-
-// Phase 3-E: list view only needs the columns rendered on the index
-// page; detail view still pulls every column via getInquiry.
-export type InquiryListRow = Pick<
-  InquiryRow,
-  "id" | "type" | "name" | "message" | "status" | "created_at" | "preferred_date"
->;
+import {
+  INQUIRIES_PAGE_SIZE,
+  type InquiriesPage,
+  type InquiryListRow,
+  type InquiryRow,
+} from "./types";
 
 const INQUIRY_LIST_COLUMNS = "id, type, name, message, status, created_at, preferred_date";
-
-// Phase 3-D: pagination so admin doesn't pull the entire history when
-// the inquiries table grows.
-export const INQUIRIES_PAGE_SIZE = 50;
-
-export type InquiriesPage = {
-  rows: InquiryListRow[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-};
 
 export async function getInquiries(status?: string, page = 1): Promise<InquiriesPage> {
   const user = await getUser();
