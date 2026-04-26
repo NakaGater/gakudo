@@ -56,6 +56,11 @@ export const POST = withApiAuth(ALL_ROLES, async ({ user, supabase }, request: R
 
   const { error: insertError } = await supabase.from("push_subscriptions").insert({
     user_id: user.id,
+    // body matches PushSubscriptionBody (validated by isValidSubscription
+    // above). Phase 3-C: TypeScript can't structurally bridge a closed
+    // type to Supabase's recursive Json without an unknown hop. Single
+    // eslint-disable here is intentional and isolated.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subscription: body as unknown as Json,
   });
 

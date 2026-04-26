@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { uploadAttachment } from "@/lib/attachments/actions";
 import { withAuth } from "@/lib/actions/middleware";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 import type { Database } from "@/lib/supabase/types";
 
@@ -17,19 +18,15 @@ type SiteNewsInsert = Database["public"]["Tables"]["site_news"]["Insert"];
 export const createNews = withAuth(
   "admin",
   async ({ user, supabase }, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const title = formData.get("title");
-    const body = formData.get("body");
-
-    if (typeof title !== "string" || !title.trim()) {
-      return { success: false, message: "タイトルを入力してください" };
-    }
-    if (typeof body !== "string" || !body.trim()) {
-      return { success: false, message: "本文を入力してください" };
-    }
+    // Phase 2-D: getString centralizes the typeof / trim plumbing.
+    const titleR = getString(formData, "title", { message: "タイトルを入力してください" });
+    if (!titleR.ok) return { success: false, message: titleR.error };
+    const bodyR = getString(formData, "body", { message: "本文を入力してください" });
+    if (!bodyR.ok) return { success: false, message: bodyR.error };
 
     const insertData: SiteNewsInsert = {
-      title: title.trim(),
-      body: body.trim(),
+      title: titleR.value,
+      body: bodyR.value,
       created_by: user.id,
     };
     const { data, error } = await supabase

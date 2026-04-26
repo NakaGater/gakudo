@@ -57,6 +57,9 @@ export function PullToRefresh() {
 
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches === true ||
+      // Safari iOS exposes a non-standard `navigator.standalone` boolean
+      // for home-screen apps. Cast is intentional feature detection.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as unknown as { standalone?: boolean }).standalone === true;
     const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     enabled.current = standalone && hasTouch;

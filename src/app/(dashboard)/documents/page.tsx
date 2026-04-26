@@ -25,9 +25,10 @@ export default async function DocumentsPage() {
     .select(
       "id, title, category, file_path, created_at, uploader:profiles!documents_uploaded_by_fkey(name)",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .returns<DocumentRow[]>();
 
-  const documents = (data ?? []) as unknown as DocumentRow[];
+  const documents = data ?? [];
 
   // Group by category
   const grouped = new Map<string, DocumentRow[]>();

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { withAuth } from "@/lib/actions/middleware";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 // Phase 2-C: first action migrated to withAuth as a worked example.
@@ -12,19 +13,17 @@ import type { ActionResult, ActionState } from "@/lib/actions/types";
 export const updateProfile = withAuth(
   ["parent", "teacher", "admin", "entrance"],
   async ({ user, supabase }, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const name = formData.get("name");
-    if (typeof name !== "string" || !name.trim()) {
-      return { success: false, message: "名前を入力してください" };
-    }
-
-    if (name.trim().length > 50) {
+    // Phase 2-D: required vs >50 must yield different messages, and
+    // getString's `message` would override both. Use it without max,
+    // then check length separately.
+    const nameR = getString(formData, "name", { message: "名前を入力してください" });
+    if (!nameR.ok) return { success: false, message: nameR.error };
+    if (nameR.value.length > 50) {
       return { success: false, message: "名前は50文字以内で入力してください" };
     }
+    const name = nameR.value;
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ name: name.trim() })
-      .eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ name }).eq("id", user.id);
 
     if (error) {
       return { success: false, message: sanitizeError(error, "保存に失敗しました") };

@@ -22,27 +22,77 @@ export type InquiryRow = {
   created_at: string | null;
 };
 
-export async function getInquiries(status?: string): Promise<InquiryRow[]> {
+// Phase 3-E: list view only needs the columns rendered on the index
+// page; detail view still pulls every column via getInquiry.
+export type InquiryListRow = Pick<
+  InquiryRow,
+  "id" | "type" | "name" | "message" | "status" | "created_at" | "preferred_date"
+>;
+
+const INQUIRY_LIST_COLUMNS = "id, type, name, message, status, created_at, preferred_date";
+
+// Phase 3-D: pagination so admin doesn't pull the entire history when
+// the inquiries table grows.
+export const INQUIRIES_PAGE_SIZE = 50;
+
+export type InquiriesPage = {
+  rows: InquiryListRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export async function getInquiries(status?: string, page = 1): Promise<InquiriesPage> {
   const user = await getUser();
-  if (!isStaff(user.role)) return [];
-
-  const supabase = await createClient();
-  let query = supabase.from("inquiries").select("*").order("created_at", { ascending: false });
-
-  if (status && status !== "all") {
-    query = query.eq("status", status);
+  if (!isStaff(user.role)) {
+    return { rows: [], total: 0, page: 1, pageSize: INQUIRIES_PAGE_SIZE, totalPages: 1 };
   }
 
-  const { data } = await query;
-  return (data as InquiryRow[]) ?? [];
+  const supabase = await createClient();
+  const safePage = Math.max(1, Math.floor(page));
+  const from = (safePage - 1) * INQUIRIES_PAGE_SIZE;
+  const to = from + INQUIRIES_PAGE_SIZE - 1;
+
+  // Count + page in parallel so the total tracks the same filter.
+  let countQuery = supabase.from("inquiries").select("*", { count: "exact", head: true });
+  let dataQuery = supabase
+    .from("inquiries")
+    .select(INQUIRY_LIST_COLUMNS)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (status && status !== "all") {
+    countQuery = countQuery.eq("status", status);
+    dataQuery = dataQuery.eq("status", status);
+  }
+
+  const [{ count }, { data }] = await Promise.all([countQuery, dataQuery]);
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / INQUIRIES_PAGE_SIZE));
+
+  return {
+    rows: (data as InquiryListRow[]) ?? [],
+    total,
+    page: safePage,
+    pageSize: INQUIRIES_PAGE_SIZE,
+    totalPages,
+  };
 }
+
+const INQUIRY_DETAIL_COLUMNS =
+  "id, type, name, email, phone, preferred_date, message, status, admin_reply, replied_at, replied_by, created_at";
 
 export async function getInquiry(id: string): Promise<InquiryRow | null> {
   const user = await getUser();
   if (!isStaff(user.role)) return null;
 
   const supabase = await createClient();
-  const { data } = await supabase.from("inquiries").select("*").eq("id", id).single();
+  const { data } = await supabase
+    .from("inquiries")
+    .select(INQUIRY_DETAIL_COLUMNS)
+    .eq("id", id)
+    .single();
 
   return (data as InquiryRow) ?? null;
 }

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { withAuth } from "@/lib/actions/middleware";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 import type { Database, Json } from "@/lib/supabase/types";
 
@@ -21,30 +22,33 @@ export const updateSitePage = withAuth(
     _prev: ActionState,
     formData: FormData,
   ): Promise<ActionResult> => {
-    const title = formData.get("title");
-    const content = formData.get("content");
-    const metadataRaw = formData.get("metadata");
+    // Phase 2-D: getString centralizes the typeof + trim plumbing.
+    const titleR = getString(formData, "title", { message: "タイトルを入力してください" });
+    if (!titleR.ok) return { success: false, message: titleR.error };
 
-    if (typeof title !== "string" || !title.trim()) {
-      return { success: false, message: "タイトルを入力してください" };
-    }
-    if (typeof content !== "string") {
+    // content may legitimately be an empty string (cleared page body),
+    // but the field must be *present*; getString collapses null and ""
+    // for required:false so we keep this one as a raw FormData read.
+    const contentRaw = formData.get("content");
+    if (typeof contentRaw !== "string") {
       return { success: false, message: "コンテンツを入力してください" };
     }
+    const content = contentRaw;
 
+    const metadataR = getString(formData, "metadata", { required: false });
     let metadata: Record<string, unknown> = {};
-    if (typeof metadataRaw === "string" && metadataRaw.trim()) {
+    if (metadataR.ok && metadataR.value) {
       try {
-        metadata = JSON.parse(metadataRaw);
+        metadata = JSON.parse(metadataR.value);
       } catch {
         return { success: false, message: "メタデータのJSON形式が不正です" };
       }
     }
 
     const updateData: SitePageUpdate = {
-      title: title.trim(),
+      title: titleR.value,
       content,
-      metadata: metadata as unknown as Json,
+      metadata: metadata as Json,
       updated_by: user.id,
     };
     const { error } = await supabase.from("site_pages").update(updateData).eq("slug", slug);

@@ -1,17 +1,20 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 export async function forgotPassword(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionResult> {
-  const email = formData.get("email") as string;
-
-  if (!email) {
-    return { success: false, message: "メールアドレスを入力してください" };
-  }
+  // Phase 2-D: existing tests assert the exact wording, so the
+  // helper's `message` option preserves it verbatim.
+  const emailR = getString(formData, "email", {
+    message: "メールアドレスを入力してください",
+  });
+  if (!emailR.ok) return { success: false, message: emailR.error };
+  const email = emailR.value;
 
   const supabase = await createClient();
 
