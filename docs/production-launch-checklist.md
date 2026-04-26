@@ -215,10 +215,16 @@ supabase db push
 リファクタリング戦略の Phase 3〜4 で予定していたが、実証段階では着手しなかったもの:
 
 - [x] ~~**withAuth 残り 17 actions の callsite 移行**~~ → 完了（11 ファイル全部移行済、Phase 2-C PR1〜PR4）
-- [ ] **withApiAuth 残り 3 routes の callsite 移行**（`api/auth/invite`, `api/billing/export`, `api/push/subscribe`）
-- [ ] **lib/validation/form.ts の callsite 移行 14 箇所**（プラン Phase 2-D）
-- [ ] **Phase 3** 大型ファイル分割 / `useArrayEditor` カスタムフック / `as unknown as` 撲滅 / pagination
-- [ ] **Phase 4** Supabase mock factory 統一 / E2E ロール境界テスト / `tsconfig.strict++`
+- [x] ~~**withApiAuth 残り 3 routes の callsite 移行**~~ → 完了（4/4 routes すべて）
+- [x] ~~**lib/validation/form.ts の callsite 移行 14 箇所**~~ → 主要 11 ファイル完了（残りはファイル系で範囲外）
+- [x] ~~**Phase 3-C/D/E**~~ → 完了（`as unknown as` 撲滅 / pagination / `select("*")` 削減）
+- [x] ~~**Phase 3-B 大型ファイル分割**~~ → `(public)/page.tsx`(581→484) と `billing/[yearMonth]/page.tsx`(314→255) のデータ抽出完了
+- [ ] **Phase 3-A** `useArrayEditor` + meta-fields 統一（重複削減のみ、UX/性能影響なし）
+- [ ] **Phase 4** 残:
+  - `tsconfig` 強化: `exactOptionalPropertyTypes: true` → ~6 callsite（Input/Form の `string | undefined` プロップ）の修正必要
+  - `tsconfig` 強化: `noUncheckedIndexedAccess: true` → 100+ callsite 想定、専用ブランチで機械的修正
+  - Supabase mock factory 統一（`src/test/supabase-mock-factory.ts`）
+  - E2E ロール境界テスト（teacher/entrance / 403 / network 失敗系の 4 spec 追加）
 
 ### 2-C migration の動作変更（launch 前に挙動確認）
 
