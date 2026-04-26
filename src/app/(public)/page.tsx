@@ -3,7 +3,7 @@ import Link from "next/link";
 import { InquiryForm } from "@/app/(public)/access/inquiry-form";
 import { TEXT_LIMITS } from "@/config/constants";
 import { getFeatureIcon } from "@/config/feature-icons";
-import { createClient } from "@/lib/supabase/server";
+import { loadHomePageData } from "@/lib/site/load-home-data";
 import { HeroSlideshow } from "./components/hero-slideshow";
 import type { Metadata } from "next";
 
@@ -13,118 +13,21 @@ export const metadata: Metadata = {
     "星ヶ丘こどもクラブは、保護者が運営する学童保育施設です。安心・安全な放課後の居場所を提供します。",
 };
 
-const DEFAULT_HERO_TEXT =
-  "星ヶ丘こどもクラブは、保護者の手で運営する学童保育施設です。約30名の児童が、宿題・遊び・おやつの時間を通じて、のびのびと放課後を過ごしています。";
-
-const DEFAULT_HERO_TITLE = "子どもたちの\n笑顔あふれる\n放課後を";
-const DEFAULT_HERO_EMPHASIS = "笑顔あふれる";
-
-type FeatureItem = { icon: string; title: string; description: string };
-
-const DEFAULT_FEATURES: FeatureItem[] = [
-  {
-    icon: "Users",
-    title: "父母運営のあたたかさ",
-    description:
-      "保護者が運営に参加することで、家庭とクラブが一体となってお子さまの成長を見守ります。",
-  },
-  {
-    icon: "Heart",
-    title: "異年齢の交流",
-    description:
-      "1年生から6年生まで一緒に過ごすことで、思いやりやリーダーシップが自然と育まれます。",
-  },
-  {
-    icon: "Calendar",
-    title: "季節の行事",
-    description: "お花見、七夕、クリスマス会など四季折々の行事を通じて、豊かな思い出を育みます。",
-  },
-  {
-    icon: "Apple",
-    title: "食育・おやつ",
-    description:
-      "栄養バランスを考えたおやつで、旬の味覚を楽しみます。みんなで食べる時間も大切にしています。",
-  },
-];
-
-/* Crayon color per feature index — reserved for future theming */
-
 export default async function HomePage() {
-  let heroText = DEFAULT_HERO_TEXT;
-  let heroTitle = DEFAULT_HERO_TITLE;
-  let heroEmphasis = DEFAULT_HERO_EMPHASIS;
-  let featuresHeading = "施設の特徴";
-  let featuresSubtitle = "デジタルの力で、保護者の安心と運営の効率化を両立します。";
-  let featureItems: FeatureItem[] = DEFAULT_FEATURES;
-  let photoUrls: string[] = [];
-  let newsItems: { id: string; title: string; body: string; published_at: string }[] = [];
-  let accessContent = "";
-  let accessMeta: Record<string, unknown> = {};
-  try {
-    const supabase = await createClient();
+  // Phase 3-B: data assembly + defaults moved to lib/site/load-home-data.
+  const {
+    heroText,
+    heroTitle,
+    heroEmphasis,
+    featuresHeading,
+    featuresSubtitle,
+    featureItems,
+    photoUrls,
+    newsItems,
+    accessContent,
+    accessMeta,
+  } = await loadHomePageData();
 
-    // 3クエリを並列実行（アクセス情報はhomeメタデータに統合）
-    const [homeResult, photosResult, newsResult] = await Promise.all([
-      supabase.from("site_pages").select("title, content, metadata").eq("slug", "home").single(),
-      supabase
-        .from("photos")
-        .select("storage_path")
-        .eq("visibility", "public")
-        .order("created_at", { ascending: false })
-        .limit(10),
-      supabase
-        .from("site_news")
-        .select("id, title, body, published_at")
-        .order("published_at", { ascending: false }),
-    ]);
-
-    const homePage = homeResult.data as {
-      title: string;
-      content: string;
-      metadata: Record<string, unknown>;
-    } | null;
-    if (homePage?.content) {
-      heroText = homePage.content;
-    }
-    if (homePage?.metadata) {
-      const m = homePage.metadata;
-      if (m.hero_title) heroTitle = m.hero_title as string;
-      if (m.hero_emphasis) heroEmphasis = m.hero_emphasis as string;
-      if (m.features_heading) featuresHeading = m.features_heading as string;
-      if (m.features_subtitle) featuresSubtitle = m.features_subtitle as string;
-      if (Array.isArray(m.features) && m.features.length > 0) {
-        featureItems = m.features as FeatureItem[];
-      }
-      // アクセス情報をhomeメタデータから取得（access_プレフィックス）
-      if (m.access_address) accessContent = m.access_address as string;
-      accessMeta = {
-        subtitle: m.access_subtitle ?? accessMeta.subtitle,
-        opening_hours: m.access_opening_hours ?? accessMeta.opening_hours,
-        phone: m.access_phone ?? accessMeta.phone,
-        phone_hours: m.access_phone_hours ?? accessMeta.phone_hours,
-        visit_heading: m.access_visit_heading ?? accessMeta.visit_heading,
-        visit_text: m.access_visit_text ?? accessMeta.visit_text,
-        map_embed_url: m.access_map_embed_url ?? accessMeta.map_embed_url,
-      };
-    }
-
-    const photos = photosResult.data;
-    if (photos && photos.length > 0) {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      photoUrls = photos.map(
-        (p) => `${supabaseUrl}/storage/v1/object/public/photos/${p.storage_path}`,
-      );
-    }
-
-    const news = newsResult.data as
-      | { id: string; title: string; body: string; published_at: string }[]
-      | null;
-    if (news && news.length > 0) {
-      newsItems = news;
-    }
-  } catch {
-    // DB接続エラー時はデフォルトテキストを使用
-  }
   return (
     <>
       {/* Hero */}
