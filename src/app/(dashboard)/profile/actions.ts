@@ -21,13 +21,17 @@ import type { ActionResult, ActionState } from "@/lib/actions/types";
  * processes it also writes the cookie deletion headers; the redirect
  * then runs the next request without any session.
  *
+ * Lands on "/" (the public homepage). The middleware only redirects
+ * *authenticated* visitors away from "/" — once cookies are cleared
+ * the user sees the public site and can re-enter via the login link.
+ *
  * `redirect()` from next/navigation throws internally; that's expected
- * — Server Actions catch the throw and return a 303 to /login.
+ * — Server Actions catch the throw and return a 303 to /.
  */
 export async function logout(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect("/");
 }
 
 // Phase 2-C: first action migrated to withAuth as a worked example.

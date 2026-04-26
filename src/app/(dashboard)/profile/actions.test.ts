@@ -97,16 +97,20 @@ describe("logout (Server Action)", () => {
     expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 
-  it("redirects to /login after signing out", async () => {
-    await expect(logout()).rejects.toThrow("NEXT_REDIRECT:/login");
-    expect(mockRedirect).toHaveBeenCalledWith("/login");
+  // After logging out the user should land on the public homepage,
+  // not the login screen. The middleware is now careful not to bounce
+  // unauthenticated visitors at "/" anywhere — it only redirects
+  // *authenticated* users from "/" into the dashboard.
+  it("redirects to / (public homepage) after signing out", async () => {
+    await expect(logout()).rejects.toThrow("NEXT_REDIRECT:/");
+    expect(mockRedirect).toHaveBeenCalledWith("/");
   });
 
   it("still redirects when signOut fails (best-effort logout)", async () => {
     // If signOut errors, we still want the user *off* the dashboard.
     // Staying on the page would imply they're still authenticated.
     mockSignOut.mockResolvedValue({ error: { message: "network" } });
-    await expect(logout()).rejects.toThrow("NEXT_REDIRECT:/login");
+    await expect(logout()).rejects.toThrow("NEXT_REDIRECT:/");
   });
 
   it("signs out before redirecting (order matters for cookie clearance)", async () => {
@@ -121,6 +125,6 @@ describe("logout (Server Action)", () => {
     });
 
     await expect(logout()).rejects.toThrow();
-    expect(events).toEqual(["signOut", "redirect:/login"]);
+    expect(events).toEqual(["signOut", "redirect:/"]);
   });
 });
