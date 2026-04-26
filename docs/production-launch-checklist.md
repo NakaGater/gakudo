@@ -198,6 +198,14 @@ supabase db push
 - [ ] 本番デプロイ手順を docs/operations.md（未作成）にまとめる
 - [ ] ロールバック手順（前のリリースに戻す方法）を文書化
 
+### Vercel ビルドキャッシュ汚染トラブルシュート
+
+直前のデプロイが **Turbopack コンパイルエラー** で落ちた直後、後続 PR で原因コードを修正してマージしても **同じエラーが再現する** 現象が確認されている。原因は Vercel の Build Cache に古いコンパイル成果物が残ること。
+
+**復旧手順**: Vercel Deployments → 失敗 deployment → 右上「⋯」→ **Redeploy** → ダイアログで **"Use existing Build Cache" のチェックを外す** → Redeploy。
+
+ローカルで `npm run build` が通っているのに Vercel だけ落ちる場合、まずキャッシュクリア Redeploy を試すこと。
+
 ---
 
 ## 10. ユーザー / 関係者周知
