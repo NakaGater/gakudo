@@ -1,10 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { withAuth } from "@/lib/actions/middleware";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { createClient } from "@/lib/supabase/server";
 import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
+
+/**
+ * Sign out as a Server Action.
+ *
+ * We cannot do this on the client: `createBrowserClient.auth.signOut()`
+ * cannot reliably delete the server-managed auth cookies. A follow-up
+ * `window.location.href = "/"` then frequently redirects right back
+ * into the dashboard via the middleware in `lib/supabase/middleware.ts`
+ * — the "logout button does nothing" symptom.
+ *
+ * Running signOut() on the server guarantees the response that
+ * processes it also writes the cookie deletion headers; the redirect
+ * then runs the next request without any session.
+ *
+ * `redirect()` from next/navigation throws internally; that's expected
+ * — Server Actions catch the throw and return a 303 to /login.
+ */
+export async function logout(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
 
 // Phase 2-C: first action migrated to withAuth as a worked example.
 // Any signed-in user can edit their own profile, so the guard accepts
