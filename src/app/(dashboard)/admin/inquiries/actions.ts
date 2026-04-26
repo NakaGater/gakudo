@@ -22,27 +22,46 @@ export type InquiryRow = {
   created_at: string | null;
 };
 
-export async function getInquiries(status?: string): Promise<InquiryRow[]> {
+// Phase 3-E: list view only needs the columns rendered on the index
+// page; detail view still pulls every column via getInquiry.
+export type InquiryListRow = Pick<
+  InquiryRow,
+  "id" | "type" | "name" | "message" | "status" | "created_at" | "preferred_date"
+>;
+
+const INQUIRY_LIST_COLUMNS = "id, type, name, message, status, created_at, preferred_date";
+
+export async function getInquiries(status?: string): Promise<InquiryListRow[]> {
   const user = await getUser();
   if (!isStaff(user.role)) return [];
 
   const supabase = await createClient();
-  let query = supabase.from("inquiries").select("*").order("created_at", { ascending: false });
+  let query = supabase
+    .from("inquiries")
+    .select(INQUIRY_LIST_COLUMNS)
+    .order("created_at", { ascending: false });
 
   if (status && status !== "all") {
     query = query.eq("status", status);
   }
 
   const { data } = await query;
-  return (data as InquiryRow[]) ?? [];
+  return (data as InquiryListRow[]) ?? [];
 }
+
+const INQUIRY_DETAIL_COLUMNS =
+  "id, type, name, email, phone, preferred_date, message, status, admin_reply, replied_at, replied_by, created_at";
 
 export async function getInquiry(id: string): Promise<InquiryRow | null> {
   const user = await getUser();
   if (!isStaff(user.role)) return null;
 
   const supabase = await createClient();
-  const { data } = await supabase.from("inquiries").select("*").eq("id", id).single();
+  const { data } = await supabase
+    .from("inquiries")
+    .select(INQUIRY_DETAIL_COLUMNS)
+    .eq("id", id)
+    .single();
 
   return (data as InquiryRow) ?? null;
 }

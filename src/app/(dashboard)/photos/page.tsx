@@ -8,7 +8,12 @@ import { setPhotoVisibility, deletePhoto } from "./actions";
 import { UploadForm } from "./upload-form";
 import type { Database } from "@/lib/supabase/types";
 
-type Photo = Database["public"]["Tables"]["photos"]["Row"];
+// Phase 3-E: only the columns rendered below are pulled; Pick keeps
+// the type honest about that.
+type Photo = Pick<
+  Database["public"]["Tables"]["photos"]["Row"],
+  "id" | "storage_path" | "caption" | "event_name" | "visibility"
+>;
 
 export default async function PhotosPage() {
   const user = await getUser();
@@ -84,7 +89,7 @@ export default async function PhotosPage() {
 
   const { data: photos } = await supabase
     .from("photos")
-    .select("*")
+    .select("id, storage_path, caption, event_name, visibility")
     .order("created_at", { ascending: false })
     .limit(50);
 

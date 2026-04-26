@@ -30,7 +30,9 @@ const { mockSingle, mockUpdate, mockFrom } = vi.hoisted(() => {
           ) {
             return { eq: vi.fn().mockResolvedValue({ count: 3 }) };
           }
-          if (args[0] === "*") {
+          if (typeof args[0] === "string") {
+            // Phase 3-E: getInquiries / getInquiry now request explicit
+            // columns; previously this branch was gated on "*".
             const orderResult = {
               then: (resolve: (v: unknown) => void) => resolve({ data: [] }),
               eq: vi.fn().mockReturnValue({

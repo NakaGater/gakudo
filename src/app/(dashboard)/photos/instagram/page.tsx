@@ -18,10 +18,13 @@ export default async function InstagramManagePage() {
   const supabase = await createClient();
   const { data: posts } = await supabase
     .from("instagram_posts")
-    .select("*")
+    .select("id, post_url, caption, created_at, is_visible, display_order")
     .order("display_order", { ascending: true });
 
-  const postList: IgPost[] = posts ?? [];
+  // Pick<…> matches the explicit select to keep type narrow.
+  const postList: Array<
+    Pick<IgPost, "id" | "post_url" | "caption" | "created_at" | "is_visible" | "display_order">
+  > = posts ?? [];
 
   return (
     <>
