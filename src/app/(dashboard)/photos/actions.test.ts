@@ -1,50 +1,25 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 const mockGetUser = vi.fn();
-const mockStorageUpload = vi.fn();
-const mockStorageRemove = vi.fn();
-const mockInsert = vi.fn();
-const mockSingle = vi.fn();
-const mockUpdateEq = vi.fn();
-const mockDeleteEq = vi.fn();
-const mockRevalidatePath = vi.fn();
-
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: () => ({
-        insert: (...a: unknown[]) => mockInsert(...a),
-        select: () => ({
-          eq: () => ({
-            single: () => mockSingle(),
-          }),
-        }),
-        update: () => ({
-          eq: (...e: unknown[]) => mockUpdateEq(...e),
-        }),
-        delete: () => ({
-          eq: (...e: unknown[]) => mockDeleteEq(...e),
-        }),
-      }),
-      storage: {
-        from: () => ({
-          upload: (...a: unknown[]) => mockStorageUpload(...a),
-          remove: (...a: unknown[]) => mockStorageRemove(...a),
-        }),
-      },
-    }),
-  ),
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
 }));
 
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: () => Promise.resolve(holder.current!.client),
+}));
+
+const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-import { uploadPhoto, setPhotoVisibility, deletePhoto } from "./actions";
+import { deletePhoto, setPhotoVisibility, uploadPhoto } from "./actions";
 
 function imageFile(name = "img.jpg", type = "image/jpeg", size = 32): File {
   // Real JPEG magic bytes so validateFileMagicBytes accepts the fixture.
@@ -63,9 +38,13 @@ function fdWith(files: File[], fields: Record<string, string> = {}): FormData {
   return fd;
 }
 
+const uploadCalls = () => holder.current!.spies.storageCalls.filter((c) => c.op === "upload");
+const removeCalls = () => holder.current!.spies.storageCalls.filter((c) => c.op === "remove");
+
 describe("uploadPhoto", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
     mockGetUser.mockResolvedValue({ id: "u-staff", role: "teacher" });
   });
 
@@ -73,7 +52,7 @@ describe("uploadPhoto", () => {
     mockGetUser.mockResolvedValue({ id: "u-parent", role: "parent" });
     const result = await uploadPhoto(fdWith([imageFile()]));
     expect(result.success).toBe(false);
-    expect(mockStorageUpload).not.toHaveBeenCalled();
+    expect(uploadCalls()).toHaveLength(0);
   });
 
   it("rejects when no files are provided", async () => {
@@ -83,18 +62,26 @@ describe("uploadPhoto", () => {
   });
 
   it("forces visibility=private for non-admin staff even if 'public' was sent", async () => {
-    mockStorageUpload.mockResolvedValue({ error: null });
-    mockInsert.mockResolvedValue({ error: null });
     await uploadPhoto(fdWith([imageFile()], { visibility: "public" }));
-    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({ visibility: "private" }));
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({
+        table: "photos",
+        op: "insert",
+        payload: expect.objectContaining({ visibility: "private" }),
+      }),
+    );
   });
 
   it("admin can mark photos public", async () => {
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
-    mockStorageUpload.mockResolvedValue({ error: null });
-    mockInsert.mockResolvedValue({ error: null });
     await uploadPhoto(fdWith([imageFile()], { visibility: "public" }));
-    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({ visibility: "public" }));
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({
+        table: "photos",
+        op: "insert",
+        payload: expect.objectContaining({ visibility: "public" }),
+      }),
+    );
   });
 
   it("rejects non-image files inline (no upload attempt)", async () => {
@@ -103,7 +90,7 @@ describe("uploadPhoto", () => {
     });
     const result = await uploadPhoto(fdWith([txt]));
     expect(result.success).toBe(false);
-    expect(mockStorageUpload).not.toHaveBeenCalled();
+    expect(uploadCalls()).toHaveLength(0);
   });
 
   it("rejects an image file whose bytes don't match the claimed MIME", async () => {
@@ -116,42 +103,46 @@ describe("uploadPhoto", () => {
     const lying = new File([bytes], "lying.jpg", { type: "image/jpeg" });
     const result = await uploadPhoto(fdWith([lying]));
     expect(result.success).toBe(false);
-    expect(mockStorageUpload).not.toHaveBeenCalled();
+    expect(uploadCalls()).toHaveLength(0);
   });
 
   it("removes uploaded file when DB insert fails (cleanup)", async () => {
-    mockStorageUpload.mockResolvedValue({ error: null });
-    mockInsert.mockResolvedValue({ error: { message: "constraint" } });
+    holder.current = createSupabaseMock({
+      tables: { photos: { data: null, error: { message: "constraint" } } },
+    });
     const result = await uploadPhoto(fdWith([imageFile()]));
     expect(result.success).toBe(false);
-    expect(mockStorageRemove).toHaveBeenCalled();
+    expect(removeCalls().length).toBeGreaterThan(0);
   });
 });
 
 describe("setPhotoVisibility", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-admin users (including teacher)", async () => {
     mockGetUser.mockResolvedValue({ id: "u-teacher", role: "teacher" });
     const result = await setPhotoVisibility("p-1", "public");
     expect(result.success).toBe(false);
-    expect(mockUpdateEq).not.toHaveBeenCalled();
+    expect(holder.current!.spies.mutations.filter((m) => m.op === "update")).toHaveLength(0);
   });
 
   it("admin can update visibility", async () => {
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
-    mockUpdateEq.mockResolvedValue({ error: null });
     const result = await setPhotoVisibility("p-1", "public");
     expect(result.success).toBe(true);
-    expect(mockUpdateEq).toHaveBeenCalledWith("id", "p-1");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "photos", op: "update" }),
+    );
   });
 });
 
 describe("deletePhoto", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-staff users", async () => {
@@ -162,33 +153,41 @@ describe("deletePhoto", () => {
 
   it("teacher cannot delete a photo uploaded by someone else", async () => {
     mockGetUser.mockResolvedValue({ id: "u-teacher", role: "teacher" });
-    mockSingle.mockResolvedValue({
-      data: { storage_path: "owner/file.jpg", uploaded_by: "u-other" },
-      error: null,
+    holder.current = createSupabaseMock({
+      tables: {
+        photos: {
+          data: { storage_path: "owner/file.jpg", uploaded_by: "u-other" },
+          error: null,
+        },
+      },
     });
     const result = await deletePhoto("p-1");
     expect(result.success).toBe(false);
-    expect(mockStorageRemove).not.toHaveBeenCalled();
+    expect(removeCalls()).toHaveLength(0);
   });
 
   it("admin can delete any photo", async () => {
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
-    mockSingle.mockResolvedValue({
-      data: { storage_path: "owner/file.jpg", uploaded_by: "u-other" },
-      error: null,
+    holder.current = createSupabaseMock({
+      tables: {
+        photos: {
+          data: { storage_path: "owner/file.jpg", uploaded_by: "u-other" },
+          error: null,
+        },
+      },
     });
-    mockStorageRemove.mockResolvedValue({ error: null });
-    mockDeleteEq.mockResolvedValue({ error: null });
     const result = await deletePhoto("p-1");
     expect(result.success).toBe(true);
-    expect(mockStorageRemove).toHaveBeenCalledWith(["owner/file.jpg"]);
+    expect(removeCalls()[0]?.args[0]).toEqual(["owner/file.jpg"]);
   });
 
   it("returns error when photo is not found", async () => {
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
-    mockSingle.mockResolvedValue({ data: null, error: { message: "not found" } });
+    holder.current = createSupabaseMock({
+      tables: { photos: { data: null, error: { message: "not found" } } },
+    });
     const result = await deletePhoto("missing");
     expect(result.success).toBe(false);
-    expect(mockStorageRemove).not.toHaveBeenCalled();
+    expect(removeCalls()).toHaveLength(0);
   });
 });

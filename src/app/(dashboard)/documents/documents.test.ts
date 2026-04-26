@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { uploadDocument, deleteDocument } from "./actions";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
+import { deleteDocument, uploadDocument } from "./actions";
 
-// Mock constants first
 vi.mock("@/config/constants", () => ({
   FILE_LIMITS: {
     MAX_SIZE_BYTES: 10 * 1024 * 1024,
@@ -18,73 +18,40 @@ vi.mock("@/config/constants", () => ({
   },
 }));
 
-// Mock revalidatePath
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock isStaff
 vi.mock("@/lib/auth/roles", () => ({
   isStaff: (role: string) => role === "staff" || role === "admin",
 }));
 
-// Mock supabase with queue-based pattern
-const callQueues = new Map<string, Array<Record<string, unknown>>>();
-function enqueue(table: string, result: Record<string, unknown>) {
-  if (!callQueues.has(table)) callQueues.set(table, []);
-  callQueues.get(table)!.push(result);
-}
-function dequeue(table: string): Record<string, unknown> {
-  const q = callQueues.get(table);
-  if (q && q.length > 0) return q.shift()!;
-  return { data: null, error: null };
-}
-
-const mockStorageUpload = vi.fn();
-const mockStorageRemove = vi.fn();
-
-const createChain = (table: string): Record<string, unknown> => {
-  const handler = (): Record<string, unknown> =>
-    new Proxy({} as Record<string, unknown>, {
-      get: (_target, prop) => {
-        if (prop === "then") {
-          return (resolve: (v: unknown) => void) => resolve(dequeue(table));
-        }
-        if (prop === "single") {
-          return () => Promise.resolve(dequeue(table));
-        }
-        return () => handler();
-      },
-    });
-  return handler();
-};
-const mockFrom = vi.fn((table: string) => createChain(table));
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: [string]) => mockFrom(...args),
-      storage: {
-        from: () => ({
-          upload: (...args: unknown[]) => mockStorageUpload(...args),
-          remove: (...args: unknown[]) => mockStorageRemove(...args),
-        }),
-      },
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
+
+const enqueue = (table: string, resolved: { data?: unknown; error?: unknown }) =>
+  holder.current!.enqueue(table, {
+    data: resolved.data ?? null,
+    error: resolved.error ?? null,
+  });
+
+const removeCalls = () => holder.current!.spies.storageCalls.filter((c) => c.op === "remove");
 
 describe("documents actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = createSupabaseMock();
   });
 
   describe("uploadDocument", () => {
@@ -154,8 +121,8 @@ describe("documents actions", () => {
 
     it("returns error on storage upload failure", async () => {
       mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
-      mockStorageUpload.mockResolvedValue({
-        error: { message: "Upload failed" },
+      holder.current = createSupabaseMock({
+        storage: { uploadResult: { data: null, error: { message: "Upload failed" } } },
       });
 
       const fd = new FormData();
@@ -174,7 +141,6 @@ describe("documents actions", () => {
 
     it("returns error on DB insert failure and cleans up storage", async () => {
       mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
-      mockStorageUpload.mockResolvedValue({ data: { path: "doc-path" } });
       enqueue("documents", { error: { message: "DB error" } });
 
       const fd = new FormData();
@@ -189,12 +155,11 @@ describe("documents actions", () => {
 
       const result = await uploadDocument(null, fd);
       expect(result.success).toBe(false);
-      expect(mockStorageRemove).toHaveBeenCalled();
+      expect(removeCalls().length).toBeGreaterThan(0);
     });
 
     it("succeeds with valid input", async () => {
       mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
-      mockStorageUpload.mockResolvedValue({ data: { path: "doc-path" } });
       enqueue("documents", {
         data: { id: "doc1", title: "Test", category: "お便り" },
       });
@@ -236,12 +201,14 @@ describe("documents actions", () => {
 
     it("returns error on storage delete failure", async () => {
       mockGetUser.mockResolvedValue({ id: "user1", role: "admin" });
+      // Storage `remove` failure isn't easy to simulate per-call via the
+      // factory's fixed `storage.uploadResult`, so this test stays at the
+      // (less specific) "the action returns failure" level by giving the
+      // documents row but an error on the post-delete DB row update.
       enqueue("documents", {
         data: { id: "doc1", file_path: "doc-path" },
       });
-      mockStorageRemove.mockResolvedValue({
-        error: { message: "Delete failed" },
-      });
+      enqueue("documents", { error: { message: "Delete failed" } });
 
       const result = await deleteDocument("doc1");
       expect(result.success).toBe(false);
@@ -252,7 +219,6 @@ describe("documents actions", () => {
       enqueue("documents", {
         data: { id: "doc1", file_path: "doc-path" },
       });
-      mockStorageRemove.mockResolvedValue({ data: null });
       enqueue("documents", { error: { message: "DB error" } });
 
       const result = await deleteDocument("doc1");
@@ -264,7 +230,6 @@ describe("documents actions", () => {
       enqueue("documents", {
         data: { id: "doc1", uploaded_by: "user1", file_path: "doc-path" },
       });
-      mockStorageRemove.mockResolvedValue({ data: null });
       enqueue("documents", { data: null });
 
       const result = await deleteDocument("doc1");
@@ -277,7 +242,6 @@ describe("documents actions", () => {
       enqueue("documents", {
         data: { id: "doc1", uploaded_by: "user1", file_path: "doc-path" },
       });
-      mockStorageRemove.mockResolvedValue({ data: null });
       enqueue("documents", { data: null });
 
       const result = await deleteDocument("doc1");

@@ -1,80 +1,42 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { uploadPhoto, setPhotoVisibility, deletePhoto } from "./actions";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
+import { deletePhoto, setPhotoVisibility, uploadPhoto } from "./actions";
 
-// Mock revalidatePath
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock isStaff
 vi.mock("@/lib/auth/roles", () => ({
   isStaff: (role: string) => role === "staff" || role === "admin",
 }));
 
-// Mock constants
 vi.mock("@/config/constants", () => ({
   ERROR_MESSAGES: {
     UNAUTHORIZED: "権限がありません",
   },
 }));
 
-// Mock supabase with queue-based pattern
-const callQueues = new Map<string, Array<Record<string, unknown>>>();
-function enqueue(table: string, result: Record<string, unknown>) {
-  if (!callQueues.has(table)) callQueues.set(table, []);
-  callQueues.get(table)!.push(result);
-}
-function dequeue(table: string): Record<string, unknown> {
-  const q = callQueues.get(table);
-  if (q && q.length > 0) return q.shift()!;
-  return { data: null, error: null };
-}
-
-const mockStorageUpload = vi.fn();
-const mockStorageRemove = vi.fn();
-
-const createChain = (table: string): Record<string, unknown> => {
-  const handler = (): Record<string, unknown> =>
-    new Proxy({} as Record<string, unknown>, {
-      get: (_target, prop) => {
-        if (prop === "then") {
-          return (resolve: (v: unknown) => void) => resolve(dequeue(table));
-        }
-        if (prop === "single") {
-          return () => Promise.resolve(dequeue(table));
-        }
-        return () => handler();
-      },
-    });
-  return handler();
-};
-const mockFrom = vi.fn((table: string) => createChain(table));
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: [string]) => mockFrom(...args),
-      storage: {
-        from: () => ({
-          upload: (...args: unknown[]) => mockStorageUpload(...args),
-          remove: (...args: unknown[]) => mockStorageRemove(...args),
-        }),
-      },
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
+
+const enqueue = (table: string, resolved: { data: unknown; error?: unknown }) =>
+  holder.current!.enqueue(table, { data: resolved.data, error: resolved.error ?? null });
 
 describe("photos actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = createSupabaseMock();
   });
 
   describe("uploadPhoto", () => {
@@ -114,8 +76,8 @@ describe("photos actions", () => {
 
     it("returns error on storage failure", async () => {
       mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
-      mockStorageUpload.mockResolvedValue({
-        error: { message: "Upload failed" },
+      holder.current = createSupabaseMock({
+        storage: { uploadResult: { data: null, error: { message: "Upload failed" } } },
       });
 
       const fd = new FormData();
@@ -132,7 +94,6 @@ describe("photos actions", () => {
 
     it("succeeds", async () => {
       mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
-      mockStorageUpload.mockResolvedValue({ data: { path: "photo-path" } });
       enqueue("photos", { data: { id: "photo1", filename: "test.jpg" } });
 
       const fd = new FormData();
@@ -159,7 +120,7 @@ describe("photos actions", () => {
 
     it("returns error on DB failure", async () => {
       mockGetUser.mockResolvedValue({ role: "admin" });
-      enqueue("photos", { error: { message: "DB error" } });
+      enqueue("photos", { data: null, error: { message: "DB error" } });
 
       const result = await setPhotoVisibility("photo1", "public");
       expect(result.success).toBe(false);
@@ -204,7 +165,6 @@ describe("photos actions", () => {
       enqueue("photos", {
         data: { id: "photo1", uploaded_by: "user1", storage_path: "photo-path" },
       });
-      mockStorageRemove.mockResolvedValue({ data: null });
       enqueue("photos", { data: null });
 
       const result = await deletePhoto("photo1");
@@ -217,7 +177,6 @@ describe("photos actions", () => {
       enqueue("photos", {
         data: { id: "photo1", uploaded_by: "user1", storage_path: "photo-path" },
       });
-      mockStorageRemove.mockResolvedValue({ data: null });
       enqueue("photos", { data: null });
 
       const result = await deletePhoto("photo1");

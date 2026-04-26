@@ -89,6 +89,11 @@ export function createSupabaseMock(scenario: Scenario = {}) {
   const fromCalls: string[] = [];
   const mutations: MutationCall[] = [];
   const rpcCalls: Array<{ name: string; args: unknown }> = [];
+  const storageCalls: Array<{
+    bucket: string;
+    op: "upload" | "remove" | "getPublicUrl";
+    args: unknown[];
+  }> = [];
   // Per-table FIFO queue. Tests that depend on call order (e.g. one
   // `from("attendances")` returns enter records, the next returns
   // exits) push into this queue; each chain termination dequeues.
@@ -167,16 +172,23 @@ export function createSupabaseMock(scenario: Scenario = {}) {
       ),
     },
     storage: {
-      from: vi.fn((_bucket: string) => ({
-        upload: vi.fn((_path: string, _body: unknown, _opts?: unknown) =>
-          Promise.resolve(
+      from: vi.fn((bucket: string) => ({
+        upload: vi.fn((path: string, body: unknown, opts?: unknown) => {
+          storageCalls.push({ bucket, op: "upload", args: [path, body, opts] });
+          return Promise.resolve(
             scenario.storage?.uploadResult ?? { data: { path: "uploaded" }, error: null },
-          ),
-        ),
-        getPublicUrl: vi.fn((_path: string) => ({
-          data: { publicUrl: scenario.storage?.publicUrl ?? "https://example/file" },
-        })),
-        remove: vi.fn((_paths: string[]) => Promise.resolve({ data: null, error: null })),
+          );
+        }),
+        getPublicUrl: vi.fn((path: string) => {
+          storageCalls.push({ bucket, op: "getPublicUrl", args: [path] });
+          return {
+            data: { publicUrl: scenario.storage?.publicUrl ?? "https://example/file" },
+          };
+        }),
+        remove: vi.fn((paths: string[]) => {
+          storageCalls.push({ bucket, op: "remove", args: [paths] });
+          return Promise.resolve({ data: null, error: null });
+        }),
       })),
     },
   };
@@ -187,6 +199,7 @@ export function createSupabaseMock(scenario: Scenario = {}) {
       fromCalls,
       mutations,
       rpcCalls,
+      storageCalls,
     },
     /**
      * Push a result onto the FIFO queue for `table`. Each subsequent
