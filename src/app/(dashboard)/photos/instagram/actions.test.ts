@@ -1,42 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 const mockGetUser = vi.fn();
-const mockSelectMaxOrder = vi.fn();
-const mockInsert = vi.fn();
-const mockDeleteEq = vi.fn();
-const mockUpdateEq = vi.fn();
-const mockRevalidatePath = vi.fn();
-
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (table: string) => {
-        if (table !== "instagram_posts") throw new Error(`unexpected table ${table}`);
-        return {
-          select: () => ({
-            order: () => ({
-              limit: () => ({
-                single: () => mockSelectMaxOrder(),
-              }),
-            }),
-          }),
-          insert: (...args: unknown[]) => mockInsert(...args),
-          delete: () => ({
-            eq: (...e: unknown[]) => mockDeleteEq(...e),
-          }),
-          update: () => ({
-            eq: (...e: unknown[]) => mockUpdateEq(...e),
-          }),
-        };
-      },
-    }),
-  ),
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
 }));
 
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: () => Promise.resolve(holder.current!.client),
+}));
+
+const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
@@ -52,6 +30,7 @@ function form(fields: Record<string, string>): FormData {
 describe("addInstagramPost", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
   });
 
@@ -62,7 +41,7 @@ describe("addInstagramPost", () => {
       form({ post_url: "https://www.instagram.com/p/abc123/" }),
     );
     expect(result.success).toBe(false);
-    expect(mockInsert).not.toHaveBeenCalled();
+    expect(holder.current!.spies.mutations.filter((m) => m.op === "insert")).toHaveLength(0);
   });
 
   it("rejects empty URL", async () => {
@@ -87,24 +66,35 @@ describe("addInstagramPost", () => {
     "https://instagram.com/reel/xyz_456",
     "http://www.instagram.com/tv/CdEf-Gh",
   ])("accepts well-formed Instagram URL: %s", async (url) => {
-    mockSelectMaxOrder.mockResolvedValue({ data: { display_order: 4 }, error: null });
-    mockInsert.mockResolvedValue({ error: null });
+    holder.current!.enqueue("instagram_posts", {
+      data: { display_order: 4 },
+      error: null,
+    });
     const result = await addInstagramPost(null, form({ post_url: url, caption: "" }));
     expect(result.success).toBe(true);
-    expect(mockInsert).toHaveBeenCalled();
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "instagram_posts", op: "insert" }),
+    );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/photos/instagram");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/gallery");
   });
 
   it("uses display_order = max + 1 (handles initial empty state)", async () => {
-    mockSelectMaxOrder.mockResolvedValue({ data: null, error: null });
-    mockInsert.mockResolvedValue({ error: null });
+    holder.current!.enqueue("instagram_posts", { data: null, error: null });
     await addInstagramPost(
       null,
       form({ post_url: "https://www.instagram.com/p/abc/", caption: "x" }),
     );
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ display_order: 0, caption: "x", created_by: "u-admin" }),
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({
+        table: "instagram_posts",
+        op: "insert",
+        payload: expect.objectContaining({
+          display_order: 0,
+          caption: "x",
+          created_by: "u-admin",
+        }),
+      }),
     );
   });
 
@@ -124,6 +114,7 @@ describe("addInstagramPost", () => {
 describe("deleteInstagramPost", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
   });
 
@@ -131,20 +122,22 @@ describe("deleteInstagramPost", () => {
     mockGetUser.mockResolvedValue({ id: "u-parent", role: "parent" });
     const result = await deleteInstagramPost("post-1");
     expect(result.success).toBe(false);
-    expect(mockDeleteEq).not.toHaveBeenCalled();
+    expect(holder.current!.spies.mutations.filter((m) => m.op === "delete")).toHaveLength(0);
   });
 
   it("deletes when staff", async () => {
-    mockDeleteEq.mockResolvedValue({ error: null });
     const result = await deleteInstagramPost("post-1");
     expect(result.success).toBe(true);
-    expect(mockDeleteEq).toHaveBeenCalledWith("id", "post-1");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "instagram_posts", op: "delete" }),
+    );
   });
 });
 
 describe("toggleInstagramPostVisibility", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
   });
 
@@ -152,13 +145,14 @@ describe("toggleInstagramPostVisibility", () => {
     mockGetUser.mockResolvedValue({ id: "u-parent", role: "parent" });
     const result = await toggleInstagramPostVisibility("post-1", true);
     expect(result.success).toBe(false);
-    expect(mockUpdateEq).not.toHaveBeenCalled();
+    expect(holder.current!.spies.mutations.filter((m) => m.op === "update")).toHaveLength(0);
   });
 
   it("flips visibility when staff", async () => {
-    mockUpdateEq.mockResolvedValue({ error: null });
     const result = await toggleInstagramPostVisibility("post-1", true);
     expect(result.success).toBe(true);
-    expect(mockUpdateEq).toHaveBeenCalledWith("id", "post-1");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "instagram_posts", op: "update" }),
+    );
   });
 });

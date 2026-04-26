@@ -1,46 +1,25 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 const mockGetUser = vi.fn();
-const mockStorageUpload = vi.fn();
-const mockStorageRemove = vi.fn();
-const mockInsert = vi.fn();
-const mockSingle = vi.fn();
-const mockDeleteEq = vi.fn();
-const mockRevalidatePath = vi.fn();
-
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: () => ({
-        insert: (...a: unknown[]) => mockInsert(...a),
-        select: () => ({
-          eq: () => ({
-            single: () => mockSingle(),
-          }),
-        }),
-        delete: () => ({
-          eq: (...e: unknown[]) => mockDeleteEq(...e),
-        }),
-      }),
-      storage: {
-        from: () => ({
-          upload: (...a: unknown[]) => mockStorageUpload(...a),
-          remove: (...a: unknown[]) => mockStorageRemove(...a),
-        }),
-      },
-    }),
-  ),
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
 }));
 
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: () => Promise.resolve(holder.current!.client),
+}));
+
+const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-import { uploadDocument, deleteDocument } from "./actions";
+import { deleteDocument, uploadDocument } from "./actions";
 
 function pdfFile(name = "guide.pdf", size = 64): File {
   // Real PDF magic bytes (%PDF) so validateFileMagicBytes accepts the
@@ -62,9 +41,13 @@ function form(fields: Record<string, string | File>): FormData {
   return fd;
 }
 
+const uploadCalls = () => holder.current!.spies.storageCalls.filter((c) => c.op === "upload");
+const removeCalls = () => holder.current!.spies.storageCalls.filter((c) => c.op === "remove");
+
 describe("uploadDocument", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
     mockGetUser.mockResolvedValue({ id: "u-staff", role: "teacher" });
   });
 
@@ -75,7 +58,7 @@ describe("uploadDocument", () => {
       form({ title: "x", category: "お便り", file: pdfFile() }),
     );
     expect(result.success).toBe(false);
-    expect(mockStorageUpload).not.toHaveBeenCalled();
+    expect(uploadCalls()).toHaveLength(0);
   });
 
   it("aggregates field errors when all required fields are missing", async () => {
@@ -115,85 +98,100 @@ describe("uploadDocument", () => {
     const result = await uploadDocument(null, form({ title: "t", category: "お便り", file: evil }));
     expect(result.success).toBe(false);
     expect(result.fieldErrors?.file).toBeTruthy();
-    expect(mockStorageUpload).not.toHaveBeenCalled();
+    expect(uploadCalls()).toHaveLength(0);
   });
 
   it("happy path: uploads and inserts a row", async () => {
-    mockStorageUpload.mockResolvedValue({ error: null });
-    mockInsert.mockResolvedValue({ error: null });
     const result = await uploadDocument(
       null,
       form({ title: " 計画書 ", category: "書類", file: pdfFile() }),
     );
     expect(result.success).toBe(true);
-    expect(mockStorageUpload).toHaveBeenCalledOnce();
-    expect(mockInsert).toHaveBeenCalledWith(
+    expect(uploadCalls()).toHaveLength(1);
+    expect(holder.current!.spies.mutations).toContainEqual(
       expect.objectContaining({
-        title: "計画書",
-        category: "書類",
-        uploaded_by: "u-staff",
+        table: "documents",
+        op: "insert",
+        payload: expect.objectContaining({
+          title: "計画書",
+          category: "書類",
+          uploaded_by: "u-staff",
+        }),
       }),
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/documents");
   });
 
   it("removes uploaded file on DB insert failure (cleanup)", async () => {
-    mockStorageUpload.mockResolvedValue({ error: null });
-    mockInsert.mockResolvedValue({ error: { message: "constraint" } });
+    holder.current = createSupabaseMock({
+      tables: { documents: { data: null, error: { message: "constraint" } } },
+    });
+    mockGetUser.mockResolvedValue({ id: "u-staff", role: "teacher" });
     const result = await uploadDocument(
       null,
       form({ title: "t", category: "お便り", file: pdfFile() }),
     );
     expect(result.success).toBe(false);
-    expect(mockStorageRemove).toHaveBeenCalledOnce();
+    expect(removeCalls()).toHaveLength(1);
   });
 });
 
 describe("deleteDocument", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("returns not-found when the document does not exist", async () => {
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
-    mockSingle.mockResolvedValue({ data: null, error: { message: "no rows" } });
+    holder.current = createSupabaseMock({
+      tables: { documents: { data: null, error: { message: "no rows" } } },
+    });
     const result = await deleteDocument("missing");
     expect(result.success).toBe(false);
-    expect(mockStorageRemove).not.toHaveBeenCalled();
+    expect(removeCalls()).toHaveLength(0);
   });
 
   it("teacher cannot delete a document uploaded by someone else", async () => {
     mockGetUser.mockResolvedValue({ id: "u-teacher", role: "teacher" });
-    mockSingle.mockResolvedValue({
-      data: { id: "d-1", file_path: "owner/x.pdf", uploaded_by: "u-other" },
-      error: null,
+    holder.current = createSupabaseMock({
+      tables: {
+        documents: {
+          data: { id: "d-1", file_path: "owner/x.pdf", uploaded_by: "u-other" },
+          error: null,
+        },
+      },
     });
     const result = await deleteDocument("d-1");
     expect(result.success).toBe(false);
-    expect(mockStorageRemove).not.toHaveBeenCalled();
+    expect(removeCalls()).toHaveLength(0);
   });
 
   it("admin can delete any document", async () => {
     mockGetUser.mockResolvedValue({ id: "u-admin", role: "admin" });
-    mockSingle.mockResolvedValue({
-      data: { id: "d-1", file_path: "owner/x.pdf", uploaded_by: "u-other" },
-      error: null,
+    holder.current = createSupabaseMock({
+      tables: {
+        documents: {
+          data: { id: "d-1", file_path: "owner/x.pdf", uploaded_by: "u-other" },
+          error: null,
+        },
+      },
     });
-    mockStorageRemove.mockResolvedValue({ error: null });
-    mockDeleteEq.mockResolvedValue({ error: null });
     const result = await deleteDocument("d-1");
     expect(result.success).toBe(true);
-    expect(mockStorageRemove).toHaveBeenCalledWith(["owner/x.pdf"]);
+    expect(removeCalls()[0]?.args[0]).toEqual(["owner/x.pdf"]);
   });
 
   it("uploader can delete their own document", async () => {
     mockGetUser.mockResolvedValue({ id: "u-self", role: "teacher" });
-    mockSingle.mockResolvedValue({
-      data: { id: "d-1", file_path: "self/x.pdf", uploaded_by: "u-self" },
-      error: null,
+    holder.current = createSupabaseMock({
+      tables: {
+        documents: {
+          data: { id: "d-1", file_path: "self/x.pdf", uploaded_by: "u-self" },
+          error: null,
+        },
+      },
     });
-    mockStorageRemove.mockResolvedValue({ error: null });
-    mockDeleteEq.mockResolvedValue({ error: null });
     const result = await deleteDocument("d-1");
     expect(result.success).toBe(true);
   });

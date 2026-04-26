@@ -1,71 +1,45 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 import { addInstagramPost, deleteInstagramPost, toggleInstagramPostVisibility } from "./actions";
 
-// Mock revalidatePath
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock isStaff
 vi.mock("@/lib/auth/roles", () => ({
   isStaff: (role: string) => role === "staff" || role === "admin",
 }));
 
-// Mock constants
 vi.mock("@/config/constants", () => ({
   ERROR_MESSAGES: {
     UNAUTHORIZED: "権限がありません",
   },
 }));
 
-// Mock supabase with queue-based pattern
-const callQueues = new Map<string, Array<Record<string, unknown>>>();
-function enqueue(table: string, result: Record<string, unknown>) {
-  if (!callQueues.has(table)) callQueues.set(table, []);
-  callQueues.get(table)!.push(result);
-}
-function dequeue(table: string): Record<string, unknown> {
-  const q = callQueues.get(table);
-  if (q && q.length > 0) return q.shift()!;
-  return { data: null, error: null };
-}
-
-const createChain = (table: string): Record<string, unknown> => {
-  const handler = (): Record<string, unknown> =>
-    new Proxy({} as Record<string, unknown>, {
-      get: (_target, prop) => {
-        if (prop === "then") {
-          return (resolve: (v: unknown) => void) => resolve(dequeue(table));
-        }
-        if (prop === "single") {
-          return () => Promise.resolve(dequeue(table));
-        }
-        return () => handler();
-      },
-    });
-  return handler();
-};
-const mockFrom = vi.fn((table: string) => createChain(table));
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: [string]) => mockFrom(...args),
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
+
+const enqueue = (table: string, resolved: { data?: unknown; error?: unknown }) =>
+  holder.current!.enqueue(table, {
+    data: resolved.data ?? null,
+    error: resolved.error ?? null,
+  });
 
 describe("instagram actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = createSupabaseMock();
   });
 
   describe("addInstagramPost", () => {
