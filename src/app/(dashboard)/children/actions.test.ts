@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 // I/O 境界のみモック (next/cache, next/navigation, getUser, Supabase)。
 // フォームバリデーションは actions.helpers.test.ts で純粋にカバー済み。
@@ -20,19 +21,22 @@ vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-const mockFrom = vi.fn();
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() => Promise.resolve({ from: mockFrom })),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
 
 import {
   createChild,
-  updateChild,
   deleteChild,
+  linkParent,
   regenerateQR,
   searchParents,
-  linkParent,
   unlinkParent,
+  updateChild,
 } from "./actions";
 
 function form(fields: Record<string, string>): FormData {
@@ -44,6 +48,7 @@ function form(fields: Record<string, string>): FormData {
 describe("createChild", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-staff users", async () => {
@@ -60,18 +65,17 @@ describe("createChild", () => {
 
   it("inserts a child with a GK-prefixed nanoid QR and returns childId", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const insert = vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: { id: "child-1" }, error: null }),
-      }),
-    });
-    mockFrom.mockReturnValue({ insert });
+    holder.current!.enqueue("children", { data: { id: "child-1" }, error: null });
 
     const result = await createChild(null, form({ name: "太郎", grade: "3" }));
     expect(result).toMatchObject({ success: true, childId: "child-1" });
 
     // 境界契約: name/grade/qr_code が children テーブルへ insert される
-    const inserted = insert.mock.calls[0]![0];
+    const insertCall = holder.current!.spies.mutations.find(
+      (m) => m.table === "children" && m.op === "insert",
+    );
+    expect(insertCall).toBeDefined();
+    const inserted = insertCall!.payload as { name: string; grade: number; qr_code: string };
     expect(inserted.name).toBe("太郎");
     expect(inserted.grade).toBe(3);
     expect(inserted.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
@@ -79,13 +83,7 @@ describe("createChild", () => {
 
   it("returns DB error message on insert failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      insert: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: null, error: { message: "duplicate" } }),
-        }),
-      }),
-    });
+    holder.current!.enqueue("children", { data: null, error: { message: "duplicate" } });
 
     const result = await createChild(null, form({ name: "太郎", grade: "3" }));
     expect(result.success).toBe(false);
@@ -94,7 +92,10 @@ describe("createChild", () => {
 });
 
 describe("updateChild", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -104,23 +105,23 @@ describe("updateChild", () => {
 
   it("updates and returns success", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const eq = vi.fn().mockResolvedValue({ error: null });
-    const update = vi.fn().mockReturnValue({ eq });
-    mockFrom.mockReturnValue({ update });
 
     const result = await updateChild("child-1", null, form({ name: "更新太郎", grade: "5" }));
     expect(result).toMatchObject({ success: true });
     // 境界契約のみ: 渡されたデータが id=child-1 で更新される
-    expect(update).toHaveBeenCalledWith({ name: "更新太郎", grade: 5 });
-    expect(eq).toHaveBeenCalledWith("id", "child-1");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({
+        table: "children",
+        op: "update",
+        payload: { name: "更新太郎", grade: 5 },
+      }),
+    );
   });
 
   it("returns DB error message on update failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: { message: "FK constraint" } }),
-      }),
+    holder.current = createSupabaseMock({
+      tables: { children: { data: null, error: { message: "FK constraint" } } },
     });
     const result = await updateChild("child-1", null, form({ name: "太郎", grade: "3" }));
     expect(result.success).toBe(false);
@@ -130,7 +131,10 @@ describe("updateChild", () => {
 });
 
 describe("deleteChild", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-admin users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
@@ -139,19 +143,17 @@ describe("deleteChild", () => {
 
   it("deletes and returns success for admin", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const eq = vi.fn().mockResolvedValue({ error: null });
-    mockFrom.mockReturnValue({ delete: vi.fn().mockReturnValue({ eq }) });
 
     expect(await deleteChild("child-1")).toMatchObject({ success: true });
-    expect(eq).toHaveBeenCalledWith("id", "child-1");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "children", op: "delete" }),
+    );
   });
 
   it("returns DB error on delete failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      delete: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: { message: "FK err" } }),
-      }),
+    holder.current = createSupabaseMock({
+      tables: { children: { data: null, error: { message: "FK err" } } },
     });
     const result = await deleteChild("child-1");
     expect(result.success).toBe(false);
@@ -160,7 +162,10 @@ describe("deleteChild", () => {
 });
 
 describe("regenerateQR", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-admin users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
@@ -169,23 +174,22 @@ describe("regenerateQR", () => {
 
   it("issues a new GK-prefixed QR and activates it", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const eq = vi.fn().mockResolvedValue({ error: null });
-    const update = vi.fn().mockReturnValue({ eq });
-    mockFrom.mockReturnValue({ update });
 
     const result = await regenerateQR("c1");
     expect(result).toMatchObject({ success: true });
-    const arg = update.mock.calls[0]![0];
+    const updateCall = holder.current!.spies.mutations.find(
+      (m) => m.table === "children" && m.op === "update",
+    );
+    expect(updateCall).toBeDefined();
+    const arg = updateCall!.payload as { qr_code: string; qr_active: boolean };
     expect(arg.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
     expect(arg.qr_active).toBe(true);
   });
 
   it("returns DB error on update failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: { message: "DB err" } }),
-      }),
+    holder.current = createSupabaseMock({
+      tables: { children: { data: null, error: { message: "DB err" } } },
     });
     const result = await regenerateQR("c1");
     expect(result.success).toBe(false);
@@ -194,7 +198,10 @@ describe("regenerateQR", () => {
 });
 
 describe("searchParents", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("returns empty for non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -204,41 +211,30 @@ describe("searchParents", () => {
   it("returns empty for blank query (no DB call)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
     expect(await searchParents("  ")).toEqual([]);
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(holder.current!.spies.fromCalls).toEqual([]);
   });
 
   it("returns matching parents on success", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
     const data = [{ id: "p1", name: "田中", email: "tanaka@example.com" }];
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          or: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue({ data, error: null }),
-          }),
-        }),
-      }),
-    });
+    holder.current = createSupabaseMock({ tables: { profiles: { data, error: null } } });
     expect(await searchParents("田中")).toEqual(data);
   });
 
   it("returns empty on DB error (graceful failure)", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          or: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue({ data: null, error: { message: "x" } }),
-          }),
-        }),
-      }),
+    holder.current = createSupabaseMock({
+      tables: { profiles: { data: null, error: { message: "x" } } },
     });
     expect(await searchParents("test")).toEqual([]);
   });
 });
 
 describe("linkParent", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -247,16 +243,16 @@ describe("linkParent", () => {
 
   it("links and returns success", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      upsert: vi.fn().mockResolvedValue({ error: null }),
-    });
     expect(await linkParent("c1", "p1")).toMatchObject({ success: true });
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "child_parents", op: "upsert" }),
+    );
   });
 
   it("returns DB error on upsert failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      upsert: vi.fn().mockResolvedValue({ error: { message: "dup" } }),
+    holder.current = createSupabaseMock({
+      tables: { child_parents: { data: null, error: { message: "dup" } } },
     });
     const result = await linkParent("c1", "p1");
     expect(result.success).toBe(false);
@@ -265,7 +261,10 @@ describe("linkParent", () => {
 });
 
 describe("unlinkParent", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -274,20 +273,16 @@ describe("unlinkParent", () => {
 
   it("unlinks and returns success", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    const eq2 = vi.fn().mockResolvedValue({ error: null });
-    const eq1 = vi.fn().mockReturnValue({ eq: eq2 });
-    mockFrom.mockReturnValue({ delete: vi.fn().mockReturnValue({ eq: eq1 }) });
     expect(await unlinkParent("c1", "p1")).toMatchObject({ success: true });
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "child_parents", op: "delete" }),
+    );
   });
 
   it("returns DB error on delete failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      delete: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: { message: "FK err" } }),
-        }),
-      }),
+    holder.current = createSupabaseMock({
+      tables: { child_parents: { data: null, error: { message: "FK err" } } },
     });
     const result = await unlinkParent("c1", "p1");
     expect(result.success).toBe(false);
