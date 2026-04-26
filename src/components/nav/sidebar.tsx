@@ -3,7 +3,7 @@
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { logout } from "@/app/(dashboard)/profile/actions";
 import { cn } from "@/lib/utils";
 import { getNavItems } from "./nav-items";
 import type { BadgeCounts } from "./get-badge-counts";
@@ -34,12 +34,6 @@ export function Sidebar({ user, badgeCounts }: SidebarProps) {
     }
     return pathname.startsWith(href + "/");
   };
-
-  async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  }
 
   const roleLabel =
     user.role === "admin"
@@ -99,13 +93,15 @@ export function Sidebar({ user, badgeCounts }: SidebarProps) {
             <div className="sb__urole">{roleLabel}</div>
           </div>
         </Link>
-        <button
-          onClick={handleLogout}
-          className="ml-auto p-1 text-ink-light hover:text-cr-red transition-colors flex-shrink-0"
-          aria-label="ログアウト"
-        >
-          <LogOut size={16} strokeWidth={1.75} />
-        </button>
+        <form action={logout} className="ml-auto flex-shrink-0">
+          <button
+            type="submit"
+            className="p-1 text-ink-light hover:text-cr-red transition-colors"
+            aria-label="ログアウト"
+          >
+            <LogOut size={16} strokeWidth={1.75} />
+          </button>
+        </form>
       </div>
     </aside>
   );

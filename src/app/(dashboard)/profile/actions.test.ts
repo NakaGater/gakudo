@@ -4,6 +4,8 @@ const mockGetUser = vi.fn();
 const mockUpdate = vi.fn();
 const mockEq = vi.fn();
 const mockRevalidatePath = vi.fn();
+const mockSignOut = vi.fn();
+const mockRedirect = vi.fn<(url: string) => never>();
 
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
@@ -12,6 +14,9 @@ vi.mock("@/lib/auth/get-user", () => ({
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
+      auth: {
+        signOut: (...args: unknown[]) => mockSignOut(...args),
+      },
       from: () => ({
         update: (...args: unknown[]) => {
           mockUpdate(...args);
@@ -26,7 +31,14 @@ vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-import { updateProfile } from "./actions";
+vi.mock("next/navigation", () => ({
+  redirect: (...args: Parameters<typeof mockRedirect>) => {
+    mockRedirect(...args);
+    throw new Error(`NEXT_REDIRECT:${args[0]}`);
+  },
+}));
+
+import { logout, updateProfile } from "./actions";
 
 function form(fields: Record<string, string>): FormData {
   const fd = new FormData();
@@ -67,5 +79,48 @@ describe("updateProfile", () => {
     mockEq.mockResolvedValue({ error: { message: "internal db detail" } });
     const result = await updateProfile(null, form({ name: "山田" }));
     expect(result.success).toBe(false);
+  });
+});
+
+describe("logout (Server Action)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSignOut.mockResolvedValue({ error: null });
+  });
+
+  // Regression: client-side `supabase.auth.signOut() + window.location` is
+  // unreliable because the browser client cannot reliably clear the
+  // server-managed auth cookies. The Server Action runs on the request
+  // that *sets* the cookies, so deletion is guaranteed before redirect.
+  it("calls supabase.auth.signOut on the server", async () => {
+    await expect(logout()).rejects.toThrow(/NEXT_REDIRECT/);
+    expect(mockSignOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("redirects to /login after signing out", async () => {
+    await expect(logout()).rejects.toThrow("NEXT_REDIRECT:/login");
+    expect(mockRedirect).toHaveBeenCalledWith("/login");
+  });
+
+  it("still redirects when signOut fails (best-effort logout)", async () => {
+    // If signOut errors, we still want the user *off* the dashboard.
+    // Staying on the page would imply they're still authenticated.
+    mockSignOut.mockResolvedValue({ error: { message: "network" } });
+    await expect(logout()).rejects.toThrow("NEXT_REDIRECT:/login");
+  });
+
+  it("signs out before redirecting (order matters for cookie clearance)", async () => {
+    const events: string[] = [];
+    mockSignOut.mockImplementation(async () => {
+      events.push("signOut");
+      return { error: null };
+    });
+    mockRedirect.mockImplementation((url: string) => {
+      events.push(`redirect:${url}`);
+      throw new Error(`NEXT_REDIRECT:${url}`);
+    });
+
+    await expect(logout()).rejects.toThrow();
+    expect(events).toEqual(["signOut", "redirect:/login"]);
   });
 });

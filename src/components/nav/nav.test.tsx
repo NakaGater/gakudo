@@ -9,11 +9,11 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-// Mock supabase client (Sidebar uses signOut on logout)
-vi.mock("@/lib/supabase/client", () => ({
-  createClient: () => ({
-    auth: { signOut: vi.fn().mockResolvedValue({ error: null }) },
-  }),
+// Sidebar logout uses the `logout` Server Action (form action). Mock
+// the action so the component can render without a real Supabase
+// client / cookies / redirect chain.
+vi.mock("@/app/(dashboard)/profile/actions", () => ({
+  logout: vi.fn(),
 }));
 
 const emptyBadgeCounts = { pendingInquiries: 0, unreadAnnouncements: 0 };
@@ -110,6 +110,27 @@ describe("Sidebar", () => {
     );
     expect(screen.getByText("田中太郎")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /ログアウト/ })).toBeInTheDocument();
+  });
+
+  // Regression: the logout button used to be `<button onClick={...}>` that
+  // ran `supabase.auth.signOut() + window.location` on the client. That
+  // pattern can't reliably clear server-managed Supabase auth cookies, so
+  // the user appeared to "stay logged in". Now it must be a form
+  // submission to the Server Action — verify that structurally so a
+  // future "convenience" rewrite can't silently regress it.
+  it("logout button submits a form (Server Action), not a client onClick", () => {
+    const { container } = render(
+      <Sidebar
+        user={{ id: "1", email: "a@b.c", name: "田中太郎", role: "parent" }}
+        badgeCounts={emptyBadgeCounts}
+      />,
+    );
+    const logoutBtn = screen.getByRole("button", { name: /ログアウト/ });
+    expect(logoutBtn.getAttribute("type")).toBe("submit");
+    // Must be wrapped in a <form> — otherwise Server Action wiring is broken
+    const form = container.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(form).toContainElement(logoutBtn);
   });
 
   it("applies active styling to current path", () => {

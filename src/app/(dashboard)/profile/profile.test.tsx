@@ -1,5 +1,6 @@
 import { render, screen, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { LogoutButton } from "./logout-button";
 import { ProfileForm } from "./profile-form";
 
 vi.mock("next/navigation", () => ({
@@ -9,6 +10,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("./actions", () => ({
   updateProfile: vi.fn(),
+  logout: vi.fn(),
 }));
 
 afterEach(() => {
@@ -71,5 +73,20 @@ describe("ProfileForm", () => {
     render(<ProfileForm user={defaultUser} />);
 
     expect(screen.queryByText("保存しました")).not.toBeInTheDocument();
+  });
+});
+
+describe("LogoutButton", () => {
+  // Regression: an earlier client-side `onClick` implementation called
+  // `supabase.auth.signOut() + window.location` which couldn't reliably
+  // clear server-managed auth cookies. Lock down the structure so any
+  // future rewrite must keep the form-action shape (Server Action).
+  it("renders a submit button inside a form (Server Action)", () => {
+    const { container } = render(<LogoutButton />);
+    const btn = screen.getByRole("button", { name: /ログアウト/ });
+    expect(btn.getAttribute("type")).toBe("submit");
+    const form = container.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(form).toContainElement(btn);
   });
 });
