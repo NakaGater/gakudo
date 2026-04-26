@@ -214,11 +214,23 @@ supabase db push
 
 リファクタリング戦略の Phase 3〜4 で予定していたが、実証段階では着手しなかったもの:
 
-- [ ] **withAuth 残り 17 actions の callsite 移行**（プラン Phase 2-C ドメイン別 4 PR）
-- [ ] **withApiAuth 残り 3 routes の callsite 移行**（プラン Phase 2-E）
+- [x] ~~**withAuth 残り 17 actions の callsite 移行**~~ → 完了（11 ファイル全部移行済、Phase 2-C PR1〜PR4）
+- [ ] **withApiAuth 残り 3 routes の callsite 移行**（`api/auth/invite`, `api/billing/export`, `api/push/subscribe`）
 - [ ] **lib/validation/form.ts の callsite 移行 14 箇所**（プラン Phase 2-D）
 - [ ] **Phase 3** 大型ファイル分割 / `useArrayEditor` カスタムフック / `as unknown as` 撲滅 / pagination
 - [ ] **Phase 4** Supabase mock factory 統一 / E2E ロール境界テスト / `tsconfig.strict++`
+
+### 2-C migration の動作変更（launch 前に挙動確認）
+
+withAuth 統一の副作用で、**非 admin が admin only action を直接叩いた場合のレスポンスが変わった** 箇所が 3 つ:
+
+| 関数 | Phase 2-C 前 | Phase 2-C 後 |
+|---|---|---|
+| `(dashboard)/admin/site/actions.ts:updateSitePage` | `redirect("/")` | `{ success: false, message: "権限がありません" }` |
+| `(dashboard)/admin/site/news/actions.ts:createNews` | `redirect("/")` | 同上 |
+| `(dashboard)/admin/site/news/actions.ts:deleteNews` | `redirect("/")` | 同上 |
+
+通常フローでは `(dashboard)/layout.tsx` のロールガードで先に弾かれるため UI への影響なしの想定だが、本番投入前に **非 admin で admin 画面 URL を直叩きしてリダイレクトが期待通りか** 1 度確認する。
 
 これらは本番運用開始後でも、機能追加と並行して着手可能。
 
