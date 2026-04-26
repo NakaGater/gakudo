@@ -1,12 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
-// Mock next/cache
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock next/navigation
 const mockRedirect = vi.fn<(url: string) => never>();
 vi.mock("next/navigation", () => ({
   redirect: (...args: Parameters<typeof mockRedirect>) => {
@@ -15,59 +14,35 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock uploadAttachment
 const mockUploadAttachment = vi.fn();
 vi.mock("@/lib/attachments/actions", () => ({
   uploadAttachment: (...args: unknown[]) => mockUploadAttachment(...args),
 }));
 
-// Mock notification
 const mockSendNotification = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/notifications/send", () => ({
   sendAnnouncementNotification: (...args: unknown[]) => mockSendNotification(...args),
 }));
 
-// Mock Supabase - chainable query builder
-const mockSingle = vi.fn();
-const mockSelectChain = vi.fn(() => ({ single: mockSingle }));
-const mockAnnouncementsInsert = vi.fn(() => ({ select: mockSelectChain }));
-const mockRecipientsInsert = vi.fn().mockResolvedValue({ error: null });
-const mockAnnouncementsDelete = vi.fn(() => ({
-  eq: vi.fn().mockResolvedValue({ error: null }),
-}));
-const mockUpsert = vi.fn().mockResolvedValue({ error: null });
-const mockEqCount = vi.fn().mockResolvedValue({ count: 0 });
-const mockSelectCount = vi.fn(() => ({ eq: mockEqCount }));
-const mockFrom = vi.fn((table: string) => {
-  if (table === "announcement_reads") {
-    return { upsert: mockUpsert, select: mockSelectCount };
-  }
-  if (table === "announcement_recipients") {
-    return { insert: mockRecipientsInsert };
-  }
-  // announcements
-  return { insert: mockAnnouncementsInsert, delete: mockAnnouncementsDelete };
-});
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: unknown[]) => mockFrom(...(args as [string])),
-    }),
-  ),
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
 }));
 
-import { createAnnouncement, markAsRead, getReadCount } from "./actions";
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: () => Promise.resolve(holder.current!.client),
+}));
+
+import { createAnnouncement, getReadCount, markAsRead } from "./actions";
 
 describe("createAnnouncement", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRecipientsInsert.mockResolvedValue({ error: null });
+    holder.current = createSupabaseMock();
   });
 
   it("rejects non-staff users", async () => {
@@ -80,7 +55,7 @@ describe("createAnnouncement", () => {
 
   it("allows admin users with audience=all", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockSingle.mockResolvedValue({ data: { id: "ann-1" }, error: null });
+    holder.current!.enqueue("announcements", { data: { id: "ann-1" }, error: null });
 
     const fd = new FormData();
     fd.set("title", "テスト");
@@ -88,18 +63,25 @@ describe("createAnnouncement", () => {
     fd.set("audience", "all");
 
     await expect(createAnnouncement(null, fd)).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockRecipientsInsert).toHaveBeenCalledWith([
+
+    expect(holder.current!.spies.mutations).toContainEqual(
       expect.objectContaining({
-        announcement_id: "ann-1",
-        recipient_type: "all",
-        recipient_user_id: null,
+        table: "announcement_recipients",
+        op: "insert",
+        payload: [
+          expect.objectContaining({
+            announcement_id: "ann-1",
+            recipient_type: "all",
+            recipient_user_id: null,
+          }),
+        ],
       }),
-    ]);
+    );
   });
 
   it("allows teacher users with individual recipients", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-    mockSingle.mockResolvedValue({ data: { id: "ann-1" }, error: null });
+    holder.current!.enqueue("announcements", { data: { id: "ann-1" }, error: null });
 
     const fd = new FormData();
     fd.set("title", "テスト");
@@ -109,10 +91,16 @@ describe("createAnnouncement", () => {
     fd.append("userIds", "p2");
 
     await expect(createAnnouncement(null, fd)).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockRecipientsInsert).toHaveBeenCalledWith([
-      expect.objectContaining({ recipient_type: "user", recipient_user_id: "p1" }),
-      expect.objectContaining({ recipient_type: "user", recipient_user_id: "p2" }),
-    ]);
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({
+        table: "announcement_recipients",
+        op: "insert",
+        payload: [
+          expect.objectContaining({ recipient_type: "user", recipient_user_id: "p1" }),
+          expect.objectContaining({ recipient_type: "user", recipient_user_id: "p2" }),
+        ],
+      }),
+    );
   });
 
   it("rejects audience=user with no userIds", async () => {
@@ -176,7 +164,7 @@ describe("createAnnouncement", () => {
 
   it("creates announcement with file uploads", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockSingle.mockResolvedValue({ data: { id: "ann-1" }, error: null });
+    holder.current!.enqueue("announcements", { data: { id: "ann-1" }, error: null });
     mockUploadAttachment.mockResolvedValue({ success: true });
 
     const fd = new FormData();
@@ -186,8 +174,8 @@ describe("createAnnouncement", () => {
     fd.append("files", new File(["pdf"], "doc.pdf", { type: "application/pdf" }));
 
     await expect(createAnnouncement(null, fd)).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockFrom).toHaveBeenCalledWith("announcements");
-    expect(mockFrom).toHaveBeenCalledWith("announcement_recipients");
+    expect(holder.current!.spies.fromCalls).toContain("announcements");
+    expect(holder.current!.spies.fromCalls).toContain("announcement_recipients");
     expect(mockUploadAttachment).toHaveBeenCalledWith(
       "announcement",
       "ann-1",
@@ -198,7 +186,10 @@ describe("createAnnouncement", () => {
 
   it("returns error on DB failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockSingle.mockResolvedValue({ data: null, error: { message: "DB error" } });
+    holder.current!.enqueue("announcements", {
+      data: null,
+      error: { message: "DB error" },
+    });
 
     const fd = new FormData();
     fd.set("title", "テスト");
@@ -208,13 +199,15 @@ describe("createAnnouncement", () => {
     const result = await createAnnouncement(null, fd);
     expect(result?.success).toBe(false);
     expect(result?.message).not.toContain("DB error");
-    expect(result?.success).toBe(false);
   });
 
   it("rolls back announcement when recipients insert fails", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockSingle.mockResolvedValue({ data: { id: "ann-1" }, error: null });
-    mockRecipientsInsert.mockResolvedValueOnce({ error: { message: "recipients fail" } });
+    holder.current!.enqueue("announcements", { data: { id: "ann-1" }, error: null });
+    holder.current!.enqueue("announcement_recipients", {
+      data: null,
+      error: { message: "recipients fail" },
+    });
 
     const fd = new FormData();
     fd.set("title", "テスト");
@@ -224,8 +217,10 @@ describe("createAnnouncement", () => {
     const result = await createAnnouncement(null, fd);
     expect(result?.success).toBe(false);
     expect(result?.message).not.toContain("recipients fail");
-    expect(result?.success).toBe(false);
-    expect(mockAnnouncementsDelete).toHaveBeenCalled();
+    // Rollback path: delete on announcements
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "announcements", op: "delete" }),
+    );
     expect(mockSendNotification).not.toHaveBeenCalled();
   });
 });
@@ -233,21 +228,24 @@ describe("createAnnouncement", () => {
 describe("markAsRead", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("only marks for parent users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
 
     await markAsRead("ann-1");
-    expect(mockFrom).toHaveBeenCalledWith("announcement_reads");
-    expect(mockUpsert).toHaveBeenCalled();
+    expect(holder.current!.spies.fromCalls).toContain("announcement_reads");
+    expect(holder.current!.spies.mutations).toContainEqual(
+      expect.objectContaining({ table: "announcement_reads", op: "upsert" }),
+    );
   });
 
   it("does nothing for non-parent users", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
 
     await markAsRead("ann-1");
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(holder.current!.spies.fromCalls).toEqual([]);
   });
 });
 
@@ -257,15 +255,19 @@ describe("getReadCount", () => {
   });
 
   it("returns count from DB", async () => {
-    mockEqCount.mockResolvedValue({ count: 5 });
+    holder.current = createSupabaseMock({
+      tables: { announcement_reads: { data: null, error: null, count: 5 } },
+    });
 
     const count = await getReadCount("ann-1");
     expect(count).toBe(5);
-    expect(mockFrom).toHaveBeenCalledWith("announcement_reads");
+    expect(holder.current!.spies.fromCalls).toContain("announcement_reads");
   });
 
   it("returns 0 when count is null", async () => {
-    mockEqCount.mockResolvedValue({ count: null });
+    holder.current = createSupabaseMock({
+      tables: { announcement_reads: { data: null, error: null, count: null } },
+    });
 
     const count = await getReadCount("ann-1");
     expect(count).toBe(0);
