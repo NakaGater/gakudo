@@ -36,25 +36,28 @@ export type ActionContext = {
  *     across calls in the same handler avoids re-instantiation while
  *     still respecting the cookie store.
  *
- * The wrapped function returns either the handler's TResult or an
- * UNAUTHORIZED ActionResult. Most existing actions return ActionResult,
- * so the union collapses cleanly; non-ActionResult-returning actions
- * must explicitly handle the failure shape (or use a guard that never
- * fails by passing `() => true`).
+ * Constrained to `TResult extends ActionResult` so the unauthorized
+ * failure shape `{ success: false; message: string }` is structurally
+ * compatible with whatever the handler returns. Subtypes that add
+ * extra fields (e.g. AttendanceResult: childName / type / recordedAt)
+ * are still narrowable at the callsite via discriminated checks like
+ * `if (res.success && res.childName)`.
  *
  * Migration plan: per-domain in follow-ups (see Phase 2-C in the plan).
- * Until then, raw `getUser()` calls are not flagged. After the last
- * action migrates, an ESLint rule will forbid `getUser()` outside of
- * RSC pages and layouts.
+ * After the last action migrates, an ESLint rule will forbid raw
+ * `getUser()` outside of RSC pages and layouts.
  */
-export function withAuth<TArgs extends unknown[], TResult>(
+export function withAuth<TArgs extends unknown[], TResult extends ActionResult>(
   guard: Guard,
   handler: (ctx: ActionContext, ...args: TArgs) => Promise<TResult>,
-): (...args: TArgs) => Promise<TResult | ActionResult> {
+): (...args: TArgs) => Promise<TResult> {
   return async (...args: TArgs) => {
     const user = await getUser();
     if (!passes(guard, user)) {
-      return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
+      // Cast is sound: ActionResult is the structural lower bound of
+      // every TResult. Subtype-specific fields stay undefined on the
+      // failure path, which is what callers already check for.
+      return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED } as TResult;
     }
     const supabase = await createClient();
     return handler({ user, supabase }, ...args);

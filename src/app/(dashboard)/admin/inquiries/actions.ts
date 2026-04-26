@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ERROR_MESSAGES } from "@/config/constants";
+import { withAuth } from "@/lib/actions/middleware";
 import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -76,62 +76,59 @@ export async function getReplyTemplate(
   return REPLY_TEMPLATES.declined(name);
 }
 
-export async function replyToInquiry(
-  inquiryId: string,
-  action: "approved" | "declined" | "replied",
-  replyText: string,
-): Promise<ActionResult> {
-  const user = await getUser();
-  if (!isStaff(user.role)) {
-    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
-  }
+export const replyToInquiry = withAuth(
+  ["admin", "teacher", "entrance"],
+  async (
+    { user, supabase },
+    inquiryId: string,
+    action: "approved" | "declined" | "replied",
+    replyText: string,
+  ): Promise<ActionResult> => {
+    // 問い合わせ情報を取得
+    const { data: inquiry } = await supabase
+      .from("inquiries")
+      .select("email, name")
+      .eq("id", inquiryId)
+      .single();
 
-  const supabase = await createClient();
+    if (!inquiry) {
+      return { success: false, message: "お問い合わせが見つかりません。" };
+    }
 
-  // 問い合わせ情報を取得
-  const { data: inquiry } = await supabase
-    .from("inquiries")
-    .select("email, name")
-    .eq("id", inquiryId)
-    .single();
+    // ステータス更新
+    const { error } = await supabase
+      .from("inquiries")
+      .update({
+        status: action,
+        admin_reply: replyText,
+        replied_at: new Date().toISOString(),
+        replied_by: user.id,
+      })
+      .eq("id", inquiryId);
 
-  if (!inquiry) {
-    return { success: false, message: "お問い合わせが見つかりません。" };
-  }
+    if (error) {
+      return { success: false, message: "更新に失敗しました。" };
+    }
 
-  // ステータス更新
-  const { error } = await supabase
-    .from("inquiries")
-    .update({
-      status: action,
-      admin_reply: replyText,
-      replied_at: new Date().toISOString(),
-      replied_by: user.id,
-    })
-    .eq("id", inquiryId);
+    // メール送信
+    try {
+      await sendReplyEmail(
+        (inquiry as { email: string; name: string }).email,
+        (inquiry as { email: string; name: string }).name,
+        action,
+        replyText,
+      );
+    } catch (err) {
+      console.error("[inquiry] Reply email failed:", err);
+    }
 
-  if (error) {
-    return { success: false, message: "更新に失敗しました。" };
-  }
+    revalidatePath("/admin/inquiries");
+    revalidatePath(`/admin/inquiries/${inquiryId}`);
 
-  // メール送信
-  try {
-    await sendReplyEmail(
-      (inquiry as { email: string; name: string }).email,
-      (inquiry as { email: string; name: string }).name,
-      action,
-      replyText,
-    );
-  } catch (err) {
-    console.error("[inquiry] Reply email failed:", err);
-  }
-
-  revalidatePath("/admin/inquiries");
-  revalidatePath(`/admin/inquiries/${inquiryId}`);
-
-  const actionLabel = action === "approved" ? "承認" : action === "declined" ? "お断り" : "返信";
-  return { success: true, message: `${actionLabel}メールを送信しました。` };
-}
+    const actionLabel = action === "approved" ? "承認" : action === "declined" ? "お断り" : "返信";
+    return { success: true, message: `${actionLabel}メールを送信しました。` };
+  },
+);
 
 async function sendReplyEmail(email: string, name: string, action: string, replyText: string) {
   const { sendEmail } = await import("@/lib/email/send");

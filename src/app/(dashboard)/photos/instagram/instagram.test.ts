@@ -80,7 +80,7 @@ describe("instagram actions", () => {
     });
 
     it("returns error for empty URL", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
       fd.append("post_url", "");
@@ -90,7 +90,7 @@ describe("instagram actions", () => {
     });
 
     it("returns error for invalid URL (not Instagram)", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
       fd.append("post_url", "https://www.twitter.com/some/post");
@@ -100,7 +100,7 @@ describe("instagram actions", () => {
     });
 
     it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("instagram_posts", { data: [{ display_order: 0 }] });
       enqueue("instagram_posts", { error: { message: "DB error" } });
 
@@ -112,7 +112,7 @@ describe("instagram actions", () => {
     });
 
     it("succeeds with valid Instagram post URL", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("instagram_posts", { data: [{ display_order: 5 }] });
       enqueue("instagram_posts", {
         data: { id: "post1", post_url: "https://www.instagram.com/p/ABC123/" },
@@ -127,7 +127,7 @@ describe("instagram actions", () => {
     });
 
     it("succeeds with reel URL", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("instagram_posts", { data: [{ display_order: 3 }] });
       enqueue("instagram_posts", {
         data: { id: "post1", post_url: "https://www.instagram.com/reel/ABC123/" },
@@ -151,7 +151,7 @@ describe("instagram actions", () => {
     });
 
     it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
       enqueue("instagram_posts", { error: { message: "DB error" } });
 
       const result = await deleteInstagramPost("post1");
@@ -159,7 +159,7 @@ describe("instagram actions", () => {
     });
 
     it("succeeds", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
       enqueue("instagram_posts", { data: null });
 
       const result = await deleteInstagramPost("post1");
@@ -177,7 +177,7 @@ describe("instagram actions", () => {
     });
 
     it("returns error on DB failure", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
       enqueue("instagram_posts", { error: { message: "DB error" } });
 
       const result = await toggleInstagramPostVisibility("post1", true);
@@ -185,7 +185,7 @@ describe("instagram actions", () => {
     });
 
     it("succeeds", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
       enqueue("instagram_posts", {
         data: { id: "post1", is_visible: false },
       });

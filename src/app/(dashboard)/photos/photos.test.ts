@@ -94,7 +94,7 @@ describe("photos actions", () => {
     });
 
     it("returns error for empty files", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
 
@@ -103,7 +103,7 @@ describe("photos actions", () => {
     });
 
     it("rejects non-image files", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const fd = new FormData();
       fd.append("files", new File(["content"], "test.txt", { type: "text/plain" }));
@@ -113,7 +113,7 @@ describe("photos actions", () => {
     });
 
     it("returns error on storage failure", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       mockStorageUpload.mockResolvedValue({
         error: { message: "Upload failed" },
       });
@@ -131,7 +131,7 @@ describe("photos actions", () => {
     });
 
     it("succeeds", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       mockStorageUpload.mockResolvedValue({ data: { path: "photo-path" } });
       enqueue("photos", { data: { id: "photo1", filename: "test.jpg" } });
 
@@ -151,7 +151,7 @@ describe("photos actions", () => {
 
   describe("setPhotoVisibility", () => {
     it("rejects non-admin", async () => {
-      mockGetUser.mockResolvedValue({ role: "staff" });
+      mockGetUser.mockResolvedValue({ role: "teacher" });
 
       const result = await setPhotoVisibility("photo1", "public");
       expect(result.success).toBe(false);
@@ -184,7 +184,7 @@ describe("photos actions", () => {
     });
 
     it("returns error when photo not found", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("photos", { data: null });
 
       const result = await deletePhoto("photo1");
@@ -192,7 +192,7 @@ describe("photos actions", () => {
     });
 
     it("rejects unauthorized (not admin, not uploader)", async () => {
-      mockGetUser.mockResolvedValue({ id: "user2", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user2", role: "teacher" });
       enqueue("photos", { data: { id: "photo1", uploaded_by: "user1" } });
 
       const result = await deletePhoto("photo1");
@@ -213,7 +213,7 @@ describe("photos actions", () => {
     });
 
     it("succeeds for uploader", async () => {
-      mockGetUser.mockResolvedValue({ id: "user1", role: "staff" });
+      mockGetUser.mockResolvedValue({ id: "user1", role: "teacher" });
       enqueue("photos", {
         data: { id: "photo1", uploaded_by: "user1", storage_path: "photo-path" },
       });

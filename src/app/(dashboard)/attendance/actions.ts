@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ERROR_MESSAGES } from "@/config/constants";
+import { withAuth } from "@/lib/actions/middleware";
+import type { ActionResult } from "@/lib/actions/types";
 import { getUser } from "@/lib/auth/get-user";
-import { isStaff, isEntrance } from "@/lib/auth/roles";
+import { isStaff } from "@/lib/auth/roles";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendAttendanceNotification } from "@/lib/notifications/send";
 import { createClient } from "@/lib/supabase/server";
@@ -18,9 +19,10 @@ import {
 
 export type { DashboardChildStatus } from "./actions.helpers";
 
-export type AttendanceResult = {
-  success: boolean;
-  message: string;
+// Phase 2-C: extends ActionResult so withAuth's `TResult | ActionResult`
+// union collapses to a single shape and callsites can keep narrowing on
+// `success && childName && type && recordedAt`.
+export type AttendanceResult = ActionResult & {
   childName?: string;
   type?: "enter" | "exit";
   recordedAt?: string;
@@ -210,49 +212,43 @@ async function createAttendanceRecord(
   };
 }
 
-export async function recordManualAttendance(childId: string): Promise<AttendanceResult> {
-  const user = await getUser();
-  if (!isEntrance(user.role)) {
-    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
-  }
+export const recordManualAttendance = withAuth(
+  "entrance",
+  async ({ user, supabase }, childId: string): Promise<AttendanceResult> => {
+    const { data: child } = await supabase
+      .from("children")
+      .select("id, name")
+      .eq("id", childId)
+      .single();
 
-  const supabase = await createClient();
-  const { data: child } = await supabase
-    .from("children")
-    .select("id, name")
-    .eq("id", childId)
-    .single();
+    if (!child) {
+      return { success: false, message: "児童が見つかりません" };
+    }
 
-  if (!child) {
-    return { success: false, message: "児童が見つかりません" };
-  }
+    return createAttendanceRecord(child.id, child.name, "manual", user.id, [
+      "/attendance",
+      "/attendance/manual",
+    ]);
+  },
+);
 
-  return createAttendanceRecord(child.id, child.name, "manual", user.id, [
-    "/attendance",
-    "/attendance/manual",
-  ]);
-}
+export const recordAttendance = withAuth(
+  "entrance",
+  async ({ user, supabase }, qrCode: string): Promise<AttendanceResult> => {
+    const { data: child } = await supabase
+      .from("children")
+      .select("id, name, qr_active")
+      .eq("qr_code", qrCode)
+      .single();
 
-export async function recordAttendance(qrCode: string): Promise<AttendanceResult> {
-  const user = await getUser();
-  if (!isEntrance(user.role)) {
-    return { success: false, message: ERROR_MESSAGES.UNAUTHORIZED };
-  }
+    if (!child) {
+      return { success: false, message: "児童が見つかりません" };
+    }
 
-  const supabase = await createClient();
-  const { data: child } = await supabase
-    .from("children")
-    .select("id, name, qr_active")
-    .eq("qr_code", qrCode)
-    .single();
+    if (!child.qr_active) {
+      return { success: false, message: "このQRコードは無効です" };
+    }
 
-  if (!child) {
-    return { success: false, message: "児童が見つかりません" };
-  }
-
-  if (!child.qr_active) {
-    return { success: false, message: "このQRコードは無効です" };
-  }
-
-  return createAttendanceRecord(child.id, child.name, "qr", user.id, ["/attendance"]);
-}
+    return createAttendanceRecord(child.id, child.name, "qr", user.id, ["/attendance"]);
+  },
+);

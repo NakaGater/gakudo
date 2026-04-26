@@ -39,6 +39,13 @@ vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
+// withAuth instantiates a server-side Supabase client via createClient()
+// before invoking the handler. The body uses the admin client (below);
+// ctx.supabase here is just a stub.
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: () => Promise.resolve({} as unknown),
+}));
+
 // Admin client mocks
 const mockInviteUserByEmail = vi.fn();
 const mockUpdateUserById = vi.fn();
@@ -118,7 +125,7 @@ describe("inviteUser", () => {
     );
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("管理者権限が必要です");
+    expect(result.message).toBe("権限がありません");
   });
 
   it("2. returns error for missing email", async () => {
@@ -238,7 +245,7 @@ describe("updateUser", () => {
     );
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("管理者権限が必要です");
+    expect(result.message).toBe("権限がありません");
   });
 
   it("9. returns error for empty ID", async () => {
@@ -367,7 +374,7 @@ describe("deleteUser", () => {
     );
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("管理者権限が必要です");
+    expect(result.message).toBe("権限がありません");
   });
 
   it("17. returns error for empty ID", async () => {

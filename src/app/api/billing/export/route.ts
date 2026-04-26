@@ -1,25 +1,9 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api/auth";
-import { isAdminOrTeacher } from "@/lib/auth/roles";
+import { withApiAuth } from "@/lib/api/auth";
 import { generateBillingCSV } from "@/lib/billing/csv";
 import { sanitizeError } from "@/lib/errors/sanitize";
 
-export async function GET(request: Request) {
-  const auth = await requireAuth();
-  if (auth.error) return auth.error;
-  const { user, supabase } = auth;
-
-  // 権限チェック (admin/teacher のみ)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || !isAdminOrTeacher(profile.role)) {
-    return NextResponse.json({ error: "権限がありません" }, { status: 403 });
-  }
-
+export const GET = withApiAuth("adminOrTeacher", async ({ supabase }, request: Request) => {
   // クエリパラメータ取得
   const { searchParams } = new URL(request.url);
   const yearMonth = searchParams.get("yearMonth");
@@ -61,4 +45,4 @@ export async function GET(request: Request) {
       "Content-Disposition": `attachment; filename="gakudo-billing-${yearMonth}.csv"`,
     },
   });
-}
+});
