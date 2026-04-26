@@ -1,11 +1,11 @@
+/**
+ * Phase 3-A: every meta-fields component is on the controlled
+ * `updateMeta(key, value)` API. State stays in the parent so it
+ * serializes back to a single `metadata` JSON column on submit.
+ */
 export type MetaFieldsProps = {
   meta: Record<string, unknown>;
   updateMeta: (key: string, value: unknown) => void;
-};
-
-export type MetaFieldsWithSetterProps = {
-  meta: Record<string, unknown>;
-  setMeta: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 };
 
 export type ScheduleItem = { time: string; label: string; emoji: string };

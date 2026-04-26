@@ -91,13 +91,13 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
       {slug === "about" && <AboutMetaFields meta={meta} updateMeta={updateMeta} />}
 
       {/* FAQ ページ固有フィールド */}
-      {slug === "faq" && <FaqMetaFields meta={meta} setMeta={setMeta} />}
+      {slug === "faq" && <FaqMetaFields meta={meta} updateMeta={updateMeta} />}
 
       {/* 日々の生活ページ固有フィールド */}
-      {slug === "daily-life" && <DailyLifeMetaFields meta={meta} setMeta={setMeta} />}
+      {slug === "daily-life" && <DailyLifeMetaFields meta={meta} updateMeta={updateMeta} />}
 
       {/* 入所案内ページ固有フィールド */}
-      {slug === "enrollment" && <EnrollmentMetaFields meta={meta} setMeta={setMeta} />}
+      {slug === "enrollment" && <EnrollmentMetaFields meta={meta} updateMeta={updateMeta} />}
 
       {/* アクセスページ固有フィールド */}
       {slug === "access" && <AccessMetaFields meta={meta} updateMeta={updateMeta} />}

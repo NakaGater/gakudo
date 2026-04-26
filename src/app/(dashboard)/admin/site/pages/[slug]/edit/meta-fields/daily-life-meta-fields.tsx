@@ -1,62 +1,32 @@
 "use client";
 
-import type { MetaFieldsWithSetterProps } from "./types";
+import { useArrayEditor } from "@/components/forms/use-array-editor";
+import type { MetaFieldsProps } from "./types";
 
-export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps) {
-  const activities =
-    (meta.activities as Array<{ emoji: string; title: string; description: string }>) || [];
-  const events = (meta.events as Array<{ emoji: string; title: string; season: string }>) || [];
+type Activity = { emoji: string; title: string; description: string };
+type Event = { emoji: string; title: string; season: string };
 
-  const updateActivity = (index: number, field: string, value: string) => {
-    const updated = [...activities];
-    updated[index] = { ...updated[index], [field]: value };
-    setMeta((prev) => ({ ...prev, activities: updated }));
-  };
+export function DailyLifeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
+  const activities = (meta.activities as Activity[]) ?? [];
+  const events = (meta.events as Event[]) ?? [];
 
-  const addActivity = () => {
-    setMeta((prev) => ({
-      ...prev,
-      activities: [...activities, { emoji: "🎯", title: "", description: "" }],
-    }));
-  };
-
-  const removeActivity = (index: number) => {
-    setMeta((prev) => ({
-      ...prev,
-      activities: activities.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateEvent = (index: number, field: string, value: string) => {
-    const updated = [...events];
-    updated[index] = { ...updated[index], [field]: value };
-    setMeta((prev) => ({ ...prev, events: updated }));
-  };
-
-  const addEvent = () => {
-    setMeta((prev) => ({
-      ...prev,
-      events: [...events, { emoji: "🎉", title: "", season: "通年" }],
-    }));
-  };
-
-  const removeEvent = (index: number) => {
-    setMeta((prev) => ({
-      ...prev,
-      events: events.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateMeta = (key: string, value: unknown) => {
-    setMeta((prev) => ({ ...prev, [key]: value }));
-  };
+  const activityEditor = useArrayEditor<Activity>(
+    activities,
+    (next) => updateMeta("activities", next),
+    { emoji: "🎯", title: "", description: "" },
+  );
+  const eventEditor = useArrayEditor<Event>(
+    events,
+    (next) => updateMeta("events", next),
+    { emoji: "🎉", title: "", season: "通年" },
+  );
 
   return (
     <>
       <fieldset className="border border-border rounded-md p-2 sm:p-4 w-full box-border">
         <legend className="text-sm font-bold text-fg px-2">活動カード</legend>
         <div className="flex flex-col gap-4">
-          {activities.map((item, i) => (
+          {activityEditor.items.map((item, i) => (
             <div
               key={i}
               className="rounded-md border border-border p-2 sm:p-3 bg-bg-elev/50 min-w-0"
@@ -65,7 +35,7 @@ export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps
                 <span className="text-xs font-bold text-fg-muted">活動 {i + 1}</span>
                 <button
                   type="button"
-                  onClick={() => removeActivity(i)}
+                  onClick={() => activityEditor.remove(i)}
                   className="text-xs px-1.5 py-0.5 rounded border border-red-300 text-red-600 hover:bg-red-50 cursor-pointer"
                 >
                   削除
@@ -76,21 +46,21 @@ export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps
                   <input
                     type="text"
                     value={item.emoji}
-                    onChange={(e) => updateActivity(i, "emoji", e.target.value)}
+                    onChange={(e) => activityEditor.update(i, { emoji: e.target.value })}
                     placeholder="絵文字"
                     className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16 shrink-0"
                   />
                   <input
                     type="text"
                     value={item.title}
-                    onChange={(e) => updateActivity(i, "title", e.target.value)}
+                    onChange={(e) => activityEditor.update(i, { title: e.target.value })}
                     placeholder="活動名"
                     className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1 min-w-0"
                   />
                 </div>
                 <textarea
                   value={item.description}
-                  onChange={(e) => updateActivity(i, "description", e.target.value)}
+                  onChange={(e) => activityEditor.update(i, { description: e.target.value })}
                   placeholder="説明"
                   rows={2}
                   className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm resize-y"
@@ -100,7 +70,7 @@ export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps
           ))}
           <button
             type="button"
-            onClick={addActivity}
+            onClick={activityEditor.add}
             className="self-start text-sm px-3 py-1.5 rounded-md border-2 border-dashed border-border text-fg-muted hover:border-fg-muted hover:text-fg transition-colors cursor-pointer"
           >
             ＋ 活動を追加
@@ -111,19 +81,19 @@ export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps
       <fieldset className="border border-border rounded-md p-2 sm:p-4 w-full box-border">
         <legend className="text-sm font-bold text-fg px-2">季節の行事</legend>
         <div className="flex flex-col gap-3">
-          {events.map((item, i) => (
+          {eventEditor.items.map((item, i) => (
             <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={item.emoji}
-                  onChange={(e) => updateEvent(i, "emoji", e.target.value)}
+                  onChange={(e) => eventEditor.update(i, { emoji: e.target.value })}
                   placeholder="絵文字"
                   className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm w-16"
                 />
                 <select
                   value={item.season}
-                  onChange={(e) => updateEvent(i, "season", e.target.value)}
+                  onChange={(e) => eventEditor.update(i, { season: e.target.value })}
                   className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
                 >
                   <option value="春">春</option>
@@ -137,13 +107,13 @@ export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps
                 <input
                   type="text"
                   value={item.title}
-                  onChange={(e) => updateEvent(i, "title", e.target.value)}
+                  onChange={(e) => eventEditor.update(i, { title: e.target.value })}
                   placeholder="行事名"
                   className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm flex-1"
                 />
                 <button
                   type="button"
-                  onClick={() => removeEvent(i)}
+                  onClick={() => eventEditor.remove(i)}
                   className="text-xs px-1.5 py-0.5 rounded border border-red-300 text-red-600 hover:bg-red-50 cursor-pointer shrink-0"
                 >
                   削除
@@ -153,7 +123,7 @@ export function DailyLifeMetaFields({ meta, setMeta }: MetaFieldsWithSetterProps
           ))}
           <button
             type="button"
-            onClick={addEvent}
+            onClick={eventEditor.add}
             className="self-start text-sm px-3 py-1.5 rounded-md border-2 border-dashed border-border text-fg-muted hover:border-fg-muted hover:text-fg transition-colors cursor-pointer"
           >
             ＋ 行事を追加
