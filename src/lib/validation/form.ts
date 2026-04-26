@@ -15,13 +15,13 @@ export type FormResult<T> = { ok: true; value: T } | { ok: false; error: string 
 
 type StringOpts = {
   /** Default true. Pass `false` to allow empty strings (returned as-is). */
-  required?: boolean;
+  required?: boolean | undefined;
   /** Default true. Strips leading/trailing whitespace before checks. */
-  trim?: boolean;
-  min?: number;
-  max?: number;
+  trim?: boolean | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
   /** Custom rejection message. Defaults to a generic "を入力してください". */
-  message?: string;
+  message?: string | undefined;
 };
 
 export function getString(fd: FormData, key: string, opts: StringOpts = {}): FormResult<string> {
