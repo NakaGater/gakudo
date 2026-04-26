@@ -1,28 +1,17 @@
 "use client";
 
+import { useArrayEditor } from "@/components/forms/use-array-editor";
 import { FEATURE_ICONS, FEATURE_ICON_KEYS } from "@/config/feature-icons";
 import type { MetaFieldsProps } from "./types";
 
 export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
   type FeatureItem = { icon: string; title: string; description: string };
   const features = (meta.features as FeatureItem[]) ?? [];
-
-  const updateFeatureItem = (idx: number, field: keyof FeatureItem, value: string) => {
-    const updated = [...features];
-    updated[idx] = { ...updated[idx], [field]: value };
-    updateMeta("features", updated);
-  };
-
-  const addFeatureItem = () => {
-    updateMeta("features", [...features, { icon: "Star", title: "", description: "" }]);
-  };
-
-  const removeFeatureItem = (idx: number) => {
-    updateMeta(
-      "features",
-      features.filter((_, i) => i !== idx),
-    );
-  };
+  const editor = useArrayEditor<FeatureItem>(
+    features,
+    (next) => updateMeta("features", next),
+    { icon: "Star", title: "", description: "" },
+  );
 
   return (
     <>
@@ -81,7 +70,7 @@ export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
       <fieldset className="border border-border rounded-md p-2 sm:p-4 w-full box-border">
         <legend className="text-sm font-bold text-fg px-2">特徴カード</legend>
         <div className="flex flex-col gap-4">
-          {features.map((item, idx) => (
+          {editor.items.map((item, idx) => (
             <div
               key={idx}
               className="flex flex-col gap-2 p-3 border border-border/50 rounded-md bg-bg"
@@ -95,7 +84,7 @@ export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
                   })()}
                   <select
                     value={item.icon}
-                    onChange={(e) => updateFeatureItem(idx, "icon", e.target.value)}
+                    onChange={(e) => editor.update(idx, { icon: e.target.value })}
                     className="w-28 rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
                   >
                     {FEATURE_ICON_KEYS.map((key) => (
@@ -107,7 +96,7 @@ export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeFeatureItem(idx)}
+                  onClick={() => editor.remove(idx)}
                   className="text-danger hover:text-danger/80 text-sm px-2 shrink-0"
                 >
                   ✕
@@ -117,13 +106,13 @@ export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
                 type="text"
                 placeholder="タイトル"
                 value={item.title}
-                onChange={(e) => updateFeatureItem(idx, "title", e.target.value)}
+                onChange={(e) => editor.update(idx, { title: e.target.value })}
                 className="w-full rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm"
               />
               <textarea
                 placeholder="説明文"
                 value={item.description}
-                onChange={(e) => updateFeatureItem(idx, "description", e.target.value)}
+                onChange={(e) => editor.update(idx, { description: e.target.value })}
                 rows={2}
                 className="rounded-sm border border-border bg-bg-elev px-2 py-1.5 text-sm resize-y"
               />
@@ -131,7 +120,7 @@ export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
           ))}
           <button
             type="button"
-            onClick={addFeatureItem}
+            onClick={editor.add}
             className="self-start text-sm text-accent hover:text-accent-hv"
           >
             ＋ 追加
