@@ -1,62 +1,29 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
-// Mock next/cache
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock notification
 const mockSendNotification = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/notifications/send", () => ({
   sendAttendanceNotification: (...args: unknown[]) => mockSendNotification(...args),
 }));
 
-// Queue-based mock: each from(table) call returns next result in queue
-const callQueues = new Map<string, Array<Record<string, unknown>>>();
+// Shared mock holder. Re-built fresh in each `beforeEach` so per-test
+// `enqueue` and `setRpc` calls stay isolated.
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
-function enqueue(table: string, result: Record<string, unknown>) {
-  if (!callQueues.has(table)) callQueues.set(table, []);
-  callQueues.get(table)!.push(result);
-}
-
-function dequeue(table: string): Record<string, unknown> {
-  const q = callQueues.get(table);
-  if (q && q.length > 0) return q.shift()!;
-  return { data: null, error: null };
-}
-
-const createChain = (table: string): Record<string, unknown> => {
-  const handler = (): Record<string, unknown> =>
-    new Proxy({} as Record<string, unknown>, {
-      get: (_target, prop) => {
-        if (prop === "then") {
-          // Make proxy thenable so `await chain` dequeues
-          return (resolve: (v: unknown) => void) => resolve(dequeue(table));
-        }
-        if (prop === "single") {
-          return () => Promise.resolve(dequeue(table));
-        }
-        return () => handler();
-      },
-    });
-  return handler();
-};
-const mockFrom = vi.fn((table: string) => createChain(table));
-const mockRpc = vi.fn().mockResolvedValue({ data: { entered: 5, exited: 2, none: 3, total: 10 } });
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: (...args: [string]) => mockFrom(...args),
-      rpc: (...args: unknown[]) => mockRpc(...args),
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
 
 import {
@@ -67,10 +34,23 @@ import {
   getParentAttendanceStatus,
 } from "./actions";
 
+const enqueue = (table: string, resolved: { data: unknown; error: unknown }) =>
+  holder.current!.enqueue(table, resolved);
+
+const buildMock = () =>
+  createSupabaseMock({
+    rpc: {
+      get_attendance_summary: {
+        data: { entered: 5, exited: 2, none: 3, total: 10 },
+        error: null,
+      },
+    },
+  });
+
 describe("recordManualAttendance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = buildMock();
   });
 
   it("rejects non-entrance users", async () => {
@@ -105,11 +85,8 @@ describe("recordManualAttendance", () => {
 
   it("records enter when no previous attendance today", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
-    // 1st children call: find child
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
-    // 1st attendances call: no previous → null
     enqueue("attendances", { data: null, error: null });
-    // 2nd attendances call: insert result
     enqueue("attendances", {
       data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" },
       error: null,
@@ -125,12 +102,10 @@ describe("recordManualAttendance", () => {
   it("records exit when last record is enter", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "花子" }, error: null });
-    // Previous record was enter
     enqueue("attendances", {
       data: { id: "a0", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
       error: null,
     });
-    // Insert returns exit
     enqueue("attendances", {
       data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
       error: null,
@@ -145,11 +120,11 @@ describe("recordManualAttendance", () => {
   it("returns error on insert failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎" }, error: null });
-    enqueue("attendances", { data: null, error: null }); // no previous
+    enqueue("attendances", { data: null, error: null });
     enqueue("attendances", {
       data: null,
       error: { message: "constraint attendances_pkey violated" },
-    }); // insert error
+    });
 
     const result = await recordManualAttendance("c1");
     expect(result.success).toBe(false);
@@ -175,7 +150,7 @@ describe("recordManualAttendance", () => {
 describe("recordAttendance (QR)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = buildMock();
   });
 
   it("rejects non-entrance users", async () => {
@@ -213,7 +188,7 @@ describe("recordAttendance (QR)", () => {
   it("records enter with active QR and no previous record", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
-    enqueue("attendances", { data: null, error: null }); // no previous
+    enqueue("attendances", { data: null, error: null });
     enqueue("attendances", {
       data: { id: "a1", type: "enter", recorded_at: "2025-01-01T10:00:00Z" },
       error: null,
@@ -228,7 +203,7 @@ describe("recordAttendance (QR)", () => {
   it("records exit when previous is enter", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "entrance" });
     enqueue("children", { data: { id: "c1", name: "太郎", qr_active: true }, error: null });
-    enqueue("attendances", { data: { id: "a0", type: "enter" }, error: null }); // previous enter
+    enqueue("attendances", { data: { id: "a0", type: "enter" }, error: null });
     enqueue("attendances", {
       data: { id: "a1", type: "exit", recorded_at: "2025-01-01T17:00:00Z" },
       error: null,
@@ -269,7 +244,7 @@ describe("recordAttendance (QR)", () => {
 describe("getTodayAttendanceStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = buildMock();
   });
 
   it("returns empty for non-staff", async () => {
@@ -341,7 +316,7 @@ describe("getTodayAttendanceStatus", () => {
 describe("getDashboardAttendanceStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
+    holder.current = buildMock();
   });
 
   it("returns empty for non-staff", async () => {
@@ -366,7 +341,6 @@ describe("getDashboardAttendanceStatus", () => {
       ],
       error: null,
     });
-    // Records sorted ascending
     enqueue("attendances", {
       data: [
         { child_id: "c1", type: "enter", recorded_at: "2025-01-01T08:00:00Z" },
@@ -378,14 +352,12 @@ describe("getDashboardAttendanceStatus", () => {
 
     const result = await getDashboardAttendanceStatus();
     expect(result).toHaveLength(2);
-    // c1: exited (latest is exit)
     expect(result[0]).toMatchObject({
       childId: "c1",
       status: "exited",
       enterTime: "2025-01-01T08:00:00Z",
       exitTime: "2025-01-01T17:00:00Z",
     });
-    // c2: entered (latest is enter)
     expect(result[1]).toMatchObject({
       childId: "c2",
       status: "entered",
@@ -422,8 +394,7 @@ describe("getDashboardAttendanceStatus", () => {
 describe("getParentAttendanceStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    callQueues.clear();
-    mockRpc.mockResolvedValue({ data: { entered: 5, exited: 2, none: 3, total: 10 } });
+    holder.current = buildMock();
   });
 
   it("returns empty children with summary when parent has no children", async () => {
@@ -437,7 +408,7 @@ describe("getParentAttendanceStatus", () => {
 
   it("returns summary with default zeros when RPC returns null", async () => {
     mockGetUser.mockResolvedValue({ id: "p1", role: "parent" });
-    mockRpc.mockResolvedValue({ data: null });
+    holder.current!.setRpc("get_attendance_summary", { data: null, error: null });
     enqueue("children", { data: [], error: null });
 
     const result = await getParentAttendanceStatus();

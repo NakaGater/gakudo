@@ -52,7 +52,6 @@ export type Scenario = {
     publicUrl?: string;
   };
 };
-
 export type MutationCall = {
   table: string;
   op: Op;
@@ -90,10 +89,19 @@ export function createSupabaseMock(scenario: Scenario = {}) {
   const fromCalls: string[] = [];
   const mutations: MutationCall[] = [];
   const rpcCalls: Array<{ name: string; args: unknown }> = [];
+  // Per-table FIFO queue. Tests that depend on call order (e.g. one
+  // `from("attendances")` returns enter records, the next returns
+  // exits) push into this queue; each chain termination dequeues.
+  const queues: Record<string, Resolved[]> = {};
+  // Per-test RPC overrides — tunable from inside a test without
+  // re-creating the whole mock.
+  const rpcOverrides: Record<string, Resolved> = {};
 
   const resolveFor = (table: string, op: Op): Resolved => {
     const dynamic = scenario.tableResolver?.(table, op);
     if (dynamic !== undefined) return dynamic;
+    const queue = queues[table];
+    if (queue && queue.length > 0) return queue.shift()!;
     return scenario.tables?.[table] ?? { data: [], error: null };
   };
 
@@ -141,7 +149,7 @@ export function createSupabaseMock(scenario: Scenario = {}) {
     }),
     rpc: vi.fn((name: string, args?: unknown) => {
       rpcCalls.push({ name, args });
-      const r = scenario.rpc?.[name] ?? { data: null, error: null };
+      const r = rpcOverrides[name] ?? scenario.rpc?.[name] ?? { data: null, error: null };
       return Promise.resolve(r);
     }),
     auth: {
@@ -179,6 +187,20 @@ export function createSupabaseMock(scenario: Scenario = {}) {
       fromCalls,
       mutations,
       rpcCalls,
+    },
+    /**
+     * Push a result onto the FIFO queue for `table`. Each subsequent
+     * chain terminator (`.single()`, `.maybeSingle()`, or awaiting
+     * the chain) dequeues one entry. Useful when the same table is
+     * queried multiple times in one test and each call needs a
+     * different response.
+     */
+    enqueue(table: string, resolved: Resolved) {
+      (queues[table] ??= []).push(resolved);
+    },
+    /** Override an RPC response after construction. */
+    setRpc(name: string, resolved: Resolved) {
+      rpcOverrides[name] = resolved;
     },
   };
 }
