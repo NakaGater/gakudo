@@ -1,33 +1,37 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
 
-const mockGetUser = vi.fn();
-const mockSingle = vi.fn();
-const mockCreateClient = vi.fn();
-
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: () => mockCreateClient(),
+const controller = vi.hoisted(() => ({
+  authUser: null as { id: string } | null,
+  profileRow: null as { role: string } | null,
 }));
+
+vi.mock("@/lib/supabase/server", async () => {
+  const { createSupabaseMock } = await import("@/test/supabase-mock-factory");
+  return {
+    createClient: () => {
+      const { client } = createSupabaseMock({
+        authUser: controller.authUser,
+        tableResolver: (table: string) => {
+          if (table !== "profiles") return undefined;
+          return { data: controller.profileRow, error: null };
+        },
+      });
+      return Promise.resolve(client);
+    },
+  };
+});
 
 import { withApiAuth } from "./auth";
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockCreateClient.mockResolvedValue({
-    auth: { getUser: () => mockGetUser() },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: () => mockSingle(),
-        }),
-      }),
-    }),
-  });
+  controller.authUser = null;
+  controller.profileRow = null;
 });
 
 describe("withApiAuth", () => {
   it("returns 401 JSON when no session is present", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     const handler = vi.fn();
     const wrapped = withApiAuth("staff", handler);
 
@@ -37,8 +41,8 @@ describe("withApiAuth", () => {
   });
 
   it("returns 403 when role does not match the guard", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    mockSingle.mockResolvedValue({ data: { role: "parent" }, error: null });
+    controller.authUser = { id: "u1" };
+    controller.profileRow = { role: "parent" };
     const handler = vi.fn();
     const wrapped = withApiAuth("admin", handler);
 
@@ -48,8 +52,8 @@ describe("withApiAuth", () => {
   });
 
   it("invokes the handler with ctx when authorization passes", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    mockSingle.mockResolvedValue({ data: { role: "admin" }, error: null });
+    controller.authUser = { id: "u1" };
+    controller.profileRow = { role: "admin" };
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
     const wrapped = withApiAuth("admin", handler);
 
@@ -60,8 +64,8 @@ describe("withApiAuth", () => {
   });
 
   it("supports the adminOrTeacher convenience guard", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    mockSingle.mockResolvedValue({ data: { role: "teacher" }, error: null });
+    controller.authUser = { id: "u1" };
+    controller.profileRow = { role: "teacher" };
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
     const wrapped = withApiAuth("adminOrTeacher", handler);
 
@@ -70,8 +74,8 @@ describe("withApiAuth", () => {
   });
 
   it("supports an allow-list guard", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    mockSingle.mockResolvedValue({ data: { role: "entrance" }, error: null });
+    controller.authUser = { id: "u1" };
+    controller.profileRow = { role: "entrance" };
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
     const wrapped = withApiAuth(["admin", "entrance"], handler);
 
