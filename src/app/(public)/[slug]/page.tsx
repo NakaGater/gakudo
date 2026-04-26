@@ -14,17 +14,29 @@ type PageProps = {
 // `news` / `gallery` / `access` which have their own routes elsewhere, and
 // arbitrary strings like `/random-thing-xyz`) must 404.
 //
-// `notFound()` only sets a 404 status when invoked BEFORE streaming begins.
-// Calling it after `await supabase.from(...).single()` (i.e. once an I/O
-// boundary has been crossed) leaves the response status at 200 in Next 16
-// production builds — observed in CI on flow10. Validating the slug against
-// this list at the very top of the handler keeps the notFound() call ahead
-// of any await and restores the proper 404.
-const VALID_SLUGS = new Set(["about", "faq", "daily-life", "enrollment", "home"]);
+// In Next 16 production builds, calling `notFound()` from inside a dynamic
+// catch-all route handler does not reliably propagate a 404 status when the
+// proxy (`src/proxy.ts`) returns a `NextResponse.next()` with mutated
+// headers — the route handler renders the not-found UI but the response
+// status stays at 200 (observed in CI on flow10).
+//
+// Switching the route to `dynamicParams = false` + `generateStaticParams`
+// moves the unknown-slug rejection up to Next's routing layer, which
+// returns 404 before any handler runs and bypasses the proxy's response
+// shape entirely. CMS edits stay live because the corresponding action
+// (`admin/site/actions.ts`) calls `revalidatePath("/" + slug)`.
+const VALID_SLUGS = ["about", "faq", "daily-life", "enrollment", "home"] as const;
+const VALID_SLUGS_SET = new Set<string>(VALID_SLUGS);
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return VALID_SLUGS.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  if (!VALID_SLUGS.has(slug)) return { title: "ページが見つかりません" };
+  if (!VALID_SLUGS_SET.has(slug)) return { title: "ページが見つかりません" };
   try {
     const supabase = await createClient();
     const { data } = (await supabase
@@ -53,9 +65,10 @@ const PAGE_COMPONENTS: Record<
 export default async function SitePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // Reject unknown slugs BEFORE any await — see VALID_SLUGS comment above
-  // for why this matters for the 404 status code.
-  if (!VALID_SLUGS.has(slug)) notFound();
+  // dynamicParams=false already rejects unknown slugs at the routing layer,
+  // but keep this defensive check so the function is well-typed when slug
+  // happens to fall outside VALID_SLUGS in development hot-reload edge cases.
+  if (!VALID_SLUGS_SET.has(slug)) notFound();
 
   let page: {
     title: string;
