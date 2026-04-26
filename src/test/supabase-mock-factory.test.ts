@@ -99,6 +99,21 @@ describe("createSupabaseMock", () => {
     expect(data.user).toEqual({ id: "u1", email: "a@b.com" });
   });
 
+  it("FIFO enqueue() drains in order across repeated from() calls", async () => {
+    const mock = createSupabaseMock();
+    mock.enqueue("attendances", { data: [{ id: 1 }], error: null });
+    mock.enqueue("attendances", { data: [{ id: 2 }], error: null });
+
+    const a = await mock.client.from("attendances").select("*");
+    const b = await mock.client.from("attendances").select("*");
+    const c = await mock.client.from("attendances").select("*");
+
+    expect(a.data).toEqual([{ id: 1 }]);
+    expect(b.data).toEqual([{ id: 2 }]);
+    // Queue is empty → falls through to default
+    expect(c.data).toEqual([]);
+  });
+
   it("storage upload returns configured result", async () => {
     const { client } = createSupabaseMock({
       storage: { publicUrl: "https://cdn/x.png" },

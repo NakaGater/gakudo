@@ -1,65 +1,49 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
-// Mock next/cache
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
-// Mock getUser
 const mockGetUser = vi.fn();
 vi.mock("@/lib/auth/get-user", () => ({
   getUser: () => mockGetUser(),
 }));
 
-// Mock calculateMonthlyBill
 const mockCalculateMonthlyBill = vi.fn();
 vi.mock("@/lib/billing/calculate", () => ({
   calculateMonthlyBill: (...args: unknown[]) => mockCalculateMonthlyBill(...args),
 }));
 
-// Mock Supabase - flexible chainable query builder
-const mockResult = vi.fn();
-const createChain = () => {
-  const handler = (): Record<string, unknown> =>
-    new Proxy({} as Record<string, unknown>, {
-      get: (_target, prop) => {
-        if (prop === "then") return undefined;
-        if (prop === "single") return mockResult;
-        // For terminal methods that return a promise directly
-        if (prop === "select") {
-          return () => {
-            const next = handler();
-            // If select is called after update/delete (returns promise-like)
-            return next;
-          };
-        }
-        return () => handler();
-      },
-    });
-  return handler();
-};
-const mockFrom = vi.fn(() => createChain());
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      from: mockFrom,
-    }),
-  ),
+  createClient: () => Promise.resolve(holder.current!.client),
 }));
 
 import {
+  calculateAllBills,
+  calculateSingleBill,
+  confirmAllBills,
+  confirmBill,
+  createBillingRule,
   getActiveBillingRule,
   getBillingRules,
-  createBillingRule,
-  calculateAllBills,
-  confirmBill,
-  confirmAllBills,
-  calculateSingleBill,
 } from "./actions";
 
+const setTable = (table: string, resolved: { data: unknown; error: unknown }) => {
+  // For tests that need a single fixed response per table.
+  holder.current = createSupabaseMock({ tables: { [table]: resolved } });
+};
+
 describe("getActiveBillingRule", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("returns null for non-admin", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
@@ -76,7 +60,7 @@ describe("getActiveBillingRule", () => {
       unit_minutes: 30,
       effective_from: "2025-01-01",
     };
-    mockResult.mockResolvedValue({ data: rule, error: null });
+    setTable("billing_rules", { data: rule, error: null });
 
     const result = await getActiveBillingRule();
     expect(result).toEqual(rule);
@@ -84,7 +68,10 @@ describe("getActiveBillingRule", () => {
 });
 
 describe("getBillingRules", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("returns empty for non-admin", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
@@ -94,7 +81,10 @@ describe("getBillingRules", () => {
 });
 
 describe("createBillingRule", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-admin", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
@@ -130,9 +120,7 @@ describe("createBillingRule", () => {
 
   it("creates rule on valid input", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      insert: () => Promise.resolve({ error: null }),
-    });
+    setTable("billing_rules", { data: null, error: null });
 
     const fd = new FormData();
     fd.set("regular_end_time", "17:00");
@@ -147,9 +135,7 @@ describe("createBillingRule", () => {
 
   it("returns error on DB failure", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      insert: () => Promise.resolve({ error: { message: "DB error" } }),
-    });
+    setTable("billing_rules", { data: null, error: { message: "DB error" } });
 
     const fd = new FormData();
     fd.set("regular_end_time", "17:00");
@@ -166,7 +152,10 @@ describe("createBillingRule", () => {
 });
 
 describe("calculateAllBills", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -183,9 +172,7 @@ describe("calculateAllBills", () => {
 
   it("calculates bills for all children", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      select: () => Promise.resolve({ data: [{ id: "c1" }, { id: "c2" }], error: null }),
-    });
+    setTable("children", { data: [{ id: "c1" }, { id: "c2" }], error: null });
     mockCalculateMonthlyBill.mockResolvedValue({ totalAmount: 1000 });
 
     const result = await calculateAllBills("2025-01");
@@ -196,9 +183,7 @@ describe("calculateAllBills", () => {
 
   it("allows teacher role", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "teacher" });
-    mockFrom.mockReturnValue({
-      select: () => Promise.resolve({ data: [{ id: "c1" }], error: null }),
-    });
+    setTable("children", { data: [{ id: "c1" }], error: null });
     mockCalculateMonthlyBill.mockResolvedValue({ totalAmount: 500 });
 
     const result = await calculateAllBills("2025-01");
@@ -207,7 +192,10 @@ describe("calculateAllBills", () => {
 });
 
 describe("confirmBill", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -217,9 +205,7 @@ describe("confirmBill", () => {
 
   it("confirms a draft bill", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      update: () => ({ eq: () => ({ eq: () => Promise.resolve({ error: null }) }) }),
-    });
+    setTable("monthly_bills", { data: null, error: null });
 
     const result = await confirmBill("bill-1");
     expect(result.success).toBe(true);
@@ -228,7 +214,10 @@ describe("confirmBill", () => {
 });
 
 describe("confirmAllBills", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
@@ -245,15 +234,7 @@ describe("confirmAllBills", () => {
 
   it("confirms all draft bills for month", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "admin" });
-    mockFrom.mockReturnValue({
-      update: () => ({
-        eq: () => ({
-          eq: () => ({
-            select: () => Promise.resolve({ data: [{ id: "b1" }, { id: "b2" }], error: null }),
-          }),
-        }),
-      }),
-    });
+    setTable("monthly_bills", { data: [{ id: "b1" }, { id: "b2" }], error: null });
 
     const result = await confirmAllBills("2025-01");
     expect(result.success).toBe(true);
@@ -262,7 +243,10 @@ describe("confirmAllBills", () => {
 });
 
 describe("calculateSingleBill", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    holder.current = createSupabaseMock();
+  });
 
   it("rejects non-staff", async () => {
     mockGetUser.mockResolvedValue({ id: "u1", role: "parent" });
