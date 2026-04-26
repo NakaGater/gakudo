@@ -1,28 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { inviteUser, updateUser, deleteUser } from "./actions";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock, type Op } from "@/test/supabase-mock-factory";
+import { deleteUser, inviteUser, updateUser } from "./actions";
 
 // ============================================================================
-// Mock State Management
+// Per-test scenario state. Tests mutate `controller` to drive the mock.
 // ============================================================================
 
-interface MockState {
-  upsertError: { message: string } | null;
-  updateError: { message: string } | null;
-  deleteError: { message: string } | null;
-}
+const controller = vi.hoisted(() => ({
+  upsertError: null as { message: string } | null,
+  updateError: null as { message: string } | null,
+  deleteError: null as { message: string } | null,
+}));
 
-let mockState: MockState = {
-  upsertError: null,
-  updateError: null,
-  deleteError: null,
-};
-
-function resetMockState() {
-  mockState = {
-    upsertError: null,
-    updateError: null,
-    deleteError: null,
-  };
+function resetController() {
+  controller.upsertError = null;
+  controller.updateError = null;
+  controller.deleteError = null;
 }
 
 // ============================================================================
@@ -46,46 +39,36 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: () => Promise.resolve({} as unknown),
 }));
 
-// Admin client mocks
+// auth.admin.* helpers — the factory doesn't model them, so they stay
+// as standalone vi.fn so each test can drive responses directly.
 const mockInviteUserByEmail = vi.fn();
 const mockUpdateUserById = vi.fn();
 const mockDeleteUser = vi.fn();
 
-vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({
-    auth: {
-      admin: {
-        inviteUserByEmail: (...args: unknown[]) => mockInviteUserByEmail(...args),
-        updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
-        deleteUser: (...args: unknown[]) => mockDeleteUser(...args),
+vi.mock("@/lib/supabase/admin", async () => {
+  const { createSupabaseMock: factory } = await import("@/test/supabase-mock-factory");
+  const { client } = factory({
+    tableResolver: (table: string, op: Op) => {
+      if (table !== "profiles") return undefined;
+      if (op === "upsert") return { data: null, error: controller.upsertError };
+      if (op === "update") return { data: null, error: controller.updateError };
+      if (op === "delete") return { data: null, error: controller.deleteError };
+      return undefined;
+    },
+  });
+  return {
+    createAdminClient: () => ({
+      ...client,
+      auth: {
+        admin: {
+          inviteUserByEmail: (...args: unknown[]) => mockInviteUserByEmail(...args),
+          updateUserById: (...args: unknown[]) => mockUpdateUserById(...args),
+          deleteUser: (...args: unknown[]) => mockDeleteUser(...args),
+        },
       },
-    },
-    from: (table: string) => {
-      if (table === "profiles") {
-        return {
-          upsert: () => {
-            return Promise.resolve({ error: mockState.upsertError });
-          },
-          update: () => {
-            return {
-              eq: () => {
-                return Promise.resolve({ error: mockState.updateError });
-              },
-            };
-          },
-          delete: () => {
-            return {
-              eq: () => {
-                return Promise.resolve({ error: mockState.deleteError });
-              },
-            };
-          },
-        };
-      }
-      return {};
-    },
-  }),
-}));
+    }),
+  };
+});
 
 // ============================================================================
 // Helper Functions
@@ -104,7 +87,7 @@ function makeFormData(entries: Record<string, string>): FormData {
 describe("inviteUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    resetMockState();
+    resetController();
     mockGetUser.mockResolvedValue({ id: "admin-user-id", role: "admin" });
     mockInviteUserByEmail.mockResolvedValue({
       data: { user: { id: "new-user-id" } },
@@ -188,11 +171,10 @@ describe("inviteUser", () => {
     expect(result.success).toBe(false);
     expect(result.message).toContain("招待に失敗しました");
     expect(result.message).not.toContain("User already exists");
-    expect(result.success).toBe(false);
   });
 
   it("6. returns error on profile upsert failure", async () => {
-    mockState.upsertError = { message: "Database error" };
+    controller.upsertError = { message: "Database error" };
 
     const result = await inviteUser(
       { success: true, message: "" },
@@ -227,7 +209,7 @@ describe("inviteUser", () => {
 describe("updateUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    resetMockState();
+    resetController();
     mockGetUser.mockResolvedValue({ id: "admin-user-id", role: "admin" });
     mockUpdateUserById.mockResolvedValue({ error: null });
   });
@@ -305,7 +287,7 @@ describe("updateUser", () => {
   });
 
   it("13. returns error on profile update failure", async () => {
-    mockState.updateError = { message: "Update failed" };
+    controller.updateError = { message: "Update failed" };
 
     const result = await updateUser(
       { success: true, message: "" },
@@ -358,7 +340,7 @@ describe("updateUser", () => {
 describe("deleteUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    resetMockState();
+    resetController();
     mockGetUser.mockResolvedValue({ id: "admin-user-id", role: "admin" });
     mockDeleteUser.mockResolvedValue({ error: null });
   });
@@ -402,7 +384,7 @@ describe("deleteUser", () => {
   });
 
   it("19. returns error on profile delete failure", async () => {
-    mockState.deleteError = { message: "Delete failed" };
+    controller.deleteError = { message: "Delete failed" };
 
     const result = await deleteUser(
       { success: true, message: "" },

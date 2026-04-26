@@ -1,23 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseMock } from "@/test/supabase-mock-factory";
 
 const mockSignInWithPassword = vi.fn();
-const mockSingle = vi.fn();
+
+const holder = vi.hoisted(() => ({
+  current: null as ReturnType<typeof createSupabaseMock> | null,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() =>
+  createClient: () =>
     Promise.resolve({
+      ...holder.current!.client,
       auth: {
+        ...holder.current!.client.auth,
         signInWithPassword: (...args: unknown[]) => mockSignInWithPassword(...args),
       },
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            single: () => mockSingle(),
-          }),
-        }),
-      }),
     }),
-  ),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -37,6 +35,7 @@ function form(fields: Record<string, string>): FormData {
 describe("login", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    holder.current = createSupabaseMock();
   });
 
   it("redirects to /login with invalid_credentials when sign-in fails", async () => {
@@ -48,7 +47,7 @@ describe("login", () => {
     await expect(login(form({ email: "x@y.z", password: "bad" }))).rejects.toThrow(
       /NEXT_REDIRECT:\/login\?error=invalid_credentials/,
     );
-    expect(mockSingle).not.toHaveBeenCalled();
+    expect(holder.current!.spies.fromCalls).not.toContain("profiles");
   });
 
   it("redirects parents to /announcements after successful sign-in", async () => {
@@ -56,7 +55,9 @@ describe("login", () => {
       data: { user: { id: "u-parent" } },
       error: null,
     });
-    mockSingle.mockResolvedValue({ data: { role: "parent" }, error: null });
+    holder.current = createSupabaseMock({
+      tables: { profiles: { data: { role: "parent" }, error: null } },
+    });
 
     await expect(login(form({ email: "p@example.com", password: "pw12345678" }))).rejects.toThrow(
       /NEXT_REDIRECT:\/announcements/,
@@ -68,7 +69,9 @@ describe("login", () => {
       data: { user: { id: "u-admin" } },
       error: null,
     });
-    mockSingle.mockResolvedValue({ data: { role: "admin" }, error: null });
+    holder.current = createSupabaseMock({
+      tables: { profiles: { data: { role: "admin" }, error: null } },
+    });
 
     await expect(login(form({ email: "a@example.com", password: "pw12345678" }))).rejects.toThrow(
       /NEXT_REDIRECT:\/attendance\/dashboard/,
@@ -80,7 +83,9 @@ describe("login", () => {
       data: { user: { id: "u-orphan" } },
       error: null,
     });
-    mockSingle.mockResolvedValue({ data: null, error: null });
+    holder.current = createSupabaseMock({
+      tables: { profiles: { data: null, error: null } },
+    });
 
     await expect(login(form({ email: "o@example.com", password: "pw12345678" }))).rejects.toThrow(
       /NEXT_REDIRECT:\/announcements/,
