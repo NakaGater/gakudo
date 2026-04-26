@@ -62,12 +62,10 @@ export async function getLatestEmail(
     const data = await res.json();
     const messages: MailpitMessage[] = data.messages || [];
 
-    if (messages.length > 0) {
-      const sorted = messages.sort(
-        (a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime(),
-      );
-      const latest = sorted[0];
-
+    const latest = messages.sort(
+      (a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime(),
+    )[0];
+    if (latest) {
       const bodyRes = await fetch(`${MAILPIT_API}/message/${latest.ID}`);
       const body: MailpitMessageDetail = await bodyRes.json();
 
@@ -90,9 +88,9 @@ export async function getLatestEmail(
  */
 export function extractLinkFromEmail(html: string): string {
   const match = html.match(/href="([^"]*\/auth\/v1\/verify[^"]*)"/);
-  if (!match) {
+  if (!match || !match[1]) {
     const anyLink = html.match(/href="(https?:\/\/[^"]*)"/);
-    if (!anyLink) throw new Error("No link found in email");
+    if (!anyLink || !anyLink[1]) throw new Error("No link found in email");
     return anyLink[1];
   }
   return match[1].replace(/&amp;/g, "&");

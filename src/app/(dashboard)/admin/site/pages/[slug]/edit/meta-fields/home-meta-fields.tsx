@@ -89,7 +89,7 @@ export function HomeMetaFields({ meta, updateMeta }: MetaFieldsProps) {
                   >
                     {FEATURE_ICON_KEYS.map((key) => (
                       <option key={key} value={key}>
-                        {FEATURE_ICONS[key].label}
+                        {FEATURE_ICONS[key]?.label ?? key}
                       </option>
                     ))}
                   </select>

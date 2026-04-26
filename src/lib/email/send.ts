@@ -72,7 +72,7 @@ async function sendViaMailpit(params: SendEmailParams): Promise<{ id: string }> 
 
 function parseEmailAddress(from: string): { name: string; email: string } {
   const match = from.match(/^(.+?)\s*<(.+?)>$/);
-  if (match) {
+  if (match && match[1] && match[2]) {
     return { name: match[1].trim(), email: match[2].trim() };
   }
   return { name: "", email: from };

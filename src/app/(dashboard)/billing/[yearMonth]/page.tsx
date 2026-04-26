@@ -80,7 +80,9 @@ export default async function BillingDetailPage({ params, searchParams }: Props)
   }
 
   // 請求データ・ルール・出退勤を並列取得
-  const [year, month] = yearMonth.split("-").map(Number);
+  const ymParts = yearMonth.split("-");
+  const year = Number(ymParts[0]);
+  const month = Number(ymParts[1]);
   const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
   const monthStartUTC = `${yearMonth}-01T00:00:00+09:00`;
   const nextMonth =

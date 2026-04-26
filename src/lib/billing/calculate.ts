@@ -14,7 +14,9 @@ export async function calculateMonthlyBill(
 ): Promise<BillCalculationResult> {
   const supabase = await createClient();
 
-  const [year, month] = yearMonth.split("-").map(Number);
+  const parts = yearMonth.split("-");
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
   const lastDayOfMonth = new Date(year, month, 0).toISOString().slice(0, 10);
 
   const { data: rule } = await supabase

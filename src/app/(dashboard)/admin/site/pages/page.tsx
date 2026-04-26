@@ -23,7 +23,7 @@ export default async function SitePagesPage() {
 
   const sorted = (pages ?? [])
     .filter((p) => p.slug in PAGE_ORDER)
-    .sort((a, b) => PAGE_ORDER[a.slug].order - PAGE_ORDER[b.slug].order);
+    .sort((a, b) => PAGE_ORDER[a.slug]!.order - PAGE_ORDER[b.slug]!.order);
 
   return (
     <>

@@ -71,7 +71,7 @@ describe("createChild", () => {
     expect(result).toMatchObject({ success: true, childId: "child-1" });
 
     // 境界契約: name/grade/qr_code が children テーブルへ insert される
-    const inserted = insert.mock.calls[0][0];
+    const inserted = insert.mock.calls[0]![0];
     expect(inserted.name).toBe("太郎");
     expect(inserted.grade).toBe(3);
     expect(inserted.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
@@ -175,7 +175,7 @@ describe("regenerateQR", () => {
 
     const result = await regenerateQR("c1");
     expect(result).toMatchObject({ success: true });
-    const arg = update.mock.calls[0][0];
+    const arg = update.mock.calls[0]![0];
     expect(arg.qr_code).toMatch(/^GK-[A-Z0-9]{8}$/);
     expect(arg.qr_active).toBe(true);
   });

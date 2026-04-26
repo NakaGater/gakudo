@@ -98,7 +98,7 @@ export default async function ChildrenPage() {
       ) : (
         <div>
           {grades.map((grade) => {
-            const kids = grouped[grade];
+            const kids = grouped[grade] ?? [];
             const emoji = gradeEmoji[grade] ?? "📚";
             return (
               <div key={grade}>
@@ -111,7 +111,7 @@ export default async function ChildrenPage() {
                 </div>
                 <div className="child-grid">
                   {kids.map((child) => {
-                    const avColor = colorVariants[(child.grade - 1) % 4];
+                    const avColor = colorVariants[(child.grade - 1) % 4]!;
                     return (
                       <Link key={child.id} href={`/children/${child.id}`}>
                         <div className="cc">

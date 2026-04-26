@@ -321,7 +321,7 @@ export default async function HomePage() {
                 iconBorder: "var(--cr-pink)",
               },
             ];
-            const s = stickyColors[i % stickyColors.length];
+            const s = stickyColors[i % stickyColors.length]!;
             return (
               <div key={feature.title} className={`sticky-note ${s.bg}`}>
                 <div

@@ -321,10 +321,10 @@ describe("getTodayAttendanceStatus", () => {
 
     const result = await getTodayAttendanceStatus();
     expect(result).toHaveLength(2);
-    expect(result[0].status).toBe("entered");
-    expect(result[0].lastRecordedAt).toBe("2025-01-01T08:00:00Z");
-    expect(result[1].status).toBe("exited");
-    expect(result[1].lastRecordedAt).toBe("2025-01-01T17:00:00Z");
+    expect(result[0]!.status).toBe("entered");
+    expect(result[0]!.lastRecordedAt).toBe("2025-01-01T08:00:00Z");
+    expect(result[1]!.status).toBe("exited");
+    expect(result[1]!.lastRecordedAt).toBe("2025-01-01T17:00:00Z");
   });
 
   it("handles null attendances data gracefully", async () => {
@@ -334,7 +334,7 @@ describe("getTodayAttendanceStatus", () => {
 
     const result = await getTodayAttendanceStatus();
     expect(result).toHaveLength(1);
-    expect(result[0].status).toBe("none");
+    expect(result[0]!.status).toBe("none");
   });
 });
 
@@ -415,7 +415,7 @@ describe("getDashboardAttendanceStatus", () => {
 
     const result = await getDashboardAttendanceStatus();
     expect(result).toHaveLength(1);
-    expect(result[0].status).toBe("none");
+    expect(result[0]!.status).toBe("none");
   });
 });
 
@@ -502,7 +502,7 @@ describe("getParentAttendanceStatus", () => {
 
     const result = await getParentAttendanceStatus();
     expect(result.myChildren).toHaveLength(1);
-    expect(result.myChildren[0].status).toBe("none");
+    expect(result.myChildren[0]!.status).toBe("none");
   });
 
   it("handles multiple children with different statuses", async () => {
@@ -525,7 +525,7 @@ describe("getParentAttendanceStatus", () => {
 
     const result = await getParentAttendanceStatus();
     expect(result.myChildren).toHaveLength(2);
-    expect(result.myChildren[0].status).toBe("entered");
-    expect(result.myChildren[1].status).toBe("exited");
+    expect(result.myChildren[0]!.status).toBe("entered");
+    expect(result.myChildren[1]!.status).toBe("exited");
   });
 });

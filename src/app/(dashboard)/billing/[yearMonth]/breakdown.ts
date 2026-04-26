@@ -50,7 +50,9 @@ export function buildDailyBreakdown(
   exitRecords: AttendanceRow[],
   rule: BillingRule,
 ): DailyBreakdown[] {
-  const [endH, endM] = rule.regular_end_time.split(":").map(Number);
+  const parts = rule.regular_end_time.split(":");
+  const endH = Number(parts[0]);
+  const endM = Number(parts[1]);
   const regularEndMinutes = endH * 60 + endM;
 
   return exitRecords.map((record) => {

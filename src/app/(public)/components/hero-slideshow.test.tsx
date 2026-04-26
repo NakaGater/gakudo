@@ -84,8 +84,8 @@ describe("HeroSlideshow", () => {
       render(<HeroSlideshow photoUrls={photoUrls}>{ILLUSTRATION}</HeroSlideshow>);
       const images = screen.getAllByRole("img");
       // next/image may encode the src, so check it contains the original URL
-      expect(images[0].getAttribute("src")).toContain("photo1.jpg");
-      expect(images[1].getAttribute("src")).toContain("photo2.jpg");
+      expect(images[0]!.getAttribute("src")).toContain("photo1.jpg");
+      expect(images[1]!.getAttribute("src")).toContain("photo2.jpg");
     });
   });
 

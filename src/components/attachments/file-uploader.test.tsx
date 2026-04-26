@@ -78,8 +78,8 @@ describe("FileUploader", () => {
 
     // Remove the second file (index 1)
     const removeBtns = container.querySelectorAll("li button");
-    fireEvent.click(removeBtns[1]);
-    const result = onChange.mock.calls[0][0];
+    fireEvent.click(removeBtns[1]!);
+    const result = onChange.mock.calls[0]![0];
     expect(result.length).toBe(2);
     expect(result[0].file.name).toBe("a.pdf");
     expect(result[1].file.name).toBe("c.pdf");
@@ -122,7 +122,7 @@ describe("FileUploader", () => {
     });
 
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange.mock.calls[0][0][0].file.name).toBe("dropped.pdf");
+    expect(onChange.mock.calls[0]![0][0].file.name).toBe("dropped.pdf");
   });
 
   it("rejects oversized files on drop with error", () => {
