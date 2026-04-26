@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { withAuth } from "@/lib/actions/middleware";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getEnum, getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 const VALID_ROLES = ["parent", "teacher", "admin", "entrance"] as const;
@@ -17,26 +18,26 @@ type Role = (typeof VALID_ROLES)[number];
 export const inviteUser = withAuth(
   "admin",
   async (_ctx, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const email = formData.get("email");
-    const name = formData.get("name");
-    const role = formData.get("role");
+    // Phase 2-D: getString / getEnum centralize the typeof + trim plumbing.
+    const emailR = getString(formData, "email", { message: "メールアドレスを入力してください" });
+    if (!emailR.ok) return { success: false, message: emailR.error };
+    const nameR = getString(formData, "name", { message: "名前を入力してください" });
+    if (!nameR.ok) return { success: false, message: nameR.error };
+    const roleR = getEnum(formData, "role", VALID_ROLES, {
+      message: "有効な役割を選択してください",
+    });
+    if (!roleR.ok) return { success: false, message: roleR.error };
 
-    if (typeof email !== "string" || !email.trim()) {
-      return { success: false, message: "メールアドレスを入力してください" };
-    }
-    if (typeof name !== "string" || !name.trim()) {
-      return { success: false, message: "名前を入力してください" };
-    }
-    if (typeof role !== "string" || !VALID_ROLES.includes(role as Role)) {
-      return { success: false, message: "有効な役割を選択してください" };
-    }
+    const email = emailR.value;
+    const name = nameR.value;
+    const role = roleR.value;
 
     const adminClient = createAdminClient();
 
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
-      email.trim(),
+      email,
       {
-        data: { name: name.trim(), role },
+        data: { name, role },
         redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000"}/auth/callback?type=invite`,
       },
     );
@@ -70,19 +71,18 @@ export const inviteUser = withAuth(
 export const updateUser = withAuth(
   "admin",
   async ({ user }, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const targetId = formData.get("id");
-    const name = formData.get("name");
-    const role = formData.get("role");
+    const targetIdR = getString(formData, "id", { message: "ユーザーIDが不正です" });
+    if (!targetIdR.ok) return { success: false, message: targetIdR.error };
+    const nameR = getString(formData, "name", { message: "名前を入力してください" });
+    if (!nameR.ok) return { success: false, message: nameR.error };
+    const roleR = getEnum(formData, "role", VALID_ROLES, {
+      message: "有効な役割を選択してください",
+    });
+    if (!roleR.ok) return { success: false, message: roleR.error };
 
-    if (typeof targetId !== "string" || !targetId.trim()) {
-      return { success: false, message: "ユーザーIDが不正です" };
-    }
-    if (typeof name !== "string" || !name.trim()) {
-      return { success: false, message: "名前を入力してください" };
-    }
-    if (typeof role !== "string" || !VALID_ROLES.includes(role as Role)) {
-      return { success: false, message: "有効な役割を選択してください" };
-    }
+    const targetId = targetIdR.value;
+    const name = nameR.value;
+    const role = roleR.value;
 
     if (targetId === user.id) {
       return { success: false, message: "自分自身の役割は変更できません" };
@@ -92,7 +92,7 @@ export const updateUser = withAuth(
 
     const { error: profileError } = await adminClient
       .from("profiles")
-      .update({ name: name.trim(), role: role as Role })
+      .update({ name, role })
       .eq("id", targetId);
 
     if (profileError) {
@@ -103,7 +103,7 @@ export const updateUser = withAuth(
     }
 
     const { error: authError } = await adminClient.auth.admin.updateUserById(targetId, {
-      user_metadata: { name: name.trim(), role },
+      user_metadata: { name, role },
     });
 
     if (authError) {
@@ -121,10 +121,9 @@ export const updateUser = withAuth(
 export const deleteUser = withAuth(
   "admin",
   async ({ user }, _prev: ActionState, formData: FormData): Promise<ActionResult> => {
-    const targetId = formData.get("id");
-    if (typeof targetId !== "string" || !targetId.trim()) {
-      return { success: false, message: "ユーザーIDが不正です" };
-    }
+    const targetIdR = getString(formData, "id", { message: "ユーザーIDが不正です" });
+    if (!targetIdR.ok) return { success: false, message: targetIdR.error };
+    const targetId = targetIdR.value;
 
     if (targetId === user.id) {
       return { success: false, message: "自分自身は削除できません" };
