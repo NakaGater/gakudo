@@ -28,25 +28,41 @@ const { mockSingle, mockUpdate, mockFrom } = vi.hoisted(() => {
             args[1] !== null &&
             "count" in (args[1] as Record<string, unknown>)
           ) {
-            return { eq: vi.fn().mockResolvedValue({ count: 3 }) };
+            // Phase 3-D: getInquiries now runs count + data queries in
+            // parallel. The countQuery is awaited directly OR after .eq(),
+            // so both shapes need to be thenable to `{ count }`.
+            const countResolved = (resolve: (v: unknown) => void) =>
+              resolve({ count: 3, error: null });
+            return {
+              then: countResolved,
+              eq: vi.fn().mockReturnValue({ then: countResolved }),
+            };
           }
           if (typeof args[0] === "string") {
             // Phase 3-E: getInquiries / getInquiry now request explicit
             // columns; previously this branch was gated on "*".
+            // Phase 3-D: order().range() is the new pagination shape.
+            const dataResolve = (resolve: (v: unknown) => void) =>
+              resolve({ data: [], error: null });
             const orderResult = {
-              then: (resolve: (v: unknown) => void) => resolve({ data: [] }),
+              then: dataResolve,
+              range: vi.fn().mockReturnValue({
+                then: dataResolve,
+                eq: vi.fn().mockReturnValue({ then: dataResolve }),
+              }),
               eq: vi.fn().mockReturnValue({
-                then: (resolve: (v: unknown) => void) => resolve({ data: [] }),
+                then: dataResolve,
+                range: vi.fn().mockReturnValue({ then: dataResolve }),
               }),
             };
             return {
               order: vi.fn().mockReturnValue(orderResult),
               eq: vi.fn().mockReturnValue({
                 single: mockSingle,
-                order: vi.fn().mockReturnValue({
-                  then: (resolve: (v: unknown) => void) => resolve({ data: [] }),
-                }),
+                order: vi.fn().mockReturnValue(orderResult),
+                range: vi.fn().mockReturnValue({ then: dataResolve }),
               }),
+              range: vi.fn().mockReturnValue({ then: dataResolve }),
             };
           }
           return mockSelect();
@@ -85,25 +101,29 @@ describe("getInquiries", () => {
     mockGetUser.mockResolvedValue(mockUser);
   });
 
-  it("returns empty array for non-staff users", async () => {
+  it("returns an empty page for non-staff users", async () => {
     mockGetUser.mockResolvedValue({ ...mockUser, role: "parent" });
     const result = await getInquiries();
-    expect(result).toEqual([]);
+    expect(result.rows).toEqual([]);
+    expect(result.total).toBe(0);
   });
 
-  it("returns inquiries for staff", async () => {
+  it("returns paginated inquiries for staff", async () => {
     const result = await getInquiries();
-    expect(Array.isArray(result)).toBe(true);
+    expect(Array.isArray(result.rows)).toBe(true);
+    expect(result.page).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.totalPages).toBeGreaterThanOrEqual(1);
   });
 
   it("passes status filter when provided", async () => {
     const result = await getInquiries("pending");
-    expect(Array.isArray(result)).toBe(true);
+    expect(Array.isArray(result.rows)).toBe(true);
   });
 
   it("does not filter when status is 'all'", async () => {
     const result = await getInquiries("all");
-    expect(Array.isArray(result)).toBe(true);
+    expect(Array.isArray(result.rows)).toBe(true);
   });
 });
 
