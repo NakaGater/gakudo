@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/ratelimit/check";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getEmail, getEnum, getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 // Public form, abuse-prone. 10 submissions per hour per (IP, email)
@@ -22,26 +23,34 @@ async function callerIp(): Promise<string> {
 }
 
 export async function submitInquiry(_prev: ActionState, formData: FormData): Promise<ActionResult> {
-  const type = formData.get("type") as string;
-  const name = (formData.get("name") as string)?.trim();
-  const email = (formData.get("email") as string)?.trim();
-  const phone = (formData.get("phone") as string)?.trim() || null;
-  const preferredDate = (formData.get("preferred_date") as string)?.trim() || null;
-  const message = (formData.get("message") as string)?.trim();
+  // Phase 2-D: validation through lib/validation/form.ts so the
+  // typeof / trim / regex boilerplate lives in one tested place.
+  const typeR = getEnum(formData, "type", ["visit", "general"] as const, {
+    message: "種別を選択してください。",
+  });
+  if (!typeR.ok) return { success: false, message: typeR.error };
+  const type = typeR.value;
 
-  // バリデーション
-  if (!type || !["visit", "general"].includes(type)) {
-    return { success: false, message: "種別を選択してください。" };
-  }
-  if (!name) {
-    return { success: false, message: "お名前を入力してください。" };
-  }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { success: false, message: "有効なメールアドレスを入力してください。" };
-  }
-  if (!message) {
-    return { success: false, message: "メッセージを入力してください。" };
-  }
+  const nameR = getString(formData, "name", { message: "お名前を入力してください。" });
+  if (!nameR.ok) return { success: false, message: nameR.error };
+  const name = nameR.value;
+
+  const emailR = getEmail(formData, "email", {
+    message: "有効なメールアドレスを入力してください。",
+  });
+  if (!emailR.ok) return { success: false, message: emailR.error };
+  const email = emailR.value;
+
+  const phoneR = getString(formData, "phone", { required: false });
+  const phone = phoneR.ok && phoneR.value ? phoneR.value : null;
+
+  const preferredDateR = getString(formData, "preferred_date", { required: false });
+  const preferredDate = preferredDateR.ok && preferredDateR.value ? preferredDateR.value : null;
+
+  const messageR = getString(formData, "message", { message: "メッセージを入力してください。" });
+  if (!messageR.ok) return { success: false, message: messageR.error };
+  const message = messageR.value;
+
   if (type === "visit" && !preferredDate) {
     return { success: false, message: "見学予約の場合は希望日時を入力してください。" };
   }
