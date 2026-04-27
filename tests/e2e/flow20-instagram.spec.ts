@@ -40,9 +40,10 @@ test.describe("Flow 20: Instagram管理", () => {
     // The post appears after the Server Action's redirect/revalidation;
     // give it a generous timeout (production builds can be slow on the
     // first request after build) and use .first() defensively in case
-    // any prior run leaked rows.
+    // any prior run leaked rows. Bumped 15s → 25s after observing flake
+    // on CI runners where the action+revalidation chain ran long.
     await expect(page.getByText(shortcode).or(page.getByText(testUrl)).first()).toBeVisible({
-      timeout: 15000,
+      timeout: 25000,
     });
   });
 

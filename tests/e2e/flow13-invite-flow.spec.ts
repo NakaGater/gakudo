@@ -28,9 +28,12 @@ test.describe("Flow 13: Invite → set password → login", () => {
     // 5. Submit invite
     await modal.getByRole("button", { name: "招待する" }).click();
 
-    // Wait for success message
+    // Wait for success message — bumped from 10s → 20s. The invite Server
+    // Action does Supabase admin createUser + Resend/Mailpit handoff and
+    // occasionally exceeds 10s under CI runner load (same root cause as
+    // flow18/19 which were bumped to 30s for the same reason).
     await expect(modal.getByText("招待メールを送信しました")).toBeVisible({
-      timeout: 10000,
+      timeout: 20000,
     });
 
     // 6. Get invite link from Inbucket
