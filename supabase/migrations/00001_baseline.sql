@@ -1419,28 +1419,46 @@ CREATE TABLE IF NOT EXISTS site_news_revisions (
   body TEXT NOT NULL,
   -- Snapshot of attachments at the time of the edit. Shape:
   --   [{ id, file_name, file_path, file_size, mime_type }]
-  attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
-  -- CHECK that the JSONB really is an array of objects with the
-  -- documented keys, so a buggy writer can't poison the audit log
-  -- with a string / number / null payload that breaks all later
-  -- readers. The check uses jsonb_typeof + a NOT EXISTS guard
-  -- against any element missing a required key.
-  CONSTRAINT site_news_revisions_attachments_shape CHECK (
-    jsonb_typeof(attachments) = 'array'
-    AND NOT EXISTS (
-      SELECT 1
-      FROM jsonb_array_elements(attachments) AS att
-      WHERE jsonb_typeof(att) <> 'object'
-         OR NOT (att ? 'id')
-         OR NOT (att ? 'file_name')
-         OR NOT (att ? 'file_path')
-         OR NOT (att ? 'file_size')
-         OR NOT (att ? 'mime_type')
-    )
-  ),
+  -- The element-shape guarantee (object with the documented keys)
+  -- is enforced via the BEFORE INSERT/UPDATE trigger below — Postgres
+  -- forbids subqueries inside CHECK constraints, which rules out
+  -- jsonb_array_elements() as a CHECK expression. A simple top-level
+  -- "is array" check still rides as a CHECK so the column type is
+  -- self-documenting at the schema level.
+  attachments JSONB NOT NULL DEFAULT '[]'::jsonb
+    CHECK (jsonb_typeof(attachments) = 'array'),
   edited_by UUID REFERENCES profiles(id) ON DELETE SET NULL ON UPDATE CASCADE,
   edited_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Per-element shape validation (id, file_name, file_path, file_size,
+-- mime_type) — done in a trigger because CHECK constraints can't run
+-- subqueries against jsonb_array_elements().
+CREATE OR REPLACE FUNCTION validate_site_news_revisions_attachments()
+RETURNS TRIGGER AS $$
+DECLARE
+  att JSONB;
+BEGIN
+  FOR att IN SELECT value FROM jsonb_array_elements(NEW.attachments) LOOP
+    IF jsonb_typeof(att) <> 'object'
+       OR NOT (att ? 'id')
+       OR NOT (att ? 'file_name')
+       OR NOT (att ? 'file_path')
+       OR NOT (att ? 'file_size')
+       OR NOT (att ? 'mime_type') THEN
+      RAISE EXCEPTION
+        'site_news_revisions.attachments element missing required keys (id, file_name, file_path, file_size, mime_type): %',
+        att;
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_site_news_revisions_validate_attachments
+  BEFORE INSERT OR UPDATE ON site_news_revisions
+  FOR EACH ROW
+  EXECUTE FUNCTION validate_site_news_revisions_attachments();
 
 CREATE INDEX IF NOT EXISTS site_news_revisions_news_id_idx
   ON site_news_revisions (news_id, edited_at DESC);
