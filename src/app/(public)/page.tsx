@@ -13,7 +13,18 @@ export const metadata: Metadata = {
     "星ヶ丘こどもクラブは、保護者が運営する学童保育施設です。安心・安全な放課後の居場所を提供します。",
 };
 
-export default async function HomePage() {
+type HomePageProps = {
+  // `?inquiry=visit` (hero CTA) or `?inquiry=general` (FAQ page) opens
+  // the bottom inquiry form expanded with the matching tab pre-selected.
+  // Anything else leaves the form collapsed.
+  searchParams: Promise<{ inquiry?: string }>;
+};
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const { inquiry } = await searchParams;
+  const inquiryOpen = inquiry === "visit" || inquiry === "general";
+  const inquiryInitialType: "visit" | "general" = inquiry === "general" ? "general" : "visit";
+
   // Phase 3-B: data assembly + defaults moved to lib/site/load-home-data.
   const {
     heroText,
@@ -90,7 +101,7 @@ export default async function HomePage() {
                 施設について詳しく →
               </Link>
               <Link
-                href="#inquiry"
+                href="/?inquiry=visit#inquiry"
                 className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border-2 border-page-edge bg-white px-[22px] py-[10px] text-sm font-bold font-story text-ink shadow-[0_2px_0_var(--page-edge)] transition-all hover:border-cr-orange hover:text-cr-orange hover:-translate-y-px"
               >
                 📩 見学・お問い合わせ
@@ -447,9 +458,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Inquiry — 見学申し込み・お問い合わせフォーム（折りたたみ） */}
+      {/* Inquiry — 見学申し込み・お問い合わせフォーム（折りたたみ）。
+          Hero CTA → /?inquiry=visit#inquiry / FAQ link → /?inquiry=general#inquiry
+          で `open` 属性と form の初期 type を切り替える。 */}
       <details
         id="inquiry"
+        open={inquiryOpen}
         className="group mx-5 mt-6 mb-8 md:mx-10 md:mt-8 md:mb-10"
         style={{
           background: "var(--page-deep)",
@@ -475,7 +489,7 @@ export default async function HomePage() {
         </summary>
         <div className="px-5 pb-6 md:px-9 md:pb-7">
           <div className="mx-auto max-w-lg">
-            <InquiryForm />
+            <InquiryForm initialType={inquiryInitialType} />
           </div>
         </div>
       </details>

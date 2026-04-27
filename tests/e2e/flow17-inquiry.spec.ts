@@ -88,6 +88,54 @@ test.describe("Flow 17: お問い合わせフォーム", () => {
     await expect(page.getByText(testName).first()).toBeVisible({ timeout: 10000 });
   });
 
+  test("hero CTA deep-links to open form with visit type pre-selected", async ({ page }) => {
+    // Hero "📩 見学・お問い合わせ" links to /?inquiry=visit#inquiry. The
+    // home page reads searchParams.inquiry server-side and renders the
+    // <details open> with InquiryForm initialized to the visit tab.
+    await page.goto("/?inquiry=visit#inquiry");
+
+    const details = page.locator("details#inquiry");
+    // open attribute is server-rendered, no summary click required
+    await expect(details).toHaveAttribute("open", "");
+
+    // Visit tab is the active one — its 見学希望日時 field is visible
+    await expect(page.getByLabel(/見学希望日時/)).toBeVisible();
+  });
+
+  test("FAQ page link deep-links to open form with general type pre-selected", async ({ page }) => {
+    // FAQ page's "お問い合わせフォーム" link points to
+    // /?inquiry=general#inquiry. The form should open expanded with the
+    // general tab active (so 見学希望日時 is hidden).
+    await page.goto("/?inquiry=general#inquiry");
+
+    const details = page.locator("details#inquiry");
+    await expect(details).toHaveAttribute("open", "");
+
+    // General tab is active → 見学希望日時 is NOT shown
+    await expect(page.getByLabel(/見学希望日時/)).not.toBeVisible();
+
+    // Sanity: the general radio button is the orange-highlighted one
+    // (the visit button is the inactive bordered variant). We just
+    // confirm both buttons exist so the form is recognizably the
+    // inquiry form, not some other page.
+    await expect(page.getByRole("button", { name: /見学予約/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /一般お問い合わせ/ })).toBeVisible();
+  });
+
+  test("FAQ page link from /faq navigates and opens form", async ({ page }) => {
+    // End-to-end: start on /faq, click the inquiry link in the footer
+    // panel, verify the home page renders with the form open + general
+    // type selected (見学希望日時 hidden).
+    await page.goto("/faq");
+    await page.getByRole("link", { name: "お問い合わせフォーム" }).first().click();
+
+    await page.waitForURL(/\/\?inquiry=general(#inquiry)?$/, { timeout: 10000 });
+
+    const details = page.locator("details#inquiry");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(page.getByLabel(/見学希望日時/)).not.toBeVisible();
+  });
+
   test("admin can view inquiry detail", async ({ page }) => {
     const testName = `詳細テスト${uniqueId}`;
 
