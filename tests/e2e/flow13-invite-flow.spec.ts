@@ -6,6 +6,16 @@ const INVITE_PASSWORD = "testpass1234";
 
 test.describe("Flow 13: Invite → set password → login", () => {
   test("admin invites user, user sets password and logs in", async ({ page }) => {
+    // This test does login → admin invite (Server Action + Supabase admin
+    // createUser + Mailpit handoff) → email link visit → password set →
+    // login. End-to-end on a slow CI runner this can exceed the global
+    // 30s per-test budget set in playwright.config.ts. test.slow() lifts
+    // the budget to 90s so the inner visibility waits actually have a
+    // chance to fully play out instead of being killed by the outer
+    // timeout (the bug that made flow13 chronically flaky despite each
+    // individual `await expect(...)` having generous timeouts).
+    test.slow();
+
     // Generate the invite address INSIDE the test function so each retry
     // sees a fresh, unique email. The previous file-scope `const ... =
     // Date.now()...` was evaluated once at module load and reused across

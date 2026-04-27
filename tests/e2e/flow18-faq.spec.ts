@@ -64,6 +64,14 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
   });
 
   test("CMS: can add a new question", async ({ page }) => {
+    // Login + edit page load + Server Action save chain can take >30s on
+    // CI runners. Lift the per-test budget to 90s so the inner
+    // 保存しました visibility wait isn't pre-empted by the outer 30s
+    // global timeout (the cause of the chronic flake — bumping the
+    // visibility timeout alone to 30s never helped because the test
+    // itself was killed at 30s elapsed).
+    test.slow();
+
     await loginViaForm(page, "admin@example.com", "password123");
     await page.goto("/admin/site/pages/faq/edit");
     await expect(page.getByText("Q&A 項目")).toBeVisible({ timeout: 10000 });
