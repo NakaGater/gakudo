@@ -50,7 +50,10 @@ describe("login", () => {
     expect(holder.current!.spies.fromCalls).not.toContain("profiles");
   });
 
-  it("redirects parents to /announcements after successful sign-in", async () => {
+  it("redirects parents to /attendance/status after successful sign-in", async () => {
+    // Parents land on the per-child attendance status page, not the
+    // announcements list — that's the page they actually want first.
+    // See actions.helpers.ts for the rationale.
     mockSignInWithPassword.mockResolvedValue({
       data: { user: { id: "u-parent" } },
       error: null,
@@ -60,7 +63,7 @@ describe("login", () => {
     });
 
     await expect(login(form({ email: "p@example.com", password: "pw12345678" }))).rejects.toThrow(
-      /NEXT_REDIRECT:\/announcements/,
+      /NEXT_REDIRECT:\/attendance\/status/,
     );
   });
 

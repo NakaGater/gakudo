@@ -6,7 +6,11 @@ describe("getRedirectPathForRole", () => {
     ["admin", "/attendance/dashboard"],
     ["teacher", "/attendance/dashboard"],
     ["entrance", "/attendance/dashboard"],
-    ["parent", "/announcements"],
+    // Parent lands on their child's attendance status page, not the
+    // announcements list — that's the page they actually want to see
+    // first ("did my kid arrive?"), and it matches the sidebar logo
+    // link target for parents.
+    ["parent", "/attendance/status"],
     ["", "/announcements"],
   ])("role=%s → %s", (role, expected) => {
     expect(getRedirectPathForRole(role)).toBe(expected);
@@ -20,7 +24,11 @@ describe("getRedirectPathForRole", () => {
     expect(getRedirectPathForRole(null)).toBe("/announcements");
   });
 
-  it("treats unknown roles as parent (no escalation)", () => {
+  // Unknown roles fall back to the lowest-privilege dashboard page so
+  // that a malformed `profiles.role` value can't accidentally drop the
+  // user onto a role-gated page (e.g. /attendance/status redirects
+  // non-parents away anyway, but /announcements is safest).
+  it("treats unknown roles as the lowest-privilege fallback", () => {
     expect(getRedirectPathForRole("villain")).toBe("/announcements");
   });
 });
