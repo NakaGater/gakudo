@@ -71,6 +71,11 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
   });
 
   test("CMS: can add a new activity", async ({ page }) => {
+    // See flow18 — same wait-for-action-commit chain and same need
+    // to lift the per-test budget so it doesn't get killed by the
+    // default 30s outer timeout.
+    test.slow();
+
     await loginViaForm(page, "admin@example.com", "password123");
     await page.goto("/admin/site/pages/daily-life/edit");
     await expect(page.getByText("活動カード")).toBeVisible({ timeout: 10000 });
@@ -93,8 +98,15 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
 
     // Save — optimistic UI surfaces 保存しました immediately on click,
     // see edit-page-form.tsx for the rationale.
-    await page.getByRole("button", { name: "保存" }).click();
+    const saveButton = page.getByRole("button", { name: "保存" });
+    await saveButton.click();
     await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 5000 });
+
+    // Wait for the action to actually commit before navigating to
+    // /daily-life. Same pattern + rationale as flow18 — without this
+    // wait we'd race the action's `revalidatePath("/daily-life")` and
+    // read a stale cached page.
+    await expect(saveButton).toBeEnabled({ timeout: 30000 });
 
     // Verify on public page
     await page.goto("/daily-life");

@@ -43,13 +43,22 @@ export default async function AdminNewsListPage() {
         {newsList && newsList.length > 0 ? (
           newsList.map((news) => (
             <Card key={news.id}>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-fg">{news.title}</p>
+              <CardContent className="flex items-center justify-between gap-3">
+                <Link
+                  href={`/admin/site/news/${news.id}/edit`}
+                  className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+                >
+                  <p className="font-medium text-fg truncate">{news.title}</p>
                   <p className="text-xs text-fg-muted mt-1">
                     {new Date(news.published_at).toLocaleDateString("ja-JP")}
                   </p>
-                </div>
+                </Link>
+                <Link
+                  href={`/admin/site/news/${news.id}/edit`}
+                  className="shrink-0 rounded-md border border-border bg-bg-elev px-3 py-1.5 text-xs text-fg hover:border-accent hover:text-accent transition-colors"
+                >
+                  編集
+                </Link>
                 <DeleteNewsButton id={news.id} />
               </CardContent>
             </Card>
