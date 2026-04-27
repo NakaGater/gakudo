@@ -58,6 +58,9 @@ export const updateSitePage = withAuth(
     }
 
     revalidatePath("/");
+    // Edited slug's static page (built via dynamicParams=false in
+    // (public)/[slug]/page.tsx) — invalidate so the next request rebuilds.
+    revalidatePath(`/${slug}`);
     revalidatePath(`/admin/site/pages/${slug}/edit`);
 
     return { success: true, message: "保存しました" };

@@ -10,37 +10,57 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-// Slugs that this catch-all is willing to render. Anything else (including
-// `news` / `gallery` / `access` which have their own routes elsewhere, and
-// arbitrary strings like `/random-thing-xyz`) must call notFound().
+// Slugs this catch-all renders. Anything else (`news` / `gallery` /
+// `access` have their own routes; arbitrary strings like `/random-xyz`)
+// must produce a 404.
 //
-// NOTE on 404 status code: in Next 16 (Turbopack) production builds, a
-// route that goes through `src/proxy.ts` returning `NextResponse.next()`
-// with mutated headers (we set `x-pathname` for the entrance-role guard)
-// renders the not-found UI but keeps the response status at 200.
-// `dynamicParams = false` + generateStaticParams was tried and ALSO returns
-// 200 while breaking the CMS edit flow's revalidatePath path. Until the
-// proxy is restructured to not interfere with notFound() status
-// propagation, the not-found content is shown but the HTTP status is 200.
-// flow10 asserts the content rather than the status.
-const VALID_SLUGS = new Set(["about", "faq", "daily-life", "enrollment", "home"]);
+// `dynamicParams = false` + `generateStaticParams` tells Next's router
+// to reject any slug not returned below. That rejection happens BEFORE
+// any handler runs, so the response status is 404 — sidestepping the
+// streaming-SSR issue where notFound() inside a Suspense boundary
+// (the (public)/loading.tsx fallback) leaves the response at 200.
+//
+// Cache invalidation: admin/site/actions.ts calls `revalidatePath("/" +
+// slug)` after a CMS edit so the corresponding static page is rebuilt
+// on the next request.
+const VALID_SLUGS = ["about", "faq", "daily-life", "enrollment", "home"] as const;
+const VALID_SLUGS_SET = new Set<string>(VALID_SLUGS);
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  if (!VALID_SLUGS.has(slug)) return { title: "ページが見つかりません" };
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return VALID_SLUGS.map((slug) => ({ slug }));
+}
+
+type SitePageRow = {
+  title: string;
+  content: string;
+  updated_at: string;
+  metadata: Record<string, unknown>;
+};
+
+async function fetchSitePage(slug: string): Promise<SitePageRow | null> {
   try {
     const supabase = await createClient();
     const { data } = (await supabase
       .from("site_pages")
-      .select("title")
+      .select("title, content, updated_at, metadata")
       .eq("slug", slug)
-      .single()) as { data: { title: string } | null };
-
-    if (!data) return { title: "ページが見つかりません" };
-    return { title: `${data.title} — 星ヶ丘こどもクラブ` };
+      .single()) as { data: SitePageRow | null };
+    return data;
   } catch {
-    return { title: "ページが見つかりません" };
+    return null;
   }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  // dynamicParams=false guarantees slug is in VALID_SLUGS by the time we
+  // get here, but keep the guard so this function is safe to reuse.
+  if (!VALID_SLUGS_SET.has(slug)) return { title: "ページが見つかりません" };
+  const page = await fetchSitePage(slug);
+  if (!page) return { title: "ページが見つかりません" };
+  return { title: `${page.title} — 星ヶ丘こどもクラブ` };
 }
 
 const PAGE_COMPONENTS: Record<
@@ -56,36 +76,12 @@ const PAGE_COMPONENTS: Record<
 export default async function SitePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // Reject unknown slugs early — produces the not-found UI even though the
-  // proxy currently keeps the response status at 200 (see VALID_SLUGS
-  // comment).
-  if (!VALID_SLUGS.has(slug)) notFound();
+  // Belt-and-suspenders: dynamicParams=false should prevent us from
+  // ever getting an unknown slug, but if e.g. a future generateStaticParams
+  // change misses a row this still returns the right not-found UI.
+  if (!VALID_SLUGS_SET.has(slug)) notFound();
 
-  let page: {
-    title: string;
-    content: string;
-    updated_at: string;
-    metadata: Record<string, unknown>;
-  } | null = null;
-  try {
-    const supabase = await createClient();
-    const { data } = (await supabase
-      .from("site_pages")
-      .select("title, content, updated_at, metadata")
-      .eq("slug", slug)
-      .single()) as {
-      data: {
-        title: string;
-        content: string;
-        updated_at: string;
-        metadata: Record<string, unknown>;
-      } | null;
-    };
-    page = data;
-  } catch {
-    notFound();
-  }
-
+  const page = await fetchSitePage(slug);
   if (!page) notFound();
 
   const PageComponent = PAGE_COMPONENTS[slug];
