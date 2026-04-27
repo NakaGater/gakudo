@@ -1,4 +1,4 @@
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { getNavItems } from "./nav-items";
 
@@ -202,5 +202,43 @@ describe("MobileTabs", () => {
     );
     const announcementsLink = screen.getByRole("link", { name: /連絡/ });
     expect(announcementsLink.className).toContain("text-accent");
+  });
+
+  // Regression: the overflow panel that opens on the "その他" tab used to
+  // be pinned with Tailwind's `bottom-14` (a fixed 56px). The bottom tab
+  // bar itself is `h-14` PLUS `pb-[env(safe-area-inset-bottom)]`, which
+  // on iPhones with a home indicator (~34px) makes the bar taller than
+  // 56px — so the panel slipped under the bar's safe-area padding and
+  // visually overlapped the lower row of nav items.
+  //
+  // The fix anchors the panel's bottom to the same safe-area-aware
+  // formula. This test asserts the inline style explicitly so a future
+  // refactor can't silently revert to a fixed pixel value.
+  it("overflow panel position accounts for iOS safe-area-inset-bottom", () => {
+    render(
+      <MobileTabs
+        user={{ id: "3", email: "ad@b.c", name: "管理者", role: "admin" }}
+        badgeCounts={emptyBadgeCounts}
+      />,
+    );
+
+    // Open the overflow panel
+    fireEvent.click(screen.getByRole("button", { name: /その他/ }));
+
+    // The panel header confirms the panel is now mounted
+    expect(screen.getByText("メニュー")).toBeInTheDocument();
+
+    // Locate the panel container — the closest ancestor of the menu
+    // header that uses `absolute` positioning is the panel itself.
+    const panel = screen.getByText("メニュー").closest('[class*="absolute"]') as HTMLElement | null;
+    expect(panel).not.toBeNull();
+
+    // Inline `bottom` must include env(safe-area-inset-bottom). A plain
+    // "56px" or "3.5rem" without the env() expression would silently
+    // resurrect the regression on iPhone X+ devices.
+    const bottomStyle = panel!.style.bottom;
+    expect(bottomStyle).toMatch(/env\(safe-area-inset-bottom\)/);
+    // Sanity: the static portion still matches the bar's h-14 (3.5rem).
+    expect(bottomStyle).toMatch(/3\.5rem/);
   });
 });
