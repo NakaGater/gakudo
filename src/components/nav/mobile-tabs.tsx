@@ -56,7 +56,13 @@ export function MobileTabs({ user, badgeCounts }: MobileTabsProps) {
         <div className="fixed inset-0 z-50 md:hidden" onClick={() => setMoreOpen(false)}>
           <div className="absolute inset-0 bg-black/30" />
           <div
-            className="absolute bottom-14 left-0 right-0 bg-page border-t-2 border-dashed border-page-edge rounded-t-xl p-3 shadow-lg"
+            className="absolute left-0 right-0 bg-page border-t-2 border-dashed border-page-edge rounded-t-xl p-3 shadow-lg"
+            // The bottom tab bar below is `h-14` (56px) PLUS
+            // `pb-[env(safe-area-inset-bottom)]` for the iPhone home
+            // indicator. Pin the overflow panel's bottom edge to the same
+            // computed height so it sits flush above the bar instead of
+            // overlapping it on devices with a non-zero safe-area-inset.
+            style={{ bottom: "calc(3.5rem + env(safe-area-inset-bottom))" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2 px-1">
