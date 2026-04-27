@@ -1479,3 +1479,36 @@ CREATE POLICY "site_news_revisions_admin_insert"
   ON site_news_revisions FOR INSERT
   TO authenticated
   WITH CHECK (is_admin());
+
+-- ============================================================
+-- Schema-level GRANTs for the standard Supabase roles
+-- ============================================================
+--
+-- `supabase db reset` (CLI) and `supabase start` re-apply these
+-- automatically, but applying this baseline through the Dashboard
+-- SQL editor — the path used for the pre-launch deploy — does NOT.
+-- After a `DROP SCHEMA public CASCADE` followed by raw SQL execution,
+-- the freshly recreated tables have no privileges granted to
+-- anon / authenticated / service_role, which means RLS-allowed
+-- queries still fail with "permission denied for table profiles"
+-- (see SQLSTATE 42501). Putting the GRANTs in the baseline itself
+-- keeps the Dashboard path self-sufficient.
+--
+-- Order matters: USAGE on the schema first (without it, no role can
+-- even resolve `public.<table>` regardless of table-level grants),
+-- then ALL on every existing object, then ALTER DEFAULT PRIVILEGES
+-- so future tables / sequences / functions added on top of this
+-- baseline inherit the same grants.
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+GRANT ALL ON ALL TABLES    IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL ON TABLES    TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL ON FUNCTIONS TO anon, authenticated, service_role;
