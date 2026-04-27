@@ -34,45 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      announcement_recipients: {
-        Row: {
-          announcement_id: string
-          created_at: string | null
-          id: string
-          recipient_type: string
-          recipient_user_id: string | null
-        }
-        Insert: {
-          announcement_id: string
-          created_at?: string | null
-          id?: string
-          recipient_type: string
-          recipient_user_id?: string | null
-        }
-        Update: {
-          announcement_id?: string
-          created_at?: string | null
-          id?: string
-          recipient_type?: string
-          recipient_user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "announcement_recipients_announcement_id_fkey"
-            columns: ["announcement_id"]
-            isOneToOne: false
-            referencedRelation: "announcements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "announcement_recipients_recipient_user_id_fkey"
-            columns: ["recipient_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       announcement_reads: {
         Row: {
           announcement_id: string
@@ -100,6 +61,45 @@ export type Database = {
           {
             foreignKeyName: "announcement_reads_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcement_recipients: {
+        Row: {
+          announcement_id: string
+          created_at: string | null
+          id: string
+          recipient_type: Database["public"]["Enums"]["recipient_type"]
+          recipient_user_id: string | null
+        }
+        Insert: {
+          announcement_id: string
+          created_at?: string | null
+          id?: string
+          recipient_type: Database["public"]["Enums"]["recipient_type"]
+          recipient_user_id?: string | null
+        }
+        Update: {
+          announcement_id?: string
+          created_at?: string | null
+          id?: string
+          recipient_type?: Database["public"]["Enums"]["recipient_type"]
+          recipient_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_recipients_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_recipients_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -155,7 +155,7 @@ export type Database = {
         Row: {
           created_at: string | null
           entity_id: string
-          entity_type: string
+          entity_type: Database["public"]["Enums"]["attachment_entity_type"]
           file_name: string
           file_path: string
           file_size: number
@@ -166,7 +166,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           entity_id: string
-          entity_type: string
+          entity_type: Database["public"]["Enums"]["attachment_entity_type"]
           file_name: string
           file_path: string
           file_size: number
@@ -177,7 +177,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           entity_id?: string
-          entity_type?: string
+          entity_type?: Database["public"]["Enums"]["attachment_entity_type"]
           file_name?: string
           file_path?: string
           file_size?: number
@@ -199,26 +199,26 @@ export type Database = {
         Row: {
           child_id: string
           id: string
-          method: string
+          method: Database["public"]["Enums"]["attendance_method"]
           recorded_at: string | null
           recorded_by: string | null
-          type: string
+          type: Database["public"]["Enums"]["attendance_type"]
         }
         Insert: {
           child_id: string
           id?: string
-          method: string
+          method: Database["public"]["Enums"]["attendance_method"]
           recorded_at?: string | null
           recorded_by?: string | null
-          type: string
+          type: Database["public"]["Enums"]["attendance_type"]
         }
         Update: {
           child_id?: string
           id?: string
-          method?: string
+          method?: Database["public"]["Enums"]["attendance_method"]
           recorded_at?: string | null
           recorded_by?: string | null
-          type?: string
+          type?: Database["public"]["Enums"]["attendance_type"]
         }
         Relationships: [
           {
@@ -368,15 +368,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
+            foreignKeyName: "documents_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "documents_updated_by_fkey"
-            columns: ["updated_by"]
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -395,8 +395,8 @@ export type Database = {
           preferred_date: string | null
           replied_at: string | null
           replied_by: string | null
-          status: string
-          type: string
+          status: Database["public"]["Enums"]["inquiry_status"]
+          type: Database["public"]["Enums"]["inquiry_type"]
           updated_at: string | null
           updated_by: string | null
         }
@@ -411,8 +411,8 @@ export type Database = {
           preferred_date?: string | null
           replied_at?: string | null
           replied_by?: string | null
-          status?: string
-          type: string
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          type: Database["public"]["Enums"]["inquiry_type"]
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -427,8 +427,8 @@ export type Database = {
           preferred_date?: string | null
           replied_at?: string | null
           replied_by?: string | null
-          status?: string
-          type?: string
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          type?: Database["public"]["Enums"]["inquiry_type"]
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -507,7 +507,7 @@ export type Database = {
           confirmed_by: string | null
           created_at: string | null
           id: string
-          status: string
+          status: Database["public"]["Enums"]["bill_status"]
           total_amount: number
           total_extended_minutes: number
           year_month: string
@@ -518,7 +518,7 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string | null
           id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["bill_status"]
           total_amount?: number
           total_extended_minutes?: number
           year_month: string
@@ -529,7 +529,7 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string | null
           id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["bill_status"]
           total_amount?: number
           total_extended_minutes?: number
           year_month?: string
@@ -553,15 +553,15 @@ export type Database = {
       }
       notification_preferences: {
         Row: {
-          method: string
+          method: Database["public"]["Enums"]["notification_method"]
           user_id: string
         }
         Insert: {
-          method?: string
+          method?: Database["public"]["Enums"]["notification_method"]
           user_id: string
         }
         Update: {
-          method?: string
+          method?: Database["public"]["Enums"]["notification_method"]
           user_id?: string
         }
         Relationships: [
@@ -584,7 +584,7 @@ export type Database = {
           updated_at: string | null
           updated_by: string | null
           uploaded_by: string
-          visibility: string
+          visibility: Database["public"]["Enums"]["photo_visibility"]
         }
         Insert: {
           caption?: string | null
@@ -595,7 +595,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           uploaded_by: string
-          visibility?: string
+          visibility?: Database["public"]["Enums"]["photo_visibility"]
         }
         Update: {
           caption?: string | null
@@ -606,9 +606,16 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           uploaded_by?: string
-          visibility?: string
+          visibility?: Database["public"]["Enums"]["photo_visibility"]
         }
         Relationships: [
+          {
+            foreignKeyName: "photos_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "photos_uploaded_by_fkey"
             columns: ["uploaded_by"]
@@ -624,7 +631,7 @@ export type Database = {
           email: string
           id: string
           name: string
-          role: string
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
         }
         Insert: {
@@ -632,7 +639,7 @@ export type Database = {
           email: string
           id: string
           name: string
-          role: string
+          role: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
         }
         Update: {
@@ -640,7 +647,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string
-          role?: string
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
         }
         Relationships: []
@@ -673,6 +680,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limit_log: {
+        Row: {
+          hit_at: string
+          id: number
+          key: string
+        }
+        Insert: {
+          hit_at?: string
+          id?: number
+          key: string
+        }
+        Update: {
+          hit_at?: string
+          id?: number
+          key?: string
+        }
+        Relationships: []
       }
       site_news: {
         Row: {
@@ -749,17 +774,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "site_news_revisions_news_id_fkey"
-            columns: ["news_id"]
-            isOneToOne: false
-            referencedRelation: "site_news"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "site_news_revisions_edited_by_fkey"
             columns: ["edited_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_news_revisions_news_id_fkey"
+            columns: ["news_id"]
+            isOneToOne: false
+            referencedRelation: "site_news"
             referencedColumns: ["id"]
           },
         ]
@@ -807,16 +832,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_attendance_summary: {
-        Args: Record<string, never>
-        Returns: { entered: number; exited: number; none: number; total: number }
+      can_view_announcement: {
+        Args: { p_announcement_id: string }
+        Returns: boolean
       }
+      get_attendance_summary: { Args: never; Returns: Json }
       get_user_role: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      rate_limit_log_cleanup: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      attachment_entity_type: "announcement" | "news"
+      attendance_method: "qr" | "manual"
+      attendance_type: "enter" | "exit"
+      bill_status: "draft" | "confirmed"
+      inquiry_status: "pending" | "approved" | "declined" | "replied"
+      inquiry_type: "visit" | "general"
+      notification_method: "push" | "email" | "both" | "off"
+      photo_visibility: "private" | "public"
+      recipient_type: "all" | "user"
+      user_role: "parent" | "teacher" | "admin" | "entrance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -946,7 +982,18 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      attachment_entity_type: ["announcement", "news"],
+      attendance_method: ["qr", "manual"],
+      attendance_type: ["enter", "exit"],
+      bill_status: ["draft", "confirmed"],
+      inquiry_status: ["pending", "approved", "declined", "replied"],
+      inquiry_type: ["visit", "general"],
+      notification_method: ["push", "email", "both", "off"],
+      photo_visibility: ["private", "public"],
+      recipient_type: ["all", "user"],
+      user_role: ["parent", "teacher", "admin", "entrance"],
+    },
   },
 } as const
 
