@@ -93,7 +93,29 @@ describe("updateSitePage", () => {
     expect(holder.current!.spies.mutations).toContainEqual(
       expect.objectContaining({ table: "site_pages", op: "update" }),
     );
+
+    // Cache invalidation contract:
+    //  - "/" : the homepage embeds news + site_pages metadata.
+    //  - "/${slug}" : the public static page (`(public)/[slug]/page.tsx`
+    //    uses dynamicParams=false; the per-slug page is generated at
+    //    request time and stays cached until invalidated). Asserting this
+    //    pins the PR #32 fix that makes /about, /faq, /daily-life,
+    //    /enrollment refresh after a CMS edit.
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/home");
+
+    // PR #36 regression guard: the action used to also call
+    // `revalidatePath("/admin/site/pages/${slug}/edit")`, which was the
+    // root cause of the chronic flow18/19 30s flake — invalidating the
+    // current page forced Next to regenerate the entire RSC tree
+    // (root layout + dashboard layout + edit page) as part of the
+    // Server Action response. The form's useActionState surfaces "保存
+    // しました" via state.message without needing the page itself to
+    // re-render, so the self-revalidate was redundant. If a future
+    // change re-introduces it, this assertion fails loudly.
+    expect(mockRevalidatePath).not.toHaveBeenCalledWith(
+      expect.stringMatching(/^\/admin\/site\/pages\//),
+    );
   });
 
   it("updates page without metadata", async () => {
