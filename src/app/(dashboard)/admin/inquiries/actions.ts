@@ -6,12 +6,23 @@ import { getUser } from "@/lib/auth/get-user";
 import { isStaff } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/types";
+import type { Database } from "@/lib/supabase/types";
 import {
   INQUIRIES_PAGE_SIZE,
   type InquiriesPage,
   type InquiryListRow,
   type InquiryRow,
 } from "./types";
+
+type InquiryStatus = Database["public"]["Enums"]["inquiry_status"];
+const INQUIRY_STATUSES: readonly InquiryStatus[] = [
+  "pending",
+  "approved",
+  "declined",
+  "replied",
+] as const;
+const isInquiryStatus = (s: string): s is InquiryStatus =>
+  (INQUIRY_STATUSES as readonly string[]).includes(s);
 
 const INQUIRY_LIST_COLUMNS = "id, type, name, message, status, created_at, preferred_date";
 
@@ -34,7 +45,7 @@ export async function getInquiries(status?: string, page = 1): Promise<Inquiries
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (status && status !== "all") {
+  if (status && status !== "all" && isInquiryStatus(status)) {
     countQuery = countQuery.eq("status", status);
     dataQuery = dataQuery.eq("status", status);
   }
