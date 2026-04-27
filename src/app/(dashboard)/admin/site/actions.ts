@@ -58,7 +58,6 @@ export const updateSitePage = withAuth(
     }
 
     revalidatePath("/");
-    revalidatePath(`/${slug}`);
     revalidatePath(`/admin/site/pages/${slug}/edit`);
 
     return { success: true, message: "保存しました" };

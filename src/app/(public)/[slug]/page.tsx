@@ -12,31 +12,22 @@ type PageProps = {
 
 // Slugs that this catch-all is willing to render. Anything else (including
 // `news` / `gallery` / `access` which have their own routes elsewhere, and
-// arbitrary strings like `/random-thing-xyz`) must 404.
+// arbitrary strings like `/random-thing-xyz`) must call notFound().
 //
-// In Next 16 production builds, calling `notFound()` from inside a dynamic
-// catch-all route handler does not reliably propagate a 404 status when the
-// proxy (`src/proxy.ts`) returns a `NextResponse.next()` with mutated
-// headers — the route handler renders the not-found UI but the response
-// status stays at 200 (observed in CI on flow10).
-//
-// Switching the route to `dynamicParams = false` + `generateStaticParams`
-// moves the unknown-slug rejection up to Next's routing layer, which
-// returns 404 before any handler runs and bypasses the proxy's response
-// shape entirely. CMS edits stay live because the corresponding action
-// (`admin/site/actions.ts`) calls `revalidatePath("/" + slug)`.
-const VALID_SLUGS = ["about", "faq", "daily-life", "enrollment", "home"] as const;
-const VALID_SLUGS_SET = new Set<string>(VALID_SLUGS);
-
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return VALID_SLUGS.map((slug) => ({ slug }));
-}
+// NOTE on 404 status code: in Next 16 (Turbopack) production builds, a
+// route that goes through `src/proxy.ts` returning `NextResponse.next()`
+// with mutated headers (we set `x-pathname` for the entrance-role guard)
+// renders the not-found UI but keeps the response status at 200.
+// `dynamicParams = false` + generateStaticParams was tried and ALSO returns
+// 200 while breaking the CMS edit flow's revalidatePath path. Until the
+// proxy is restructured to not interfere with notFound() status
+// propagation, the not-found content is shown but the HTTP status is 200.
+// flow10 asserts the content rather than the status.
+const VALID_SLUGS = new Set(["about", "faq", "daily-life", "enrollment", "home"]);
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  if (!VALID_SLUGS_SET.has(slug)) return { title: "ページが見つかりません" };
+  if (!VALID_SLUGS.has(slug)) return { title: "ページが見つかりません" };
   try {
     const supabase = await createClient();
     const { data } = (await supabase
@@ -65,10 +56,10 @@ const PAGE_COMPONENTS: Record<
 export default async function SitePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // dynamicParams=false already rejects unknown slugs at the routing layer,
-  // but keep this defensive check so the function is well-typed when slug
-  // happens to fall outside VALID_SLUGS in development hot-reload edge cases.
-  if (!VALID_SLUGS_SET.has(slug)) notFound();
+  // Reject unknown slugs early — produces the not-found UI even though the
+  // proxy currently keeps the response status at 200 (see VALID_SLUGS
+  // comment).
+  if (!VALID_SLUGS.has(slug)) notFound();
 
   let page: {
     title: string;
