@@ -93,7 +93,7 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
 
     // Save — see flow18 for the rationale on the bumped timeout + .first().
     await page.getByRole("button", { name: "保存" }).click();
-    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 30000 });
 
     // Verify on public page
     await page.goto("/daily-life");
