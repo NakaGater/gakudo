@@ -7,13 +7,17 @@ test.describe("Flow 6: Attendance (US-6)", () => {
   });
 
   test("attendance page redirects non-entrance users", async ({ page }) => {
-    // /attendance requires entrance role — admin should be redirected
+    // /attendance (QR scanner) requires entrance role. Non-entrance users
+    // are bounced via redirect("/") → middleware (/ → /attendance/status)
+    // → /attendance/status sees admin and redirect("/attendance/dashboard").
+    // The redirect target path lives UNDER /attendance so we cannot assert
+    // "URL no longer starts with /attendance" — instead assert the URL is
+    // no longer the QR scanner route itself.
     await page.goto("/attendance");
-    await page.waitForURL((url) => !url.pathname.startsWith("/attendance"), {
+    await page.waitForURL((url) => url.pathname !== "/attendance", {
       timeout: 10000,
     });
-    // Admin is redirected to home
-    expect(page.url()).not.toContain("/attendance");
+    expect(new URL(page.url()).pathname).not.toBe("/attendance");
   });
 
   test("attendance history page renders", async ({ page }) => {
@@ -29,11 +33,12 @@ test.describe("Flow 6: Attendance (US-6)", () => {
   });
 
   test("manual attendance page redirects non-entrance users", async ({ page }) => {
-    // /attendance/manual requires entrance role — admin should be redirected
+    // Same redirect chain as the /attendance test above; admin lands on
+    // /attendance/dashboard, not "/" — only assert we left the manual page.
     await page.goto("/attendance/manual");
-    await page.waitForURL((url) => !url.pathname.startsWith("/attendance/manual"), {
+    await page.waitForURL((url) => url.pathname !== "/attendance/manual", {
       timeout: 10000,
     });
-    expect(page.url()).not.toContain("/attendance/manual");
+    expect(new URL(page.url()).pathname).not.toBe("/attendance/manual");
   });
 });

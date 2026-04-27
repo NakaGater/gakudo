@@ -20,7 +20,14 @@ test.describe("Flow 20: Instagram管理", () => {
   test("can add an Instagram post", async ({ page }) => {
     await page.goto("/photos/instagram");
 
-    const testUrl = "https://www.instagram.com/p/TEST123/";
+    // Use a per-attempt unique shortcode so a flaky retry doesn't pile
+    // duplicate posts in the DB and trip strict-mode (the previous
+    // hardcoded "TEST123" caused exactly this when the first attempt
+    // timed out at the visibility assertion but had already persisted
+    // the post — the retry then added a second one and the locator
+    // matched both).
+    const shortcode = `TEST${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+    const testUrl = `https://www.instagram.com/p/${shortcode}/`;
     await page.getByPlaceholder(/instagram\.com/i).fill(testUrl);
 
     const captionInput = page.getByPlaceholder(/夏祭り/);
@@ -29,9 +36,14 @@ test.describe("Flow 20: Instagram管理", () => {
     }
 
     await page.getByRole("button", { name: /追加|登録/i }).click();
-    await page.waitForTimeout(1000);
 
-    await expect(page.getByText("TEST123").or(page.getByText(testUrl))).toBeVisible();
+    // The post appears after the Server Action's redirect/revalidation;
+    // give it a generous timeout (production builds can be slow on the
+    // first request after build) and use .first() defensively in case
+    // any prior run leaked rows.
+    await expect(page.getByText(shortcode).or(page.getByText(testUrl)).first()).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("can toggle post visibility", async ({ page }) => {

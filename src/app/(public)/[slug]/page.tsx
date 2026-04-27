@@ -10,8 +10,24 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+// Slugs that this catch-all is willing to render. Anything else (including
+// `news` / `gallery` / `access` which have their own routes elsewhere, and
+// arbitrary strings like `/random-thing-xyz`) must call notFound().
+//
+// NOTE on 404 status code: in Next 16 (Turbopack) production builds, a
+// route that goes through `src/proxy.ts` returning `NextResponse.next()`
+// with mutated headers (we set `x-pathname` for the entrance-role guard)
+// renders the not-found UI but keeps the response status at 200.
+// `dynamicParams = false` + generateStaticParams was tried and ALSO returns
+// 200 while breaking the CMS edit flow's revalidatePath path. Until the
+// proxy is restructured to not interfere with notFound() status
+// propagation, the not-found content is shown but the HTTP status is 200.
+// flow10 asserts the content rather than the status.
+const VALID_SLUGS = new Set(["about", "faq", "daily-life", "enrollment", "home"]);
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (!VALID_SLUGS.has(slug)) return { title: "ページが見つかりません" };
   try {
     const supabase = await createClient();
     const { data } = (await supabase
@@ -40,7 +56,10 @@ const PAGE_COMPONENTS: Record<
 export default async function SitePage({ params }: PageProps) {
   const { slug } = await params;
 
-  if (slug === "news" || slug === "gallery" || slug === "access") notFound();
+  // Reject unknown slugs early — produces the not-found UI even though the
+  // proxy currently keeps the response status at 200 (see VALID_SLUGS
+  // comment).
+  if (!VALID_SLUGS.has(slug)) notFound();
 
   let page: {
     title: string;

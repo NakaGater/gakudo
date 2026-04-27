@@ -91,9 +91,9 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
     const lastDesc = descTextareas.last();
     await lastDesc.fill(`E2Eテスト説明${uid}`);
 
-    // Save
+    // Save — see flow18 for the rationale on the bumped timeout + .first().
     await page.getByRole("button", { name: "保存" }).click();
-    await expect(page.getByText("保存しました")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 30000 });
 
     // Verify on public page
     await page.goto("/daily-life");

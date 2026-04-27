@@ -1,19 +1,19 @@
-name: E2E (manual)
+name: E2E
 
-# Phase 0-A's auto-trigger was removed: the workflow needs the full
-# Supabase + Mailpit + Next.js stack to be up to actually pass, which
-# CI doesn't currently provision. Until that's wired up, the workflow
-# stays available via `workflow_dispatch` so anyone can trigger it
-# from the Actions tab once they've supplied the right secrets, but
-# it doesn't gate PRs / pushes anymore.
+# Boots the local Supabase stack (Postgres + Auth + Storage + Mailpit)
+# via the Supabase CLI, seeds the 4 fixed test users, builds the app,
+# and runs the full Playwright suite.
 #
-# Re-enabling auto-trigger requires either:
-#   1. A `services:` block with a Supabase Postgres + Mailpit, plus
-#      `npm run start` orchestration, OR
-#   2. Supabase Cloud preview branches with seeded data.
-# Tracked in docs/production-launch-checklist.md.
+# Triggers on every PR + every push to main. ~10 min per run on
+# ubuntu-latest. The job is heavier than the lint/typecheck jobs so it
+# runs as a separate workflow — keep `concurrency` set so a force-push
+# doesn't pile up parallel runs.
 
 on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
   workflow_dispatch:
 
 concurrency:
@@ -27,26 +27,87 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
+
       - run: npm ci
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - name: Run E2E
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local stack
+        # `supabase start` boots Postgres, GoTrue (Auth), Storage,
+        # Realtime, and Mailpit (port 54324, used by tests via
+        # tests/e2e/helpers.ts). Migrations under supabase/migrations/
+        # plus supabase/seed.sql are applied automatically.
+        run: supabase start
+
+      - name: Capture Supabase env vars
+        # `supabase status -o env` prints `KEY=value` lines (some shells
+        # emit quoted values — strip surrounding quotes for $GITHUB_ENV
+        # which doesn't unquote). The keys we care about are API_URL,
+        # ANON_KEY, SERVICE_ROLE_KEY.
+        run: |
+          supabase status -o env | sed -E 's/^([A-Z0-9_]+)="(.*)"$/\1=\2/' >> "$GITHUB_ENV"
+
+      - name: Write .env.local for seed-auth.sh
+        # seed-auth.sh reads SERVICE_ROLE_KEY from .env.local — give it
+        # a real one. Other keys are placeholders since this file is
+        # not used by the test runner itself (the `env:` block on the
+        # Playwright step is what matters at runtime).
+        run: |
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}"
+            echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=dummy-vapid-public"
+            echo "VAPID_PRIVATE_KEY=dummy-vapid-private"
+            echo "RESEND_API_KEY=dummy-resend"
+            echo "NEXT_PUBLIC_APP_URL=http://localhost:3000"
+          } > .env.local
+
+      - name: Seed fixed test users (admin / parent / teacher / entrance)
+        run: bash supabase/seed-auth.sh
+
+      - name: Run Playwright E2E
         run: npm run e2e
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL || 'http://localhost:54321' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY || 'dummy-anon-key' }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY || 'dummy-service-role-key' }}
+          # NEXT_PUBLIC_* are baked into the client bundle at `next
+          # build` time — these need to be present here so the
+          # webServer.command (`npm run build && npm run start`) emits
+          # a bundle that talks to our local Supabase.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.API_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: dummy-vapid-public
           VAPID_PRIVATE_KEY: dummy-vapid-private
           RESEND_API_KEY: dummy-resend
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload Playwright HTML report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+      - name: Upload failure traces / screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 14
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup
