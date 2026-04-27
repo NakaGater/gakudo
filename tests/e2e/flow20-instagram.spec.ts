@@ -18,6 +18,12 @@ test.describe("Flow 20: Instagram管理", () => {
   });
 
   test("can add an Instagram post", async ({ page }) => {
+    // The 30s wait-for-action-commit step below can dominate the
+    // default 30s per-test budget on slow CI runners. Lift the budget
+    // to 90s (test.slow()) so the wait can play out without being
+    // killed by the outer test timeout.
+    test.slow();
+
     await page.goto("/photos/instagram");
 
     // Use a per-attempt unique shortcode so a flaky retry doesn't pile
@@ -44,7 +50,12 @@ test.describe("Flow 20: Instagram管理", () => {
     // raced the action: page.goto could fire before the row landed in
     // Supabase, leading to a stale list and a flaky shortcode-visible
     // assertion below.
-    await expect(submitButton).toBeEnabled({ timeout: 15000 });
+    //
+    // Bumped 15s → 30s after observing CI runs where the action
+    // legitimately took longer (the action does Supabase select(max)
+    // + insert + revalidatePath x 2; under runner load the cumulative
+    // round-trip exceeded 15s).
+    await expect(submitButton).toBeEnabled({ timeout: 30000 });
 
     // Now navigate fresh to read the post list. The action's
     // revalidatePath("/photos/instagram") on the server side ensures

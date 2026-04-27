@@ -64,6 +64,12 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
   });
 
   test("CMS: can add a new question", async ({ page }) => {
+    // Lift the per-test budget (30s default → 90s) — the
+    // wait-for-action-commit step below can take up to 30s on slow CI
+    // runners, which combined with login + edit-page-load + /faq verify
+    // routinely overflows the default budget.
+    test.slow();
+
     await loginViaForm(page, "admin@example.com", "password123");
     await page.goto("/admin/site/pages/faq/edit");
     await expect(page.getByText("Q&A 項目")).toBeVisible({ timeout: 10000 });
@@ -86,9 +92,18 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
 
     // Save — the form now uses optimistic UI (see edit-page-form.tsx),
     // so 保存しました appears immediately on click rather than waiting
-    // for Next's RSC payload regeneration. 5s timeout is plenty.
-    await page.getByRole("button", { name: "保存" }).click();
+    // for Next's RSC payload regeneration.
+    const saveButton = page.getByRole("button", { name: "保存" });
+    await saveButton.click();
     await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 5000 });
+
+    // Wait for the action to actually commit before navigating to /faq.
+    // The submit button is `loading={isPending}`, which Playwright reports
+    // as disabled while the Server Action is in flight. Without this wait
+    // we race the action's `revalidatePath("/faq")` and read a stale
+    // cached version of the public page (the original cause of this
+    // test's recent flake).
+    await expect(saveButton).toBeEnabled({ timeout: 30000 });
 
     // Verify on public page
     await page.goto("/faq");
