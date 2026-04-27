@@ -10,7 +10,7 @@ import { sanitizeError } from "@/lib/errors/sanitize";
 import { createClient } from "@/lib/supabase/server";
 import { getString } from "@/lib/validation/form";
 import type { ActionResult, ActionState } from "@/lib/actions/types";
-import type { Database } from "@/lib/supabase/types";
+import type { Database, Json } from "@/lib/supabase/types";
 
 type SiteNewsInsert = Database["public"]["Tables"]["site_news"]["Insert"];
 
@@ -93,29 +93,6 @@ type AttachmentSnapshot = {
   mime_type: string;
 };
 
-// The auto-generated `Database` type does not (yet) include the
-// `site_news_revisions` table — that arrives the next time
-// `npm run db:types` is run after migration 00013 lands. Until then
-// route the writes/reads through a hand-rolled minimal client view.
-// The runtime shape is asserted by the SQL schema, RLS, and these
-// action tests.
-type RevisionsClient = {
-  from: (t: "site_news_revisions") => {
-    insert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
-    select: (cols: string) => {
-      eq: (
-        col: string,
-        val: string,
-      ) => {
-        order: (
-          col: string,
-          opts: { ascending: boolean },
-        ) => Promise<{ data: NewsRevision[] | null }>;
-      };
-    };
-  };
-};
-
 export const updateNews = withAuth(
   "admin",
   async (
@@ -151,28 +128,23 @@ export const updateNews = withAuth(
       .returns<AttachmentSnapshot[]>();
 
     // 2. Append a revision row carrying the pre-edit snapshot.
-    await (supabase as unknown as RevisionsClient).from("site_news_revisions").insert({
+    await supabase.from("site_news_revisions").insert({
       news_id: id,
       title: current.title,
       body: current.body,
-      attachments: liveAttachments ?? [],
+      attachments: (liveAttachments ?? []) as unknown as Json,
       edited_by: user.id,
     });
 
-    // 3. Update the live row. The trigger added in 00013 bumps
-    //    updated_at automatically; we set updated_by ourselves. The
-    //    `as never` cast bypasses `exactOptionalPropertyTypes` rejecting
-    //    `updated_by` — that column was added in migration 00013 and
-    //    hasn't been folded into the auto-generated Database type yet
-    //    (run `npm run db:types` after this PR's migration to drop the
-    //    cast). Runtime shape is enforced by SQL.
+    // 3. Update the live row. trg_site_news_updated_at bumps
+    //    updated_at automatically; we set updated_by ourselves.
     const { error: updateError } = await supabase
       .from("site_news")
       .update({
         title: titleR.value,
         body: bodyR.value,
         updated_by: user.id,
-      } as never)
+      })
       .eq("id", id);
 
     if (updateError) {
@@ -231,11 +203,18 @@ export async function getNewsRevisions(newsId: string): Promise<NewsRevision[]> 
 
   const supabase = await createClient();
 
-  const { data } = await (supabase as unknown as RevisionsClient)
+  const { data } = await supabase
     .from("site_news_revisions")
     .select("id, title, body, attachments, edited_at, edited_by")
     .eq("news_id", newsId)
     .order("edited_at", { ascending: false });
 
-  return data ?? [];
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    title: r.title,
+    body: r.body,
+    attachments: (r.attachments as unknown as AttachmentSnapshot[]) ?? [],
+    edited_at: r.edited_at,
+    edited_by: r.edited_by,
+  }));
 }
