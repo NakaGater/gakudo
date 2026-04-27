@@ -4,35 +4,27 @@ test.describe("Flow 10: 404 page", () => {
   test("nonexistent page shows the not-found UI without crashing", async ({ page }) => {
     // TODO: assert `res.status() === 404` once the underlying Next 16 +
     // proxy (`src/proxy.ts`) interaction is fixed. Today, the not-found
-    // UI is rendered correctly but the response status is 200 because
-    // the proxy returns NextResponse.next() with mutated `x-pathname`
-    // headers, which appears to lock the status before the route
-    // handler's notFound() can override it. Both the
-    // VALID_SLUGS-early-notFound() and dynamicParams=false approaches
-    // were tried and neither fixes the status. See [slug]/page.tsx
-    // VALID_SLUGS comment for context.
+    // UI hydrates correctly but the response status is 200 because the
+    // proxy returns NextResponse.next() with mutated `x-pathname`
+    // headers, which appears to lock the status before notFound() can
+    // override it.
+    //
+    // Note on streaming SSR: Next 16 streams the page with the (public)
+    // loading.tsx skeleton as the initial Suspense fallback, then the
+    // client hydrates and swaps in the not-found.tsx content. A
+    // synchronous `body.innerText()` right after page.goto() observes
+    // only the skeleton (no text) — use Playwright's auto-waiting
+    // expect() so the assertion blocks until hydration completes.
     await page.goto("/nonexistent-page-xyz");
 
-    // Page should not be a blank white screen — some content must render.
-    const bodyText = await page.locator("body").innerText();
-    expect(bodyText.length).toBeGreaterThan(0);
+    // The not-found content lives in `app/not-found.tsx` /
+    // `(public)/not-found.tsx` — both render an h1 with this text.
+    await expect(page.getByRole("heading", { name: "ページが見つかりません" }).first()).toBeVisible(
+      { timeout: 10000 },
+    );
 
-    // And it should be the not-found page, not a real article view —
-    // the (public)/[slug]/page.tsx VALID_SLUGS guard calls notFound()
-    // for unknown slugs which renders Next's default not-found UI.
-    // Next's built-in not-found page contains "404" or "could not be
-    // found" in English — guard against the route being silently
-    // remapped to a real page in the future.
-    const lowercased = bodyText.toLowerCase();
-    const looksLikeNotFound =
-      lowercased.includes("404") ||
-      lowercased.includes("not found") ||
-      lowercased.includes("could not be found") ||
-      bodyText.includes("ページが見つかりません") ||
-      bodyText.includes("見つかりません");
-    expect(
-      looksLikeNotFound,
-      `expected /nonexistent-page-xyz to render a not-found page, got body: ${bodyText.slice(0, 200)}`,
-    ).toBe(true);
+    // Sanity: the rendered page has more than just the heading
+    // (it should also show the explanatory paragraph and home link).
+    await expect(page.getByText("404").first()).toBeVisible();
   });
 });
