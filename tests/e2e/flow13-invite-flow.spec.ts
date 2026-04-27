@@ -43,22 +43,26 @@ test.describe("Flow 13: Invite → set password → login", () => {
     await modal.locator("select#role").selectOption("parent");
 
     // 5. Submit invite
-    const submitInviteButton = modal.getByRole("button", { name: "招待する" });
-    await submitInviteButton.click();
+    await modal.getByRole("button", { name: "招待する" }).click();
 
     // Optimistic UI shows the success banner instantly (see invite-form.tsx).
     await expect(modal.getByText("招待メールを送信しました")).toBeVisible({
       timeout: 5000,
     });
 
-    // Wait for the action to actually commit before reading email — the
-    // button is `loading={isPending}`, which Playwright reports as
-    // disabled while the action is in flight. Without this we'd race
-    // the Mailpit fetch below against the in-flight invite action.
-    await expect(submitInviteButton).toBeEnabled({ timeout: 15000 });
+    // We deliberately DON'T wait for the submit button to re-enable here.
+    // The invite action does `adminClient.auth.admin.inviteUserByEmail()`
+    // which sends an SMTP email to Mailpit; on slow CI runners that
+    // round trip is the dominant cost (10-30s). `getLatestEmail` below
+    // already polls Mailpit with its own timeout, so it implicitly
+    // waits for the action to finish — adding a separate enabled-state
+    // wait here just doubles the timeout budget without buying anything.
 
-    // 6. Get invite link from Inbucket
-    const email = await getLatestEmail(inviteEmail);
+    // 6. Get invite link from Inbucket. Bump timeout from default 15s
+    // → 30s: the invite action's SMTP handoff to Mailpit can take
+    // 10-25s on slow CI runners, so by the time the email lands we
+    // need a budget that can absorb the worst case.
+    const email = await getLatestEmail(inviteEmail, { timeout: 30000 });
     const inviteLink = extractLinkFromEmail(email.html);
     expect(inviteLink).toContain("/auth/v1/verify");
 
