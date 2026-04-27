@@ -1,13 +1,20 @@
 import { test, expect } from "@playwright/test";
 import { loginViaForm, getLatestEmail, extractLinkFromEmail, clearMailbox } from "./helpers";
 
-const INVITE_EMAIL = `e2e-invite-${Date.now()}@test.com`;
 const INVITE_NAME = "E2Eテストユーザー";
 const INVITE_PASSWORD = "testpass1234";
 
 test.describe("Flow 13: Invite → set password → login", () => {
   test("admin invites user, user sets password and logs in", async ({ page }) => {
-    await clearMailbox(INVITE_EMAIL);
+    // Generate the invite address INSIDE the test function so each retry
+    // sees a fresh, unique email. The previous file-scope `const ... =
+    // Date.now()...` was evaluated once at module load and reused across
+    // retries, so attempt 1 created the user in Supabase, attempt 2/3 then
+    // hit "User already exists", the action errored, and "招待メールを送信
+    // しました" never appeared — the test would time out, retry with the
+    // same stale email, and fail again.
+    const inviteEmail = `e2e-invite-${Date.now()}-${Math.random().toString(36).slice(2, 6)}@test.com`;
+    await clearMailbox(inviteEmail);
 
     // 1. Admin logs in
     await loginViaForm(page, "admin@example.com", "password123");
@@ -21,20 +28,21 @@ test.describe("Flow 13: Invite → set password → login", () => {
 
     // 4. Fill invite form
     const modal = page.locator(".fixed.inset-0");
-    await modal.locator('input[name="email"]').fill(INVITE_EMAIL);
+    await modal.locator('input[name="email"]').fill(inviteEmail);
     await modal.locator('input[name="name"]').fill(INVITE_NAME);
     await modal.locator("select#role").selectOption("parent");
 
     // 5. Submit invite
     await modal.getByRole("button", { name: "招待する" }).click();
 
-    // Wait for success message
+    // Wait for success message. 20s budget covers the worst Supabase admin
+    // createUser + Mailpit handoff time observed under CI runner load.
     await expect(modal.getByText("招待メールを送信しました")).toBeVisible({
-      timeout: 10000,
+      timeout: 20000,
     });
 
     // 6. Get invite link from Inbucket
-    const email = await getLatestEmail(INVITE_EMAIL);
+    const email = await getLatestEmail(inviteEmail);
     const inviteLink = extractLinkFromEmail(email.html);
     expect(inviteLink).toContain("/auth/v1/verify");
 
@@ -58,7 +66,7 @@ test.describe("Flow 13: Invite → set password → login", () => {
     });
 
     // 11. Login with new credentials
-    await page.locator('input[name="email"]').fill(INVITE_EMAIL);
+    await page.locator('input[name="email"]').fill(inviteEmail);
     await page.locator('input[name="password"]').fill(INVITE_PASSWORD);
     await page.getByRole("button", { name: "ログイン" }).click();
 

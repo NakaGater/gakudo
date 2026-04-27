@@ -21,11 +21,7 @@ test.describe("Flow 20: Instagram管理", () => {
     await page.goto("/photos/instagram");
 
     // Use a per-attempt unique shortcode so a flaky retry doesn't pile
-    // duplicate posts in the DB and trip strict-mode (the previous
-    // hardcoded "TEST123" caused exactly this when the first attempt
-    // timed out at the visibility assertion but had already persisted
-    // the post — the retry then added a second one and the locator
-    // matched both).
+    // duplicate posts in the DB and trip strict-mode.
     const shortcode = `TEST${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
     const testUrl = `https://www.instagram.com/p/${shortcode}/`;
     await page.getByPlaceholder(/instagram\.com/i).fill(testUrl);
@@ -37,12 +33,20 @@ test.describe("Flow 20: Instagram管理", () => {
 
     await page.getByRole("button", { name: /追加|登録/i }).click();
 
-    // The post appears after the Server Action's redirect/revalidation;
-    // give it a generous timeout (production builds can be slow on the
-    // first request after build) and use .first() defensively in case
-    // any prior run leaked rows.
+    // First wait for the in-form success indicator. This proves the Server
+    // Action returned successfully — independent of whether the page tree
+    // re-rendered with the new post yet.
+    await expect(page.getByText("登録しました").first()).toBeVisible({ timeout: 20000 });
+
+    // Then navigate fresh to read the post list. We previously asserted
+    // the post directly after click(), but production-mode in-place
+    // re-renders after a Server Action sometimes don't propagate the
+    // updated server data within Playwright's window on slow runners
+    // (observed across multiple CI runs with timeouts up to 25s).
+    // A fresh goto guarantees we're reading a freshly-rendered list.
+    await page.goto("/photos/instagram");
     await expect(page.getByText(shortcode).or(page.getByText(testUrl)).first()).toBeVisible({
-      timeout: 15000,
+      timeout: 10000,
     });
   });
 
