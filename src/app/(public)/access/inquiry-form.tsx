@@ -6,9 +6,20 @@ import { cn } from "@/lib/utils";
 import { submitInquiry } from "./actions";
 import type { ActionState } from "@/lib/actions/types";
 
-export function InquiryForm() {
+type InquiryType = "visit" | "general";
+
+type InquiryFormProps = {
+  /**
+   * Initial radio selection. Used by deep-links from the hero CTA
+   * (`?inquiry=visit`) and the FAQ page footer (`?inquiry=general`) to
+   * pre-select the right tab when the user lands on the form.
+   */
+  initialType?: InquiryType;
+};
+
+export function InquiryForm({ initialType = "visit" }: InquiryFormProps = {}) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(submitInquiry, null);
-  const [type, setType] = useState<"visit" | "general">("visit");
+  const [type, setType] = useState<InquiryType>(initialType);
 
   // 送信成功時
   if (state?.success) {

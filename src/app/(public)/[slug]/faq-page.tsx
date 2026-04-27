@@ -37,7 +37,10 @@ export function FaqPage({ title, content, metadata }: SlugPageProps) {
             <p className="text-sm text-ink font-story font-bold mb-2">💬 その他のご質問は</p>
             <p className="text-xs text-ink-mid leading-relaxed">
               お気軽に
-              <Link href="/#inquiry" className="text-cr-orange font-bold hover:underline">
+              <Link
+                href="/?inquiry=general#inquiry"
+                className="text-cr-orange font-bold hover:underline"
+              >
                 お問い合わせフォーム
               </Link>
               からご連絡ください。
