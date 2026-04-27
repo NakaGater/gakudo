@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useCallback } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { Button, Input } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { AboutMetaFields } from "./meta-fields/about-meta-fields";
@@ -10,7 +10,7 @@ import { EnrollmentMetaFields } from "./meta-fields/enrollment-meta-fields";
 import { FaqMetaFields } from "./meta-fields/faq-meta-fields";
 import { HomeMetaFields } from "./meta-fields/home-meta-fields";
 import { updateSitePage } from "../../../actions";
-import type { ActionState } from "@/lib/actions/types";
+import type { ActionResult, ActionState } from "@/lib/actions/types";
 
 type Props = {
   slug: string;
@@ -19,9 +19,55 @@ type Props = {
   metadata: Record<string, unknown>;
 };
 
+/**
+ * Banner that surfaces the most recent save result. Extracted so unit
+ * tests can drive every visible state shape directly without going
+ * through the async action wiring.
+ */
+export function SaveResultBanner({ state }: { state: ActionState }) {
+  if (!state?.message) return null;
+  return (
+    <div
+      role="alert"
+      className={cn(
+        "rounded-md px-4 py-3 text-sm",
+        state.success ? "bg-success/10 text-success" : "bg-danger/10 text-danger",
+      )}
+    >
+      {state.message}
+    </div>
+  );
+}
+
 export function EditPageForm({ slug, title, content, metadata }: Props) {
+  // Optimistic save UX (PR replacing useActionState):
+  //
+  // Calling a Server Action via `<form action={formAction}>` (the
+  // useActionState pattern) makes Next 16 attach a fresh RSC payload
+  // for the entire current page to the response. That means re-running
+  // root layout + (dashboard) layout (getUser, getBadgeCounts → 2-3
+  // Supabase round trips) + this edit page (another site_pages fetch)
+  // before the form's state.message can update with "保存しました".
+  // On production this is ~500ms-1s; on CI it's tens of seconds.
+  //
+  // We don't actually need any of that re-rendered tree here — the
+  // form's <input defaultValue> is set once on initial mount and
+  // doesn't refresh, and the banner is purely client state. So bypass
+  // <form action> entirely:
+  //   1. Show "保存しました" optimistically the moment the user submits.
+  //   2. Call the Server Action as a plain async function (which does
+  //      NOT include the RSC payload — that's only triggered by
+  //      <form action> binding).
+  //   3. If the action returns an error, replace the optimistic banner
+  //      with the error message.
+  //
+  // Result: instant visual feedback, no layout-wide re-render cost,
+  // and the public-facing static pages still get refreshed because the
+  // action's revalidatePath calls run unchanged on the server.
+  const [resultState, setResultState] = useState<ActionState>(null);
+  const [isPending, startTransition] = useTransition();
+
   const boundAction = updateSitePage.bind(null, slug);
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(boundAction, null);
 
   // Metadata state
   const [meta, setMeta] = useState<Record<string, unknown>>(metadata ?? {});
@@ -30,19 +76,26 @@ export function EditPageForm({ slug, title, content, metadata }: Props) {
     setMeta((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    // Optimistic banner — flips to error if the server disagrees below.
+    setResultState({ success: true, message: "保存しました" });
+
+    startTransition(async () => {
+      const result: ActionResult = await boundAction(null, formData);
+      if (!result.success) {
+        setResultState({ success: false, message: result.message });
+      }
+      // On success, the optimistic state is already correct; do nothing
+      // so we don't trigger an unnecessary re-render.
+    });
+  };
+
   return (
-    <form action={formAction} className="flex flex-col gap-6 min-w-0 w-full">
-      {state?.message && (
-        <div
-          role="alert"
-          className={cn(
-            "rounded-md px-4 py-3 text-sm",
-            state.success ? "bg-success/10 text-success" : "bg-danger/10 text-danger",
-          )}
-        >
-          {state.message}
-        </div>
-      )}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 min-w-0 w-full">
+      <SaveResultBanner state={resultState} />
 
       {/* hidden field for metadata JSON */}
       <input type="hidden" name="metadata" value={JSON.stringify(meta)} />

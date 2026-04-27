@@ -71,10 +71,6 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
   });
 
   test("CMS: can add a new activity", async ({ page }) => {
-    // See flow18 — same login + edit + save chain, same need to lift
-    // the global 30s per-test budget so the inner waits run to completion.
-    test.slow();
-
     await loginViaForm(page, "admin@example.com", "password123");
     await page.goto("/admin/site/pages/daily-life/edit");
     await expect(page.getByText("活動カード")).toBeVisible({ timeout: 10000 });
@@ -95,9 +91,10 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
     const lastDesc = descTextareas.last();
     await lastDesc.fill(`E2Eテスト説明${uid}`);
 
-    // Save — see flow18 for the rationale on the bumped timeout + .first().
+    // Save — optimistic UI surfaces 保存しました immediately on click,
+    // see edit-page-form.tsx for the rationale.
     await page.getByRole("button", { name: "保存" }).click();
-    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 5000 });
 
     // Verify on public page
     await page.goto("/daily-life");

@@ -64,14 +64,6 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
   });
 
   test("CMS: can add a new question", async ({ page }) => {
-    // Login + edit page load + Server Action save chain can take >30s on
-    // CI runners. Lift the per-test budget to 90s so the inner
-    // 保存しました visibility wait isn't pre-empted by the outer 30s
-    // global timeout (the cause of the chronic flake — bumping the
-    // visibility timeout alone to 30s never helped because the test
-    // itself was killed at 30s elapsed).
-    test.slow();
-
     await loginViaForm(page, "admin@example.com", "password123");
     await page.goto("/admin/site/pages/faq/edit");
     await expect(page.getByText("Q&A 項目")).toBeVisible({ timeout: 10000 });
@@ -92,14 +84,11 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
     const lastTextarea = textareas.last();
     await lastTextarea.fill(`E2Eテスト回答${uid}`);
 
-    // Save — stays on edit page with success message
+    // Save — the form now uses optimistic UI (see edit-page-form.tsx),
+    // so 保存しました appears immediately on click rather than waiting
+    // for Next's RSC payload regeneration. 5s timeout is plenty.
     await page.getByRole("button", { name: "保存" }).click();
-    // Bumped from 10s → 30s: under CI runner load the Server Action
-    // (first compilation of the edit route in production mode + Supabase
-    // round-trip + revalidatePath chain) repeatedly exceeded the budget.
-    // .first() guards against duplicate matches if a route announcer or
-    // toast also echoes the text.
-    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 5000 });
 
     // Verify on public page
     await page.goto("/faq");

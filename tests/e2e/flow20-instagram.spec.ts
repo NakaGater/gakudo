@@ -31,19 +31,24 @@ test.describe("Flow 20: Instagram管理", () => {
       await captionInput.fill("テスト投稿");
     }
 
-    await page.getByRole("button", { name: /追加|登録/i }).click();
+    const submitButton = page.getByRole("button", { name: /追加|登録/i });
+    await submitButton.click();
 
-    // First wait for the in-form success indicator. This proves the Server
-    // Action returned successfully — independent of whether the page tree
-    // re-rendered with the new post yet.
-    await expect(page.getByText("登録しました").first()).toBeVisible({ timeout: 20000 });
+    // Optimistic UI shows 登録しました instantly (see instagram-add-form.tsx).
+    await expect(page.getByText("登録しました").first()).toBeVisible({ timeout: 5000 });
 
-    // Then navigate fresh to read the post list. We previously asserted
-    // the post directly after click(), but production-mode in-place
-    // re-renders after a Server Action sometimes don't propagate the
-    // updated server data within Playwright's window on slow runners
-    // (observed across multiple CI runs with timeouts up to 25s).
-    // A fresh goto guarantees we're reading a freshly-rendered list.
+    // Wait for the action to actually commit before navigating. The
+    // submit button is `disabled={isPending}`, and `startTransition`
+    // flips isPending back to false only after the Server Action has
+    // returned (and the DB INSERT has happened). Without this, we
+    // raced the action: page.goto could fire before the row landed in
+    // Supabase, leading to a stale list and a flaky shortcode-visible
+    // assertion below.
+    await expect(submitButton).toBeEnabled({ timeout: 15000 });
+
+    // Now navigate fresh to read the post list. The action's
+    // revalidatePath("/photos/instagram") on the server side ensures
+    // the next render of this route reflects the new row.
     await page.goto("/photos/instagram");
     await expect(page.getByText(shortcode).or(page.getByText(testUrl)).first()).toBeVisible({
       timeout: 10000,
