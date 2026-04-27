@@ -71,6 +71,10 @@ test.describe("Flow 19: Daily Life page (public + CMS)", () => {
   });
 
   test("CMS: can add a new activity", async ({ page }) => {
+    // See flow18 — same login + edit + save chain, same need to lift
+    // the global 30s per-test budget so the inner waits run to completion.
+    test.slow();
+
     await loginViaForm(page, "admin@example.com", "password123");
     await page.goto("/admin/site/pages/daily-life/edit");
     await expect(page.getByText("活動カード")).toBeVisible({ timeout: 10000 });
