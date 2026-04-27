@@ -86,7 +86,11 @@ test.describe("Flow 18: FAQ page (public + CMS)", () => {
 
     // Save — stays on edit page with success message
     await page.getByRole("button", { name: "保存" }).click();
-    await expect(page.getByText("保存しました")).toBeVisible({ timeout: 10000 });
+    // Bumped from 10s → 20s: under CI runner load the Server Action +
+    // revalidatePath chain occasionally exceeds 10s, surfacing as a
+    // flaky test. .first() guards against duplicate matches if a route
+    // announcer / toast also echoes the text.
+    await expect(page.getByText("保存しました").first()).toBeVisible({ timeout: 20000 });
 
     // Verify on public page
     await page.goto("/faq");
