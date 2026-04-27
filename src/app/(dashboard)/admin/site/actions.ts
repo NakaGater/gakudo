@@ -57,11 +57,23 @@ export const updateSitePage = withAuth(
       return { success: false, message: sanitizeError(error, "保存に失敗しました") };
     }
 
+    // Public-facing caches: the homepage embeds news + site_pages
+    // metadata, and `(public)/[slug]` is statically generated per slug
+    // (dynamicParams=false in its page.tsx) so we explicitly flush both.
     revalidatePath("/");
-    // Edited slug's static page (built via dynamicParams=false in
-    // (public)/[slug]/page.tsx) — invalidate so the next request rebuilds.
     revalidatePath(`/${slug}`);
-    revalidatePath(`/admin/site/pages/${slug}/edit`);
+    // NOTE: previously also revalidatePath(`/admin/site/pages/${slug}/edit`).
+    // Removed because invalidating the *current* page forces Next to
+    // regenerate the entire RSC tree (root layout → dashboard layout →
+    // edit page) as part of the Server Action response — including
+    // re-running getUser, badge-count queries, and the Supabase fetch
+    // for this slug. On CI runners that re-render took 30+ seconds and
+    // was the actual cause of the chronic flow18/19 flake (not the test
+    // timeouts we've been bumping). The form's useActionState already
+    // surfaces the success message via state.message, so the user sees
+    // "保存しました" without needing the page itself to re-render. Stale
+    // defaultValue on the form inputs is harmless: any subsequent save
+    // sends the user's current values from FormData, not defaultValue.
 
     return { success: true, message: "保存しました" };
   },
