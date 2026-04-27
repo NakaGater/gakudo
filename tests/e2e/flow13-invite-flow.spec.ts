@@ -43,13 +43,19 @@ test.describe("Flow 13: Invite → set password → login", () => {
     await modal.locator("select#role").selectOption("parent");
 
     // 5. Submit invite
-    await modal.getByRole("button", { name: "招待する" }).click();
+    const submitInviteButton = modal.getByRole("button", { name: "招待する" });
+    await submitInviteButton.click();
 
-    // Wait for success message. 20s budget covers the worst Supabase admin
-    // createUser + Mailpit handoff time observed under CI runner load.
+    // Optimistic UI shows the success banner instantly (see invite-form.tsx).
     await expect(modal.getByText("招待メールを送信しました")).toBeVisible({
-      timeout: 20000,
+      timeout: 5000,
     });
+
+    // Wait for the action to actually commit before reading email — the
+    // button is `loading={isPending}`, which Playwright reports as
+    // disabled while the action is in flight. Without this we'd race
+    // the Mailpit fetch below against the in-flight invite action.
+    await expect(submitInviteButton).toBeEnabled({ timeout: 15000 });
 
     // 6. Get invite link from Inbucket
     const email = await getLatestEmail(inviteEmail);

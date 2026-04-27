@@ -31,14 +31,22 @@ test.describe("Flow 20: Instagram管理", () => {
       await captionInput.fill("テスト投稿");
     }
 
-    await page.getByRole("button", { name: /追加|登録/i }).click();
+    const submitButton = page.getByRole("button", { name: /追加|登録/i });
+    await submitButton.click();
 
-    // The form now uses optimistic UI (see instagram-add-form.tsx),
-    // so 登録しました surfaces immediately on click rather than waiting
-    // for Next's RSC payload regeneration. 5s is plenty.
+    // Optimistic UI shows 登録しました instantly (see instagram-add-form.tsx).
     await expect(page.getByText("登録しました").first()).toBeVisible({ timeout: 5000 });
 
-    // Then navigate fresh to read the post list. The action's
+    // Wait for the action to actually commit before navigating. The
+    // submit button is `disabled={isPending}`, and `startTransition`
+    // flips isPending back to false only after the Server Action has
+    // returned (and the DB INSERT has happened). Without this, we
+    // raced the action: page.goto could fire before the row landed in
+    // Supabase, leading to a stale list and a flaky shortcode-visible
+    // assertion below.
+    await expect(submitButton).toBeEnabled({ timeout: 15000 });
+
+    // Now navigate fresh to read the post list. The action's
     // revalidatePath("/photos/instagram") on the server side ensures
     // the next render of this route reflects the new row.
     await page.goto("/photos/instagram");
